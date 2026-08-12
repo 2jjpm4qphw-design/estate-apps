@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D1B3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Diversions">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>Diversions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --navy:#0D1B3E; --mid:#1A3A6B; --lime:#C4F000; --mist:#C4CCDD; --white:#FFFFFF; }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--mist);-webkit-font-smoothing:antialiased;padding:0 0 90px}
+  a{color:inherit}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 0}
+  header.top{display:flex;align-items:baseline;justify-content:space-between;padding:6px 2px 12px}
+  header.top h1{font-size:20px;font-weight:800;color:var(--white);margin:0;letter-spacing:.02em}
+  header.top .eyebrow{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--lime)}
+  .status{font-size:11px;color:var(--mist);opacity:.7}
+  /* filter chips */
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+  .chip{border:1px solid #2a4778;background:transparent;color:var(--mist);border-radius:20px;padding:6px 12px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+  .chip.on{background:var(--lime);border-color:var(--lime);color:var(--navy)}
+  .chips.small .chip{font-size:11.5px;padding:5px 11px}
+  .sep{height:1px;background:#22375f;margin:10px 0}
+  /* section + card */
+  .plat-h{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);margin:16px 0 8px;display:flex;align-items:center;gap:8px}
+  .plat-h .ct{color:var(--mist);opacity:.6;font-weight:600;letter-spacing:.04em}
+  .card{background:var(--mid);border:1px solid #24467e;border-radius:14px;padding:13px 14px;margin-bottom:10px}
+  .card .title{font-size:15.5px;font-weight:700;color:var(--white);line-height:1.25}
+  .card .meta{font-size:11.5px;color:var(--mist);opacity:.85;margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .badge{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:#0e2murder}
+  .badge.film{background:#26406e;color:var(--mist)}
+  .badge.tv{background:#2f2660;color:#cdbcf5}
+  .when{color:var(--lime);font-weight:600}
+  .card .blurb{font-size:12.5px;color:var(--mist);opacity:.9;margin-top:7px;line-height:1.45}
+  .acts{display:flex;gap:7px;margin-top:11px}
+  .act{flex:1;border:1px solid #2a4778;background:transparent;color:var(--mist);border-radius:9px;padding:8px 4px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;text-align:center}
+  .act.want.on{background:var(--lime);border-color:var(--lime);color:var(--navy)}
+  .act.pass.on{background:#3a2030;border-color:#6b3550;color:#e39ab6}
+  .act.seen.on{background:#12351f;border-color:#2c7a48;color:#7fe0a0}
+  .card.passed{opacity:.5}
+  .empty{color:var(--mist);opacity:.7;font-size:13px;padding:22px 4px;line-height:1.5}
+  .note{color:var(--mist);opacity:.55;font-size:11px;padding:14px 4px 0;line-height:1.5}
+  /* bottom nav */
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0a1530;border-top:1px solid #22375f;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+  nav.tabs button{flex:1;background:none;border:0;color:var(--mist);opacity:.65;font:inherit;font-size:10.5px;font-weight:600;padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+  nav.tabs button .ic{font-size:17px;line-height:1}
+  nav.tabs button.on{opacity:1;color:var(--lime)}
+  /* setup */
+  #setup{padding:22px 18px;max-width:520px;margin:0 auto}
+  #setup h1{color:var(--white);font-size:22px;margin:6px 0 6px}
+  #setup p{font-size:13.5px;line-height:1.5}
+  #setup label{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--lime);margin:16px 0 6px}
+  #setup input{width:100%;border:1px solid #2a4778;background:#0a1530;color:var(--white);border-radius:10px;padding:11px 12px;font:inherit;font-size:14px}
+  #setup .hint{font-size:11.5px;opacity:.7;margin-top:6px;line-height:1.4}
+  #setup .go{margin-top:18px;width:100%;background:var(--lime);color:var(--navy);border:0;border-radius:10px;padding:13px;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+  #setup .err{margin-top:12px;color:#ff9aa8;font-size:13px}
+  #setup .signout{margin-top:20px;background:none;border:0;color:var(--mist);opacity:.7;font:inherit;font-size:12px;text-decoration:underline;cursor:pointer}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+
+<div id="setup" hidden>
+  <span class="eyebrow" style="color:var(--lime);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase">The Book Room</span>
+  <h1>Diversions</h1>
+  <p>Upcoming films and TV across the cinema and your streaming services — mark what you want to see, and tick it off once you have. It reads and updates the same data as The Hub, so your picks show up everywhere.</p>
+  <p style="opacity:.85">Open The Hub, tap the <b>⚙</b> in the header, and copy the Gist ID and token here. Stored only on this device.</p>
+  <label>Gist ID</label>
+  <input type="text" data-cfg-id autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="32-character hex ID">
+  <label>Token</label>
+  <input type="password" data-cfg-token autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="ghp_… or github_pat_…">
+  <div class="hint">Needs the <code>gist</code> scope — the same token The Hub and Pocket use.</div>
+  <button class="go" data-cfg-save>Connect</button>
+  <div class="err" data-cfg-err hidden></div>
+  <button class="signout" data-cfg-signout hidden>Disconnect this device</button>
+</div>
+
+<div id="app" hidden>
+  <div class="wrap">
+    <header class="top">
+      <div><span class="eyebrow">The Book Room</span><h1>Diversions</h1></div>
+      <span class="status" data-status></span>
+    </header>
+
+    <section data-view="browse">
+      <div class="chips" data-plat-chips></div>
+      <div class="chips small" data-int-chips>
+        <button class="chip on" data-int="all">Everything</button>
+        <button class="chip" data-int="want">Want to see</button>
+        <button class="chip" data-int="new">Undecided</button>
+      </div>
+      <div class="sep"></div>
+      <div data-list></div>
+      <p class="note">Dates can shift — check before you set out. Coverage is refreshed weekly; cinema and the big streamers are the most complete.</p>
+    </section>
+
+    <section data-view="seen" hidden>
+      <div data-seen-list></div>
+    </section>
+  </div>
+
+  <nav class="tabs">
+    <button data-nav="browse" class="on"><span class="ic">🎬</span>Browse</button>
+    <button data-nav="seen"><span class="ic">✓</span>Seen</button>
+    <button data-nav="setup"><span class="ic">⚙</span>Setup</button>
+  </nav>
+</div>
+
+<script>
+(function(){
+  var _mem={};
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(_){ return (k in _mem)?_mem[k]:null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(_){ _mem[k]=v; } }
+  function lsDel(k){ try{ localStorage.removeItem(k); }catch(_){ delete _mem[k]; } }
+  function $(s){ return document.querySelector(s); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  var ID_KEY='connolly-sync:gist-id', TOK_KEY='connolly-sync:token', DIV_FILT_KEY='diversions:filters';
+  var creds=null; (function(){ var id=lsGet(ID_KEY), tk=lsGet(TOK_KEY); if(id&&tk) creds={id:id,token:tk}; })();
+  function saveCreds(id,tk){ lsSet(ID_KEY,id); lsSet(TOK_KEY,tk); creds={id:id,token:tk}; }
+  function clearCreds(){ lsDel(ID_KEY); lsDel(TOK_KEY); creds=null; }
+  function headers(){ return { 'Authorization':'Bearer '+creds.token, 'Accept':'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' }; }
+
+  // ---- platforms (Mark's services) ----
+  var PLATFORMS=[
+    ['cinema','Cinema'],['netflix','Netflix'],['disney','Disney+'],['prime','Prime Video'],
+    ['iplayer','BBC iPlayer'],['channel4','Channel 4'],['itv','ITV'],
+    ['skyone','Sky One'],['skyatlantic','Sky Atlantic'],['alibi','Alibi'],['u','U']
+  ];
+  function platLabel(k){ for(var i=0;i<PLATFORMS.length;i++){ if(PLATFORMS[i][0]===k) return PLATFORMS[i][1]; } return k; }
+
+  // ---- seed catalogue (used until the Gist / weekly curator supplies one) ----
+  var SEED=[
+    // ---- Cinema ----
+    {id:'d-cinema-rise-of-the-footsoldier-retribution', title:'Rise of the Footsoldier: Retribution', platform:'cinema', type:'film', date:'2026-08-28', blurb:'The British crime saga continues.'},
+    {id:'d-cinema-the-death-of-robin-hood', title:'The Death of Robin Hood', platform:'cinema', type:'film', date:'2026-09-04', blurb:'A darker take on the legend.'},
+    {id:'d-cinema-the-uprising', title:'The Uprising', platform:'cinema', type:'film', date:'2026-09-11', blurb:'Paul Greengrass thriller with Andrew Garfield and Jamie Bell.'},
+    {id:'d-cinema-practical-magic-2', title:'Practical Magic 2', platform:'cinema', type:'film', date:'2026-09-11', blurb:'Sandra Bullock and Nicole Kidman return.'},
+    {id:'d-cinema-manhunter', title:'Manhunter', platform:'cinema', type:'film', date:'2026-09-25', blurb:'Studiocanal thriller.'},
+    {id:'d-cinema-sense-and-sensibility', title:'Sense and Sensibility', platform:'cinema', type:'film', date:'2026-09-25', blurb:'Georgia Oakley’s Austen adaptation — Daisy Edgar-Jones, Caitríona Balfe, George MacKay, Fiona Shaw.'},
+    {id:'d-cinema-digger', title:'Digger', platform:'cinema', type:'film', date:'2026-10-02', blurb:'Iñárritu film starring Tom Cruise, Sandra Hüller and John Goodman.'},
+    {id:'d-cinema-verity', title:'Verity', platform:'cinema', type:'film', date:'2026-10-02', blurb:'Thriller adapted from the Colleen Hoover novel (Sony).'},
+    {id:'d-cinema-zootopia-2', title:'Zootopia 2', platform:'cinema', type:'film', date:'2026-11', blurb:'Disney animation sequel (cinema first).'},
+    {id:'d-cinema-predator-badlands', title:'Predator: Badlands', platform:'cinema', type:'film', date:'2026-11', blurb:'New Predator film (cinema first).'},
+    {id:'d-cinema-hamnet', title:'Hamnet', platform:'cinema', type:'film', date:'2026', blurb:'Awards-season drama from Chloé Zhao.'},
+    // ---- Netflix ----
+    {id:'d-netflix-outer-banks-season-5', title:'Outer Banks — Season 5', platform:'netflix', type:'tv', date:'2026-08-20', blurb:'The final season of the treasure-hunt drama.'},
+    {id:'d-netflix-the-gentlemen-season-2', title:'The Gentlemen — Season 2', platform:'netflix', type:'tv', date:'2026-09-03', blurb:'Guy Ritchie’s crime comedy returns, this time set in Italy.'},
+    {id:'d-netflix-monster-the-lizzie-borden-story', title:'Monster: The Lizzie Borden Story', platform:'netflix', type:'tv', date:'2026-09', blurb:'Ryan Murphy’s anthology takes on the Borden case.'},
+    {id:'d-netflix-lupin-part-4', title:'Lupin — Part 4', platform:'netflix', type:'tv', date:'2026', blurb:'Omar Sy returns as gentleman thief Assane Diop (autumn 2026).'},
+    {id:'d-netflix-emily-in-paris-season-6', title:'Emily in Paris — Season 6', platform:'netflix', type:'tv', date:'2026', blurb:'Confirmed by Netflix; date not yet announced.'},
+    {id:'d-netflix-the-whisper-man', title:'The Whisper Man', platform:'netflix', type:'film', date:'2026', blurb:'Chilling crime thriller adaptation.'},
+    // ---- Prime Video ----
+    {id:'d-prime-reacher-season-4', title:'Reacher — Season 4', platform:'prime', type:'tv', date:'2026', blurb:'Alan Ritchson returns as Jack Reacher.'},
+    {id:'d-prime-the-last-showgirl', title:'The Last Showgirl', platform:'prime', type:'film', date:'2026', blurb:'Pamela Anderson as a veteran Vegas dancer.'},
+    // ---- Disney+ ----
+    {id:'d-disney-futurama-season-14', title:'Futurama — Season 14', platform:'disney', type:'tv', date:'2026', blurb:'More from Planet Express.'},
+    // ---- BBC iPlayer ----
+    {id:'d-iplayer-the-lady', title:'The Lady', platform:'iplayer', type:'tv', date:'2026', blurb:'Royal drama from The Crown team; Natalie Dormer as Jane Andrews.'},
+    // ---- Channel 4 ----
+    {id:'d-channel4-maya', title:'Maya', platform:'channel4', type:'tv', date:'2026', blurb:'Witness-protection thriller with Bella Ramsey and Daisy Haggard.'},
+    {id:'d-channel4-army-of-shadows', title:'Army of Shadows', platform:'channel4', type:'tv', date:'2026', blurb:'Near-future reimagining from The Day of the Jackal’s Ronan Bennett.'},
+    // ---- Sky Atlantic ----
+    {id:'d-skyatlantic-sweetpea-season-2', title:'Sweetpea — Season 2', platform:'skyatlantic', type:'tv', date:'2026', blurb:'Darkly comic thriller with Ella Purnell, Tamsin Greig and Rish Shah.'},
+    {id:'d-skyatlantic-yaga', title:'Yaga', platform:'skyatlantic', type:'tv', date:'2026', blurb:'Mystery thriller with Carrie-Anne Moss and Noah Reid.'},
+    {id:'d-skyatlantic-possession', title:'Possession', platform:'skyatlantic', type:'tv', date:'2026', blurb:'Karla Crome’s five-part inheritance drama set in Jamaica.'},
+    // ---- Alibi (U&Alibi) ----
+    {id:'d-alibi-bookish-series-2', title:'Bookish — Series 2', platform:'alibi', type:'tv', date:'2026-08-26', blurb:'Mark Gatiss’s 1940s sleuth Gabriel Book returns for three new cases on U&Alibi.'}
+  ];
+
+  // ---- state ----
+  var CATALOGUE=SEED.slice();   // replaced by Gist catalogue if present
+  var INTEREST={};              // id -> 'want' | 'pass' | 'seen'
+  var fullState=null;           // last-pulled full Hub state (for read-modify-write)
+  var filt={ plat:'all', int:'all' };
+  try{ var f=JSON.parse(lsGet(DIV_FILT_KEY)||'null'); if(f){ filt.plat=f.plat||'all'; filt.int=f.int||'all'; } }catch(_){ }
+
+  function setStatus(t){ var el=$('[data-status]'); if(el) el.textContent=t||''; }
+
+  // ---- Catalogue (auto-updated weekly by the curator task, pushed to this repo as catalogue.json) ----
+  // Priority: catalogue.json (repo, kept current) > baked SEED. Interest always comes from the gist.
+  function fetchCatalogue(){
+    return fetch('./catalogue.json',{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){
+      var arr = Array.isArray(j) ? j : (j && Array.isArray(j.catalogue) ? j.catalogue : null);
+      if(arr && arr.length) CATALOGUE=arr;
+      return true;
+    }).catch(function(){ return false; });
+  }
+
+  // ---- Gist ----
+  function pull(){
+    if(!creds) return Promise.reject(new Error('no creds'));
+    setStatus('syncing…');
+    return fetch('https://api.github.com/gists/'+creds.id,{headers:headers()}).then(function(r){ if(!r.ok) throw new Error('gist '+r.status); return r.json(); }).then(function(g){
+      var f=g.files && g.files['life-twoweek.json']; if(!f) throw new Error('no life-twoweek.json');
+      var raw=f.content;
+      var go=function(text){ var payload=JSON.parse(text||'{}'); fullState=payload.state||payload||{}; var d=fullState.diversions||{}; if(Array.isArray(d.catalogue)&&d.catalogue.length) CATALOGUE=d.catalogue; INTEREST=(d.interest&&typeof d.interest==='object')?d.interest:{}; setStatus(''); return true; };
+      if(f.truncated && f.raw_url){ return fetch(f.raw_url,{headers:{'Authorization':'Bearer '+creds.token}}).then(function(r){return r.text();}).then(go); }
+      return go(raw);
+    });
+  }
+  var pushTimer=null;
+  function schedulePush(){ if(pushTimer) clearTimeout(pushTimer); pushTimer=setTimeout(pushNow, 1200); }
+  function pushNow(){
+    if(!creds) return; if(pushTimer){ clearTimeout(pushTimer); pushTimer=null; }
+    setStatus('saving…');
+    // read-modify-write: pull fresh, merge only our interest map, write back the whole state.
+    fetch('https://api.github.com/gists/'+creds.id,{headers:headers()}).then(function(r){ if(!r.ok) throw new Error('gist '+r.status); return r.json(); }).then(function(g){
+      var f=g.files && g.files['life-twoweek.json']; var raw=f?f.content:'{}';
+      function write(text){
+        var payload; try{ payload=JSON.parse(text||'{}'); }catch(_){ payload={}; }
+        var state=payload.state||payload; if(!state.diversions||typeof state.diversions!=='object') state.diversions={};
+        var remoteI=(state.diversions.interest&&typeof state.diversions.interest==='object')?state.diversions.interest:{};
+        // our INTEREST is authoritative for keys we've touched this session; merge over remote
+        state.diversions.interest=Object.assign({}, remoteI, INTEREST);
+        INTEREST=state.diversions.interest;
+        payload.state=state; payload.savedAt=new Date().toISOString(); payload.writer={id:'diversions',label:'Diversions',at:payload.savedAt};
+        var body={files:{}}; body.files['life-twoweek.json']={content:JSON.stringify(payload)};
+        return fetch('https://api.github.com/gists/'+creds.id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json'},headers()),body:JSON.stringify(body)})
+          .then(function(r){ setStatus(r.ok?'':'save failed'); });
+      }
+      if(f&&f.truncated&&f.raw_url){ return fetch(f.raw_url,{headers:{'Authorization':'Bearer '+creds.token}}).then(function(r){return r.text();}).then(write); }
+      return write(raw);
+    }).catch(function(){ setStatus('offline'); });
+  }
+
+  // ---- render ----
+  function fmtDate(d){ if(!d) return ''; if(/^\d{4}-\d{2}-\d{2}$/.test(d)){ var p=d.split('-'); return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString('en-GB',{day:'numeric',month:'short'}); } if(/^\d{4}-\d{2}$/.test(d)){ var q=d.split('-'); return new Date(+q[0],+q[1]-1,1).toLocaleDateString('en-GB',{month:'long'})+' '+q[0]; } return d; }
+  function dsort(a,b){ var ax=(a.date||'9999'), bx=(b.date||'9999'); return ax<bx?-1:(ax>bx?1:0); }
+  function renderPlatChips(){
+    var el=$('[data-plat-chips]'); if(!el) return;
+    var present={}; CATALOGUE.forEach(function(it){ present[it.platform]=1; });
+    var html='<button class="chip'+(filt.plat==='all'?' on':'')+'" data-plat="all">All</button>';
+    PLATFORMS.forEach(function(p){ if(present[p[0]]) html+='<button class="chip'+(filt.plat===p[0]?' on':'')+'" data-plat="'+p[0]+'">'+esc(p[1])+'</button>'; });
+    el.innerHTML=html;
+    $('[data-int-chips]').querySelectorAll('[data-int]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-int')===filt.int); });
+  }
+  function cardHtml(it){
+    var st=INTEREST[it.id]||'';
+    return '<div class="card'+(st==='pass'?' passed':'')+'" data-id="'+esc(it.id)+'">'
+      +'<div class="title">'+esc(it.title)+'</div>'
+      +'<div class="meta"><span class="badge '+(it.type==='tv'?'tv':'film')+'">'+(it.type==='tv'?'Series':'Film')+'</span><span>'+esc(platLabel(it.platform))+'</span>'+(it.date?'<span class="when">'+esc(fmtDate(it.date))+'</span>':'')+'</div>'
+      +(it.blurb?'<div class="blurb">'+esc(it.blurb)+'</div>':'')
+      +'<div class="acts"><button class="act want'+(st==='want'?' on':'')+'" data-act="want">Want to see</button>'
+      +'<button class="act pass'+(st==='pass'?' on':'')+'" data-act="pass">Pass</button>'
+      +'<button class="act seen'+(st==='seen'?' on':'')+'" data-act="seen">Seen</button></div></div>';
+  }
+  function renderBrowse(){
+    renderPlatChips();
+    var list=$('[data-list]'); if(!list) return;
+    var items=CATALOGUE.filter(function(it){
+      if(INTEREST[it.id]==='seen') return false; // seen live on the Seen tab
+      if(filt.plat!=='all' && it.platform!==filt.plat) return false;
+      if(filt.int==='want' && INTEREST[it.id]!=='want') return false;
+      if(filt.int==='new' && INTEREST[it.id]) return false;
+      return true;
+    }).slice().sort(dsort);
+    if(!items.length){ list.innerHTML='<div class="empty">Nothing here yet. Try “All” platforms, or the catalogue will fill out on the next weekly refresh.</div>'; return; }
+    // group by platform
+    var byPlat={}; items.forEach(function(it){ (byPlat[it.platform]=byPlat[it.platform]||[]).push(it); });
+    var order=PLATFORMS.map(function(p){return p[0];});
+    var html='';
+    order.forEach(function(pk){ var arr=byPlat[pk]; if(!arr) return; html+='<div class="plat-h">'+esc(platLabel(pk))+' <span class="ct">'+arr.length+'</span></div>'+arr.map(cardHtml).join(''); });
+    list.innerHTML=html;
+  }
+  function renderSeen(){
+    var list=$('[data-seen-list]'); if(!list) return;
+    var items=CATALOGUE.filter(function(it){ return INTEREST[it.id]==='seen'; }).slice().sort(dsort).reverse();
+    if(!items.length){ list.innerHTML='<div class="empty">Nothing ticked off yet. Mark things “Seen” on the Browse tab and they’ll collect here.</div>'; return; }
+    list.innerHTML='<div class="plat-h">Seen <span class="ct">'+items.length+'</span></div>'+items.map(cardHtml).join('');
+  }
+  function renderCurrent(){ var v=$('[data-view="seen"]').hidden?'browse':'seen'; if(v==='seen') renderSeen(); else renderBrowse(); }
+
+  // ---- interactions ----
+  document.addEventListener('click', function(e){
+    var pc=e.target.closest && e.target.closest('[data-plat]'); if(pc){ filt.plat=pc.getAttribute('data-plat'); lsSet(DIV_FILT_KEY,JSON.stringify(filt)); renderBrowse(); return; }
+    var ic=e.target.closest && e.target.closest('[data-int]'); if(ic){ filt.int=ic.getAttribute('data-int'); lsSet(DIV_FILT_KEY,JSON.stringify(filt)); renderBrowse(); return; }
+    var act=e.target.closest && e.target.closest('[data-act]'); if(act){
+      var card=act.closest('[data-id]'); if(!card) return; var id=card.getAttribute('data-id'); var a=act.getAttribute('data-act');
+      INTEREST[id] = (INTEREST[id]===a) ? '' : a;   // tap again to clear
+      if(!INTEREST[id]) delete INTEREST[id];
+      schedulePush(); renderCurrent(); return;
+    }
+    var nv=e.target.closest && e.target.closest('[data-nav]'); if(nv){ navTo(nv.getAttribute('data-nav')); return; }
+    if(e.target.closest && e.target.closest('[data-cfg-save]')){ doConnect(); return; }
+    if(e.target.closest && e.target.closest('[data-cfg-signout]')){ if(confirm('Disconnect this device? Your Hub data is untouched.')){ clearCreds(); openSetup(); } return; }
+  });
+
+  function navTo(v){
+    if(v==='setup'){ openSetup(true); return; }
+    $('[data-view="browse"]').hidden = v!=='browse';
+    $('[data-view="seen"]').hidden = v!=='seen';
+    document.querySelectorAll('[data-nav]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-nav')===v); });
+    try{ window.scrollTo(0,0); }catch(_){ }
+    renderCurrent();
+  }
+
+  // ---- setup / boot ----
+  function openSetup(){ $('#app').hidden=true; $('#setup').hidden=false; $('[data-cfg-id]').value=creds?creds.id:''; $('[data-cfg-token]').value=creds?creds.token:''; $('[data-cfg-signout]').hidden=!creds; $('[data-cfg-err]').hidden=true; }
+  function openApp(){ $('#setup').hidden=true; $('#app').hidden=false; navTo('browse'); }
+  function doConnect(){
+    var id=$('[data-cfg-id]').value.trim().replace(/^.*\/(?=[0-9a-f]{8,})/i,''); var tk=$('[data-cfg-token]').value.trim();
+    var err=$('[data-cfg-err]');
+    if(!id||!tk){ err.textContent='Enter both the Gist ID and a token.'; err.hidden=false; return; }
+    saveCreds(id,tk);
+    err.hidden=true; setStatus('connecting…');
+    pull().then(function(){ openApp(); return fetchCatalogue(); }).then(renderCurrent).catch(function(e){ err.textContent='Could not connect: '+(e.message||'error'); err.hidden=false; });
+  }
+  // boot
+  if(creds){ openApp(); pull().catch(function(){ setStatus('offline'); }).then(fetchCatalogue).then(renderCurrent); }
+  else { openSetup(); fetchCatalogue(); }
+  // periodic refresh of the catalogue/interest
+  setInterval(function(){ if(creds && !document.hidden){ pull().catch(function(){}).then(fetchCatalogue).then(renderCurrent); } }, 5*60*1000);
+  if('serviceWorker' in navigator){ try{ var _r=navigator.serviceWorker.register('./sw.js'); if(_r&&_r.catch) _r.catch(function(){}); }catch(_){ } }
+})();
+</script>
+</body>
+</html>

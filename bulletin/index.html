@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D1B3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bulletin">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>Bulletin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --navy:#0D1B3E; --mid:#1A3A6B; --lime:#C4F000; --mist:#C4CCDD; --white:#FFFFFF; }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--mist);-webkit-font-smoothing:antialiased;padding:0 0 90px}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 0}
+  header.top{display:flex;align-items:baseline;justify-content:space-between;padding:6px 2px 12px}
+  header.top h1{font-size:20px;font-weight:800;color:var(--white);margin:0;letter-spacing:.02em}
+  header.top .eyebrow{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--lime)}
+  .status{font-size:11px;color:var(--mist);opacity:.7}
+  .muted{color:var(--mist);opacity:.7;font-size:13px;padding:16px 4px;line-height:1.5}
+  .view{display:none}
+  .view.on{display:block}
+  /* ---- weather ---- */
+  .wx-card{background:var(--mid);border:1px solid #24467e;border-radius:14px;padding:13px 14px;margin-bottom:10px}
+  .wx-top{display:flex;align-items:center;justify-content:space-between}
+  .wx-city{font-size:15px;font-weight:700;color:var(--white)}
+  .wx-now{font-size:17px;font-weight:700;color:var(--lime)}
+  .wx-days{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+  .wx-d{font-size:12px;color:var(--mist)}
+  .wx-d b{color:var(--white);font-weight:700;margin-left:2px}
+  .wx-d i{opacity:.6;font-style:normal;margin-left:3px}
+  .wx-hours{display:flex;flex-direction:column;margin-top:10px}
+  .wx-h{display:flex;align-items:center;gap:12px;padding:9px 4px;border-top:1px solid #23406e}
+  .wx-h:first-child{border-top:0}
+  .wx-h .hh{flex:0 0 66px;font-size:13px;color:var(--mist);opacity:.85}
+  .wx-h .hi{flex:0 0 24px;text-align:center;font-size:18px}
+  .wx-h .ht{flex:0 0 46px;font-size:15px;color:var(--white);font-weight:700}
+  .wx-h .hp{margin-left:auto;font-size:12px;color:var(--lime);font-weight:600}
+  .wx-sub{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mist);opacity:.55;margin:14px 0 2px}
+  .wx-clear{background:none;border:0;color:var(--mist);opacity:.6;font:inherit;font-size:12px;cursor:pointer;margin-left:6px}
+  .wx-else-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 2px 2px}
+  .wx-else-btn{border:1px solid #2a4778;background:transparent;color:var(--mist);border-radius:20px;padding:7px 12px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+  form[data-wx-town]{display:flex;gap:6px;flex:1;min-width:170px}
+  form[data-wx-town] input{flex:1;border:1px solid #2a4778;background:#0a1530;color:var(--white);border-radius:20px;padding:7px 12px;font:inherit;font-size:12px}
+  form[data-wx-town] button{border:1px solid #2a4778;background:transparent;color:var(--lime);border-radius:20px;padding:7px 12px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+  .carflag{background:#2a1c0a;border:1px solid #7a5a1c;border-radius:12px;padding:11px 13px;margin-bottom:12px;font-size:12.5px;color:#f0cf8a;line-height:1.45;display:none}
+  .carflag.on{display:block}
+  /* ---- news ---- */
+  .news-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+  .news-tab{border:1px solid #2a4778;background:transparent;color:var(--mist);border-radius:20px;padding:6px 12px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+  .news-tab.on{background:var(--lime);border-color:var(--lime);color:var(--navy)}
+  .news-item{padding:11px 2px;border-bottom:1px solid #22375f}
+  .news-item a{font-size:14.5px;font-weight:600;color:var(--white);line-height:1.35}
+  .news-when{display:block;font-size:11px;color:var(--mist);opacity:.7;margin-top:4px}
+  /* ---- setup ---- */
+  #setup{padding:22px 18px;max-width:520px;margin:0 auto}
+  #setup h1{color:var(--white);font-size:22px;margin:6px 0 6px}
+  #setup p{font-size:13.5px;line-height:1.5}
+  #setup label{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--lime);margin:16px 0 6px}
+  #setup input{width:100%;border:1px solid #2a4778;background:#0a1530;color:var(--white);border-radius:10px;padding:11px 12px;font:inherit;font-size:14px}
+  #setup .hint{font-size:11.5px;opacity:.7;margin-top:6px;line-height:1.4}
+  #setup .go{margin-top:16px;width:100%;background:var(--lime);color:var(--navy);border:0;border-radius:10px;padding:13px;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+  #setup .msg{margin-top:12px;color:var(--lime);font-size:13px}
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0a1530;border-top:1px solid #22375f;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+  nav.tabs button{flex:1;background:none;border:0;color:var(--mist);opacity:.65;font:inherit;font-size:10.5px;font-weight:600;padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+  nav.tabs button .ic{font-size:17px;line-height:1}
+  nav.tabs button.on{opacity:1;color:var(--lime)}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="wrap">
+    <header class="top">
+      <div><span class="eyebrow">The Reading Room</span><h1>Bulletin</h1></div>
+      <span class="status" data-status></span>
+    </header>
+
+    <section class="view on" data-view="news">
+      <div class="news-tabs" data-news-tabs></div>
+      <div data-news-list></div>
+    </section>
+
+    <section class="view" data-view="weather">
+      <div class="carflag" data-carflag></div>
+      <div data-wx-cards></div>
+      <div data-wx-elsewhere></div>
+    </section>
+
+    <section class="view" data-view="setup">
+      <div style="padding:6px 2px 2px">
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--lime);margin:8px 0 6px">News key</label>
+        <input type="text" data-cfg-newskey autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="rss2json API key" style="width:100%;border:1px solid #2a4778;background:#0a1530;color:var(--white);border-radius:10px;padding:11px 12px;font:inherit;font-size:14px">
+        <div class="hint" style="font-size:11.5px;opacity:.7;margin-top:6px;line-height:1.4">Free from <b>rss2json.com</b>. Stored only on this phone. Weather needs no key.</div>
+        <button class="go" data-cfg-newskey-save style="margin-top:14px;width:100%;background:var(--lime);color:var(--navy);border:0;border-radius:10px;padding:13px;font:inherit;font-size:15px;font-weight:700;cursor:pointer">Save news key</button>
+        <div class="msg" data-cfg-msg hidden></div>
+        <p class="hint" style="margin-top:20px;line-height:1.5">Weather is fixed to <b>Harpenden</b> and <b>London</b>. On the Weather tab you can add a third place on demand (a town name or your current location) — it won't ask for your location unless you tap it.</p>
+      </div>
+    </section>
+  </div>
+
+  <nav class="tabs">
+    <button data-nav="news" class="on"><span class="ic">📰</span>News</button>
+    <button data-nav="weather"><span class="ic">🌤️</span>Weather</button>
+    <button data-nav="setup"><span class="ic">⚙</span>Setup</button>
+  </nav>
+</div>
+
+<script>
+(function(){
+  var _mem={};
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(_){ return (k in _mem)?_mem[k]:null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(_){ _mem[k]=v; } }
+  function $(s){ return document.querySelector(s); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  // ---------- WEATHER ----------
+  var WX_LOCS=[{n:'Harpenden',lat:51.817,lon:-0.357}];
+  var WX_FULL_KEY='connolly-bulletin:wxfull2', WX_ELSE_KEY='connolly-bulletin:wxelse';
+  function wxIcon(code){ code=+code; if(code===0)return'☀️'; if(code<=2)return'🌤️'; if(code===3)return'☁️'; if(code>=45&&code<=48)return'🌫️'; if(code>=51&&code<=67)return'🌧️'; if(code>=71&&code<=77)return'❄️'; if(code>=80&&code<=82)return'🌦️'; if(code>=95)return'⛈️'; return'☁️'; }
+  function wxLocs(){ var arr=WX_LOCS.slice(); try{ var e=JSON.parse(lsGet(WX_ELSE_KEY)||'null'); if(e&&e.lat!=null) arr.push({n:e.n||'Where I am',lat:e.lat,lon:e.lon,extra:true}); }catch(_){ } return arr; }
+  function renderElseCtl(){ var el=$('[data-wx-elsewhere]'); if(!el) return; var has=false; try{ has=!!JSON.parse(lsGet(WX_ELSE_KEY)||'null'); }catch(_){ } el.innerHTML = has ? '' : '<div class="wx-else-row"><button class="wx-else-btn" data-wx-here>Use where I am now</button><form data-wx-town autocomplete="off"><input data-wx-town-in placeholder="…or type a town" enterkeyhint="go"><button type="submit">Go</button></form></div>'; }
+  function renderWeather(){ var host=$('[data-wx-cards]'); if(!host) return; var c=null; try{ c=JSON.parse(lsGet(WX_FULL_KEY)||'null'); }catch(_){ } if(c&&c.cards&&(Date.now()-c.ts)<3*3600*1000){ host.innerHTML=c.cards; renderCarFlag(c.hiMax); } else { host.innerHTML='<div class="muted">Loading weather…</div>'; fetchWeather(); } renderElseCtl(); }
+  function renderCarFlag(hiMax){ var el=$('[data-carflag]'); if(!el) return; var rain=false; // rain flag comes from codes, computed in fetch; here we only have hiMax cached
+    el.classList.toggle('on', hiMax!=null && hiMax>=26);
+    if(hiMax!=null && hiMax>=26){ el.innerHTML='🚗 <b>Cover the car.</b> Highs of '+Math.round(hiMax)+'° today — the sun bleaches the soft top and bakes the cockpit. Get the cover on.'; }
+  }
+  function hoursHtml(j){ if(!j||!j.hourly||!j.hourly.time) return ''; var t=j.hourly.time, tt=j.hourly.temperature_2m||[], wc=j.hourly.weather_code||[], pp=j.hourly.precipitation_probability||[]; var now=Date.now(); var start=0; for(var i=0;i<t.length;i++){ if(new Date(t[i]).getTime()>=now-1800000){ start=i; break; } } var cells=''; for(var k=start;k<Math.min(start+12,t.length);k++){ var d=new Date(t[k]); var hh=d.toLocaleTimeString('en-GB',{hour:'numeric',hour12:true}).replace(':00','').replace(' ',''); var p=(pp[k]!=null&&pp[k]>=20)?(pp[k]+'%'):''; cells+='<div class="wx-h"><div class="hh">'+esc(hh)+'</div><div class="hi">'+wxIcon(wc[k])+'</div><div class="ht">'+Math.round(tt[k])+'°</div><div class="hp">'+esc(p)+'</div></div>'; } return cells?'<div class="wx-sub">Next 12 hours</div><div class="wx-hours">'+cells+'</div>':''; }
+  function fetchWeather(){ var locs=wxLocs(); Promise.all(locs.map(function(L){ var u='https://api.open-meteo.com/v1/forecast?latitude='+L.lat+'&longitude='+L.lon+'&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=3&timezone=Europe%2FLondon'; return fetch(u).then(function(r){return r.json();}).then(function(j){return {L:L,j:j};}).catch(function(){return {L:L,j:null};}); })).then(function(res){ var hiMax=null; var html=res.map(function(x){ var L=x.L,j=x.j; if(!j||!j.current){ return '<div class="wx-card"><div class="wx-top"><span class="wx-city">'+esc(L.n)+'</span><span class="muted">unavailable</span></div></div>'; } var cur=Math.round(j.current.temperature_2m), ci=wxIcon(j.current.weather_code); var days=''; if(j.daily){ for(var i=0;i<Math.min(3,j.daily.time.length);i++){ var dn=i===0?'Today':new Date(j.daily.time[i]+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short'}); days+='<span class="wx-d">'+wxIcon(j.daily.weather_code[i])+' '+dn+' <b>'+Math.round(j.daily.temperature_2m_max[i])+'°</b><i>'+Math.round(j.daily.temperature_2m_min[i])+'°</i></span>'; } if(!L.extra && j.daily.temperature_2m_max && j.daily.temperature_2m_max[0]!=null){ hiMax=Math.max(hiMax==null?-99:hiMax, j.daily.temperature_2m_max[0]); } } return '<div class="wx-card"><div class="wx-top"><span class="wx-city">'+esc(L.n)+(L.extra?' <button class="wx-clear" data-wx-clear title="remove">✕</button>':'')+'</span><span class="wx-now">'+ci+' '+cur+'°</span></div><div class="wx-days">'+days+'</div>'+hoursHtml(j)+'</div>'; }).join(''); try{ lsSet(WX_FULL_KEY, JSON.stringify({ts:Date.now(),cards:html,hiMax:hiMax})); }catch(_){ } var host=$('[data-wx-cards]'); if(host) host.innerHTML=html; renderCarFlag(hiMax); }).catch(function(){ var host=$('[data-wx-cards]'); if(host) host.innerHTML='<div class="muted">Weather unavailable right now.</div>'; }); }
+
+  // ---------- NEWS ----------
+  // Each section blends several outlets via rss2json (direct CORS, one free key).
+  var NEWS_FEEDS=[
+    {key:'uk',label:'UK',urls:[
+      'https://feeds.bbci.co.uk/news/uk/rss.xml',
+      'https://feeds.skynews.com/feeds/rss/uk.xml',
+      'https://www.theguardian.com/uk-news/rss',
+      'https://www.thesun.co.uk/news/uknews/feed/']},
+    {key:'world',label:'World',urls:[
+      'https://feeds.bbci.co.uk/news/world/rss.xml',
+      'https://feeds.skynews.com/feeds/rss/world.xml',
+      'http://rss.cnn.com/rss/edition_world.rss',
+      'https://www.theguardian.com/world/rss',
+      'https://www.thesun.co.uk/news/worldnews/feed/']},
+    {key:'biz',label:'Business',urls:[
+      'https://feeds.bbci.co.uk/news/business/rss.xml',
+      'https://feeds.skynews.com/feeds/rss/business.xml',
+      'http://rss.cnn.com/rss/money_latest.rss',
+      'https://www.theguardian.com/uk/business/rss',
+      'https://www.thesun.co.uk/money/feed/']},
+    {key:'ad',label:'Advertising',urls:[
+      'https://www.theguardian.com/media/advertising/rss',
+      'https://www.theguardian.com/media/rss',
+      'https://www.adweek.com/feed/',
+      'https://www.marketingdive.com/feeds/news/']},
+    {key:'celeb',label:'Celebrity',urls:[
+      'https://www.thesun.co.uk/tvandshowbiz/feed/',
+      'https://www.thesun.co.uk/tvandshowbiz/celebrity/feed/',
+      'https://www.thesun.co.uk/tvandshowbiz/tv/feed/',
+      'https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml',
+      'https://feeds.skynews.com/feeds/rss/entertainment.xml',
+      'http://rss.cnn.com/rss/edition_entertainment.rss',
+      'https://www.theguardian.com/culture/rss']}
+  ];
+  var NEWS_KEY='connolly-bulletin:news', NEWS_APIKEY_KEY='connolly-bulletin:newskey', _newsTab='uk';
+  function newsSource(link){ try{ var h=new URL(link).hostname.replace(/^www\./,''); if(/bbc\./.test(h))return'BBC'; if(/sky/.test(h))return'Sky'; if(/guardian/.test(h))return'Guardian'; if(/cnn/.test(h))return'CNN'; if(/thesun/.test(h))return'The Sun'; if(/adweek/.test(h))return'Adweek'; if(/marketingdive/.test(h))return'Marketing Dive'; return (h.split('.')[0]||'').replace(/^\w/,function(c){return c.toUpperCase();}); }catch(_){ return ''; } }
+  function newsCache(){ try{ return JSON.parse(lsGet(NEWS_KEY)||'{}')||{}; }catch(_){ return {}; } }
+  function newsAgo(ds){ try{ var d=new Date(ds), s=(Date.now()-d.getTime())/1000; if(s<3600) return Math.max(1,Math.round(s/60))+'m ago'; if(s<86400) return Math.round(s/3600)+'h ago'; return Math.round(s/86400)+'d ago'; }catch(_){ return ''; } }
+  function newsHtml(items){ if(!items||!items.length) return '<div class="muted">Nothing right now.</div>'; return items.map(function(it){ var meta=[(it.src||''),(it.when||'')].filter(Boolean).join(' · '); return '<div class="news-item"><a href="'+esc(it.link)+'" target="_blank" rel="noopener">'+esc(it.title)+'</a>'+(meta?'<span class="news-when">'+esc(meta)+'</span>':'')+'</div>'; }).join(''); }
+  function renderNewsTabs(){ var el=$('[data-news-tabs]'); if(!el) return; el.innerHTML=NEWS_FEEDS.map(function(f){ return '<button class="news-tab'+(f.key===_newsTab?' on':'')+'" data-news-tab="'+f.key+'">'+esc(f.label)+'</button>'; }).join(''); }
+  function renderNews(){ renderNewsTabs(); var list=$('[data-news-list]'); if(!list) return; var c=newsCache()[_newsTab]; if(c&&c.items&&(Date.now()-c.ts)<30*60*1000){ list.innerHTML=newsHtml(c.items); } else { list.innerHTML='<div class="muted">Loading…</div>'; fetchNews(_newsTab); } }
+  function fetchNews(key){
+    var feed=NEWS_FEEDS.filter(function(f){return f.key===key;})[0]; if(!feed) return;
+    var list=$('[data-news-list]');
+    var apikey=''; try{ apikey=lsGet(NEWS_APIKEY_KEY)||''; }catch(_){ }
+    if(!apikey){ if(_newsTab===key && list) list.innerHTML='<div class="muted">Add your free news key in <b>Setup</b> (the ⚙ tab) to load headlines — it’s free from <b>rss2json.com</b> and stored only on this phone.</div>'; return; }
+    Promise.all(feed.urls.map(function(u){
+      return fetch('https://api.rss2json.com/v1/api.json?api_key='+encodeURIComponent(apikey)+'&count=6&rss_url='+encodeURIComponent(u))
+        .then(function(r){return r.json();}).then(function(d){ return (d&&d.status==='ok'&&d.items)?d.items:[]; }).catch(function(){ return []; });
+    })).then(function(lists){
+      var all=[]; lists.forEach(function(items){ items.forEach(function(it){ var link=(it.link||'').trim(), title=(it.title||'').trim(); if(!title||!link) return; all.push({title:title,link:link,src:newsSource(link),t:Date.parse(it.pubDate)||0,when:newsAgo(it.pubDate)}); }); });
+      all.sort(function(a,b){return b.t-a.t;});
+      var seen={}, out=[]; all.forEach(function(it){ var k2=it.title.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().slice(0,60); if(k2 && !seen[k2]){ seen[k2]=1; out.push(it); } }); out=out.slice(0,18);
+      var cache=newsCache(); cache[key]={ts:Date.now(),items:out}; try{ lsSet(NEWS_KEY, JSON.stringify(cache)); }catch(_){ }
+      if(_newsTab===key && list){ list.innerHTML = out.length?newsHtml(out):'<div class="muted">Couldn’t load right now — tap the tab again.</div>'; }
+    }).catch(function(){ if(_newsTab===key && list) list.innerHTML='<div class="muted">Couldn’t load — tap the tab again.</div>'; });
+  }
+
+  // ---------- interactions ----------
+  document.addEventListener('click', function(e){
+    var nv=e.target.closest && e.target.closest('[data-nav]'); if(nv){ navTo(nv.getAttribute('data-nav')); return; }
+    var nt=e.target.closest && e.target.closest('[data-news-tab]'); if(nt){ _newsTab=nt.getAttribute('data-news-tab'); renderNews(); return; }
+    if(e.target.closest && e.target.closest('[data-wx-here]')){ if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(function(pos){ try{ lsSet(WX_ELSE_KEY, JSON.stringify({n:'Where I am',lat:pos.coords.latitude,lon:pos.coords.longitude})); lsSet(WX_FULL_KEY,''); }catch(_){ } renderWeather(); }, function(){}); } return; }
+    if(e.target.closest && e.target.closest('[data-wx-clear]')){ try{ lsSet(WX_ELSE_KEY,''); lsSet(WX_FULL_KEY,''); }catch(_){ } renderWeather(); return; }
+    if(e.target.closest && e.target.closest('[data-cfg-newskey-save]')){ var k=$('[data-cfg-newskey]').value.trim(); try{ lsSet(NEWS_APIKEY_KEY,k); lsSet(NEWS_KEY,'{}'); }catch(_){ } var m=$('[data-cfg-msg]'); m.textContent=k?'Saved — open the News tab.':'News key cleared.'; m.hidden=false; return; }
+  });
+  document.addEventListener('submit', function(e){
+    var tf=e.target.closest && e.target.closest('[data-wx-town]'); if(!tf) return; e.preventDefault(); var inp=tf.querySelector('[data-wx-town-in]'); var q=inp?String(inp.value||'').trim():''; if(!q) return; fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(q)+'&count=1&language=en&format=json').then(function(r){return r.json();}).then(function(j){ var res=j&&j.results&&j.results[0]; if(res){ try{ lsSet(WX_ELSE_KEY, JSON.stringify({n:res.name,lat:res.latitude,lon:res.longitude})); lsSet(WX_FULL_KEY,''); }catch(_){ } renderWeather(); } }).catch(function(){}); });
+
+  function navTo(v){
+    document.querySelectorAll('[data-view]').forEach(function(s){ s.classList.toggle('on', s.getAttribute('data-view')===v); });
+    document.querySelectorAll('[data-nav]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-nav')===v); });
+    try{ window.scrollTo(0,0); }catch(_){ }
+    if(v==='news'){ renderNews(); }
+    else if(v==='weather'){ renderWeather(); }
+    else if(v==='setup'){ try{ $('[data-cfg-newskey]').value=lsGet(NEWS_APIKEY_KEY)||''; }catch(_){ } var m=$('[data-cfg-msg]'); if(m) m.hidden=true; }
+  }
+
+  // boot: open straight to News; warm the weather cache in the background
+  renderNews();
+  fetchWeather();
+  if('serviceWorker' in navigator){ try{ var _r=navigator.serviceWorker.register('./sw.js'); if(_r&&_r.catch) _r.catch(function(){}); }catch(_){ } }
+})();
+</script>
+</body>
+</html>

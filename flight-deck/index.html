@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flight Deck</title>
+<meta name="theme-color" content="#0D1B3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Flight Deck">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230D1B3E'/%3E%3Cpath d='M90 32l10 46 44 14v10l-44-6-4 34 18 12v8l-24-6-24 6v-8l18-12-4-34-44 6v-10l44-14z' fill='%23C4F000'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0D1B3E;
+  --panel:#1A3A6B;
+  --panel-2:#14244C;
+  --line:#24467E;
+  --paper:#F2F5F8;
+  --muted:#C4CCDD;
+  --lime:#C4F000;
+  --amber:#E9A13B;
+  --red:#E5484D;
+  --green:#4ADE80;
+  --r:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ink);
+  color:var(--paper);
+  font-family:'Montserrat',system-ui,-apple-system,sans-serif;
+  font-size:15px;
+  line-height:1.45;
+  padding-bottom:env(safe-area-inset-bottom);
+  min-height:100vh;
+}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px 64px}
+
+/* ---------- header ---------- */
+header{
+  position:sticky;top:0;z-index:20;
+  background:linear-gradient(180deg,var(--ink) 72%,rgba(10,27,51,0));
+  padding:calc(14px + env(safe-area-inset-top)) 0 14px;
+}
+.bar{display:flex;align-items:center;gap:10px}
+.mark{width:26px;height:26px;flex:none}
+h1{
+  font-size:15px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  margin:0;flex:1;
+}
+.chip{
+  font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:999px;padding:5px 10px;color:var(--muted);
+  background:var(--panel-2);white-space:nowrap;
+}
+.chip.warn{border-color:var(--amber);color:var(--amber)}
+.iconbtn{
+  background:var(--panel-2);border:1px solid var(--line);color:var(--muted);
+  width:34px;height:34px;border-radius:10px;display:grid;place-items:center;cursor:pointer;flex:none;
+}
+.iconbtn:hover{color:var(--paper);border-color:var(--muted)}
+.iconbtn svg{width:16px;height:16px}
+.spin{animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------- add bar ---------- */
+.add{
+  display:flex;gap:8px;margin:2px 0 18px;
+}
+.add input{
+  flex:1;min-width:0;
+  background:var(--panel-2);border:1px solid var(--line);color:var(--paper);
+  border-radius:12px;padding:13px 14px;font-size:16px;
+  font-family:'IBM Plex Mono',monospace;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+}
+.add input::placeholder{color:#54708F;text-transform:none;letter-spacing:.02em;font-family:'Montserrat',sans-serif}
+.add input:focus,.add select:focus,select:focus{outline:2px solid var(--lime);outline-offset:1px;border-color:transparent}
+.add select{
+  background:var(--panel-2);border:1px solid var(--line);color:var(--paper);
+  border-radius:12px;padding:0 10px;font-size:13px;font-family:'Montserrat',sans-serif;
+}
+.add button{
+  background:var(--lime);color:var(--ink);border:0;border-radius:12px;
+  padding:0 18px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;
+}
+.add button:active{transform:translateY(1px)}
+
+/* ---------- flight card ---------- */
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+  margin-bottom:14px;overflow:hidden;
+  animation:rise .25s ease both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}}
+.card-top{display:flex;align-items:center;gap:10px;padding:12px 14px 10px}
+.fnum{font-size:16px;font-weight:600;letter-spacing:.12em}
+.aline{font-size:11px;color:var(--muted);font-weight:500;flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.x{background:none;border:0;color:#456385;cursor:pointer;font-size:18px;line-height:1;padding:2px 4px;flex:none}
+.x:hover{color:var(--red)}
+
+.status{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 9px;border-radius:999px;flex:none;
+}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.t-idle{color:var(--muted);background:rgba(143,163,188,.12)}
+.t-soon{color:var(--amber);background:rgba(233,161,59,.13)}
+.t-warn{color:var(--amber);background:rgba(233,161,59,.13)}
+.t-live{color:var(--lime);background:rgba(196,216,46,.13)}
+.t-live .dot{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.t-done{color:var(--green);background:rgba(74,222,128,.13)}
+.t-bad{color:var(--red);background:rgba(229,72,77,.13)}
+
+/* headline — the one line that matters */
+.headline{
+  padding:0 14px 14px;font-size:19px;font-weight:600;letter-spacing:-.01em;
+}
+.headline .sub{display:block;font-size:12.5px;font-weight:500;color:var(--muted);letter-spacing:0;margin-top:3px;font-family:'Montserrat',sans-serif}
+.headline em{font-style:normal;color:var(--lime)}
+.headline .late{color:var(--amber)}
+.headline .early{color:var(--green)}
+
+/* route rail — the signature */
+.rail{padding:4px 14px 16px}
+.rail-codes{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.code{font-size:24px;font-weight:600;letter-spacing:.06em}
+.city{font-size:10.5px;color:var(--muted);font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.rail-codes .r{text-align:right}
+.track{position:relative;height:2px;background:var(--line);border-radius:2px;margin:14px 2px}
+.track .fill{position:absolute;left:0;top:0;bottom:0;background:var(--lime);border-radius:2px;transition:width .6s ease}
+.track .node{position:absolute;top:50%;width:7px;height:7px;border-radius:50%;background:var(--line);transform:translate(-50%,-50%)}
+.track .node.a{left:0;background:var(--muted)}
+.track .node.b{left:100%;background:var(--muted)}
+.track .node.on{background:var(--lime)}
+.plane{position:absolute;top:50%;transform:translate(-50%,-50%) rotate(90deg);transition:left .6s ease;color:var(--lime)}
+.plane svg{width:15px;height:15px;display:block;filter:drop-shadow(0 0 6px rgba(196,216,46,.5))}
+
+/* times grid */
+.times{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-top:1px solid var(--line)}
+.leg{background:var(--panel-2);padding:12px 14px}
+.leg h4{margin:0 0 8px;font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.big{font-size:26px;font-weight:500;letter-spacing:.02em;line-height:1}
+.big.strike{font-size:15px;color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;margin-right:6px;vertical-align:2px}
+.tlabel{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-top:5px}
+.tlabel.late{color:var(--amber)}
+.tlabel.early{color:var(--green)}
+.meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.pill{font-size:10.5px;font-weight:600;letter-spacing:.05em;color:var(--paper);
+  background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:6px;padding:3px 7px}
+.pill span{color:var(--muted);font-weight:500;margin-right:4px;text-transform:uppercase;font-size:9.5px}
+
+.foot{display:flex;align-items:center;gap:8px;padding:9px 14px;border-top:1px solid var(--line);
+  font-size:10.5px;color:#5C7997;letter-spacing:.04em}
+.foot .r{margin-left:auto;display:flex;gap:10px}
+.foot button{background:none;border:0;color:#5C7997;font-size:10.5px;cursor:pointer;font-family:inherit;padding:0;letter-spacing:.04em}
+.foot button:hover{color:var(--lime)}
+pre.raw{margin:0;padding:12px 14px;background:#07142640;border-top:1px solid var(--line);
+  font-size:10.5px;color:#7E9BB8;overflow:auto;max-height:280px;white-space:pre-wrap;word-break:break-all}
+
+.err{background:rgba(229,72,77,.08);border-top:1px solid rgba(229,72,77,.3);padding:11px 14px;
+  font-size:12.5px;color:#FF9A9D}
+.loading{padding:16px 14px;font-size:12.5px;color:var(--muted);letter-spacing:.04em}
+
+/* empty + setup */
+.empty{text-align:center;padding:52px 20px;color:var(--muted)}
+.empty svg{width:40px;height:40px;opacity:.35;margin-bottom:14px}
+.empty p{margin:0;font-size:13.5px;line-height:1.6}
+.setup{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.setup h2{margin:0 0 4px;font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.setup p{margin:0 0 14px;font-size:13px;color:var(--muted);line-height:1.6}
+.setup ol{margin:0 0 16px;padding-left:20px;font-size:13px;color:var(--muted);line-height:1.85}
+.setup ol b{color:var(--paper);font-weight:600}
+.setup a{color:var(--lime)}
+.setup input{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--paper);
+  border-radius:10px;padding:12px 13px;font-size:15px;font-family:'IBM Plex Mono',monospace;margin-bottom:10px}
+.setup .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{background:var(--lime);color:var(--ink);border:0;border-radius:10px;padding:11px 18px;
+  font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--muted)}
+.btn.ghost:hover{color:var(--paper)}
+.note{font-size:11.5px;color:#5C7997;line-height:1.6;margin-top:12px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);
+  background:var(--lime);color:var(--ink);font-weight:600;font-size:13px;padding:11px 18px;
+  border-radius:999px;transition:transform .3s cubic-bezier(.2,.8,.3,1);z-index:60;max-width:88vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.bad{background:var(--red);color:#fff}
+
+@media (max-width:400px){
+  .times{grid-template-columns:1fr}
+  .big{font-size:23px}
+  .code{font-size:21px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="bar">
+    <svg class="mark" viewBox="0 0 180 180" aria-hidden="true">
+      <path d="M90 32l10 46 44 14v10l-44-6-4 34 18 12v8l-24-6-24 6v-8l18-12-4-34-44 6v-10l44-14z" fill="#C4F000"/>
+    </svg>
+    <h1>Flight Deck</h1>
+    <div class="chip" id="quota" hidden></div>
+    <button class="iconbtn" id="refreshAll" title="Refresh all" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>
+    </button>
+    <button class="iconbtn" id="settings" title="Settings" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<div id="setup" hidden></div>
+
+<div class="add" id="addBar" hidden>
+  <input id="fnum" placeholder="Flight number, e.g. BA1442" autocapitalize="characters" autocomplete="off" spellcheck="false" enterkeyhint="go">
+  <select id="fday" aria-label="Date">
+    <option value="0" selected>Today</option>
+    <option value="1">Tomorrow</option>
+    <option value="-1">Yesterday</option>
+    <option value="2">+2 days</option>
+  </select>
+  <button id="addBtn">Track</button>
+</div>
+
+<div id="list"></div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+const HOST = 'aerodatabox.p.rapidapi.com';
+const KEY_K = 'fd_key', LIST_K = 'fd_flights', QUOTA_K = 'fd_quota', LIMIT_K = 'fd_limit';
+
+/* ---------- storage: window.storage in Claude, localStorage when self-hosted ---------- */
+const store = {
+  async get(k){
+    try{ if(window.storage){ const r = await window.storage.get(k); if(r) return JSON.parse(r.value); } }catch(e){}
+    try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; }catch(e){ return null; }
+  },
+  async set(k,v){
+    try{ if(window.storage){ await window.storage.set(k, JSON.stringify(v)); return; } }catch(e){}
+    try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){}
+  }
+};
+
+const S = { key:'', flights:[], quota:{month:'',count:0}, limit:500, results:{}, busy:{}, raw:{} };
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function toast(msg, bad){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (bad ? ' bad' : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>{ t.className='toast'; }, 3600);
+}
+
+// AeroDataBox returns "2026-07-27 06:30Z" — the space breaks Date() in Safari.
+function pdate(o){
+  if(!o) return null;
+  const s = (typeof o === 'string' ? o : o.utc || o.local);
+  if(!s) return null;
+  const d = new Date(String(s).trim().replace(' ','T'));
+  return isNaN(d.getTime()) ? null : d;
+}
+// Show the time as it reads on the airport clock, straight from the string.
+function clock(o){
+  if(!o) return null;
+  const s = o.local || o.utc;
+  if(!s) return null;
+  const m = String(s).match(/\d{2}:\d{2}/);
+  return m ? m[0] : null;
+}
+function dayOf(o){
+  const d = pdate(o); if(!d) return '';
+  return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+}
+function mins(a,b){ return Math.round((b-a)/60000); }
+function dur(m){
+  m = Math.abs(Math.round(m));
+  const h = Math.floor(m/60), r = m%60;
+  return h ? (h+'h '+(r?r+'m':'').trim()).trim() : m+'m';
+}
+function isoDay(offset){
+  const d = new Date(); d.setDate(d.getDate()+offset);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function dayLabel(iso){
+  const t = isoDay(0);
+  if(iso===t) return 'Today';
+  if(iso===isoDay(1)) return 'Tomorrow';
+  if(iso===isoDay(-1)) return 'Yesterday';
+  const d = new Date(iso+'T12:00:00');
+  return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+}
+
+const TONES = {
+  expected:['Scheduled','idle'], scheduled:['Scheduled','idle'], unknown:['Status unknown','idle'],
+  checkin:['Check-in open','soon'], boarding:['Boarding','soon'], gateclosed:['Gate closed','soon'],
+  delayed:['Delayed','warn'],
+  departed:['Departed','live'], enroute:['In the air','live'], approaching:['Approaching','live'],
+  arrived:['Landed','done'], landed:['Landed','done'],
+  canceled:['Cancelled','bad'], cancelled:['Cancelled','bad'], diverted:['Diverted','bad']
+};
+function status(s){
+  const k = String(s||'unknown').toLowerCase().replace(/[^a-z]/g,'');
+  const t = TONES[k];
+  return t ? {label:t[0], tone:t[1]} : {label:String(s||'Unknown'), tone:'idle'};
+}
+
+/* ---------- quota ---------- */
+function thisMonth(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+async function bumpQuota(){
+  const m = thisMonth();
+  if(S.quota.month !== m) S.quota = {month:m, count:0};
+  S.quota.count++;
+  await store.set(QUOTA_K, S.quota);
+  paintQuota();
+}
+function paintQuota(){
+  const el = $('#quota');
+  if(!S.key){ el.hidden = true; return; }
+  el.hidden = false;
+  const n = S.quota.month === thisMonth() ? S.quota.count : 0;
+  el.textContent = n + ' / ' + S.limit;
+  el.title = 'API calls used this month';
+  el.className = 'chip' + (n > S.limit*0.85 ? ' warn' : '');
+}
+
+/* ---------- API ---------- */
+async function fetchFlight(number, date){
+  const num = number.replace(/\s+/g,'').toUpperCase();
+  const url = 'https://'+HOST+'/flights/number/'+encodeURIComponent(num)+'/'+date;
+  let res;
+  try{
+    res = await fetch(url, {headers:{'x-rapidapi-key':S.key, 'x-rapidapi-host':HOST}});
+  }catch(e){
+    throw new Error('Could not reach the API. Check your connection — or the browser blocked the request.');
+  }
+  await bumpQuota();
+  if(res.status===401 || res.status===403) throw new Error('Key rejected. Check the key is right and that you have subscribed to AeroDataBox on RapidAPI (the free Basic plan still needs subscribing to).');
+  if(res.status===404) throw new Error('Nothing found for that flight number on that date. Check the number, or try the day either side — long-haul flights are filed on their departure date.');
+  if(res.status===429) throw new Error('Monthly quota is used up on RapidAPI. It resets on your billing date.');
+  if(!res.ok) throw new Error('API returned '+res.status+'. Try again in a moment.');
+  const data = await res.json();
+  const arr = Array.isArray(data) ? data : (data ? [data] : []);
+  if(!arr.length) throw new Error('The API returned no flights for that number and date.');
+  return arr;
+}
+
+async function load(id, silent){
+  const f = S.flights.find(x=>x.id===id);
+  if(!f || S.busy[id]) return;
+  S.busy[id] = true;
+  if(!silent) render();
+  try{
+    const arr = await fetchFlight(f.number, f.date);
+    S.results[id] = {legs:arr, at:Date.now(), error:null};
+    S.raw[id] = JSON.stringify(arr, null, 2);
+  }catch(e){
+    S.results[id] = Object.assign({}, S.results[id]||{}, {error:e.message, at:Date.now()});
+  }
+  S.busy[id] = false;
+  render();
+}
+
+/* ---------- render ---------- */
+function renderLeg(g){
+  const st = status(g.status);
+  const dep = g.departure || {}, arr = g.arrival || {};
+
+  const depSched = dep.scheduledTime, depEst = dep.revisedTime || dep.predictedTime, depAct = dep.runwayTime;
+  const arrSched = arr.scheduledTime, arrEst = arr.revisedTime || arr.predictedTime, arrAct = arr.runwayTime;
+
+  const depShown = depAct || depEst || depSched;
+  const arrShown = arrAct || arrEst || arrSched;
+  const depKind = depAct ? 'Actual' : depEst ? 'Estimated' : 'Scheduled';
+  const arrKind = arrAct ? 'Actual' : arrEst ? 'Estimated' : 'Scheduled';
+
+  const depDelta = (depShown && depSched && depShown !== depSched && pdate(depShown) && pdate(depSched)) ? mins(pdate(depSched), pdate(depShown)) : 0;
+  const arrDelta = (arrShown && arrSched && arrShown !== arrSched && pdate(arrShown) && pdate(arrSched)) ? mins(pdate(arrSched), pdate(arrShown)) : 0;
+
+  // progress along the rail
+  const dOut = pdate(depAct) || pdate(depShown), aIn = pdate(arrShown);
+  let pct = 0;
+  if(st.tone==='done') pct = 100;
+  else if(st.tone==='live' && dOut && aIn && aIn > dOut){
+    pct = Math.max(2, Math.min(98, ((Date.now()-dOut)/(aIn-dOut))*100));
+  }
+
+  // the one line that matters
+  let head = '', sub = '';
+  const now = Date.now();
+  if(st.tone==='bad'){
+    head = st.label;
+    sub = 'Check with the airline before travelling to the airport.';
+  } else if(st.tone==='done'){
+    head = 'Landed <em>'+esc(clock(arrShown)||'—')+'</em>';
+    sub = arrDelta ? dur(arrDelta)+(arrDelta>0?' behind schedule':' ahead of schedule') : 'On time';
+  } else if(st.tone==='live' && aIn){
+    const left = mins(now, aIn);
+    head = left > 0 ? 'Lands <em>'+esc(clock(arrShown)||'—')+'</em>' : 'Landing now';
+    sub = left > 0 ? 'In '+dur(left)+' · '+esc(arr.airport && (arr.airport.shortName||arr.airport.name) || 'destination')+' local time'
+                   : 'Due on the ground';
+  } else if(dOut){
+    const to = mins(now, dOut);
+    head = 'Departs <em>'+esc(clock(depShown)||'—')+'</em>';
+    sub = to > 0 ? 'In '+dur(to)+' · '+dayOf(depShown) : 'Departure time has passed — awaiting update';
+  } else {
+    head = st.label; sub = 'No times published yet.';
+  }
+  if(depDelta > 4 && st.tone!=='done' && st.tone!=='live'){
+    sub += ' · <span class="late">'+dur(depDelta)+' late</span>';
+  }
+
+  const pillsFor = (o, isArr) => {
+    const p = [];
+    if(o.terminal) p.push(['Terminal', o.terminal]);
+    if(o.gate) p.push(['Gate', o.gate]);
+    if(o.checkInDesk) p.push(['Desk', o.checkInDesk]);
+    if(isArr && o.baggageBelt) p.push(['Belt', o.baggageBelt]);
+    return p.map(x=>'<span class="pill"><span>'+esc(x[0])+'</span>'+esc(x[1])+'</span>').join('');
+  };
+  const timeBlock = (label, shown, sched, kind, delta, o, isArr) => {
+    const struck = (shown !== sched && sched && clock(sched) !== clock(shown))
+      ? '<span class="big strike mono">'+esc(clock(sched))+'</span>' : '';
+    const dcls = delta > 4 ? 'late' : delta < -4 ? 'early' : '';
+    const dtxt = delta > 4 ? kind+' · '+dur(delta)+' late'
+              : delta < -4 ? kind+' · '+dur(delta)+' early'
+              : kind;
+    return '<div class="leg">'
+      + '<h4>'+esc(label)+'</h4>'
+      + '<div>'+struck+'<span class="big mono">'+esc(clock(shown)||'--:--')+'</span></div>'
+      + '<div class="tlabel '+dcls+'">'+esc(dtxt)+'</div>'
+      + (pillsFor(o, isArr) ? '<div class="meta">'+pillsFor(o, isArr)+'</div>' : '')
+      + '</div>';
+  };
+
+  const dA = dep.airport || {}, aA = arr.airport || {};
+  const ac = g.aircraft || {}, al = g.airline || {};
+
+  return ''
+  + '<div class="card-top">'
+    + '<span class="fnum mono">'+esc(g.number || '—')+'</span>'
+    + '<span class="aline">'+esc(al.name||'')+(ac.model?' · '+esc(ac.model):'')+(ac.reg?' · '+esc(ac.reg):'')+'</span>'
+    + '<span class="status t-'+st.tone+'"><span class="dot"></span>'+esc(st.label)+'</span>'
+  + '</div>'
+  + '<div class="headline">'+head+'<span class="sub">'+sub+'</span></div>'
+  + '<div class="rail">'
+    + '<div class="rail-codes">'
+      + '<div><div class="code mono">'+esc(dA.iata||dA.icao||'???')+'</div><div class="city">'+esc(dA.municipalityName||dA.shortName||'')+'</div></div>'
+      + '<div class="r"><div class="code mono">'+esc(aA.iata||aA.icao||'???')+'</div><div class="city">'+esc(aA.municipalityName||aA.shortName||'')+'</div></div>'
+    + '</div>'
+    + '<div class="track">'
+      + '<div class="fill" style="width:'+pct+'%"></div>'
+      + '<div class="node a'+(pct>0?' on':'')+'"></div>'
+      + '<div class="node b'+(pct>=100?' on':'')+'"></div>'
+      + (pct>0 && pct<100 ? '<div class="plane" style="left:'+pct+'%"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></div>' : '')
+    + '</div>'
+  + '</div>'
+  + '<div class="times">'
+    + timeBlock('Departs '+(dA.iata||''), depShown, depSched, depKind, depDelta, dep, false)
+    + timeBlock('Arrives '+(aA.iata||''), arrShown, arrSched, arrKind, arrDelta, arr, true)
+  + '</div>';
+}
+
+function render(){
+  const list = $('#list');
+  if(!S.key){ list.innerHTML=''; return; }
+
+  if(!S.flights.length){
+    list.innerHTML = '<div class="empty">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>'
+      + '<p>Add a flight number above and it appears here.<br>Open the app to see where things stand.</p></div>';
+    return;
+  }
+
+  list.innerHTML = S.flights.map(f=>{
+    const r = S.results[f.id];
+    const busy = S.busy[f.id];
+    let body;
+
+    if(busy && !r) body = '<div class="loading">Checking '+esc(f.number)+'…</div>';
+    else if(r && r.error) body = ''
+      + '<div class="card-top"><span class="fnum mono">'+esc(f.number)+'</span>'
+      + '<span class="aline">'+esc(dayLabel(f.date))+'</span>'
+      + '<button class="x" data-del="'+f.id+'" aria-label="Remove">×</button></div>'
+      + '<div class="err">'+esc(r.error)+'</div>';
+    else if(r && r.legs) body = r.legs.map(renderLeg).join('<div style="height:1px;background:var(--line)"></div>');
+    else body = '<div class="loading">Not checked yet.</div>';
+
+    const when = r && r.at ? new Date(r.at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
+    const foot = '<div class="foot">'
+      + '<span>'+esc(dayLabel(f.date))+' · updated '+esc(when)+(busy?' · refreshing':'')+'</span>'
+      + '<span class="r">'
+        + '<button data-raw="'+f.id+'">Raw data</button>'
+        + '<button data-reload="'+f.id+'">Refresh</button>'
+        + '<button data-del="'+f.id+'">Remove</button>'
+      + '</span></div>'
+      + (f.showRaw && S.raw[f.id] ? '<pre class="raw">'+esc(S.raw[f.id])+'</pre>' : '');
+
+    return '<div class="card">'+body+foot+'</div>';
+  }).join('');
+}
+
+/* ---------- setup screen ---------- */
+function renderSetup(){
+  const box = $('#setup');
+  if(S.key && !S.editKey){ box.hidden = true; return; }
+  box.hidden = false;
+  box.innerHTML = ''
+  + '<div class="setup">'
+  + '<h2>Connect the data</h2>'
+  + '<p>This app reads live flight status from AeroDataBox. You need your own key — it takes about two minutes and the free plan covers ordinary use.</p>'
+  + '<ol>'
+    + '<li>Sign up at <a href="https://rapidapi.com/aedbx-aedbx/api/aerodatabox" target="_blank" rel="noopener">rapidapi.com — AeroDataBox</a></li>'
+    + '<li>Click <b>Subscribe to Test</b> and pick the <b>Basic</b> plan (free)</li>'
+    + '<li>Copy the value shown as <b>X-RapidAPI-Key</b></li>'
+    + '<li>Paste it below</li>'
+  + '</ol>'
+  + '<input id="keyIn" type="password" placeholder="Paste your RapidAPI key" autocomplete="off" spellcheck="false" value="'+esc(S.key||'')+'">'
+  + '<div class="row"><button class="btn" id="saveKey">Save key</button>'
+    + (S.key ? '<button class="btn ghost" id="cancelKey">Cancel</button>' : '')
+    + '<label style="font-size:12px;color:var(--muted);margin-left:auto">Monthly limit <input id="limitIn" type="number" min="1" value="'+S.limit+'" style="width:82px;padding:7px 9px;margin:0 0 0 6px;font-size:13px"></label>'
+  + '</div>'
+  + '<p class="note">The key is stored on this device only and is sent straight to AeroDataBox. Free Basic is capped — the counter in the header tracks how many calls you have made this month so the cap does not surprise you.</p>'
+  + '</div>';
+
+  $('#saveKey').onclick = async ()=>{
+    const v = $('#keyIn').value.trim();
+    const lim = parseInt($('#limitIn').value,10);
+    if(!v){ toast('Paste a key first', true); return; }
+    S.key = v; S.editKey = false;
+    S.limit = (lim && lim>0) ? lim : 500;
+    await store.set(KEY_K, S.key);
+    await store.set(LIMIT_K, S.limit);
+    paintQuota(); paintChrome(); renderSetup(); render();
+    toast('Key saved');
+    if(S.flights.length) refreshAll();
+  };
+  const c = $('#cancelKey');
+  if(c) c.onclick = ()=>{ S.editKey = false; renderSetup(); };
+}
+
+function paintChrome(){
+  const on = !!S.key;
+  $('#addBar').hidden = !on;
+  $('#refreshAll').hidden = !on;
+  $('#settings').hidden = !on;
+  paintQuota();
+}
+
+/* ---------- actions ---------- */
+async function addFlight(){
+  const inp = $('#fnum');
+  const num = inp.value.trim().toUpperCase().replace(/\s+/g,'');
+  if(!/^[A-Z0-9]{2,3}\d{1,4}[A-Z]?$/.test(num)){
+    toast('That does not look like a flight number. Try BA1442.', true); return;
+  }
+  const date = isoDay(parseInt($('#fday').value,10));
+  if(S.flights.some(f=>f.number===num && f.date===date)){ toast('Already tracking that one'); return; }
+  const f = {id: num+'|'+date, number:num, date:date, showRaw:false};
+  S.flights.unshift(f);
+  await store.set(LIST_K, S.flights);
+  inp.value='';
+  render();
+  load(f.id);
+}
+
+async function removeFlight(id){
+  S.flights = S.flights.filter(f=>f.id!==id);
+  delete S.results[id]; delete S.raw[id];
+  await store.set(LIST_K, S.flights);
+  render();
+}
+
+function refreshAll(){
+  const btn = $('#refreshAll');
+  btn.firstElementChild.classList.add('spin');
+  Promise.all(S.flights.map(f=>load(f.id, true)))
+    .then(()=>btn.firstElementChild.classList.remove('spin'));
+}
+
+// only refresh what is actually moving — protects the free quota
+function autoRefresh(){
+  if(document.hidden || !S.key) return;
+  const today = isoDay(0), tom = isoDay(1);
+  S.flights.forEach(f=>{
+    if(f.date !== today && f.date !== tom) return;
+    const r = S.results[f.id];
+    if(!r || !r.legs) return;
+    const done = r.legs.every(g=>['done','bad'].includes(status(g.status).tone));
+    if(done) return;
+    load(f.id, true);
+  });
+}
+
+/* ---------- wiring ---------- */
+$('#addBtn').onclick = addFlight;
+$('#fnum').addEventListener('keydown', e=>{ if(e.key==='Enter') addFlight(); });
+$('#refreshAll').onclick = refreshAll;
+$('#settings').onclick = ()=>{ S.editKey = true; renderSetup(); window.scrollTo({top:0,behavior:'smooth'}); };
+
+$('#list').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.del) removeFlight(b.dataset.del);
+  else if(b.dataset.reload) load(b.dataset.reload);
+  else if(b.dataset.raw){
+    const f = S.flights.find(x=>x.id===b.dataset.raw);
+    if(f){ f.showRaw = !f.showRaw; render(); }
+  }
+});
+
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) autoRefresh(); });
+setInterval(autoRefresh, 4*60*1000);
+
+/* ---------- installable ---------- */
+(function(){
+  const manifest = {
+    name:'Flight Deck', short_name:'Flights', start_url:'.', display:'standalone',
+    background_color:'#0D1B3E', theme_color:'#0D1B3E',
+    icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%230D1B3E'/%3E%3Cpath d='M256 90l28 131 125 40v28l-125-17-11 97 51 34v23l-68-17-68 17v-23l51-34-11-97-125 17v-28l125-40z' fill='%23C4F000'/%3E%3C/svg%3E", sizes:'512x512', type:'image/svg+xml'}]
+  };
+  try{
+    const l = document.createElement('link');
+    l.rel = 'manifest';
+    l.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'}));
+    document.head.appendChild(l);
+  }catch(e){}
+})();
+
+/* ---------- boot ---------- */
+(async function(){
+  S.key    = await store.get(KEY_K) || '';
+  S.flights= await store.get(LIST_K) || [];
+  S.quota  = await store.get(QUOTA_K) || {month:thisMonth(), count:0};
+  S.limit  = await store.get(LIMIT_K) || 500;
+  if(S.quota.month !== thisMonth()) S.quota = {month:thisMonth(), count:0};
+  paintChrome(); renderSetup(); render();
+  if(S.key && S.flights.length) refreshAll();
+})();
+</script>
+</body>
+</html>

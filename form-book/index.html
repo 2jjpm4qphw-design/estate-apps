@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>The Form Book</title>
+<meta name="theme-color" content="#0D1B3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Form Book">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" href="data:image/png;base64,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">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0D1B3E;
+  --mid:#1A3A6B;
+  --lime:#C4F000;
+  --mist:#C4CCDD;
+  --white:#FFFFFF;
+  --line:rgba(196,204,221,.20);
+  --hair:rgba(196,204,221,.12);
+  --pad:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--navy);
+  color:var(--white);
+  font-family:'Montserrat',-apple-system,system-ui,sans-serif;
+  font-weight:400;
+  font-size:15px;
+  line-height:1.45;
+  padding-bottom:env(safe-area-inset-bottom);
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:16px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+
+/* ---------- masthead ---------- */
+.masthead{
+  padding:calc(env(safe-area-inset-top) + 18px) var(--pad) 0;
+}
+.wordmark{
+  font-weight:800;letter-spacing:-.02em;font-size:26px;line-height:1;
+  text-transform:uppercase;
+}
+.wordmark span{font-weight:300}
+.tagline{
+  color:var(--mist);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;
+  font-weight:600;margin-top:7px;
+}
+
+/* ---------- bankroll strip ---------- */
+.bank{
+  margin:16px var(--pad) 0;
+  background:var(--mid);
+  border-radius:14px;
+  padding:15px 16px;
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;
+}
+.bank .cell{min-width:0}
+.bank .k{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mist);font-weight:600}
+.bank .v{font-size:19px;font-weight:700;letter-spacing:-.02em;margin-top:3px;white-space:nowrap}
+.bank .v.pos{color:var(--white)}
+.bank .v.neg{color:var(--mist)}
+.bankbar{
+  margin:10px var(--pad) 0;height:4px;border-radius:2px;background:var(--hair);overflow:hidden
+}
+.bankbar i{display:block;height:100%;background:var(--mist);width:0}
+.banknote{
+  margin:7px var(--pad) 0;font-size:11px;color:var(--mist);letter-spacing:.02em
+}
+
+/* ---------- tabs ---------- */
+.tabs{
+  display:flex;gap:22px;margin:20px var(--pad) 0;
+  border-bottom:1px solid var(--line);
+}
+.tab{
+  padding:0 0 10px;font-size:12px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--mist);position:relative;
+}
+.tab[aria-selected="true"]{color:var(--white)}
+.tab[aria-selected="true"]::after{
+  content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--white)
+}
+
+main{padding:18px var(--pad) 120px}
+.view{display:none}
+.view.on{display:block}
+
+/* ---------- bet cards ---------- */
+.daygroup{margin-bottom:26px}
+.dayhead{
+  font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--mist);
+  font-weight:600;padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:12px;
+  display:flex;justify-content:space-between;align-items:baseline;gap:10px
+}
+.dayhead .pl{letter-spacing:0;font-size:12px;font-weight:700}
+.pos{color:var(--white)}
+.neg{color:var(--mist)}
+
+.bet{
+  background:var(--mid);border-radius:14px;padding:14px 15px;margin-bottom:10px;
+  display:block;width:100%;text-align:left;
+}
+.bet .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.bet .horse{font-size:17px;font-weight:700;letter-spacing:-.01em;line-height:1.2}
+.bet .meta{font-size:11.5px;color:var(--mist);margin-top:4px;letter-spacing:.02em}
+.chip{
+  flex:none;font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:4px 8px;border-radius:20px;border:1px solid var(--line);color:var(--mist);white-space:nowrap
+}
+.chip.won{border-color:var(--white);background:var(--white);color:var(--navy)}
+.chip.placed{border-color:var(--white);color:var(--white)}
+.chip.lost{border-color:var(--hair);color:var(--mist)}
+.chip.pending{border-color:var(--mist);color:var(--mist)}
+.bet .figs{
+  display:flex;gap:18px;margin-top:12px;padding-top:11px;border-top:1px solid var(--line);
+  flex-wrap:wrap
+}
+.fig .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);font-weight:600}
+.fig .v{font-size:14px;font-weight:600;margin-top:2px}
+.bet .case{margin-top:11px;padding-top:10px;border-top:1px solid var(--hair)}
+.bet .case+.case{margin-top:9px;padding-top:9px}
+.bet .case .k{
+  font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mist);
+  font-weight:700;margin-bottom:4px
+}
+.bet .case .t{font-size:12.5px;color:var(--mist);line-height:1.45}
+.bet .case.forr .t{color:var(--white)}
+
+.empty{
+  border:1px dashed var(--line);border-radius:14px;padding:28px 20px;text-align:center;color:var(--mist)
+}
+.empty b{display:block;color:var(--white);font-weight:600;font-size:15px;margin-bottom:6px;font-style:normal}
+
+/* ---------- FAB ---------- */
+.fab{
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(env(safe-area-inset-bottom) + 22px);
+  background:var(--lime);color:var(--navy);
+  font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;
+  padding:15px 30px;border-radius:40px;z-index:40;
+  box-shadow:0 10px 30px rgba(13,27,62,.75);
+}
+
+/* ---------- sheet ---------- */
+.scrim{
+  position:fixed;inset:0;background:rgba(13,27,62,.82);z-index:50;display:none;
+  backdrop-filter:blur(3px)
+}
+.scrim.on{display:block}
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;top:0;background:var(--navy);z-index:60;
+  display:none;flex-direction:column;
+}
+.sheet.on{display:flex}
+.sheethead{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:calc(env(safe-area-inset-top) + 14px) var(--pad) 14px;
+  border-bottom:1px solid var(--line);flex:none
+}
+.sheethead h2{margin:0;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.sheethead button{font-size:13px;font-weight:600;color:var(--mist);letter-spacing:.06em}
+.sheetbody{flex:1;overflow-y:auto;padding:18px var(--pad) 40px;-webkit-overflow-scrolling:touch}
+
+label.f{display:block;margin-bottom:15px}
+label.f .k{
+  font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mist);
+  font-weight:600;display:block;margin-bottom:6px
+}
+.inp{
+  width:100%;background:var(--mid);border:1px solid var(--line);border-radius:11px;
+  padding:13px 14px;color:var(--white);outline:none;appearance:none
+}
+.inp:focus{border-color:var(--mist)}
+textarea.inp{min-height:74px;resize:vertical;line-height:1.45}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hint{font-size:11px;color:var(--mist);margin-top:6px;line-height:1.4}
+
+.seg{display:flex;gap:8px}
+.seg button{
+  flex:1;padding:12px 6px;border-radius:11px;background:transparent;border:1px solid var(--line);
+  font-size:12px;font-weight:600;letter-spacing:.05em;color:var(--mist)
+}
+.seg button.on{background:var(--white);border-color:var(--white);color:var(--navy)}
+
+/* ---------- the value gauge (signature) ---------- */
+.gauge{
+  background:var(--mid);border-radius:14px;padding:16px;margin:4px 0 20px;
+}
+.gauge .gh{
+  font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mist);font-weight:600
+}
+.gauge .verdict{
+  font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:8px;line-height:1.15
+}
+.gauge .verdict.value{color:var(--lime)}
+.track{position:relative;height:34px;margin-top:16px}
+.track .base{
+  position:absolute;left:0;right:0;top:14px;height:6px;border-radius:3px;background:var(--hair)
+}
+.track .mkt{
+  position:absolute;top:14px;height:6px;border-radius:3px;background:var(--mist);left:0;width:0
+}
+.track .mine{
+  position:absolute;top:8px;width:3px;height:18px;background:var(--white);border-radius:2px;left:0;
+  transition:left .18s ease
+}
+.track .lbl{
+  position:absolute;top:0;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--mist);font-weight:600;white-space:nowrap
+}
+.gaugefoot{display:flex;justify-content:space-between;gap:12px;margin-top:6px;font-size:11.5px;color:var(--mist)}
+.gaugenote{margin-top:12px;font-size:12px;line-height:1.45;color:var(--mist)}
+.gaugenote strong{color:var(--white);font-weight:600}
+
+.calc{
+  border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:20px;
+  font-size:12.5px;color:var(--mist);line-height:1.6
+}
+.calc b{color:var(--white);font-weight:600}
+
+.btn{
+  width:100%;padding:16px;border-radius:12px;font-size:13px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase
+}
+.btn.primary{background:var(--lime);color:var(--navy)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--mist);margin-top:10px}
+.btn.danger{background:transparent;border:1px solid var(--hair);color:var(--mist);margin-top:10px}
+.btn[disabled]{opacity:.35}
+
+/* ---------- analysis ---------- */
+.headline{
+  background:var(--mid);border-radius:16px;padding:22px 18px;margin-bottom:14px
+}
+.headline .k{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mist);font-weight:600}
+.headline .big{font-size:46px;font-weight:800;letter-spacing:-.035em;line-height:1;margin-top:8px}
+.headline .big.pos{color:var(--lime)}
+.headline .big.neg{color:var(--white)}
+.headline .sub{font-size:12.5px;color:var(--mist);margin-top:10px;line-height:1.5}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{background:var(--mid);border-radius:13px;padding:14px}
+.stat .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);font-weight:600}
+.stat .v{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:5px}
+.stat .n{font-size:10.5px;color:var(--mist);margin-top:3px}
+
+.panel{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.panel h3{
+  margin:0 0 4px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700
+}
+.panel p{margin:8px 0 0;font-size:12.5px;color:var(--mist);line-height:1.55}
+.panel .cal{display:flex;gap:24px;margin-top:14px}
+.panel .cal .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);font-weight:600}
+.panel .cal .v{font-size:24px;font-weight:700;margin-top:3px}
+
+/* ---------- reference ---------- */
+details.ref{border-bottom:1px solid var(--line);padding:14px 0}
+details.ref summary{
+  list-style:none;font-size:14px;font-weight:600;letter-spacing:-.01em;
+  display:flex;justify-content:space-between;align-items:center;gap:12px
+}
+details.ref summary::-webkit-details-marker{display:none}
+details.ref summary::after{content:'+';color:var(--mist);font-weight:400;font-size:19px}
+details.ref[open] summary::after{content:'–'}
+details.ref .body{font-size:13px;color:var(--mist);line-height:1.6;padding-top:10px}
+details.ref .body b{color:var(--white);font-weight:600}
+details.ref .body code{
+  background:var(--mid);padding:1px 6px;border-radius:5px;font-family:ui-monospace,Menlo,monospace;
+  font-size:12px;color:var(--white)
+}
+details.ref .body ul{margin:8px 0 0;padding-left:18px}
+details.ref .body li{margin-bottom:5px}
+
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:100px;z-index:90;
+  background:var(--mid);border:1px solid var(--line);border-radius:30px;
+  padding:11px 20px;font-size:12.5px;font-weight:600;opacity:0;pointer-events:none;
+  transition:opacity .2s ease
+}
+.toast.on{opacity:1}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wordmark">The Form <span>Book</span></div>
+  <div class="tagline">Ledger &amp; Reckoning</div>
+</header>
+
+<section class="bank">
+  <div class="cell"><div class="k">Balance</div><div class="v" id="bBal">£0.00</div></div>
+  <div class="cell"><div class="k">Profit / Loss</div><div class="v" id="bPL">£0.00</div></div>
+  <div class="cell"><div class="k">Staked</div><div class="v" id="bStake">£0.00</div></div>
+</section>
+<div class="bankbar"><i id="bBar"></i></div>
+<div class="banknote" id="bNote">£20.00 deposited · nothing staked yet</div>
+
+<nav class="tabs" role="tablist">
+  <button class="tab" role="tab" aria-selected="true" data-view="bets">Bets</button>
+  <button class="tab" role="tab" aria-selected="false" data-view="analysis">Reckoning</button>
+  <button class="tab" role="tab" aria-selected="false" data-view="ref">Glossary</button>
+</nav>
+
+<main>
+  <section class="view on" id="v-bets"></section>
+
+  <section class="view" id="v-analysis"></section>
+
+  <section class="view" id="v-ref">
+    <details class="ref"><summary>Form figures</summary><div class="body">
+      Read left to right, oldest run first. Each digit is a finishing position; <code>0</code> means it finished outside the top nine. <code>P</code> pulled up, <code>F</code> fell, <code>U</code> unseated, <code>R</code> refused, <code>B</code> brought down.
+      <br><br>A <code>-</code> marks a new season. A <code>/</code> marks a longer absence.
+      <br><br>So <b>85-3106</b> means: last season it ran 8th then 5th; this season 3rd, 1st, 0 (out of the frame), and most recently 6th.
+    </div></details>
+
+    <details class="ref"><summary>The going</summary><div class="body">
+      The state of the ground. Horses have real surface preferences, so a horse whose wins all came on soft is a genuine negative on fast ground.
+      <ul>
+        <li><b>Turf, soft to fast:</b> Heavy → Soft → Good to Soft → Good → Good to Firm → Firm</li>
+        <li><b>All-weather:</b> Slow → Standard to Slow → Standard → Fast</li>
+      </ul>
+      Heavy ground is a stamina test and suits big, powerful horses. Good to firm favours speed. The <b>GoingStick</b> reading gives a number — roughly 6 or below is soft, 8 or above is firm.
+    </div></details>
+
+    <details class="ref"><summary>Odds and implied probability</summary><div class="body">
+      <b>Fractional</b> 5/1 = £5 profit per £1 staked. <b>Decimal</b> 6.0 = total return per £1 including the stake. Same thing.
+      <br><br><b>Implied probability = 1 ÷ decimal odds.</b> 6.0 means the price says one win in six, or 16.7%.
+      <br><br>Add up the implied probabilities of every runner and you'll get more than 100%. That excess is the bookmaker's margin — the overround. It's why the market beats most people over time, and why the only real question is whether your estimate of a horse's chance beats the price.
+    </div></details>
+
+    <details class="ref"><summary>Handicaps and the Official Rating</summary><div class="body">
+      The BHA handicapper gives every horse an <b>OR</b>. In a handicap the ratings set the weights — the better horse carries more lead — with the stated aim that every runner would dead-heat.
+      <br><br>So in a handicap you aren't hunting the best horse. You're hunting the horse the handicapper has got wrong: usually one that's lightly raced and improving faster than its mark.
+      <br><br>Roughly, <b>1lb ≈ half a length</b> over a mile. Non-handicaps (maidens, Group and Listed races) run at set weights, so the best horse should simply win — which is why favourites there are short and rarely good value.
+    </div></details>
+
+    <details class="ref"><summary>Reading the rest of the racecard</summary><div class="body">
+      <ul>
+        <li><b>Number in brackets</b> after the saddlecloth — the draw, which starting stall. Matters a lot in sprints, much less over a mile.</li>
+        <li><b>Small number after the horse's name</b> — days since it last ran. A long layoff is a real question mark; 14–40 days is a normal turnaround.</li>
+        <li><b>Weight</b> like 9-7 — nine stone seven pounds.</li>
+        <li><b>Headgear</b> — <code>b</code> blinkers, <code>v</code> visor, <code>h</code> hood, <code>p</code> cheek pieces, <code>t</code> tongue strap. A <code>1</code> after it means first time, which is the trainer signalling a change.</li>
+        <li><b>(3)</b> or <b>(7)</b> after a jockey — an apprentice claim, that many pounds off the weight.</li>
+        <li><b>BF</b> — beaten favourite last time out.</li>
+        <li><b>WS</b> — has had wind surgery. <code>WS2</code> is the second run since.</li>
+        <li><b>Class 1 to 7</b> — Class 1 is Group and Listed racing, Class 7 the lowest. A horse dropping in class is easier; rising is harder.</li>
+      </ul>
+    </div></details>
+
+    <details class="ref"><summary>Bet types and place terms</summary><div class="body">
+      <b>Win</b> — the horse must win. <b>Each-way</b> — two bets of equal size, one on the win and one on the place, so a £2 each-way bet costs £4.
+      <br><br>Place terms depend on field size and are set by the bookmaker. Typical:
+      <ul>
+        <li>2–4 runners — win only</li>
+        <li>5–7 runners — 2 places at 1/4 the odds</li>
+        <li>8+ runners — 3 places at 1/5 the odds</li>
+        <li>Big handicaps of 16+ — 4 places at 1/4</li>
+      </ul>
+      In small fields each-way is usually poor value, because you're paying a second stake for an outcome that was already likely.
+      <br><br><b>Best Odds Guaranteed</b> — you take a price in the morning and get paid at the starting price if it drifts bigger. Always take it.
+    </div></details>
+
+    <details class="ref"><summary>Why this app asks what you think the chance is</summary><div class="body">
+      Because it's the only question that matters, and the only one you can get better at.
+      <br><br>Whether a bet wins is mostly noise over a handful of races. Whether your probability estimates are <b>calibrated</b> — whether the horses you call 25% shots actually win about a quarter of the time — is a skill, and it shows up in the numbers far faster than profit does.
+      <br><br>The Reckoning tab compares the wins you expected against the wins you got. If those two numbers track each other, you're reading form properly, whatever the balance says.
+    </div></details>
+
+    <div style="margin-top:26px">
+      <button class="btn ghost" id="btnExport">Export ledger as JSON</button>
+      <button class="btn ghost" id="btnImport">Import ledger from JSON</button>
+      <button class="btn ghost" id="btnDeposit">Change deposit amount</button>
+      <button class="btn danger" id="btnWipe">Erase everything</button>
+      <input type="file" id="fileIn" accept="application/json" hidden>
+    </div>
+    <p style="font-size:11px;color:var(--mist);margin-top:18px;line-height:1.6">
+      Everything is stored on this device only. Nothing is sent anywhere. This app tracks what you bet — it will never tell you to bet more, and it has no way to add money to anything.
+    </p>
+  </section>
+</main>
+
+<button class="fab" id="fab">Record a bet</button>
+
+<div class="scrim" id="scrim"></div>
+
+<!-- ============ ADD / EDIT SHEET ============ -->
+<div class="sheet" id="sheet">
+  <div class="sheethead">
+    <button id="sClose">Cancel</button>
+    <h2 id="sTitle">Record a bet</h2>
+    <button id="sSave" style="color:var(--white)">Save</button>
+  </div>
+  <div class="sheetbody">
+    <div class="row2">
+      <label class="f"><span class="k">Date</span><input class="inp" type="date" id="fDate"></label>
+      <label class="f"><span class="k">Race time</span><input class="inp" type="text" id="fTime" placeholder="16:14" inputmode="numeric"></label>
+    </div>
+    <label class="f"><span class="k">Course</span><input class="inp" type="text" id="fCourse" placeholder="Newmarket (July)" autocapitalize="words"></label>
+    <label class="f"><span class="k">Horse</span><input class="inp" type="text" id="fHorse" placeholder="Drymee" autocapitalize="words"></label>
+
+    <label class="f"><span class="k">Bet type</span>
+      <div class="seg" id="segType">
+        <button data-t="win" class="on">Win</button>
+        <button data-t="ew">Each-way</button>
+      </div>
+    </label>
+
+    <div class="row2">
+      <label class="f"><span class="k">Stake per part</span><input class="inp" type="text" id="fStake" placeholder="2.00" inputmode="decimal"></label>
+      <label class="f"><span class="k">Odds taken</span><input class="inp" type="text" id="fOdds" placeholder="11/8 or 2.38"></label>
+    </div>
+
+    <div class="row2" id="ewFields" style="display:none">
+      <label class="f"><span class="k">Place fraction</span>
+        <select class="inp" id="fEwFrac">
+          <option value="0.2">1/5</option>
+          <option value="0.25" selected>1/4</option>
+          <option value="0.3333">1/3</option>
+        </select>
+      </label>
+      <label class="f"><span class="k">Places paid</span><input class="inp" type="number" id="fEwPlaces" value="3" min="1" max="6"></label>
+    </div>
+
+    <div class="row2">
+      <label class="f"><span class="k">Chance you give it (%)</span>
+        <input class="inp" type="number" id="fProb" placeholder="35" min="1" max="99" inputmode="numeric">
+      </label>
+      <label class="f"><span class="k">Minimum price</span>
+        <input class="inp" type="text" id="fMin" placeholder="4/1">
+      </label>
+    </div>
+    <p class="hint" style="margin:-6px 0 16px">Estimate the chance before you look at the price if you can manage it. The minimum price is the number that decides the bet for you in the morning, so you're not deciding in the moment.</p>
+
+    <!-- signature element -->
+    <div class="gauge" id="gauge">
+      <div class="gh">The reckoning</div>
+      <div class="verdict" id="gVerdict">Enter odds and your estimate</div>
+      <div class="track" id="gTrack">
+        <div class="base"></div>
+        <div class="mkt" id="gMkt"></div>
+        <div class="mine" id="gMine"></div>
+        <div class="lbl" id="gLblMkt" style="left:0">Market</div>
+        <div class="lbl" id="gLblMine" style="right:0">You</div>
+      </div>
+      <div class="gaugefoot">
+        <span id="gFootMkt">Market —</span>
+        <span id="gFootMine">You —</span>
+      </div>
+      <div class="gaugenote" id="gNote">The bar is what the price says the chance is. The white marker is what you say. Betting is only sensible when the marker sits to the right of the bar.</div>
+    </div>
+
+    <div class="calc" id="calc">Enter a stake and odds to see what's at risk.</div>
+
+    <label class="f"><span class="k">The case for</span>
+      <textarea class="inp" id="fWhy" placeholder="Unexposed 3yo, 2 from 2 at the trip, handicapper may not have caught up."></textarea>
+    </label>
+
+    <label class="f"><span class="k">The case against</span>
+      <textarea class="inp" id="fAgainst" placeholder="Only four runs — genuine uncertainty in both directions."></textarea>
+      <span class="hint">Write the argument you'd lose to. Reading it back after the result is where most of the learning is.</span>
+    </label>
+
+    <label class="f"><span class="k">Result</span>
+      <div class="seg" id="segResult" style="flex-wrap:wrap">
+        <button data-r="pending" class="on">Pending</button>
+        <button data-r="won">Won</button>
+        <button data-r="placed">Placed</button>
+        <button data-r="lost">Lost</button>
+        <button data-r="void">Void</button>
+      </div>
+    </label>
+
+    <div id="reviewWrap" style="display:none">
+      <label class="f"><span class="k">Looking back — was the reasoning sound?</span>
+        <div class="seg" id="segReview">
+          <button data-v="sound">Sound</button>
+          <button data-v="mixed">Mixed</button>
+          <button data-v="flawed">Flawed</button>
+        </div>
+        <span class="hint">Separate from whether it won. A good bet can lose and a bad bet can win.</span>
+      </label>
+      <label class="f"><span class="k">What actually happened</span>
+        <textarea class="inp" id="fReview" placeholder="Missed the break, never got competitive. Ground was quicker than I read it."></textarea>
+      </label>
+    </div>
+
+    <button class="btn danger" id="sDelete" style="display:none">Delete this bet</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------------- storage ---------------- */
+var KEY='formbook.v1';
+var state={deposit:20,bets:[]};
+try{
+  var raw=localStorage.getItem(KEY);
+  if(raw){var p=JSON.parse(raw); if(p&&typeof p==='object'){state.deposit=Number(p.deposit)||20; state.bets=Array.isArray(p.bets)?p.bets:[];}}
+}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){toast('Could not save — device storage is full or blocked');}}
+
+/* ---------------- helpers ---------------- */
+function $(id){return document.getElementById(id);}
+function money(n){var s=(n<0?'-':'')+'£'+Math.abs(n).toFixed(2);return s;}
+function pct(n){return n.toFixed(1)+'%';}
+
+function parseOdds(s){
+  if(s===null||s===undefined)return null;
+  s=String(s).trim().toLowerCase().replace(/\s/g,'');
+  if(!s)return null;
+  if(s==='evs'||s==='evens'||s==='ev')return 2;
+  if(s.indexOf('/')>-1){
+    var a=s.split('/');
+    var n=parseFloat(a[0]),d=parseFloat(a[1]);
+    if(!isFinite(n)||!isFinite(d)||d<=0||n<0)return null;
+    return n/d+1;
+  }
+  var v=parseFloat(s);
+  if(!isFinite(v)||v<1.01)return null;
+  return v;
+}
+function toFrac(dec){
+  var t=dec-1;
+  if(Math.abs(t-1)<0.02)return 'Evens';
+  var best=null,bd=1e9;
+  var denoms=[1,2,3,4,5,6,7,8,9,10,11,12,16,20,25,33,40,50,66,100];
+  for(var i=0;i<denoms.length;i++){
+    var d=denoms[i], n=Math.round(t*d);
+    if(n<1)continue;
+    var diff=Math.abs(n/d-t);
+    if(diff<bd-1e-9){bd=diff;best=n+'/'+d;}
+    if(diff<0.006)break;
+  }
+  return best||dec.toFixed(2);
+}
+
+/* outlay and return for a bet */
+function outlay(b){var s=Number(b.stake)||0;return b.type==='ew'?s*2:s;}
+function returned(b){
+  var s=Number(b.stake)||0, d=Number(b.dec)||0;
+  if(b.result==='void')return outlay(b);
+  if(b.result==='pending')return 0;
+  if(b.type==='win')return b.result==='won'?s*d:0;
+  var placePart=s*(1+(d-1)*(Number(b.ewFrac)||0.25));
+  if(b.result==='won')return s*d+placePart;
+  if(b.result==='placed')return placePart;
+  return 0;
+}
+function settled(b){return b.result&&b.result!=='pending';}
+
+/* ---------------- bankroll ---------------- */
+function renderBank(){
+  var stakedAll=0,ret=0,pendOut=0;
+  state.bets.forEach(function(b){
+    stakedAll+=outlay(b);
+    ret+=returned(b);
+    if(!settled(b))pendOut+=outlay(b);
+  });
+  var pl=ret-stakedAll;
+  $('bBal').textContent=money(state.deposit+pl);
+  var e=$('bPL'); e.textContent=(pl>=0?'+':'−')+'£'+Math.abs(pl).toFixed(2);
+  e.className='v'+(pl>0?' pos':pl<0?' neg':'');
+  $('bStake').textContent=money(stakedAll);
+
+  var used=Math.min(100,state.deposit>0?(stakedAll/state.deposit)*100:0);
+  $('bBar').style.width=used+'%';
+  var parts=[money(state.deposit)+' deposited'];
+  if(stakedAll>0)parts.push(money(stakedAll)+' staked across '+state.bets.length+' bet'+(state.bets.length===1?'':'s'));
+  else parts.push('nothing staked yet');
+  if(pendOut>0)parts.push(money(pendOut)+' still running');
+  $('bNote').textContent=parts.join(' · ');
+}
+
+/* ---------------- bets view ---------------- */
+function fmtDate(iso){
+  if(!iso)return 'Undated';
+  var d=new Date(iso+'T12:00:00');
+  if(isNaN(d))return iso;
+  return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+}
+function renderBets(){
+  var el=$('v-bets');
+  if(!state.bets.length){
+    el.innerHTML='<div class="empty"><b>No bets recorded</b>Record one before the off, not after. Writing down what you thought the chance was is the whole point — it\'s the only part of this you can get measurably better at.</div>';
+    return;
+  }
+  var byDay={};
+  state.bets.forEach(function(b){(byDay[b.date||'']=byDay[b.date||'']||[]).push(b);});
+  var days=Object.keys(byDay).sort().reverse();
+  var html='';
+  days.forEach(function(d){
+    var list=byDay[d].slice().sort(function(a,b){return (a.time||'').localeCompare(b.time||'');});
+    var dPL=0,anySettled=false;
+    list.forEach(function(b){if(settled(b)){dPL+=returned(b)-outlay(b);anySettled=true;}});
+    html+='<div class="daygroup"><div class="dayhead"><span>'+esc(fmtDate(d))+'</span>';
+    if(anySettled)html+='<span class="pl '+(dPL>0?'pos':dPL<0?'neg':'')+'">'+(dPL>=0?'+':'−')+'£'+Math.abs(dPL).toFixed(2)+'</span>';
+    html+='</div>';
+    list.forEach(function(b){html+=betCard(b);});
+    html+='</div>';
+  });
+  el.innerHTML=html;
+  Array.prototype.forEach.call(el.querySelectorAll('.bet'),function(n){
+    n.addEventListener('click',function(){openSheet(n.getAttribute('data-id'));});
+  });
+}
+function betCard(b){
+  var d=Number(b.dec)||0;
+  var imp=d>1?100/d:0;
+  var mine=Number(b.prob)||0;
+  var edge=mine-imp;
+  var r=returned(b),o=outlay(b);
+  var pl=settled(b)?r-o:null;
+  var lbl={won:'Won',placed:'Placed',lost:'Lost',void:'Void',pending:'Running'}[b.result]||'Running';
+  var h='<button class="bet" data-id="'+b.id+'">';
+  h+='<div class="top"><div><div class="horse">'+esc(b.horse||'Unnamed')+'</div>';
+  var meta=[];
+  if(b.time)meta.push(b.time);
+  if(b.course)meta.push(b.course);
+  meta.push(b.type==='ew'?'Each-way':'Win');
+  h+='<div class="meta">'+esc(meta.join(' · '))+'</div></div>';
+  h+='<span class="chip '+(b.result||'pending')+'">'+lbl+'</span></div>';
+  h+='<div class="figs">';
+  h+='<div class="fig"><div class="k">Odds</div><div class="v">'+(d?toFrac(d):'—')+'</div></div>';
+  h+='<div class="fig"><div class="k">Risk</div><div class="v">'+money(o)+'</div></div>';
+  h+='<div class="fig"><div class="k">Edge claimed</div><div class="v">'+(mine?(edge>=0?'+':'−')+Math.abs(edge).toFixed(0)+'pp':'—')+'</div></div>';
+  if(pl!==null)h+='<div class="fig"><div class="k">Result</div><div class="v '+(pl>0?'pos':pl<0?'neg':'')+'">'+(pl>=0?'+':'−')+'£'+Math.abs(pl).toFixed(2)+'</div></div>';
+  h+='</div>';
+  if(b.why)h+='<div class="case forr"><div class="k">The case</div><div class="t">'+esc(b.why)+'</div></div>';
+  if(b.against)h+='<div class="case"><div class="k">Against it</div><div class="t">'+esc(b.against)+'</div></div>';
+  if(b.minOdds){
+    var md=parseOdds(b.minOdds);
+    var under=(md&&d&&d<md-0.001);
+    h+='<div class="case"><div class="k">Minimum price</div><div class="t">'+esc(b.minOdds)+
+       (under?' — taken below the minimum':(d?' — met':''))+'</div></div>';
+  }
+  h+='</button>';
+  return h;
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+/* ---------------- analysis ---------------- */
+function renderAnalysis(){
+  var el=$('v-analysis');
+  var s=state.bets.filter(settled).filter(function(b){return b.result!=='void';});
+  if(!s.length){
+    el.innerHTML='<div class="empty"><b>Nothing settled yet</b>Once bets start returning results this page will show your strike rate, your return on stake, and — the one that matters — whether the chances you gave horses actually matched how often they won.</div>';
+    return;
+  }
+  var stake=0,ret=0,wins=0,expWins=0,probCount=0,sumDec=0;
+  s.forEach(function(b){
+    stake+=outlay(b); ret+=returned(b);
+    if(b.result==='won')wins++;
+    if(b.prob){expWins+=Number(b.prob)/100;probCount++;}
+    sumDec+=Number(b.dec)||0;
+  });
+  var pl=ret-stake;
+  var roi=stake>0?(pl/stake)*100:0;
+  var strike=(wins/s.length)*100;
+  var avgDec=sumDec/s.length;
+  var avgImplied=avgDec>1?100/avgDec:0;
+
+  var h='';
+  h+='<div class="headline"><div class="k">Return on stake</div>';
+  h+='<div class="big '+(roi>0?'pos':roi<0?'neg':'')+'">'+(roi>=0?'+':'−')+Math.abs(roi).toFixed(1)+'%</div>';
+  h+='<div class="sub">'+money(stake)+' risked, '+money(ret)+' back across '+s.length+' settled bet'+(s.length===1?'':'s')+'. ';
+  h+=(pl>=0?'That is '+money(pl)+' up.':'That is '+money(Math.abs(pl))+' down.')+'</div></div>';
+
+  h+='<div class="grid2">';
+  h+='<div class="stat"><div class="k">Strike rate</div><div class="v">'+strike.toFixed(0)+'%</div><div class="n">'+wins+' win'+(wins===1?'':'s')+' from '+s.length+'</div></div>';
+  h+='<div class="stat"><div class="k">Average price</div><div class="v">'+(avgDec?toFrac(avgDec):'—')+'</div><div class="n">implies '+avgImplied.toFixed(0)+'%</div></div>';
+  h+='<div class="stat"><div class="k">Risked</div><div class="v">'+money(stake)+'</div><div class="n">of '+money(state.deposit)+' deposited</div></div>';
+  h+='<div class="stat"><div class="k">Returned</div><div class="v">'+money(ret)+'</div><div class="n">'+(pl>=0?'+':'−')+'£'+Math.abs(pl).toFixed(2)+' net</div></div>';
+  h+='</div>';
+
+  if(probCount>=1){
+    var diff=wins-expWins;
+    var verdict;
+    if(probCount<8){
+      verdict='Too few bets to read anything into this yet. Somewhere around twenty-five settled bets it starts to mean something.';
+    }else if(Math.abs(diff)<=Math.max(1.2,expWins*0.25)){
+      verdict='Your estimates and your results are tracking each other. That is the signal worth having, whatever the balance is doing.';
+    }else if(diff<0){
+      verdict='You are backing fewer winners than you expected — the usual cause is optimism about horses you have already decided you like. Try writing the percentage down before you look at the price.';
+    }else{
+      verdict='You are backing more winners than you expected, which usually means you are underrating your own reads and could be taking shorter prices less often.';
+    }
+    h+='<div class="panel"><h3>Calibration</h3>';
+    h+='<div class="cal"><div><div class="k">Wins expected</div><div class="v">'+expWins.toFixed(1)+'</div></div>';
+    h+='<div><div class="k">Wins had</div><div class="v">'+wins+'</div></div></div>';
+    h+='<p>'+verdict+'</p></div>';
+  }
+
+  var rev={sound:0,mixed:0,flawed:0};
+  s.forEach(function(b){if(b.review&&rev[b.review]!==undefined)rev[b.review]++;});
+  var revTotal=rev.sound+rev.mixed+rev.flawed;
+  if(revTotal){
+    h+='<div class="panel"><h3>Your own verdicts</h3><p>'+
+      rev.sound+' sound · '+rev.mixed+' mixed · '+rev.flawed+' flawed, out of '+revTotal+' reviewed. '+
+      'Reasoning quality and results come apart in the short run. If the sound bets keep losing, that is variance. If the flawed ones keep winning, that is a trap.'+
+      '</p></div>';
+  }
+
+  var pending=state.bets.filter(function(b){return !settled(b);});
+  if(pending.length){
+    h+='<div class="panel"><h3>Still running</h3><p>'+pending.length+' bet'+(pending.length===1?'':'s')+' unsettled, '+money(pending.reduce(function(a,b){return a+outlay(b);},0))+' at risk.</p></div>';
+  }
+
+  el.innerHTML=h;
+}
+
+/* ---------------- sheet ---------------- */
+var editing=null, fType='win', fResult='pending', fReview='';
+
+function openSheet(id){
+  editing=id?state.bets.filter(function(b){return b.id===id;})[0]:null;
+  var b=editing;
+  $('sTitle').textContent=b?'Edit bet':'Record a bet';
+  $('sDelete').style.display=b?'block':'none';
+  $('fDate').value=b?b.date:new Date().toISOString().slice(0,10);
+  $('fTime').value=b?(b.time||''):'';
+  $('fCourse').value=b?(b.course||''):'';
+  $('fHorse').value=b?(b.horse||''):'';
+  $('fStake').value=b?String(b.stake):'';
+  $('fOdds').value=b?(b.oddsRaw||''):'';
+  $('fProb').value=b&&b.prob?String(b.prob):'';
+  $('fWhy').value=b?(b.why||''):'';
+  $('fAgainst').value=b?(b.against||''):'';
+  $('fMin').value=b?(b.minOdds||''):'';
+  $('fReview').value=b?(b.reviewNote||''):'';
+  $('fEwFrac').value=b?String(b.ewFrac||0.25):'0.25';
+  $('fEwPlaces').value=b?String(b.ewPlaces||3):'3';
+  setType(b?b.type:'win');
+  setResult(b?b.result:'pending');
+  setReview(b?(b.review||''):'');
+  updateGauge();
+  $('scrim').classList.add('on');
+  $('sheet').classList.add('on');
+}
+function closeSheet(){
+  $('scrim').classList.remove('on');
+  $('sheet').classList.remove('on');
+  editing=null;
+}
+function setType(t){
+  fType=t==='ew'?'ew':'win';
+  Array.prototype.forEach.call($('segType').children,function(n){n.classList.toggle('on',n.getAttribute('data-t')===fType);});
+  $('ewFields').style.display=fType==='ew'?'grid':'none';
+  updateGauge();
+}
+function setResult(r){
+  fResult=r||'pending';
+  Array.prototype.forEach.call($('segResult').children,function(n){n.classList.toggle('on',n.getAttribute('data-r')===fResult);});
+  $('reviewWrap').style.display=(fResult!=='pending'&&fResult!=='void')?'block':'none';
+  updateGauge();
+}
+function setReview(v){
+  fReview=v||'';
+  Array.prototype.forEach.call($('segReview').children,function(n){n.classList.toggle('on',n.getAttribute('data-v')===fReview);});
+}
+
+function updateGauge(){
+  var dec=parseOdds($('fOdds').value);
+  var mine=parseFloat($('fProb').value);
+  var stake=parseFloat($('fStake').value);
+  var imp=dec?100/dec:null;
+
+  var track=$('gTrack').clientWidth||280;
+  if(imp!==null){
+    $('gMkt').style.width=Math.max(2,Math.min(100,imp))+'%';
+    $('gFootMkt').textContent='Market '+imp.toFixed(1)+'% · '+toFrac(dec);
+  }else{
+    $('gMkt').style.width='0';
+    $('gFootMkt').textContent='Market —';
+  }
+  if(isFinite(mine)&&mine>0){
+    $('gMine').style.left='calc('+Math.max(0,Math.min(100,mine))+'% - 1.5px)';
+    $('gMine').style.opacity='1';
+    $('gFootMine').textContent='You '+mine.toFixed(0)+'%';
+  }else{
+    $('gMine').style.opacity='0';
+    $('gFootMine').textContent='You —';
+  }
+
+  var v=$('gVerdict'), note=$('gNote');
+  v.classList.remove('value');
+  if(imp===null||!isFinite(mine)||mine<=0){
+    v.textContent='Enter odds and your estimate';
+    note.textContent='The bar is what the price says the chance is. The white marker is what you say. Betting is only sensible when the marker sits to the right of the bar.';
+  }else{
+    var edge=mine-imp;
+    var fair=100/mine;
+    if(edge>0){
+      v.textContent='+'+edge.toFixed(1)+'pp in your favour';
+      v.classList.add('value');
+      note.innerHTML='You rate this a <strong>'+mine.toFixed(0)+'%</strong> chance; the price of <strong>'+toFrac(dec)+'</strong> only says '+imp.toFixed(1)+'%. On your read the fair price is about <strong>'+toFrac(fair)+'</strong>, so there is value here — if the read is right.'+
+        (edge>20?' An edge that big usually means the estimate is wrong rather than the market. Check it before you back it.':'');
+    }else if(edge<0){
+      v.textContent=edge.toFixed(1)+'pp against you';
+      note.innerHTML='The price says '+imp.toFixed(1)+'% and you say '+mine.toFixed(0)+'%. On your own numbers this is a bad bet — you would want around <strong>'+toFrac(fair)+'</strong> before it made sense. Either leave it or work out which of the two of you is wrong.';
+    }else{
+      v.textContent='Level with the market';
+      note.textContent='Your estimate and the price agree. There is no edge here, and the bookmaker margin means level is a slow loss.';
+    }
+  }
+
+  var c=$('calc');
+  if(!isFinite(stake)||stake<=0||!dec){
+    c.textContent='Enter a stake and odds to see what\'s at risk.';
+  }else{
+    var out=fType==='ew'?stake*2:stake;
+    var winRet=fType==='ew'?stake*dec+stake*(1+(dec-1)*parseFloat($('fEwFrac').value)):stake*dec;
+    var txt='<b>'+money(out)+'</b> at risk. Wins returns <b>'+money(winRet)+'</b> ('+money(winRet-out)+' profit).';
+    if(fType==='ew'){
+      var placeRet=stake*(1+(dec-1)*parseFloat($('fEwFrac').value));
+      txt+=' Places only returns <b>'+money(placeRet)+'</b> ('+(placeRet-out>=0?'':'a loss of ')+money(Math.abs(placeRet-out))+(placeRet-out>=0?' profit':'')+').';
+    }
+    c.innerHTML=txt;
+  }
+}
+
+function saveBet(){
+  var dec=parseOdds($('fOdds').value);
+  var stake=parseFloat($('fStake').value);
+  var horse=$('fHorse').value.trim();
+  if(!horse){toast('Which horse?');$('fHorse').focus();return;}
+  if(!dec){toast('Odds need to look like 11/8 or 2.38');$('fOdds').focus();return;}
+  if(!isFinite(stake)||stake<=0){toast('Stake needs to be a number');$('fStake').focus();return;}
+
+  var b=editing||{id:'b'+Date.now()+Math.random().toString(36).slice(2,6)};
+  b.date=$('fDate').value||new Date().toISOString().slice(0,10);
+  b.time=$('fTime').value.trim();
+  b.course=$('fCourse').value.trim();
+  b.horse=horse;
+  b.type=fType;
+  b.stake=Math.round(stake*100)/100;
+  b.oddsRaw=$('fOdds').value.trim();
+  b.dec=dec;
+  b.ewFrac=parseFloat($('fEwFrac').value)||0.25;
+  b.ewPlaces=parseInt($('fEwPlaces').value,10)||3;
+  b.prob=parseFloat($('fProb').value)||null;
+  b.why=$('fWhy').value.trim();
+  b.against=$('fAgainst').value.trim();
+  b.minOdds=$('fMin').value.trim();
+  b.result=fResult;
+  b.review=fReview;
+  b.reviewNote=$('fReview').value.trim();
+  if(!editing)state.bets.push(b);
+  save();renderAll();closeSheet();
+  toast(editing?'Bet updated':'Bet recorded');
+}
+
+function toast(msg){
+  var t=$('toast');t.textContent=msg;t.classList.add('on');
+  clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on');},2200);
+}
+
+/* ---------------- wiring ---------------- */
+$('fab').addEventListener('click',function(){openSheet(null);});
+$('sClose').addEventListener('click',closeSheet);
+$('scrim').addEventListener('click',closeSheet);
+$('sSave').addEventListener('click',saveBet);
+$('sDelete').addEventListener('click',function(){
+  if(!editing)return;
+  if(!confirm('Delete this bet from the ledger?'))return;
+  state.bets=state.bets.filter(function(b){return b.id!==editing.id;});
+  save();renderAll();closeSheet();toast('Bet deleted');
+});
+$('segType').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(b)setType(b.getAttribute('data-t'));
+});
+$('segResult').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(b)setResult(b.getAttribute('data-r'));
+});
+$('segReview').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(b)setReview(b.getAttribute('data-v')===fReview?'':b.getAttribute('data-v'));
+});
+['fOdds','fProb','fStake','fEwFrac'].forEach(function(id){
+  $(id).addEventListener('input',updateGauge);
+  $(id).addEventListener('change',updateGauge);
+});
+
+Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(t){
+  t.addEventListener('click',function(){
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(x){x.setAttribute('aria-selected','false');});
+    t.setAttribute('aria-selected','true');
+    Array.prototype.forEach.call(document.querySelectorAll('.view'),function(v){v.classList.remove('on');});
+    $('v-'+t.getAttribute('data-view')).classList.add('on');
+    $('fab').style.display=t.getAttribute('data-view')==='bets'?'block':'none';
+    window.scrollTo(0,0);
+  });
+});
+
+$('btnExport').addEventListener('click',function(){
+  var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='formbook-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
+});
+$('btnImport').addEventListener('click',function(){$('fileIn').click();});
+$('fileIn').addEventListener('change',function(e){
+  var f=e.target.files&&e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var p=JSON.parse(r.result);
+      if(!p||!Array.isArray(p.bets))throw 0;
+      if(!confirm('Replace the current ledger with '+p.bets.length+' imported bets?'))return;
+      state.deposit=Number(p.deposit)||20;state.bets=p.bets;
+      save();renderAll();toast('Ledger imported');
+    }catch(err){toast('That file is not a Form Book ledger');}
+  };
+  r.readAsText(f);
+  e.target.value='';
+});
+$('btnDeposit').addEventListener('click',function(){
+  var v=prompt('Total deposited this month (£)',String(state.deposit));
+  if(v===null)return;
+  var n=parseFloat(v);
+  if(!isFinite(n)||n<0){toast('That needs to be a number');return;}
+  state.deposit=Math.round(n*100)/100;save();renderAll();toast('Deposit updated');
+});
+$('btnWipe').addEventListener('click',function(){
+  if(!confirm('Erase every bet and reset the ledger? This cannot be undone.'))return;
+  state={deposit:20,bets:[]};save();renderAll();toast('Ledger erased');
+});
+
+function renderAll(){renderBank();renderBets();renderAnalysis();}
+renderAll();
+
+/* ---------------- installable ---------------- */
+var manifest={
+  name:'The Form Book',short_name:'Form Book',start_url:'.',display:'standalone',
+  background_color:'#0D1B3E',theme_color:'#0D1B3E',orientation:'portrait',
+  icons:[{src:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAIAAAB7GkOtAAAMy0lEQVR4nO3dQXIjxRZAUfGDKStgCeyh56yYOXtgP39ARGNoW5Zkqepl3nMW0BTKzHerSu72T7/8+u0CQM//zr4AAM4hAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAECUAAFECABAlAABRAgAQJQAAUQIAEPXz2RcAL/THX39+/Q/5/bdvX/9DYKCffvnV5mZtT5nyj9EGliYArOfEiX+dHrAWAWABYyf+dXrAcALAUIsO/Y+IAQMJAINsNvQ/IgYMIQCcLzL3f6QEnEsAOE127v9ICTiFAHA0c/8KJeBIAsBxjP4byQDHEABeztx/mBLwUgLACxn9TyEDvIgA8BJG/9PJAE8nADyTuX8AJeBZBIDnMPoPJgN8nQDwVUb/iWSAr/ALYfgS0/9cPn++whMADzJ6RvEowAMEgLsZ/WPJAHcRAO5g9C9BBriR7wC4lem/CivFjTwB8DkDZVEeBbjOEwCfMP3XZe24zhMAHzI+tuFRgHd5AuB9pv9OrCbv8gTAfxkWG/MowFueAPgX039v1pe3BIB/mA4FVpnvvALicjEUkrwOwhMApn+UdUcA6kyBMqsf5xVQl8PPd14HNXkCiDL9ect+aBKAIqedH9kVQQKQ45zzEXujRgBanHCus0NSBCDE2eYW9kmHAFQ41dzObokQ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657IvViWLYcADHL8wXAU42y5OAGY5cjj4ShyseXafvrlV0sy0R9//fm6P9w55Ee2XJAngKFed2AcRd5lywUJwFyvODaOIlfYcjVeAS3gKc/mziG3s+UiBGAlDxxLh5CvsOX2JgBL+vRYOoQ8ly23JQEAiPIlMECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBAlAAARAkAQJQAAEQJAECUAABECQBA1P8BQDjKF1/vEwQAAAAASUVORK5CYII=',sizes:'512x512',type:'image/png',purpose:'any'}]
+};
+try{
+  var ml=document.createElement('link');
+  ml.rel='manifest';
+  ml.href=URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'}));
+  document.head.appendChild(ml);
+}catch(e){}
+})();
+</script>
+</body>
+</html>

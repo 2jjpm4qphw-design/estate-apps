@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cellar">
+<meta name="theme-color" content="#0D1B3E">
+<title>Cellar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy-900:#0D1B3E;   /* Deep Navy — anchor */
+  --navy-850:#132550;   /* card surface */
+  --navy-800:#16295C;   /* dividers */
+  --navy-700:#1A3A6B;   /* Mid Navy — panels / borders */
+  --navy-600:#24508F;
+  --lime:#C4F000;       /* Shocking Lime — accent only */
+  --ink:#C4CCDD;        /* Mist — body on navy */
+  --white:#FFFFFF;      /* headlines on navy */
+  --muted:#8492B4;
+  --danger:#FF6B6B;
+  --pad: 18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--navy-900);color:var(--ink);}
+body{
+  font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:15px;line-height:1.45;
+  overscroll-behavior-y:none;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:16px;color:inherit;}
+button{background:none;border:none;padding:0;cursor:pointer;}
+h1,h2,h3{margin:0;font-weight:800;letter-spacing:-0.02em;color:var(--white);}
+.hide{display:none !important;}
+
+/* ---------- Shell ---------- */
+#app{
+  min-height:100vh;
+  min-height:100dvh;
+  padding-top:calc(env(safe-area-inset-top) + 8px);
+  padding-bottom:calc(env(safe-area-inset-bottom) + 82px);
+}
+header.top{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  padding:10px var(--pad) 12px;
+}
+header.top .titles{min-width:0;}
+.eyebrow{
+  font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--lime);margin-bottom:3px;
+}
+header.top h1{font-size:27px;line-height:1.1;}
+.icon-btn{
+  width:38px;height:38px;border-radius:12px;background:var(--navy-800);
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  border:1px solid var(--navy-700);
+}
+.icon-btn svg{width:19px;height:19px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ---------- Search + filters ---------- */
+.searchwrap{padding:2px var(--pad) 10px;}
+.search{
+  width:100%;background:var(--navy-800);border:1px solid var(--navy-700);
+  border-radius:13px;padding:11px 14px;color:var(--ink);
+  -webkit-appearance:none;
+}
+.search::placeholder{color:var(--muted);}
+.chips{
+  display:flex;gap:7px;overflow-x:auto;padding:0 var(--pad) 12px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.chips::-webkit-scrollbar{display:none;}
+.chip{
+  flex:0 0 auto;padding:7px 13px;border-radius:100px;
+  background:var(--navy-800);border:1px solid var(--navy-700);
+  font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;
+}
+.chip.on{background:var(--navy-700);border-color:var(--navy-600);color:var(--white);}
+
+/* ---------- Wine rows ---------- */
+.list{padding:0 var(--pad);display:flex;flex-direction:column;gap:9px;}
+.card{
+  background:var(--navy-850);border:1px solid var(--navy-700);
+  border-radius:16px;padding:13px 14px;
+  display:flex;gap:12px;align-items:stretch;text-align:left;width:100%;
+}
+.card:active{background:var(--navy-800);}
+.swatch{
+  width:3px;border-radius:2px;flex:0 0 auto;background:var(--navy-700);
+}
+.typetag{
+  font-size:9px;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--muted);
+}
+.card .body{flex:1;min-width:0;}
+.card .row1{display:flex;align-items:baseline;gap:7px;}
+.vintage{
+  font-size:13px;font-weight:800;color:var(--ink);letter-spacing:0.02em;flex:0 0 auto;
+  font-variant-numeric:tabular-nums;
+}
+.wname{
+  font-size:15px;font-weight:700;letter-spacing:-0.01em;color:var(--white);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.producer{
+  font-size:12px;color:var(--muted);font-weight:500;margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.meta{
+  display:flex;gap:10px;align-items:center;margin-top:8px;
+  font-size:11px;color:var(--muted);font-weight:600;
+}
+.bottles{
+  flex:0 0 auto;min-width:34px;text-align:center;
+  align-self:center;
+}
+.bottles .n{font-size:21px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:var(--white);}
+.bottles .lbl{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+
+/* ---------- Drink window bar (signature) ---------- */
+.window{margin-top:9px;}
+.window .track{
+  position:relative;height:3px;border-radius:2px;background:var(--navy-700);
+}
+.window .span{
+  position:absolute;top:0;height:3px;border-radius:2px;
+  background:linear-gradient(90deg,rgba(196,240,0,0.25),rgba(196,240,0,0.85));
+}
+.window .now{
+  position:absolute;top:-3px;width:2px;height:9px;background:var(--ink);border-radius:1px;
+}
+.window .now.past{background:var(--danger);}
+.window .ends{
+  display:flex;justify-content:space-between;margin-top:4px;
+  font-size:9.5px;font-weight:700;letter-spacing:0.1em;color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+.window .verdict{font-size:9.5px;font-weight:700;letter-spacing:0.1em;color:var(--lime);}
+.window .verdict.past{color:var(--danger);}
+.window .verdict.early{color:var(--muted);}
+
+/* ---------- Empty state ---------- */
+.empty{
+  padding:60px 34px;text-align:center;color:var(--muted);
+}
+.empty strong{display:block;color:var(--ink);font-size:16px;margin-bottom:6px;font-weight:700;}
+
+/* ---------- Stars ---------- */
+.stars{display:inline-flex;gap:2px;align-items:center;}
+.stars svg{width:13px;height:13px;}
+.stars.big svg{width:30px;height:30px;}
+.stars .s-full{fill:var(--ink);}
+.stars.big .s-full{fill:var(--lime);}
+.stars .s-empty{fill:var(--navy-700);}
+.starinput{display:flex;gap:6px;}
+.starinput button{padding:2px 0;}
+
+/* ---------- Tabs ---------- */
+nav.tabs{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  display:flex;background:rgba(13,27,62,0.93);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-top:1px solid var(--navy-700);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+nav.tabs button{
+  flex:1;padding:10px 0 9px;display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:var(--muted);
+}
+nav.tabs button.on{color:var(--lime);}
+nav.tabs svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+nav.tabs .lbl{font-size:9.5px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;}
+
+/* ---------- Add FAB ---------- */
+.fab{
+  position:fixed;right:16px;z-index:41;
+  bottom:calc(env(safe-area-inset-bottom) + 74px);
+  width:56px;height:56px;border-radius:20px;background:var(--lime);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 24px rgba(0,0,0,0.45);
+}
+.fab svg{width:26px;height:26px;stroke:#0D1B3E;stroke-width:2.4;fill:none;stroke-linecap:round;}
+.fab:active{transform:scale(0.94);}
+
+/* ---------- Sheet ---------- */
+.sheet{
+  position:fixed;inset:0;z-index:60;background:var(--navy-900);
+  transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+  display:flex;flex-direction:column;
+}
+.sheet.open{transform:translateY(0);}
+.sheet-head{
+  display:flex;align-items:center;gap:12px;
+  padding:calc(env(safe-area-inset-top) + 12px) var(--pad) 12px;
+  border-bottom:1px solid var(--navy-800);flex:0 0 auto;
+}
+.sheet-head h2{font-size:17px;flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sheet-head .save{
+  color:var(--lime);font-weight:800;font-size:14px;letter-spacing:0.02em;flex:0 0 auto;
+}
+.sheet-body{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:var(--pad) var(--pad) calc(env(safe-area-inset-bottom) + 40px);
+}
+
+/* ---------- Forms ---------- */
+label.f{display:block;margin-bottom:14px;}
+label.f .lbl{
+  display:block;font-size:10px;font-weight:700;letter-spacing:0.16em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:6px;
+}
+.in{
+  width:100%;background:var(--navy-850);border:1px solid var(--navy-700);
+  border-radius:12px;padding:12px 13px;color:var(--ink);
+  -webkit-appearance:none;appearance:none;
+}
+.in:focus{outline:2px solid var(--lime);outline-offset:1px;border-color:var(--lime);}
+textarea.in{min-height:96px;resize:vertical;line-height:1.5;}
+select.in{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238492B4' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:16px;
+  padding-right:38px;
+}
+.pair{display:flex;gap:10px;}
+.pair > *{flex:1;min-width:0;}
+.formsec{
+  font-size:10px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--lime);margin:24px 0 12px;padding-bottom:8px;
+  border-bottom:1px solid var(--navy-800);
+}
+.formsec:first-child{margin-top:0;}
+.btn{
+  display:block;width:100%;text-align:center;padding:14px;border-radius:14px;
+  font-weight:800;font-size:14px;letter-spacing:0.02em;
+}
+.btn.primary{background:var(--lime);color:#0D1B3E;}
+.btn.ghost{background:var(--navy-850);border:1px solid var(--navy-700);color:var(--ink);}
+.btn.danger{background:transparent;border:1px solid rgba(255,107,107,0.4);color:var(--danger);}
+.btn + .btn{margin-top:9px;}
+.toggle{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--navy-850);border:1px solid var(--navy-700);
+  border-radius:12px;padding:12px 13px;margin-bottom:14px;width:100%;text-align:left;
+}
+.toggle .t{font-size:14px;font-weight:600;}
+.toggle .sw{
+  width:46px;height:27px;border-radius:100px;background:var(--navy-700);flex:0 0 auto;
+  position:relative;transition:background .16s;
+}
+.toggle .sw::after{
+  content:'';position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;
+  background:var(--muted);transition:transform .16s,background .16s;
+}
+.toggle.on .sw{background:rgba(196,240,0,0.28);}
+.toggle.on .sw::after{transform:translateX(19px);background:var(--lime);}
+
+/* ---------- Detail ---------- */
+.hero-photo{
+  width:100%;height:210px;object-fit:cover;border-radius:16px;
+  margin-bottom:18px;background:var(--navy-850);display:block;
+}
+.detail-title{font-size:23px;font-weight:800;letter-spacing:-0.02em;line-height:1.15;color:var(--white);}
+.detail-sub{color:var(--muted);font-size:13px;font-weight:600;margin-top:5px;}
+.factgrid{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--navy-800);
+  border:1px solid var(--navy-800);border-radius:14px;overflow:hidden;margin:20px 0;
+}
+.fact{background:var(--navy-850);padding:12px 13px;}
+.fact .k{font-size:9.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);}
+.fact .v{font-size:15px;font-weight:700;margin-top:4px;color:var(--white);}
+.fact .v.sm{font-size:13px;font-weight:600;}
+.notebox{
+  background:var(--navy-850);border:1px solid var(--navy-700);border-radius:14px;
+  padding:14px;font-size:14px;line-height:1.55;white-space:pre-wrap;color:var(--ink);
+}
+
+/* ---------- Tasting entries ---------- */
+.tasting{
+  background:var(--navy-850);border:1px solid var(--navy-700);border-radius:14px;
+  padding:13px 14px;margin-bottom:9px;text-align:left;width:100%;
+}
+.tasting .th{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.tasting .date{font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--muted);}
+.tasting .tn{font-size:13.5px;line-height:1.5;margin-top:8px;color:var(--ink);white-space:pre-wrap;}
+.again{
+  display:inline-block;margin-top:9px;font-size:10px;font-weight:800;
+  letter-spacing:0.12em;text-transform:uppercase;padding:4px 9px;border-radius:100px;
+}
+.again.yes{background:rgba(196,240,0,0.14);color:var(--lime);}
+.again.no{background:rgba(255,107,107,0.12);color:var(--danger);}
+
+/* ---------- Stats ---------- */
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.stat{
+  background:var(--navy-850);border:1px solid var(--navy-700);
+  border-radius:16px;padding:15px 15px 14px;
+}
+.stat .k{font-size:9.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);}
+.stat .v{font-size:27px;font-weight:800;letter-spacing:-0.03em;margin-top:6px;line-height:1;
+  font-variant-numeric:tabular-nums;}
+.stat .v.lime{color:var(--white);}
+.stat .sub{font-size:11px;color:var(--muted);margin-top:5px;font-weight:600;}
+.stat.wide{grid-column:1/-1;}
+.bars{margin-top:12px;display:flex;flex-direction:column;gap:9px;}
+.bar .bl{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:5px;}
+.bar .bt{height:6px;border-radius:3px;background:var(--navy-700);overflow:hidden;}
+.bar .bf{height:6px;border-radius:3px;background:var(--lime);}
+
+.toast{
+  position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 96px);
+  transform:translate(-50%,14px);z-index:90;
+  background:var(--lime);color:#0D1B3E;font-weight:700;font-size:13px;
+  padding:11px 18px;border-radius:100px;opacity:0;pointer-events:none;
+  transition:opacity .18s,transform .18s;box-shadow:0 6px 20px rgba(0,0,0,.4);
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;animation:none !important;}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header class="top">
+    <div class="titles">
+      <div class="eyebrow" id="eyebrow">In the racks</div>
+      <h1 id="pagetitle">Cellar</h1>
+    </div>
+    <button class="icon-btn" id="btn-settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </header>
+
+  <div id="view"></div>
+</div>
+
+<button class="fab" id="fab" aria-label="Add a wine">
+  <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<nav class="tabs">
+  <button data-tab="cellar" class="on">
+    <svg viewBox="0 0 24 24"><path d="M8 3h8v6a4 4 0 0 1-8 0V3z"/><path d="M12 13v8"/><path d="M9 21h6"/><path d="M8 7h8"/></svg>
+    <span class="lbl">Cellar</span>
+  </button>
+  <button data-tab="archive">
+    <svg viewBox="0 0 24 24"><path d="M3 7h18v13H3z"/><path d="M1 3h22v4H1z"/><path d="M10 11h4"/></svg>
+    <span class="lbl">Drunk</span>
+  </button>
+  <button data-tab="stats">
+    <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+    <span class="lbl">Stats</span>
+  </button>
+</nav>
+
+<div class="sheet" id="sheet">
+  <div class="sheet-head">
+    <button class="icon-btn" id="sheet-close" aria-label="Close">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <h2 id="sheet-title"></h2>
+    <button class="save hide" id="sheet-save">Save</button>
+  </div>
+  <div class="sheet-body" id="sheet-body"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+/* ============ Constants ============ */
+const TYPES = [
+  {id:'red',       label:'Red'},
+  {id:'white',     label:'White'},
+  {id:'rose',      label:'Rosé'},
+  {id:'sparkling', label:'Sparkling'},
+  {id:'fortified', label:'Fortified'},
+  {id:'other',     label:'Other'}
+];
+const typeOf = id => TYPES.find(t => t.id === id) || TYPES[5];
+const gbp = n => new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP',
+  minimumFractionDigits: (n % 1 ? 2 : 0), maximumFractionDigits:2}).format(n);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const THIS_YEAR = new Date().getFullYear();
+
+/* ============ IndexedDB ============ */
+const DB_NAME = 'cellar-db', DB_VER = 1;
+let _db = null;
+
+function openDB(){
+  return new Promise((res, rej) => {
+    if (_db) return res(_db);
+    const r = indexedDB.open(DB_NAME, DB_VER);
+    r.onupgradeneeded = () => {
+      const d = r.result;
+      if (!d.objectStoreNames.contains('wines'))    d.createObjectStore('wines', {keyPath:'id'});
+      if (!d.objectStoreNames.contains('tastings')) d.createObjectStore('tastings', {keyPath:'id'});
+      if (!d.objectStoreNames.contains('photos'))   d.createObjectStore('photos');
+    };
+    r.onsuccess = () => { _db = r.result; res(_db); };
+    r.onerror = () => rej(r.error);
+  });
+}
+async function idb(store, mode, fn){
+  const d = await openDB();
+  return new Promise((res, rej) => {
+    const t = d.transaction(store, mode);
+    const req = fn(t.objectStore(store));
+    t.onerror = () => rej(t.error);
+    if (req) { req.onsuccess = () => res(req.result); req.onerror = () => rej(req.error); }
+    else t.oncomplete = () => res();
+  });
+}
+let _pulling = false;
+function _afterWrite(s){ if(!_pulling && (s === 'wines' || s === 'tastings')){ try { schedulePush(); } catch(_){ } } }
+const dbAll   = s        => idb(s, 'readonly',  o => o.getAll());
+const dbPut   = (s, v, k) => idb(s, 'readwrite', o => k === undefined ? o.put(v) : o.put(v, k)).then(r => { _afterWrite(s); return r; });
+const dbGet   = (s, k)   => idb(s, 'readonly',  o => o.get(k));
+const dbDel   = (s, k)   => idb(s, 'readwrite', o => o.delete(k)).then(r => { _afterWrite(s); return r; });
+const dbClear = s        => idb(s, 'readwrite', o => o.clear()).then(r => { _afterWrite(s); return r; });
+
+/* ============ Hub sync — records only; photos stay on the device (never in the shared store) ============ */
+function _ls(k){ try { return localStorage.getItem(k); } catch(_){ return null; } }
+function _lsSet(k,v){ try { localStorage.setItem(k,v); } catch(_){ } }
+function cellarCreds(){ const id=_ls('connolly-sync:gist-id'), tk=_ls('connolly-sync:token'); return (id&&tk)?{id:id,token:tk}:null; }
+function _gh(c){ return {'Authorization':'Bearer '+c.token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}; }
+function gistGet(c){ return fetch('https://api.github.com/gists/'+c.id,{headers:_gh(c)}).then(r => { if(!r.ok) throw new Error('gist '+r.status); return r.json(); }).then(g => { const f=g.files&&g.files['life-twoweek.json']; if(!f) throw new Error('no file'); if(f.truncated&&f.raw_url) return fetch(f.raw_url,{headers:{'Authorization':'Bearer '+c.token}}).then(r => r.text()); return f.content; }); }
+function pushCellar(){ const c=cellarCreds(); if(!c) return Promise.resolve(); return gistGet(c).then(text => { let payload; try { payload=JSON.parse(text||'{}'); } catch(_){ payload={}; } const st=payload.state||payload; st.cellar={ wines:S.wines, tastings:S.tastings, syncedAt:Date.now() }; payload.state=st; payload.savedAt=new Date().toISOString(); payload.writer={id:'cellar',label:'Cellar',at:payload.savedAt}; const body={files:{}}; body.files['life-twoweek.json']={content:JSON.stringify(payload)}; return fetch('https://api.github.com/gists/'+c.id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json'},_gh(c)),body:JSON.stringify(body)}); }).catch(() => {}); }
+let _pushTimer=null; function schedulePush(){ if(!cellarCreds()) return; if(_pushTimer) clearTimeout(_pushTimer); _pushTimer=setTimeout(pushCellar,1200); }
+async function pullCellarIfEmpty(){ const c=cellarCreds(); if(!c) return; try { const text=await gistGet(c); let payload; try { payload=JSON.parse(text||'{}'); } catch(_){ return; } const st=payload.state||payload; const cell=st&&st.cellar; if(cell&&Array.isArray(cell.wines)&&cell.wines.length&&S.wines.length===0){ _pulling=true; for(const w of cell.wines) await dbPut('wines',w); for(const t of (cell.tastings||[])) await dbPut('tastings',t); _pulling=false; S.wines=await dbAll('wines'); S.tastings=await dbAll('tastings'); } } catch(_){ _pulling=false; } }
+
+/* ============ State ============ */
+const S = {
+  wines: [], tastings: [],
+  tab: 'cellar', filter: 'all', q: '', showEmpty: false,
+  archQ: '', archSort: 'recent'
+};
+const photoURLs = new Map();
+
+async function photoURL(id){
+  if (!id) return null;
+  if (photoURLs.has(id)) return photoURLs.get(id);
+  const blob = await dbGet('photos', id);
+  if (!blob) return null;
+  const url = URL.createObjectURL(blob);
+  photoURLs.set(id, url);
+  return url;
+}
+
+/* ============ Helpers ============ */
+const tastingsFor = wid => S.tastings.filter(t => t.wineId === wid)
+  .sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+function ratingOf(w){
+  const ts = tastingsFor(w.id).filter(t => t.rating > 0);
+  if (!ts.length) return null;
+  return ts.reduce((s,t) => s + t.rating, 0) / ts.length;
+}
+
+function starsHTML(r, cls){
+  if (r == null) return '';
+  let out = `<span class="stars ${cls||''}" aria-label="${r} out of 5">`;
+  for (let i = 1; i <= 5; i++){
+    const fill = r >= i ? 1 : (r >= i - 0.5 ? 0.5 : 0);
+    const pid = 'g' + uid();
+    out += `<svg viewBox="0 0 24 24">${ fill === 0.5 ? `<defs><linearGradient id="${pid}"><stop offset="50%" stop-color="var(--ink)"/><stop offset="50%" stop-color="var(--navy-700)"/></linearGradient></defs>` : ''}
+      <path class="${fill===1?'s-full':(fill===0?'s-empty':'')}" ${fill===0.5?`fill="url(#${pid})"`:''}
+      d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>`;
+  }
+  return out + '</span>';
+}
+
+function windowHTML(w){
+  const from = parseInt(w.drinkFrom), to = parseInt(w.drinkBy);
+  if (!from && !to) return '';
+  const lo = from || to, hi = to || from;
+  if (hi < lo) return '';
+  const pad = Math.max(2, Math.round((hi - lo) * 0.35));
+  const s = lo - pad, e = hi + pad, total = Math.max(1, e - s);
+  const pct = y => Math.min(100, Math.max(0, ((y - s) / total) * 100));
+  const past = THIS_YEAR > hi, early = THIS_YEAR < lo;
+  const verdict = past ? 'Past window' : early ? `Hold ${lo - THIS_YEAR}y` : 'Drink now';
+  const vcls = past ? 'past' : early ? 'early' : '';
+  return `<div class="window">
+    <div class="track">
+      <div class="span" style="left:${pct(lo)}%;width:${pct(hi)-pct(lo)}%"></div>
+      <div class="now ${past?'past':''}" style="left:${pct(THIS_YEAR)}%"></div>
+    </div>
+    <div class="ends">
+      <span>${from||'—'}</span>
+      <span class="verdict ${vcls}">${verdict}</span>
+      <span>${to||'—'}</span>
+    </div>
+  </div>`;
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 1900);
+}
+
+/* ============ Sheet ============ */
+const sheet = document.getElementById('sheet');
+const sheetBody = document.getElementById('sheet-body');
+const sheetTitle = document.getElementById('sheet-title');
+const sheetSave = document.getElementById('sheet-save');
+let saveHandler = null;
+
+function openSheet(title, html, onSave){
+  sheetTitle.textContent = title;
+  sheetBody.innerHTML = html;
+  sheetBody.scrollTop = 0;
+  saveHandler = onSave || null;
+  sheetSave.classList.toggle('hide', !onSave);
+  sheet.classList.add('open');
+}
+function closeSheet(){ sheet.classList.remove('open'); saveHandler = null; }
+document.getElementById('sheet-close').onclick = closeSheet;
+sheetSave.onclick = () => { if (saveHandler) saveHandler(); };
+
+/* ============ Cellar view ============ */
+function inCellar(w){ return (w.bottles || 0) > 0; }
+
+function filteredWines(){
+  const q = S.q.trim().toLowerCase();
+  return S.wines
+    .filter(w => S.showEmpty ? true : inCellar(w))
+    .filter(w => S.filter === 'all' || w.type === S.filter)
+    .filter(w => !q || [w.name, w.producer, w.region, w.country, w.grape, w.vendor, w.location]
+      .some(v => (v||'').toLowerCase().includes(q)))
+    .sort((a,b) =>
+      (b.bottles>0) - (a.bottles>0) ||
+      (a.producer||a.name||'').localeCompare(b.producer||b.name||'') ||
+      (a.vintage||'').localeCompare(b.vintage||''));
+}
+
+function wineCardHTML(w){
+  const t = typeOf(w.type);
+  const r = ratingOf(w);
+  const bits = [`<span class="typetag">${t.label}</span>`];
+  if (w.region || w.country) bits.push(esc([w.region, w.country].filter(Boolean).join(', ')));
+  if (w.price) bits.push(gbp(w.price));
+  if (w.location) bits.push(esc(w.location));
+  return `<button class="card" data-wine="${w.id}">
+    <div class="swatch"></div>
+    <div class="body">
+      <div class="row1">
+        ${w.vintage ? `<span class="vintage">${esc(w.vintage)}</span>` : ''}
+        <span class="wname">${esc(w.name || 'Untitled')}</span>
+      </div>
+      ${w.producer ? `<div class="producer">${esc(w.producer)}</div>` : ''}
+      ${bits.length || r != null ? `<div class="meta">${bits.join(' · ')}${r != null ? starsHTML(r) : ''}</div>` : ''}
+      ${windowHTML(w)}
+    </div>
+    <div class="bottles">
+      <div class="n" style="${w.bottles ? '' : 'color:var(--muted)'}">${w.bottles||0}</div>
+      <div class="lbl">${w.bottles === 1 ? 'btl' : 'btls'}</div>
+    </div>
+  </button>`;
+}
+
+function renderCellar(){
+  const list = filteredWines();
+  const totalBottles = S.wines.reduce((s,w) => s + (w.bottles||0), 0);
+  document.getElementById('eyebrow').textContent =
+    totalBottles ? `${totalBottles} bottle${totalBottles===1?'':'s'} in the racks` : 'In the racks';
+  document.getElementById('pagetitle').textContent = 'Cellar';
+
+  const chips = ['all', ...TYPES.map(t => t.id)].map(id => {
+    const label = id === 'all' ? 'All' : typeOf(id).label;
+    return `<button class="chip ${S.filter===id?'on':''}" data-filter="${id}">${label}</button>`;
+  }).join('');
+
+  document.getElementById('view').innerHTML = `
+    <div class="searchwrap">
+      <input class="search" id="q" type="search" placeholder="Search producer, region, grape…"
+        value="${esc(S.q)}" autocomplete="off" autocorrect="off" autocapitalize="none">
+    </div>
+    <div class="chips">${chips}
+      <button class="chip ${S.showEmpty?'on':''}" data-empty="1">Show empties</button>
+    </div>
+    <div class="list">
+      ${list.length ? list.map(wineCardHTML).join('') : `
+        <div class="empty">
+          <strong>${S.wines.length ? 'Nothing matches' : 'The racks are empty'}</strong>
+          ${S.wines.length ? 'Try a different filter or search.' : 'Tap + to log your first bottle.'}
+        </div>`}
+    </div>`;
+
+  const q = document.getElementById('q');
+  q.oninput = e => {
+    S.q = e.target.value;
+    const l = document.querySelector('.list');
+    const r = filteredWines();
+    l.innerHTML = r.length ? r.map(wineCardHTML).join('')
+      : `<div class="empty"><strong>Nothing matches</strong>Try a different filter or search.</div>`;
+  };
+}
+
+/* ============ Archive view ============ */
+function renderArchive(){
+  document.getElementById('pagetitle').textContent = 'Drunk';
+  const q = S.archQ.trim().toLowerCase();
+  let rows = S.tastings.map(t => ({t, w: S.wines.find(w => w.id === t.wineId)}))
+    .filter(x => x.w)
+    .filter(x => !q || [x.w.name, x.w.producer, x.w.region, x.t.notes, x.t.occasion]
+      .some(v => (v||'').toLowerCase().includes(q)));
+
+  if (S.archSort === 'recent') rows.sort((a,b) => (b.t.date||'').localeCompare(a.t.date||''));
+  if (S.archSort === 'rating') rows.sort((a,b) => (b.t.rating||0) - (a.t.rating||0));
+  if (S.archSort === 'again')  rows = rows.filter(x => x.t.buyAgain)
+    .sort((a,b) => (b.t.rating||0) - (a.t.rating||0));
+
+  document.getElementById('eyebrow').textContent =
+    `${S.tastings.length} bottle${S.tastings.length===1?'':'s'} logged`;
+
+  document.getElementById('view').innerHTML = `
+    <div class="searchwrap">
+      <input class="search" id="aq" type="search" placeholder="Search notes, wines, occasions…"
+        value="${esc(S.archQ)}" autocomplete="off">
+    </div>
+    <div class="chips">
+      <button class="chip ${S.archSort==='recent'?'on':''}" data-sort="recent">Most recent</button>
+      <button class="chip ${S.archSort==='rating'?'on':''}" data-sort="rating">Best rated</button>
+      <button class="chip ${S.archSort==='again'?'on':''}" data-sort="again">Buy again</button>
+    </div>
+    <div class="list">
+      ${rows.length ? rows.map(({t,w}) => `
+        <button class="tasting" data-wine="${w.id}">
+          <div class="th">
+            <div style="min-width:0">
+              <div class="row1">
+                ${w.vintage?`<span class="vintage">${esc(w.vintage)}</span>`:''}
+                <span class="wname">${esc(w.name)}</span>
+              </div>
+              ${w.producer?`<div class="producer">${esc(w.producer)}</div>`:''}
+            </div>
+            ${t.rating ? starsHTML(t.rating) : ''}
+          </div>
+          <div class="date" style="margin-top:8px">${fmtDate(t.date)}${t.occasion?' · '+esc(t.occasion):''}</div>
+          ${t.notes?`<div class="tn">${esc(t.notes)}</div>`:''}
+          ${t.buyAgain !== null && t.buyAgain !== undefined
+            ? `<span class="again ${t.buyAgain?'yes':'no'}">${t.buyAgain?'Buy again':'Not again'}</span>` : ''}
+        </button>`).join('')
+      : `<div class="empty"><strong>Nothing here yet</strong>Open a bottle from the cellar and it lands here.</div>`}
+    </div>`;
+
+  document.getElementById('aq').oninput = e => { S.archQ = e.target.value; renderArchive(); };
+}
+
+function fmtDate(d){
+  if (!d) return '';
+  const dt = new Date(d + 'T12:00:00');
+  if (isNaN(dt)) return d;
+  return dt.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+}
+
+/* ============ Stats view ============ */
+function renderStats(){
+  document.getElementById('pagetitle').textContent = 'Stats';
+  document.getElementById('eyebrow').textContent = 'The numbers';
+
+  const stock = S.wines.filter(inCellar);
+  const bottles = stock.reduce((s,w) => s + w.bottles, 0);
+  const value = stock.reduce((s,w) => s + (w.price||0) * w.bottles, 0);
+  const spend = S.wines.reduce((s,w) => s + (w.price||0) * (w.totalBought || w.bottles || 0), 0);
+  const rated = S.tastings.filter(t => t.rating > 0);
+  const avg = rated.length ? rated.reduce((s,t) => s + t.rating, 0) / rated.length : 0;
+  const again = S.tastings.filter(t => t.buyAgain).length;
+
+  const byType = TYPES.map(t => ({
+    ...t, n: stock.filter(w => w.type === t.id).reduce((s,w) => s + w.bottles, 0)
+  })).filter(t => t.n).sort((a,b) => b.n - a.n);
+  const maxType = Math.max(1, ...byType.map(t => t.n));
+
+  const vendors = {};
+  S.wines.forEach(w => {
+    if (!w.vendor) return;
+    vendors[w.vendor] = (vendors[w.vendor]||0) + (w.price||0) * (w.totalBought || w.bottles || 0);
+  });
+  const topVendors = Object.entries(vendors).sort((a,b) => b[1]-a[1]).slice(0,5);
+  const maxVendor = Math.max(1, ...topVendors.map(v => v[1]));
+
+  const best = [...S.tastings].filter(t => t.rating > 0)
+    .sort((a,b) => b.rating - a.rating).slice(0,3)
+    .map(t => ({t, w: S.wines.find(w => w.id === t.wineId)})).filter(x => x.w);
+
+  document.getElementById('view').innerHTML = `
+    <div style="padding:0 var(--pad)">
+      <div class="statgrid">
+        <div class="stat"><div class="k">Bottles</div><div class="v lime">${bottles}</div>
+          <div class="sub">${stock.length} distinct wine${stock.length===1?'':'s'}</div></div>
+        <div class="stat"><div class="k">Cellar value</div><div class="v">${value?gbp(value):'—'}</div>
+          <div class="sub">at purchase price</div></div>
+        <div class="stat"><div class="k">Average score</div>
+          <div class="v">${avg?avg.toFixed(1):'—'}<span style="font-size:14px;color:var(--muted)">${avg?' / 5':''}</span></div>
+          <div class="sub">${rated.length} rated</div></div>
+        <div class="stat"><div class="k">Buy again</div><div class="v">${again}</div>
+          <div class="sub">of ${S.tastings.length} drunk</div></div>
+        <div class="stat wide"><div class="k">Total spend logged</div>
+          <div class="v">${spend?gbp(spend):'—'}</div>
+          <div class="sub">every bottle you've recorded buying</div></div>
+      </div>
+
+      ${byType.length ? `<div class="stat wide" style="margin-bottom:10px">
+        <div class="k">What's in the racks</div>
+        <div class="bars">${byType.map(t => `
+          <div class="bar">
+            <div class="bl"><span>${t.label}</span><span style="color:var(--muted)">${t.n}</span></div>
+            <div class="bt"><div class="bf" style="width:${(t.n/maxType)*100}%"></div></div>
+          </div>`).join('')}</div>
+      </div>` : ''}
+
+      ${topVendors.length ? `<div class="stat wide" style="margin-bottom:10px">
+        <div class="k">Where the money goes</div>
+        <div class="bars">${topVendors.map(([v,amt]) => `
+          <div class="bar">
+            <div class="bl"><span>${esc(v)}</span><span style="color:var(--muted)">${gbp(amt)}</span></div>
+            <div class="bt"><div class="bf" style="width:${(amt/maxVendor)*100}%"></div></div>
+          </div>`).join('')}</div>
+      </div>` : ''}
+
+      ${best.length ? `<div class="stat wide">
+        <div class="k" style="margin-bottom:12px">Best of the bottles you've opened</div>
+        ${best.map(({t,w}) => `
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--navy-800)">
+            <div style="min-width:0">
+              <div class="wname">${esc(w.vintage||'')} ${esc(w.name)}</div>
+              <div class="producer">${esc(w.producer||'')}</div>
+            </div>
+            ${starsHTML(t.rating)}
+          </div>`).join('')}
+      </div>` : ''}
+    </div>`;
+}
+
+/* ============ Wine detail ============ */
+async function showWine(id){
+  const w = S.wines.find(x => x.id === id);
+  if (!w) return;
+  const t = typeOf(w.type);
+  const ts = tastingsFor(id);
+  const url = await photoURL(w.photoId);
+
+  const facts = [
+    ['Type', t.label],
+    ['Vintage', w.vintage || '—'],
+    ['Region', [w.region, w.country].filter(Boolean).join(', ') || '—'],
+    ['Grape / style', w.grape || '—'],
+    ['Paid', w.price ? gbp(w.price) + ' / btl' : '—'],
+    ['Bought from', w.vendor || '—'],
+    ['Bought', w.purchaseDate ? fmtDate(w.purchaseDate) : '—'],
+    ['Where it lives', w.location || '—']
+  ];
+
+  openSheet(w.name || 'Wine', `
+    ${url ? `<img class="hero-photo" src="${url}" alt="">` : ''}
+    <div class="detail-title">${esc(w.vintage||'')} ${esc(w.name||'')}</div>
+    <div class="detail-sub">${esc(w.producer||'')}</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+      <div style="font-size:15px;font-weight:800">${w.bottles||0} in stock</div>
+      ${ratingOf(w)!=null ? starsHTML(ratingOf(w)) : ''}
+    </div>
+    ${windowHTML(w)}
+    <div class="factgrid">${facts.map(([k,v]) =>
+      `<div class="fact"><div class="k">${k}</div><div class="v ${String(v).length>14?'sm':''}">${esc(v)}</div></div>`).join('')}</div>
+    ${w.notes ? `<div class="formsec">Cellar note</div><div class="notebox">${esc(w.notes)}</div>` : ''}
+
+    <div class="formsec">Actions</div>
+    ${w.bottles > 0 ? `<button class="btn primary" data-act="drink">Open a bottle</button>` : ''}
+    <button class="btn ghost" data-act="restock">Add bottles</button>
+    <button class="btn ghost" data-act="edit">Edit details</button>
+    <button class="btn danger" data-act="delete">Delete wine</button>
+
+    ${ts.length ? `<div class="formsec">Tasting history · ${ts.length}</div>
+      ${ts.map(t => `<div class="tasting">
+        <div class="th"><span class="date">${fmtDate(t.date)}${t.occasion?' · '+esc(t.occasion):''}</span>
+          ${t.rating?starsHTML(t.rating):''}</div>
+        ${t.notes?`<div class="tn">${esc(t.notes)}</div>`:''}
+        ${t.buyAgain !== null && t.buyAgain !== undefined
+          ? `<span class="again ${t.buyAgain?'yes':'no'}">${t.buyAgain?'Buy again':'Not again'}</span>`:''}
+        <button class="btn danger" style="margin-top:10px;padding:8px;font-size:12px"
+          data-deltasting="${t.id}">Delete this entry</button>
+      </div>`).join('')}` : ''}
+  `);
+
+  sheetBody.querySelectorAll('[data-act]').forEach(b => b.onclick = () => {
+    const a = b.dataset.act;
+    if (a === 'drink')   return openDrinkForm(w);
+    if (a === 'edit')    return openWineForm(w);
+    if (a === 'restock') return openRestock(w);
+    if (a === 'delete')  return deleteWine(w);
+  });
+  sheetBody.querySelectorAll('[data-deltasting]').forEach(b => b.onclick = async () => {
+    if (!confirm('Delete this tasting note?')) return;
+    await dbDel('tastings', b.dataset.deltasting);
+    S.tastings = S.tastings.filter(t => t.id !== b.dataset.deltasting);
+    toast('Entry deleted'); render(); showWine(id);
+  });
+}
+
+/* ============ Wine form ============ */
+function openWineForm(existing){
+  const w = existing || {};
+  const isNew = !existing;
+  openSheet(isNew ? 'Add a wine' : 'Edit wine', `
+    <div class="formsec">The bottle</div>
+    <label class="f"><span class="lbl">Wine name</span>
+      <input class="in" id="f-name" value="${esc(w.name||'')}" placeholder="Barolo Cannubi" autocapitalize="words"></label>
+    <label class="f"><span class="lbl">Producer</span>
+      <input class="in" id="f-producer" value="${esc(w.producer||'')}" placeholder="Paolo Scavino" autocapitalize="words"></label>
+    <div class="pair">
+      <label class="f"><span class="lbl">Vintage</span>
+        <input class="in" id="f-vintage" value="${esc(w.vintage||'')}" inputmode="numeric" placeholder="2016"></label>
+      <label class="f"><span class="lbl">Type</span>
+        <select class="in" id="f-type">${TYPES.map(t =>
+          `<option value="${t.id}" ${w.type===t.id?'selected':''}>${t.label}</option>`).join('')}</select></label>
+    </div>
+    <div class="pair">
+      <label class="f"><span class="lbl">Region</span>
+        <input class="in" id="f-region" value="${esc(w.region||'')}" placeholder="Piedmont" autocapitalize="words"></label>
+      <label class="f"><span class="lbl">Country</span>
+        <input class="in" id="f-country" value="${esc(w.country||'')}" placeholder="Italy" autocapitalize="words"></label>
+    </div>
+    <label class="f"><span class="lbl">Grape or style</span>
+      <input class="in" id="f-grape" value="${esc(w.grape||'')}" placeholder="Nebbiolo"></label>
+
+    <div class="formsec">Stock &amp; money</div>
+    <div class="pair">
+      <label class="f"><span class="lbl">Bottles</span>
+        <input class="in" id="f-bottles" value="${w.bottles ?? 1}" inputmode="numeric"></label>
+      <label class="f"><span class="lbl">Price per bottle</span>
+        <input class="in" id="f-price" value="${w.price ?? ''}" inputmode="decimal" placeholder="45"></label>
+    </div>
+    <label class="f"><span class="lbl">Bought from</span>
+      <input class="in" id="f-vendor" value="${esc(w.vendor||'')}" placeholder="Berry Bros" autocapitalize="words"></label>
+    <div class="pair">
+      <label class="f"><span class="lbl">Date bought</span>
+        <input class="in" id="f-bought" type="date" value="${esc(w.purchaseDate||'')}"></label>
+      <label class="f"><span class="lbl">Where it lives</span>
+        <input class="in" id="f-location" value="${esc(w.location||'')}" placeholder="Rack B, row 3"></label>
+    </div>
+
+    <div class="formsec">Drinking window</div>
+    <div class="pair">
+      <label class="f"><span class="lbl">Drink from</span>
+        <input class="in" id="f-from" value="${esc(w.drinkFrom||'')}" inputmode="numeric" placeholder="2024"></label>
+      <label class="f"><span class="lbl">Drink by</span>
+        <input class="in" id="f-by" value="${esc(w.drinkBy||'')}" inputmode="numeric" placeholder="2032"></label>
+    </div>
+
+    <div class="formsec">Extras</div>
+    <label class="f"><span class="lbl">Cellar note</span>
+      <textarea class="in" id="f-notes" placeholder="Why you bought it, who recommended it, what it's for…">${esc(w.notes||'')}</textarea></label>
+    <label class="f"><span class="lbl">Label photo</span>
+      <input class="in" id="f-photo" type="file" accept="image/*"></label>
+    <div id="photo-preview"></div>
+    ${w.photoId ? `<button class="btn ghost" id="rmphoto">Remove photo</button>` : ''}
+  `, save);
+
+  let newPhoto = null, dropPhoto = false;
+
+  if (w.photoId) photoURL(w.photoId).then(u => {
+    if (u) document.getElementById('photo-preview').innerHTML = `<img class="hero-photo" src="${u}" alt="">`;
+  });
+  const rm = document.getElementById('rmphoto');
+  if (rm) rm.onclick = () => {
+    dropPhoto = true; newPhoto = null;
+    document.getElementById('photo-preview').innerHTML = '';
+    rm.remove(); toast('Photo will be removed on save');
+  };
+  document.getElementById('f-photo').onchange = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      newPhoto = await compress(file); dropPhoto = false;
+      document.getElementById('photo-preview').innerHTML =
+        `<img class="hero-photo" src="${URL.createObjectURL(newPhoto)}" alt="">`;
+    } catch(err){ toast("Couldn't read that image"); }
+  };
+
+  async function save(){
+    const val = id => document.getElementById(id).value.trim();
+    const name = val('f-name');
+    if (!name){ toast('Give it a name first'); document.getElementById('f-name').focus(); return; }
+    const bottles = Math.max(0, parseInt(val('f-bottles')) || 0);
+    const prev = existing ? (existing.bottles || 0) : 0;
+    const rec = {
+      id: existing ? existing.id : uid(),
+      name, producer: val('f-producer'), vintage: val('f-vintage'),
+      type: val('f-type'), region: val('f-region'), country: val('f-country'),
+      grape: val('f-grape'), bottles,
+      price: parseFloat(val('f-price')) || 0,
+      vendor: val('f-vendor'), purchaseDate: val('f-bought'), location: val('f-location'),
+      drinkFrom: val('f-from'), drinkBy: val('f-by'), notes: val('f-notes'),
+      photoId: existing ? existing.photoId : null,
+      totalBought: existing ? (existing.totalBought || prev) : bottles,
+      created: existing ? existing.created : new Date().toISOString()
+    };
+    if (existing && bottles > prev) rec.totalBought = (existing.totalBought || prev) + (bottles - prev);
+
+    if (dropPhoto && rec.photoId){ await dbDel('photos', rec.photoId); photoURLs.delete(rec.photoId); rec.photoId = null; }
+    if (newPhoto){
+      const pid = rec.photoId || uid();
+      await dbPut('photos', newPhoto, pid);
+      photoURLs.delete(pid); rec.photoId = pid;
+    }
+
+    await dbPut('wines', rec);
+    const i = S.wines.findIndex(x => x.id === rec.id);
+    if (i >= 0) S.wines[i] = rec; else S.wines.push(rec);
+    closeSheet(); render();
+    toast(existing ? 'Wine updated' : 'Added to the cellar');
+  }
+}
+
+async function compress(file){
+  const bmp = await loadImage(file);
+  const max = 1000;
+  let w = bmp.width, h = bmp.height;
+  const scale = Math.min(1, max / Math.max(w, h));
+  w = Math.round(w * scale); h = Math.round(h * scale);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  c.getContext('2d').drawImage(bmp, 0, 0, w, h);
+  return new Promise(res => c.toBlob(res, 'image/jpeg', 0.72));
+}
+function loadImage(file){
+  if (window.createImageBitmap) return createImageBitmap(file);
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = rej;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+/* ============ Drink form ============ */
+function openDrinkForm(w){
+  let rating = 0, again = null;
+  const today = new Date().toISOString().slice(0,10);
+  openSheet('Open a bottle', `
+    <div class="detail-title" style="font-size:19px">${esc(w.vintage||'')} ${esc(w.name)}</div>
+    <div class="detail-sub">${esc(w.producer||'')} · ${w.bottles} in stock</div>
+
+    <div class="formsec">How was it?</div>
+    <div class="starinput" id="stars">${[1,2,3,4,5].map(i =>
+      `<button data-star="${i}" aria-label="${i} stars">${starsHTML(0).replace('<span class="stars ">','<span class="stars big">')}</button>`).join('')}</div>
+    <div id="ratingtext" style="color:var(--muted);font-size:12px;font-weight:600;margin-top:8px">
+      Tap the left half of a star for a half point</div>
+
+    <div class="formsec">The note</div>
+    <label class="f"><span class="lbl">Tasting note</span>
+      <textarea class="in" id="d-notes" placeholder="What it smelled and tasted like, how it went with the food, whether it was ready…"></textarea></label>
+    <div class="pair">
+      <label class="f"><span class="lbl">Date</span>
+        <input class="in" id="d-date" type="date" value="${today}"></label>
+      <label class="f"><span class="lbl">Occasion</span>
+        <input class="in" id="d-occasion" placeholder="Sunday lunch"></label>
+    </div>
+    <button class="toggle" id="t-again"><span class="t">Buy this again</span><span class="sw"></span></button>
+    <button class="toggle" id="t-no"><span class="t">Never again</span><span class="sw"></span></button>
+  `, save);
+
+  const starWrap = document.getElementById('stars');
+  starWrap.querySelectorAll('[data-star]').forEach(btn => {
+    btn.onclick = e => {
+      const i = parseInt(btn.dataset.star);
+      const r = btn.getBoundingClientRect();
+      const half = (e.clientX - r.left) < r.width * 0.5;
+      rating = half ? i - 0.5 : i;
+      paintStars();
+    };
+  });
+  function paintStars(){
+    starWrap.querySelectorAll('[data-star]').forEach(btn => {
+      const i = parseInt(btn.dataset.star);
+      const fill = rating >= i ? 1 : (rating >= i - 0.5 ? 0.5 : 0);
+      const pid = 'p' + i + uid();
+      btn.innerHTML = `<span class="stars big"><svg viewBox="0 0 24 24">
+        ${fill===0.5?`<defs><linearGradient id="${pid}"><stop offset="50%" stop-color="var(--lime)"/><stop offset="50%" stop-color="var(--navy-700)"/></linearGradient></defs>`:''}
+        <path class="${fill===1?'s-full':(fill===0?'s-empty':'')}" ${fill===0.5?`fill="url(#${pid})"`:''}
+        d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg></span>`;
+    });
+    document.getElementById('ratingtext').textContent =
+      rating ? `${rating} out of 5` : 'Tap the left half of a star for a half point';
+  }
+  paintStars();
+
+  const tYes = document.getElementById('t-again'), tNo = document.getElementById('t-no');
+  tYes.onclick = () => { again = again === true ? null : true; tYes.classList.toggle('on', again===true); tNo.classList.remove('on'); };
+  tNo.onclick  = () => { again = again === false ? null : false; tNo.classList.toggle('on', again===false); tYes.classList.remove('on'); };
+
+  async function save(){
+    const rec = {
+      id: uid(), wineId: w.id,
+      date: document.getElementById('d-date').value || today,
+      rating, notes: document.getElementById('d-notes').value.trim(),
+      occasion: document.getElementById('d-occasion').value.trim(),
+      buyAgain: again
+    };
+    await dbPut('tastings', rec);
+    S.tastings.push(rec);
+
+    const updated = {...w, bottles: Math.max(0, (w.bottles||0) - 1)};
+    await dbPut('wines', updated);
+    S.wines[S.wines.findIndex(x => x.id === w.id)] = updated;
+
+    closeSheet(); render();
+    toast(updated.bottles ? `${updated.bottles} left` : 'Last one — logged');
+  }
+}
+
+/* ============ Restock / delete ============ */
+function openRestock(w){
+  openSheet('Add bottles', `
+    <div class="detail-title" style="font-size:19px">${esc(w.vintage||'')} ${esc(w.name)}</div>
+    <div class="detail-sub">${w.bottles} in stock now</div>
+    <div class="formsec">New bottles</div>
+    <div class="pair">
+      <label class="f"><span class="lbl">How many</span>
+        <input class="in" id="r-n" value="6" inputmode="numeric"></label>
+      <label class="f"><span class="lbl">Price per bottle</span>
+        <input class="in" id="r-price" value="${w.price||''}" inputmode="decimal"></label>
+    </div>
+    <label class="f"><span class="lbl">Bought from</span>
+      <input class="in" id="r-vendor" value="${esc(w.vendor||'')}" autocapitalize="words"></label>
+    <label class="f"><span class="lbl">Date bought</span>
+      <input class="in" id="r-date" type="date" value="${new Date().toISOString().slice(0,10)}"></label>
+  `, async () => {
+    const n = Math.max(0, parseInt(document.getElementById('r-n').value) || 0);
+    if (!n){ toast('How many bottles?'); return; }
+    const updated = {
+      ...w,
+      bottles: (w.bottles||0) + n,
+      totalBought: (w.totalBought || w.bottles || 0) + n,
+      price: parseFloat(document.getElementById('r-price').value) || w.price || 0,
+      vendor: document.getElementById('r-vendor').value.trim() || w.vendor,
+      purchaseDate: document.getElementById('r-date').value || w.purchaseDate
+    };
+    await dbPut('wines', updated);
+    S.wines[S.wines.findIndex(x => x.id === w.id)] = updated;
+    closeSheet(); render();
+    toast(`${updated.bottles} in stock`);
+  });
+}
+
+async function deleteWine(w){
+  const ts = tastingsFor(w.id);
+  if (!confirm(`Delete "${w.name}"${ts.length?` and its ${ts.length} tasting note${ts.length===1?'':'s'}`:''}? This can't be undone.`)) return;
+  for (const t of ts) await dbDel('tastings', t.id);
+  if (w.photoId){ await dbDel('photos', w.photoId); photoURLs.delete(w.photoId); }
+  await dbDel('wines', w.id);
+  S.wines = S.wines.filter(x => x.id !== w.id);
+  S.tastings = S.tastings.filter(t => t.wineId !== w.id);
+  closeSheet(); render(); toast('Deleted');
+}
+
+/* ============ Settings / backup ============ */
+function openSettings(){
+  const bottles = S.wines.reduce((s,w) => s + (w.bottles||0), 0);
+  openSheet('Settings', `
+    <div class="formsec">Link to the Hub</div>
+    <div class="notebox" style="margin-bottom:12px">Optional. Paste your Hub Gist ID + token to sync your bottle <b>records</b> (not photos) to the Hub, so the estate Cellar room shows the same collection. Everything works offline without this.</div>
+    <label class="f"><span class="lbl">Gist ID</span><input class="in" id="s-gist-id" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="32-character hex ID"></label>
+    <label class="f"><span class="lbl">Token</span><input class="in" id="s-gist-token" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ghp_… / github_pat_…"></label>
+    <button class="btn primary" id="s-gist-save">Connect &amp; sync</button>
+    <div id="s-gist-msg" style="color:var(--muted);font-size:12px;margin-top:8px"></div>
+
+    <div class="formsec" style="margin-top:20px">Your data</div>
+    <div class="notebox" style="margin-bottom:16px">Everything lives on this device only — ${S.wines.length} wine${S.wines.length===1?'':'s'}, ${bottles} bottle${bottles===1?'':'s'}, ${S.tastings.length} tasting note${S.tastings.length===1?'':'s'}.
+
+There is no cloud copy. If you delete the app or wipe the phone, it goes with it. Export regularly and save the file somewhere real.</div>
+    <button class="btn primary" id="s-export">Export backup file</button>
+    <button class="btn ghost" id="s-import">Restore from a backup</button>
+    <input type="file" id="s-file" accept="application/json,.json" class="hide">
+
+    <div class="formsec">Danger</div>
+    <button class="btn danger" id="s-wipe">Delete everything</button>
+  `);
+
+  const _c = cellarCreds();
+  if (_c){ document.getElementById('s-gist-id').value = _c.id; document.getElementById('s-gist-token').value = _c.token; }
+  document.getElementById('s-gist-save').onclick = async () => {
+    const gid = document.getElementById('s-gist-id').value.trim().replace(/^.*\/(?=[0-9a-f]{8,})/i,'');
+    const gtk = document.getElementById('s-gist-token').value.trim();
+    const msg = document.getElementById('s-gist-msg');
+    if (!gid || !gtk){ msg.textContent = 'Enter both the Gist ID and a token.'; return; }
+    _lsSet('connolly-sync:gist-id', gid); _lsSet('connolly-sync:token', gtk);
+    msg.textContent = 'Connecting…';
+    try { await pullCellarIfEmpty(); render(); await pushCellar(); msg.textContent = 'Connected — records synced to the Hub.'; }
+    catch(_){ msg.textContent = 'Could not sync — check the ID/token.'; }
+  };
+  document.getElementById('s-export').onclick = exportData;
+  document.getElementById('s-import').onclick = () => document.getElementById('s-file').click();
+  document.getElementById('s-file').onchange = importData;
+  document.getElementById('s-wipe').onclick = async () => {
+    if (!confirm('Delete every wine, note and photo? There is no undo.')) return;
+    if (!confirm('Really sure? Export a backup first if you have any doubt.')) return;
+    await dbClear('wines'); await dbClear('tastings'); await dbClear('photos');
+    S.wines = []; S.tastings = []; photoURLs.clear();
+    closeSheet(); render(); toast('Everything deleted');
+  };
+}
+
+const blobToDataURL = b => new Promise(res => {
+  const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(b);
+});
+
+async function exportData(){
+  toast('Building the file…');
+  const photos = {};
+  for (const w of S.wines){
+    if (!w.photoId) continue;
+    const blob = await dbGet('photos', w.photoId);
+    if (blob) photos[w.photoId] = await blobToDataURL(blob);
+  }
+  const payload = {app:'cellar', version:1, exported:new Date().toISOString(),
+    wines:S.wines, tastings:S.tastings, photos};
+  const blob = new Blob([JSON.stringify(payload)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `cellar-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+async function importData(e){
+  const file = e.target.files[0];
+  if (!file) return;
+  let data;
+  try { data = JSON.parse(await file.text()); }
+  catch { toast("That file isn't readable"); return; }
+  if (!data || !Array.isArray(data.wines)){ toast("That isn't a cellar backup"); return; }
+  if (!confirm(`Replace everything with this backup? ${data.wines.length} wines, ${(data.tastings||[]).length} notes.`)) return;
+
+  await dbClear('wines'); await dbClear('tastings'); await dbClear('photos');
+  photoURLs.clear();
+  for (const w of data.wines) await dbPut('wines', w);
+  for (const t of (data.tastings||[])) await dbPut('tastings', t);
+  for (const [pid, durl] of Object.entries(data.photos||{})){
+    try {
+      const blob = await (await fetch(durl)).blob();
+      await dbPut('photos', blob, pid);
+    } catch {}
+  }
+  S.wines = data.wines; S.tastings = data.tastings || [];
+  closeSheet(); render(); toast('Backup restored');
+}
+
+/* ============ Routing ============ */
+function render(){
+  if (S.tab === 'cellar')  renderCellar();
+  if (S.tab === 'archive') renderArchive();
+  if (S.tab === 'stats')   renderStats();
+  document.getElementById('fab').classList.toggle('hide', S.tab === 'stats');
+}
+
+document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  S.tab = b.dataset.tab;
+  window.scrollTo(0,0);
+  render();
+});
+document.getElementById('fab').onclick = () => openWineForm(null);
+document.getElementById('btn-settings').onclick = openSettings;
+
+document.getElementById('view').addEventListener('click', e => {
+  const card = e.target.closest('[data-wine]');
+  if (card) return showWine(card.dataset.wine);
+  const f = e.target.closest('[data-filter]');
+  if (f){ S.filter = f.dataset.filter; return render(); }
+  const em = e.target.closest('[data-empty]');
+  if (em){ S.showEmpty = !S.showEmpty; return render(); }
+  const so = e.target.closest('[data-sort]');
+  if (so){ S.archSort = so.dataset.sort; return renderArchive(); }
+});
+
+/* ============ PWA plumbing ============ */
+(function pwa(){
+  const icon = document.createElement('canvas');
+  icon.width = icon.height = 180;
+  const g = icon.getContext('2d');
+  g.fillStyle = '#0D1B3E'; g.fillRect(0,0,180,180);
+  g.strokeStyle = '#C4F000'; g.lineWidth = 9;
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  g.beginPath();
+  g.moveTo(60,36); g.lineTo(120,36); g.lineTo(120,78);
+  g.arc(90,78,30,0,Math.PI); g.lineTo(60,36);
+  g.stroke();
+  g.beginPath(); g.moveTo(90,108); g.lineTo(90,146); g.stroke();
+  g.beginPath(); g.moveTo(66,146); g.lineTo(114,146); g.stroke();
+  const dataURL = icon.toDataURL('image/png');
+  const link = document.createElement('link');
+  link.rel = 'apple-touch-icon'; link.href = dataURL;
+  document.head.appendChild(link);
+
+  const manifest = {
+    name:'Cellar', short_name:'Cellar', start_url:'./', display:'standalone',
+    background_color:'#0D1B3E', theme_color:'#0D1B3E', orientation:'portrait',
+    icons:[{src:dataURL, sizes:'180x180', type:'image/png', purpose:'any'}]
+  };
+  const ml = document.createElement('link');
+  ml.rel = 'manifest';
+  ml.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'}));
+  document.head.appendChild(ml);
+
+  if ('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+})();
+
+/* ============ Boot ============ */
+(async function boot(){
+  try {
+    S.wines = await dbAll('wines');
+    S.tastings = await dbAll('tastings');
+  } catch(err){
+    document.getElementById('view').innerHTML =
+      `<div class="empty"><strong>Storage is blocked</strong>This browser won't let the app save data. Turn off Private Browsing and reload.</div>`;
+    return;
+  }
+  render();
+  try { await pullCellarIfEmpty(); render(); if (cellarCreds()) await pushCellar(); } catch(_){ }
+})();
+</script>
+</body>
+</html>

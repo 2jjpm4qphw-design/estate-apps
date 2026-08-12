@@ -1,0 +1,222 @@
+{
+  "generatedAt": "2026-08-05T08:20:19.635Z",
+  "source": "initial seed (curator task overwrites weekly)",
+  "catalogue": [
+    {
+      "id": "d-cinema-rise-of-the-footsoldier-retribution",
+      "title": "Rise of the Footsoldier: Retribution",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-08-28",
+      "blurb": "The British crime saga continues."
+    },
+    {
+      "id": "d-cinema-the-death-of-robin-hood",
+      "title": "The Death of Robin Hood",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-09-04",
+      "blurb": "A darker take on the legend."
+    },
+    {
+      "id": "d-cinema-the-uprising",
+      "title": "The Uprising",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-09-11",
+      "blurb": "Paul Greengrass thriller with Andrew Garfield and Jamie Bell."
+    },
+    {
+      "id": "d-cinema-practical-magic-2",
+      "title": "Practical Magic 2",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-09-11",
+      "blurb": "Sandra Bullock and Nicole Kidman return."
+    },
+    {
+      "id": "d-cinema-manhunter",
+      "title": "Manhunter",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-09-25",
+      "blurb": "Studiocanal thriller."
+    },
+    {
+      "id": "d-cinema-sense-and-sensibility",
+      "title": "Sense and Sensibility",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-09-25",
+      "blurb": "Georgia Oakley’s Austen adaptation — Daisy Edgar-Jones, Caitríona Balfe, George MacKay, Fiona Shaw."
+    },
+    {
+      "id": "d-cinema-digger",
+      "title": "Digger",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-10-02",
+      "blurb": "Iñárritu film starring Tom Cruise, Sandra Hüller and John Goodman."
+    },
+    {
+      "id": "d-cinema-verity",
+      "title": "Verity",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-10-02",
+      "blurb": "Thriller adapted from the Colleen Hoover novel (Sony)."
+    },
+    {
+      "id": "d-cinema-zootopia-2",
+      "title": "Zootopia 2",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11",
+      "blurb": "Disney animation sequel (cinema first)."
+    },
+    {
+      "id": "d-cinema-predator-badlands",
+      "title": "Predator: Badlands",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11",
+      "blurb": "New Predator film (cinema first)."
+    },
+    {
+      "id": "d-cinema-hamnet",
+      "title": "Hamnet",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026",
+      "blurb": "Awards-season drama from Chloé Zhao."
+    },
+    {
+      "id": "d-netflix-outer-banks-season-5",
+      "title": "Outer Banks — Season 5",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-08-20",
+      "blurb": "The final season of the treasure-hunt drama."
+    },
+    {
+      "id": "d-netflix-the-gentlemen-season-2",
+      "title": "The Gentlemen — Season 2",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-09-03",
+      "blurb": "Guy Ritchie’s crime comedy returns, this time set in Italy."
+    },
+    {
+      "id": "d-netflix-monster-the-lizzie-borden-story",
+      "title": "Monster: The Lizzie Borden Story",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-09",
+      "blurb": "Ryan Murphy’s anthology takes on the Borden case."
+    },
+    {
+      "id": "d-netflix-lupin-part-4",
+      "title": "Lupin — Part 4",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Omar Sy returns as gentleman thief Assane Diop (autumn 2026)."
+    },
+    {
+      "id": "d-netflix-emily-in-paris-season-6",
+      "title": "Emily in Paris — Season 6",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Confirmed by Netflix; date not yet announced."
+    },
+    {
+      "id": "d-netflix-the-whisper-man",
+      "title": "The Whisper Man",
+      "platform": "netflix",
+      "type": "film",
+      "date": "2026",
+      "blurb": "Chilling crime thriller adaptation."
+    },
+    {
+      "id": "d-prime-reacher-season-4",
+      "title": "Reacher — Season 4",
+      "platform": "prime",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Alan Ritchson returns as Jack Reacher."
+    },
+    {
+      "id": "d-prime-the-last-showgirl",
+      "title": "The Last Showgirl",
+      "platform": "prime",
+      "type": "film",
+      "date": "2026",
+      "blurb": "Pamela Anderson as a veteran Vegas dancer."
+    },
+    {
+      "id": "d-disney-futurama-season-14",
+      "title": "Futurama — Season 14",
+      "platform": "disney",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "More from Planet Express."
+    },
+    {
+      "id": "d-iplayer-the-lady",
+      "title": "The Lady",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Royal drama from The Crown team; Natalie Dormer as Jane Andrews."
+    },
+    {
+      "id": "d-channel4-maya",
+      "title": "Maya",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Witness-protection thriller with Bella Ramsey and Daisy Haggard."
+    },
+    {
+      "id": "d-channel4-army-of-shadows",
+      "title": "Army of Shadows",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Near-future reimagining from The Day of the Jackal’s Ronan Bennett."
+    },
+    {
+      "id": "d-skyatlantic-sweetpea-season-2",
+      "title": "Sweetpea — Season 2",
+      "platform": "skyatlantic",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Darkly comic thriller with Ella Purnell, Tamsin Greig and Rish Shah."
+    },
+    {
+      "id": "d-skyatlantic-yaga",
+      "title": "Yaga",
+      "platform": "skyatlantic",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Mystery thriller with Carrie-Anne Moss and Noah Reid."
+    },
+    {
+      "id": "d-skyatlantic-possession",
+      "title": "Possession",
+      "platform": "skyatlantic",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Karla Crome’s five-part inheritance drama set in Jamaica."
+    },
+    {
+      "id": "d-alibi-bookish-series-2",
+      "title": "Bookish — Series 2",
+      "platform": "alibi",
+      "type": "tv",
+      "date": "2026-08-26",
+      "blurb": "Mark Gatiss’s 1940s sleuth Gabriel Book returns for three new cases on U&Alibi."
+    }
+  ]
+}

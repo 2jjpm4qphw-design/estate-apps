@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D1B3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Still Room">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>Still Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --navy:#0D1B3E; --mid:#1A3A6B; --lime:#C4F000; --mist:#C4CCDD; --white:#FFFFFF; --line:#24467e; }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--mist);-webkit-font-smoothing:antialiased;padding:0 0 90px}
+  .wrap{max-width:640px;margin:0 auto;padding:14px 15px 0}
+  header.top{display:flex;align-items:baseline;justify-content:space-between;padding:6px 2px 10px}
+  header.top h1{font-size:20px;font-weight:800;color:var(--white);margin:0;letter-spacing:.02em}
+  header.top .eyebrow{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--lime)}
+  .status{font-size:11px;color:var(--mist);opacity:.7}
+  .muted{color:var(--mist);opacity:.7;font-size:13px;padding:14px 4px;line-height:1.5}
+  .view{display:none}.view.on{display:block}
+  .sec{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);margin:18px 2px 8px}
+  .daterow{font-size:12px;color:var(--mist);opacity:.8;margin:2px 2px 6px}
+  /* tick rows */
+  .tick{display:flex;align-items:center;gap:12px;background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;user-select:none}
+  .tick .box{flex:0 0 24px;height:24px;border-radius:7px;border:2px solid #3a5c8f;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--navy)}
+  .tick.done .box{background:var(--lime);border-color:var(--lime)}
+  .tick .lbl{flex:1;font-size:14.5px;color:var(--white);font-weight:600}
+  .tick.done .lbl{color:var(--mist)}
+  .tick .sub{font-size:11px;color:var(--mist);opacity:.7;font-weight:400}
+  /* counter */
+  .counter{display:flex;align-items:center;gap:12px;background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:8px}
+  .counter .lbl{flex:1;font-size:14.5px;color:var(--white);font-weight:600}
+  .counter button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#0a1530;color:var(--white);font:inherit;font-size:20px;font-weight:700;cursor:pointer}
+  .counter .n{min-width:28px;text-align:center;font-size:18px;font-weight:800;color:var(--white)}
+  /* teze */
+  .teze{background:var(--mid);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:8px}
+  .teze .t-top{display:flex;justify-content:space-between;align-items:baseline}
+  .teze .t-name{font-size:14.5px;font-weight:700;color:var(--white)}
+  .teze .t-days{font-size:13px;font-weight:700}
+  .teze .t-days.due{color:#ff9aa8}.teze .t-days.soon{color:#f0cf8a}.teze .t-days.ok{color:var(--lime)}
+  .teze .t-date{font-size:11.5px;color:var(--mist);opacity:.8;margin-top:3px}
+  .teze button{margin-top:11px;width:100%;background:var(--lime);color:var(--navy);border:0;border-radius:10px;padding:10px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+  /* meds register */
+  .med{background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+  .med .m-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .med .m-name{font-size:14.5px;font-weight:700;color:var(--white)}
+  .med .m-meta{font-size:12px;color:var(--mist);opacity:.85;margin-top:2px;line-height:1.4}
+  .med .m-took{flex:0 0 auto;border:1px solid var(--line);background:transparent;color:var(--mist);border-radius:9px;padding:7px 11px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .med .m-took.today{background:#12351f;border-color:#2c7a48;color:#7fe0a0}
+  .med .m-pill{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:#26406e;color:var(--mist);margin-top:8px}
+  .med.paused{opacity:.6}
+  /* form */
+  label.fl{display:block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--lime);margin:12px 0 5px}
+  .field{width:100%;border:1px solid var(--line);background:#0a1530;color:var(--white);border-radius:10px;padding:11px 12px;font:inherit;font-size:16px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .go{margin-top:14px;width:100%;background:var(--lime);color:var(--navy);border:0;border-radius:10px;padding:13px;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+  .go.ghost{background:transparent;border:1px solid var(--line);color:var(--white)}
+  .rd{display:flex;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);font-size:13px}
+  .rd .rd-d{color:var(--mist);opacity:.8}
+  .rd .rd-v{color:var(--white);font-weight:600;text-align:right}
+  .hint{font-size:11.5px;opacity:.7;margin-top:6px;line-height:1.4}
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0a1530;border-top:1px solid #22375f;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
+  nav.tabs button{flex:1;background:none;border:0;color:var(--mist);opacity:.65;font:inherit;font-size:10.5px;font-weight:600;padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+  nav.tabs button .ic{font-size:17px;line-height:1}
+  nav.tabs button.on{opacity:1;color:var(--lime)}
+  #setup{padding:22px 18px;max-width:520px;margin:0 auto}
+  #setup h1{color:var(--white);font-size:22px;margin:6px 0 6px}
+  #setup p{font-size:13.5px;line-height:1.5}
+  #setup input{width:100%;border:1px solid var(--line);background:#0a1530;color:var(--white);border-radius:10px;padding:11px 12px;font:inherit;font-size:14px;margin-top:6px}
+  #setup .err{margin-top:12px;color:#ff9aa8;font-size:13px}
+  #setup .signout{margin-top:20px;background:none;border:0;color:var(--mist);opacity:.7;font:inherit;font-size:12px;text-decoration:underline;cursor:pointer}
+  /* bloods */
+  .bl-caveat{background:var(--mid);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:11.5px;line-height:1.5;color:var(--mist);margin:6px 0 4px}
+  .bl-grouphd{font-size:11px;font-weight:700;color:var(--white);margin:14px 2px 6px;letter-spacing:.03em}
+  .bl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .bl-u{opacity:.6;font-weight:600;text-transform:none;letter-spacing:0}
+  .bl-card{background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:9px}
+  .bl-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .bl-name{font-size:13.5px;font-weight:700;color:var(--white)}
+  .bl-chip{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 7px;border-radius:5px;white-space:nowrap}
+  .bl-chip.in{background:#12351f;color:#7fe0a0}
+  .bl-chip.out{background:#3a1620;color:#ff8a9c}
+  .bl-val{font-size:13px;color:var(--mist);margin:3px 0 6px}
+  .bl-svg{display:block;background:#0a1530;border-radius:8px}
+  .bl-nochart{font-size:11.5px;color:var(--mist);opacity:.6;padding:8px 2px}
+  .bl-range{font-size:11px;color:var(--mist);opacity:.85;margin-top:6px}
+  .bl-edit{color:var(--lime);font-weight:700;cursor:pointer}
+  .bl-rec{font-size:12px;color:#f0cf8a;background:#2a2412;border:1px solid #4a3f1a;border-radius:8px;padding:8px 10px;margin-top:8px;line-height:1.45}
+  .bl-recs{background:var(--mid);border:1px solid #4a3f1a;border-radius:12px;padding:12px;margin:10px 0}
+  .bl-recs-h{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#f0cf8a;margin-bottom:8px}
+  .bl-recs-item{font-size:12.5px;color:var(--mist);line-height:1.5;margin-bottom:7px}
+  .bl-recs-foot{font-size:10.5px;opacity:.6;margin-top:6px}
+  /* Overview ("Me") tab */
+  .ov-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .ov-card{background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+  .ov-card.good{border-left:3px solid #7fe0a0}
+  .ov-card.warn{border-left:3px solid #f0cf8a}
+  .ov-card.bad{border-left:3px solid #ff5a6e}
+  .ov-l{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mist);opacity:.7}
+  .ov-v{font-size:21px;font-weight:700;color:var(--white);line-height:1.15;margin-top:2px}
+  .ov-u{font-size:11px;font-weight:600;color:var(--mist);opacity:.7;margin-left:3px}
+  .ov-m{font-size:11px;color:var(--mist);opacity:.8;margin-top:1px}
+  .ov-card.good .ov-m{color:#7fe0a0;opacity:1}
+  .ov-card.warn .ov-m{color:#f0cf8a;opacity:1}
+  .ov-card.bad .ov-m{color:#ff8a9c;opacity:1}
+  .adv{background:var(--mid);border:1px solid #4a3f1a;border-left:3px solid #f0cf8a;border-radius:12px;padding:12px;margin:12px 0 0}
+  .adv-h{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#f0cf8a;margin-bottom:8px}
+  .adv-item{font-size:12.5px;color:var(--mist);line-height:1.5;padding:6px 0;border-top:1px solid var(--line)}
+  .adv-item:first-of-type{border-top:none}
+  .adv-item b{color:var(--white)}
+  .adv-foot{font-size:10.5px;opacity:.6;margin-top:7px}
+  .you-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .you-cell{background:var(--mid);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+  .you-k{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mist);opacity:.65}
+  .you-v{font-size:13px;font-weight:600;color:var(--white);margin-top:2px;word-break:break-word}
+  .you-v.dim{color:var(--mist);opacity:.5;font-weight:500}
+  .you-empty{font-size:12.5px;color:var(--mist);line-height:1.5;opacity:.85}
+  .ov-btn{width:100%;margin-top:10px;background:var(--lime);color:var(--navy);border:0;border-radius:10px;padding:11px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+  .cond{background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .cond-n{font-size:13.5px;font-weight:700;color:var(--white)}
+  .cond-note{font-size:11.5px;color:var(--mist);opacity:.85;margin-top:2px}
+  .cond-acts{display:flex;gap:10px;flex-shrink:0}
+  .cond-a{font-size:11px;font-weight:700;color:var(--lime);cursor:pointer}
+  .cond-empty{font-size:12.5px;color:var(--mist);line-height:1.5;opacity:.85}
+  .cond.appt-soon{border-left:3px solid #f0cf8a}
+  .cond.epi-res{opacity:.55}
+  .appt-type{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mist);opacity:.7;border:1px solid var(--line);border-radius:4px;padding:1px 5px;margin-left:3px}
+  .ov-sev{display:inline-flex;gap:3px;vertical-align:middle}
+  .ov-sev-dot{width:6px;height:6px;border-radius:50%;background:#3a5c8f;display:inline-block}
+  .ov-sev-dot.on{background:#f0cf8a}
+  /* Weight loss */
+  .wl-nums{display:flex;align-items:baseline;gap:10px;margin:2px 0 10px}
+  .wl-big{font-size:32px;font-weight:800;color:var(--white);line-height:1}
+  .wl-unit{font-size:13px;font-weight:600;color:var(--mist);opacity:.7;margin-left:3px}
+  .wl-wk{font-size:11.5px;font-weight:600;color:var(--mist);opacity:.85}
+  .wl-wk.good{color:#7fe0a0;opacity:1}
+  .wl-wk.bad{color:#ff8a9c;opacity:1}
+  .wl-bar{height:12px;border-radius:7px;background:#0a1530;border:1px solid var(--line);overflow:hidden}
+  .wl-fill{height:100%;background:#7fe0a0;border-radius:7px 0 0 7px}
+  .wl-scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mist);opacity:.85;margin-top:5px}
+  .wl-scale span:nth-child(2){font-weight:700;opacity:1;color:var(--white)}
+  .wl-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 0}
+  .wl-stat{background:var(--mid);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+  .wl-k{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mist);opacity:.7}
+  .wl-v{font-size:17px;font-weight:700;color:var(--white);margin-top:2px}
+  .wl-proj{font-size:12px;line-height:1.5;color:var(--mist);opacity:.9;margin-top:11px}
+  /* Plan */
+  .pl-lead{font-size:12.5px;line-height:1.55;color:var(--mist);background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .pl-lead b{color:var(--white)}
+  .pl-sec{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mist);opacity:.7;margin:16px 2px 8px}
+  .pl-act{display:flex;align-items:center;gap:10px;background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px}
+  .pl-actl{flex:1;min-width:0}
+  .pl-name{font-size:14px;font-weight:600;color:var(--white)}
+  .pl-count{font-size:11px;font-weight:600;color:#7fe0a0;margin-left:3px}
+  .pl-hint{font-size:11px;color:var(--mist);opacity:.75;margin-top:1px}
+  .pl-bar{height:7px;border-radius:4px;background:#0a1530;border:1px solid var(--line);overflow:hidden;margin-top:7px}
+  .pl-fill{height:100%;background:#7fe0a0}
+  .pl-log{flex-shrink:0;width:44px;height:40px;border-radius:10px;border:1px solid var(--line);background:#0a1530;color:var(--mist);font:inherit;font-size:18px;font-weight:700;cursor:pointer}
+  .pl-log.done{background:#7fe0a0;color:var(--navy);border-color:#7fe0a0}
+  .pl-tick{display:flex;align-items:flex-start;gap:11px;background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px;cursor:pointer}
+  .pl-tick.done{border-color:#7fe0a0}
+  .pl-box{flex:0 0 24px;height:24px;border-radius:7px;border:2px solid #3a5c8f;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--navy);margin-top:1px}
+  .pl-tick.done .pl-box{background:#7fe0a0;border-color:#7fe0a0}
+  .pl-tl{display:flex;flex-direction:column}
+  .pl-det{background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:0 12px;margin-top:10px}
+  .pl-det>summary{font-size:13px;font-weight:600;color:var(--lime);cursor:pointer;padding:12px 2px;list-style:none}
+  .pl-det>summary::-webkit-details-marker{display:none}
+  .pl-det[open]{padding-bottom:12px}
+  .pl-glabel{font-size:11px;font-weight:700;color:var(--white);margin:12px 0 6px}
+  .pl-glabel.green{color:#7fe0a0}.pl-glabel.amber{color:#f0cf8a}.pl-glabel.red{color:#ff8a9c}
+  .pl-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .pl-chip{font-size:11.5px;padding:3px 9px;border-radius:20px;background:#0a1530;border:1px solid var(--line);color:var(--mist)}
+  .pl-chip.green{border-color:#2f6b45}.pl-chip.amber{border-color:#6b5a1f}.pl-chip.red{border-color:#6b2635}
+  .pl-swaps{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+  .pl-swaps td{padding:6px 6px;border-top:1px solid var(--line);color:var(--mist);vertical-align:top;line-height:1.45}
+  .pl-swaps td:first-child{color:var(--white);width:40%}
+  .pl-review{background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+  .pl-wkrow{display:flex;flex-wrap:wrap;gap:6px 14px}
+  .pl-wks{font-size:12px;color:var(--mist);opacity:.85}
+  .pl-wks b{color:var(--white)}
+  .pl-wks.ok b{color:#7fe0a0}
+  .pl-wknudge{font-size:12.5px;line-height:1.55;color:var(--mist);margin-top:8px}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+
+<div id="setup" hidden>
+  <span class="eyebrow" style="color:var(--lime);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase">The Household</span>
+  <h1>The Still Room</h1>
+  <p>Your medicine cupboard on the phone — tick the day's meds and habits, log a weight or blood pressure, and keep the Tezepelumab clock. It reads and writes the same data as the Hub.</p>
+  <p style="opacity:.85">Open The Hub, tap the <b>⚙</b>, and copy the Gist ID and token here. Stored only on this device.</p>
+  <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--lime);margin-top:14px">Gist ID</label>
+  <input type="text" data-cfg-id autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="32-character hex ID">
+  <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--lime);margin-top:12px">Token</label>
+  <input type="password" data-cfg-token autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ghp_… / github_pat_…">
+  <button class="go" data-cfg-save style="margin-top:16px">Connect</button>
+  <div class="err" data-cfg-err hidden></div>
+  <button class="signout" data-cfg-signout hidden>Disconnect this device</button>
+</div>
+
+<div id="app" hidden>
+  <div class="wrap">
+    <header class="top">
+      <div><span class="eyebrow">The Household</span><h1>Still Room</h1></div>
+      <span class="status" data-status></span>
+    </header>
+
+    <section class="view on" data-view="today">
+      <div class="daterow" data-today-date></div>
+      <div class="teze" data-teze></div>
+      <div class="sec">Medications</div>
+      <div data-meds-ticks></div>
+      <div class="sec">Habits</div>
+      <div data-habit-ticks></div>
+      <div class="sec">Reliever</div>
+      <div class="counter"><span class="lbl">Salbutamol — puffs today</span><button data-puff="-1">−</button><span class="n" data-puff-n>0</span><button data-puff="1">+</button></div>
+    </section>
+
+    <section class="view" data-view="me">
+      <div class="sec">Weight loss</div>
+      <div data-ov-weightloss></div>
+      <div class="sec" style="margin-top:20px">Your plan</div>
+      <div data-ov-plan></div>
+      <div class="sec" style="margin-top:20px">At a glance</div>
+      <div data-ov-strip></div>
+      <div data-ov-advisory></div>
+      <div class="sec" style="margin-top:20px">You — emergency &amp; key details</div>
+      <div data-ov-emergency></div>
+      <div class="sec" style="margin-top:20px">Conditions</div>
+      <div data-ov-conditions></div>
+      <div class="sec" style="margin-top:20px">Appointments &amp; screenings</div>
+      <div data-ov-appts></div>
+      <div class="sec" style="margin-top:20px">Symptoms &amp; episodes</div>
+      <div data-ov-episodes></div>
+    </section>
+
+    <section class="view" data-view="log">
+      <div class="sec">Log a reading</div>
+      <div class="row2">
+        <div><label class="fl">Weight (kg)</label><input class="field" data-r="weight" inputmode="decimal"></div>
+        <div><label class="fl">Waist (cm)</label><input class="field" data-r="waist" inputmode="decimal"></div>
+      </div>
+      <div class="row3">
+        <div><label class="fl">BP sys</label><input class="field" data-r="bpSys" inputmode="numeric"></div>
+        <div><label class="fl">BP dia</label><input class="field" data-r="bpDia" inputmode="numeric"></div>
+        <div><label class="fl">Resting HR</label><input class="field" data-r="rhr" inputmode="numeric"></div>
+      </div>
+      <div class="row2">
+        <div><label class="fl">Sleep (h)</label><input class="field" data-r="sleep" inputmode="decimal"></div>
+        <div><label class="fl">Date</label><input class="field" data-r="date" type="date"></div>
+      </div>
+      <button class="go" data-save-reading>Save reading</button>
+      <div class="sec" style="margin-top:22px">Recent</div>
+      <div data-readings></div>
+    </section>
+
+    <section class="view" data-view="meds">
+      <div class="sec">The register</div>
+      <div class="hint" style="margin:0 2px 8px">What you&rsquo;re on — doses and purpose. Tick off the day&rsquo;s doses on the <b>Today</b> tab; add or change medications in the Hub.</div>
+      <div data-med-register></div>
+    </section>
+
+    <section class="view" data-view="bloods">
+      <div class="bl-caveat">Blood results. <b>Not medical advice</b> — reference ranges vary by lab, so tap “edit range” on any metric to match your own report. Anything out of range is worth raising with your GP.</div>
+      <div class="sec">Add results</div>
+      <div data-blood-form></div>
+      <button class="go" data-save-bloods>Save results</button>
+      <div data-blood-recs></div>
+      <div data-blood-panels></div>
+    </section>
+  </div>
+
+  <nav class="tabs">
+    <button data-nav="today" class="on"><span class="ic">💊</span>Today</button>
+    <button data-nav="me"><span class="ic">🩺</span>Me</button>
+    <button data-nav="log"><span class="ic">＋</span>Log</button>
+    <button data-nav="meds"><span class="ic">🗂</span>Meds</button>
+    <button data-nav="bloods"><span class="ic">🩸</span>Bloods</button>
+    <button data-nav="setup"><span class="ic">⚙</span>Setup</button>
+  </nav>
+</div>
+
+<script>
+(function(){
+  var _mem={};
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(_){ return (k in _mem)?_mem[k]:null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(_){ _mem[k]=v; } }
+  function lsDel(k){ try{ localStorage.removeItem(k); }catch(_){ delete _mem[k]; } }
+  function $(s){ return document.querySelector(s); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function uid(p){ return (p||'hr')+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7); }
+  function setStatus(t){ var el=$('[data-status]'); if(el) el.textContent=t||''; }
+
+  // Exact vocabulary the Hub uses (must match).
+  var MEDS=[['sertraline','Sertraline'],['atorvastatin','Atorvastatin'],['cpap','CPAP'],['trelegy','Trelegy'],['avamys','Avamys'],['fexofenadine','Fexofenadine']];
+  var HABITS=[['exercise','Exercise'],['weight','Weigh-in'],['linkedin','LinkedIn'],['emma','Emma']];
+  var LEGACY_MEDS=['sertraline','atorvastatin','trelegy','fexofenadine']; // legacy dailyChecks[iso].meds===true
+  var LEGACY_SPRAYS=['avamys'];                                           // legacy sprays===true
+
+  var ID_KEY='connolly-sync:gist-id', TOK_KEY='connolly-sync:token', CACHE_KEY='connolly-stillroom:state';
+  var creds=null; (function(){ var id=lsGet(ID_KEY), tk=lsGet(TOK_KEY); if(id&&tk) creds={id:id,token:tk}; })();
+  function saveCreds(id,tk){ lsSet(ID_KEY,id); lsSet(TOK_KEY,tk); creds={id:id,token:tk}; }
+  function clearCreds(){ lsDel(ID_KEY); lsDel(TOK_KEY); creds=null; }
+  function headers(){ return { 'Authorization':'Bearer '+creds.token, 'Accept':'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' }; }
+
+  var STATE=null; // last-known full Hub state
+  try{ STATE=JSON.parse(lsGet(CACHE_KEY)||'null'); }catch(_){ STATE=null; }
+
+  function gistGetRaw(){ return fetch('https://api.github.com/gists/'+creds.id,{headers:headers()}).then(function(r){ if(!r.ok) throw new Error('gist '+r.status); return r.json(); }).then(function(g){ var f=g.files&&g.files['life-twoweek.json']; if(!f) throw new Error('no life-twoweek.json'); if(f.truncated&&f.raw_url) return fetch(f.raw_url,{headers:{'Authorization':'Bearer '+creds.token}}).then(function(r){return r.text();}); return f.content; }); }
+  function parseState(text){ var p; try{ p=JSON.parse(text||'{}'); }catch(_){ p={}; } return { payload:p, state:(p.state||p||{}) }; }
+
+  function pull(){ if(!creds) return Promise.reject(new Error('no creds')); setStatus('syncing…'); return gistGetRaw().then(function(t){ var ps=parseState(t); STATE=ps.state; try{ lsSet(CACHE_KEY, JSON.stringify(STATE)); }catch(_){ } setStatus(''); return STATE; }); }
+
+  // Serialized read-modify-write: apply `mutator(state)` to a freshly pulled copy, push, keep STATE current.
+  var chain=Promise.resolve();
+  function commit(mutator){
+    if(STATE) { try{ mutator(STATE); }catch(_){ } render(); } // optimistic
+    if(!creds) return;
+    chain = chain.then(function(){
+      setStatus('saving…');
+      return gistGetRaw().then(function(t){
+        var ps=parseState(t); var st=ps.state; try{ mutator(st); }catch(_){ }
+        var payload=ps.payload; payload.state=st; payload.savedAt=new Date().toISOString(); payload.writer={id:'stillroom',label:'Still Room',at:payload.savedAt};
+        var body={files:{}}; body.files['life-twoweek.json']={content:JSON.stringify(payload)};
+        return fetch('https://api.github.com/gists/'+creds.id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json'},headers()),body:JSON.stringify(body)}).then(function(r){ if(r.ok){ STATE=st; try{ lsSet(CACHE_KEY, JSON.stringify(STATE)); }catch(_){ } setStatus(''); } else setStatus('save failed'); });
+      }).catch(function(){ setStatus('offline'); });
+    });
+  }
+
+  // ---- helpers over state ----
+  function dc(st, iso){ if(!st.dailyChecks||typeof st.dailyChecks!=='object') st.dailyChecks={}; if(!st.dailyChecks[iso]) st.dailyChecks[iso]={}; return st.dailyChecks[iso]; }
+  function medDone(st, key){ var iso=todayISO(); var d=(st.dailyChecks&&st.dailyChecks[iso])||{}; if(d[key]===true) return true; if(d.meds===true && LEGACY_MEDS.indexOf(key)>=0) return true; if(d.sprays===true && LEGACY_SPRAYS.indexOf(key)>=0) return true; return false; }
+  function habitDone(st, key){ var iso=todayISO(); var d=(st.dailyChecks&&st.dailyChecks[iso])||{}; return d[key]===true; }
+  function puffs(st){ var iso=todayISO(); var d=(st.dailyChecks&&st.dailyChecks[iso])||{}; return parseInt(d.salbutamolPuffs,10)||0; }
+  function tezeDate(st){ var h=st.health&&st.health.profile; return st.tezeNextDate || (h&&h.tezeNextDate) || ''; }
+  function daysUntil(iso){ if(!iso) return null; var t=new Date(iso+'T00:00:00'); var now=new Date(); now.setHours(0,0,0,0); return Math.round((t-now)/86400000); }
+  function addDaysISO(iso, n){ var d=iso?new Date(iso+'T00:00:00'):new Date(); d.setDate(d.getDate()+n); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+  // ---- render ----
+  function renderToday(){
+    if(!STATE) return;
+    $('[data-today-date]').textContent = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+    // teze
+    var td=tezeDate(STATE); var du=daysUntil(td); var tz=$('[data-teze]');
+    var cls = du==null?'ok':(du<=0?'due':(du<=3?'soon':'ok'));
+    var dtxt = du==null?'no date set':(du<0?(Math.abs(du)+' days overdue'):(du===0?'due today':('in '+du+' day'+(du===1?'':'s'))));
+    tz.innerHTML='<div class="t-top"><span class="t-name">Tezepelumab</span><span class="t-days '+cls+'">'+esc(dtxt)+'</span></div>'+(td?'<div class="t-date">next dose '+new Date(td+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+'</div>':'')+'<button data-teze-taken>Mark taken today (+28 days)</button>';
+    // meds
+    $('[data-meds-ticks]').innerHTML = MEDS.map(function(m){ var done=medDone(STATE,m[0]); return '<div class="tick'+(done?' done':'')+'" data-tick-med="'+m[0]+'"><span class="box">'+(done?'✓':'')+'</span><span class="lbl">'+esc(m[1])+'</span></div>'; }).join('');
+    $('[data-habit-ticks]').innerHTML = HABITS.map(function(h){ var done=habitDone(STATE,h[0]); return '<div class="tick'+(done?' done':'')+'" data-tick-habit="'+h[0]+'"><span class="box">'+(done?'✓':'')+'</span><span class="lbl">'+esc(h[1])+'</span></div>'; }).join('');
+    $('[data-puff-n]').textContent = puffs(STATE);
+  }
+  function renderReadings(){
+    if(!STATE) return; var rs=((STATE.health&&STATE.health.readings)||[]).slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'');}).slice(0,10);
+    var host=$('[data-readings]'); if(!host) return;
+    if(!rs.length){ host.innerHTML='<div class="muted">No readings yet.</div>'; return; }
+    host.innerHTML=rs.map(function(r){ var bits=[]; if(r.weight!=null) bits.push(r.weight+'kg'); if(r.bpSys!=null&&r.bpDia!=null) bits.push(r.bpSys+'/'+r.bpDia); if(r.waist!=null) bits.push('waist '+r.waist); if(r.rhr!=null) bits.push('HR '+r.rhr); if(r.sleep!=null) bits.push(r.sleep+'h'); var d=r.date?new Date(r.date+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}):''; return '<div class="rd"><span class="rd-d">'+esc(d)+'</span><span class="rd-v">'+esc(bits.join(' · ')||'—')+'</span></div>'; }).join('');
+  }
+  function renderMedRegister(){
+    if(!STATE) return; var meds=(STATE.medications||[]).slice().sort(function(a,b){ var o={active:0,paused:1,stopped:2}; return (o[a.status]||0)-(o[b.status]||0); });
+    var host=$('[data-med-register]'); if(!host) return;
+    if(!meds.length){ host.innerHTML='<div class="muted">No medications in the register. Add them in the Hub.</div>'; return; }
+    host.innerHTML=meds.filter(function(m){return m.status!=='stopped';}).map(function(m){ var meta=[m.dose,m.schedule].filter(Boolean).join(' · '); return '<div class="med'+(m.status==='paused'?' paused':'')+'"><div class="m-top"><div><div class="m-name">'+esc(m.name||'')+'</div>'+(meta?'<div class="m-meta">'+esc(meta)+'</div>':'')+(m.purpose?'<div class="m-meta">'+esc(m.purpose)+'</div>':'')+'</div></div>'+(m.status==='paused'?'<span class="m-pill">Paused</span>':'')+'</div>'; }).join('');
+  }
+  // ===== Bloods: lab results with editable normal ranges, a per-metric trend + shaded range band, and lifestyle notes. =====
+  // Results live in shared state.health.bloods (array of {id,date,<key>:value}); edited ranges in state.health.bloodRanges.
+  // Default ranges are typical UK adult values — vary by lab, so they're editable. Not medical advice.
+  var BLOODS=[
+    {k:'hba1c',label:'HbA1c (IFCC)',unit:'mmol/mol',panel:'Diabetes',dir:'high',low:20,high:42,rec:'Above ~42 signals rising blood sugar. Fewer refined carbs and sugary drinks, losing excess weight and regular activity all lower HbA1c.'},
+    {k:'hba1c_dcct',label:'HbA1c (DCCT)',unit:'%',panel:'Diabetes',dir:'high',low:4,high:6,rec:'Same as IFCC — lower with fewer refined carbs, weight loss and activity.'},
+    {k:'glucose',label:'Fasting glucose',unit:'mmol/L',panel:'Diabetes',dir:'range',low:3.9,high:5.5,rec:'Above ~5.5 fasting suggests impaired glucose. Fewer refined carbs, weight loss and activity help; ≥7.0 → GP.'},
+    {k:'alt',label:'ALT',unit:'U/L',panel:'Liver',dir:'high',low:10,high:40,rec:'Raised ALT often reflects fatty liver, alcohol or medication. Less alcohol, weight loss and fewer sugary drinks usually help.'},
+    {k:'alp',label:'Alk phosphatase',unit:'U/L',panel:'Liver',dir:'high',low:30,high:130,rec:'Can be liver- or bone-related; best read alongside GGT by your GP.'},
+    {k:'bilirubin',label:'Total bilirubin',unit:'µmol/L',panel:'Liver',dir:'high',low:0,high:21,rec:'Mildly raised is often harmless (e.g. Gilbert’s). Persistent, or with other abnormal LFTs, → GP.'},
+    {k:'albumin',label:'Albumin',unit:'g/L',panel:'Liver',dir:'range',low:35,high:50,rec:'Low albumin can reflect nutrition, inflammation or liver/kidney issues — adequate protein and hydration help. (Also part of the bone profile.)'},
+    {k:'ggt',label:'Gamma GT',unit:'U/L',panel:'Liver',dir:'high',low:10,high:71,rec:'GGT is sensitive to alcohol and fatty liver — cutting alcohol and losing weight are the most effective changes.'},
+    {k:'total_protein',label:'Total protein',unit:'g/L',panel:'Liver',dir:'range',low:60,high:80,rec:'Interpreted with albumin — discuss out-of-range values with your GP.'},
+    {k:'tchol',label:'Total cholesterol',unit:'mmol/L',panel:'Lipids',dir:'high',low:0,high:5,rec:'Lower saturated fat, more soluble fibre (oats, beans), oily fish and activity all lower cholesterol.'},
+    {k:'hdl',label:'HDL cholesterol',unit:'mmol/L',panel:'Lipids',dir:'low',low:1,high:3,rec:'HDL (“good”) rises with regular exercise, stopping smoking, and healthy fats (olive oil, nuts, oily fish).'},
+    {k:'trig',label:'Triglycerides',unit:'mmol/L',panel:'Lipids',dir:'high',low:0,high:1.7,rec:'Fall with less sugar/refined carbs and alcohol, weight loss, activity and omega-3.'},
+    {k:'ldl',label:'LDL cholesterol',unit:'mmol/L',panel:'Lipids',dir:'high',low:0,high:3,rec:'LDL (“bad”) lowers with less saturated fat, more fibre and plant sterols, and activity.'},
+    {k:'chol_hdl_ratio',label:'Chol/HDL ratio',unit:'',panel:'Lipids',dir:'high',low:0,high:4,rec:'Improves by lowering total cholesterol and raising HDL — the combined changes above.'},
+    {k:'non_hdl',label:'Non-HDL cholesterol',unit:'mmol/L',panel:'Lipids',dir:'high',low:0,high:4,rec:'A key cardiovascular target — lowers with the same diet and activity changes as LDL.'},
+    {k:'wbc',label:'White cell count',unit:'×10⁹/L',panel:'Full blood count',dir:'range',low:4,high:11,rec:'Usually not lifestyle-driven; your GP interprets this with the rest of the count.'},
+    {k:'rbc',label:'Red cell count',unit:'×10¹²/L',panel:'Full blood count',dir:'range',low:4.5,high:6.5,rec:'Interpreted with haemoglobin and MCV by your GP.'},
+    {k:'haemoglobin',label:'Haemoglobin',unit:'g/L',panel:'Full blood count',dir:'range',low:130,high:170,rec:'Low can mean anaemia (sometimes iron/B12/folate). Your GP interprets; see haematinics.'},
+    {k:'haematocrit',label:'Haematocrit',unit:'L/L',panel:'Full blood count',dir:'range',low:0.40,high:0.54,rec:'Interpreted with haemoglobin; hydration affects it slightly. GP interprets.'},
+    {k:'mcv',label:'MCV',unit:'fL',panel:'Full blood count',dir:'range',low:80,high:100,rec:'High can accompany low B12/folate or alcohol; low can accompany iron deficiency. GP interprets.'},
+    {k:'mch',label:'MCH',unit:'pg',panel:'Full blood count',dir:'range',low:27,high:33,rec:'Interpreted with MCV and haemoglobin by your GP.'},
+    {k:'platelets',label:'Platelet count',unit:'×10⁹/L',panel:'Full blood count',dir:'range',low:150,high:400,rec:'Not lifestyle-driven; your GP interprets out-of-range values.'},
+    {k:'neutrophils',label:'Neutrophils',unit:'×10⁹/L',panel:'White cell differential',dir:'range',low:2.0,high:7.5,rec:'Reflects infection/inflammation; interpreted by your GP.'},
+    {k:'lymphocytes',label:'Lymphocytes',unit:'×10⁹/L',panel:'White cell differential',dir:'range',low:1.0,high:4.0,rec:'Interpreted by your GP alongside the rest of the differential.'},
+    {k:'monocytes',label:'Monocytes',unit:'×10⁹/L',panel:'White cell differential',dir:'range',low:0.2,high:0.8,rec:'Interpreted by your GP.'},
+    {k:'eosinophils',label:'Eosinophils',unit:'×10⁹/L',panel:'White cell differential',dir:'range',low:0,high:0.4,rec:'Can rise with allergy or asthma; your GP interprets.'},
+    {k:'basophils',label:'Basophils',unit:'×10⁹/L',panel:'White cell differential',dir:'range',low:0,high:0.1,rec:'Interpreted by your GP.'},
+    {k:'ferritin',label:'Ferritin',unit:'µg/L',panel:'Haematinics',dir:'range',low:30,high:400,rec:'Low = low iron stores: iron-rich foods (red meat, pulses, dark greens) with vitamin C aid absorption. High can reflect inflammation — GP interprets.'},
+    {k:'folate',label:'Folate',unit:'µg/L',panel:'Haematinics',dir:'low',low:3.9,high:20,rec:'Low folate: more leafy greens, legumes and fortified foods; your GP may advise a supplement.'},
+    {k:'b12',label:'Vitamin B12',unit:'ng/L',panel:'Haematinics',dir:'low',low:200,high:900,rec:'Low B12: meat, fish, dairy and eggs, or a supplement; marked deficiency may need injections — see your GP.'},
+    {k:'crp',label:'C-reactive protein',unit:'mg/L',panel:'Inflammation',dir:'high',low:0,high:5,rec:'Raised CRP signals inflammation or infection. If persistently high, discuss with your GP; weight loss and stopping smoking modestly lower baseline inflammation.'},
+    {k:'free_t4',label:'Free T4',unit:'pmol/L',panel:'Thyroid',dir:'range',low:12,high:22,rec:'Thyroid — interpreted with TSH by your GP; not lifestyle-corrected.'},
+    {k:'tsh',label:'TSH',unit:'mIU/L',panel:'Thyroid',dir:'range',low:0.4,high:4.0,rec:'Thyroid function — interpreted with Free T4 by your GP.'},
+    {k:'sodium',label:'Sodium',unit:'mmol/L',panel:'Kidney (U&E)',dir:'range',low:135,high:145,rec:'Electrolyte — your GP interprets; hydration and some medications shift it.'},
+    {k:'potassium',label:'Potassium',unit:'mmol/L',panel:'Kidney (U&E)',dir:'range',low:3.5,high:5.3,rec:'Electrolyte — your GP interprets out-of-range values.'},
+    {k:'urea',label:'Urea',unit:'mmol/L',panel:'Kidney (U&E)',dir:'range',low:2.5,high:7.8,rec:'Kidney/hydration — staying well hydrated helps; your GP interprets.'},
+    {k:'creatinine',label:'Creatinine',unit:'µmol/L',panel:'Kidney (U&E)',dir:'range',low:60,high:110,rec:'Kidney function — good hydration and avoiding excess NSAIDs help; GP interprets with eGFR.'},
+    {k:'egfr',label:'eGFR (MDRD)',unit:'mL/min',panel:'Kidney (U&E)',dir:'low',low:60,high:120,rec:'Below ~60 warrants a GP review of kidney function. Good blood-pressure control, hydration and avoiding excess NSAIDs protect the kidneys.'},
+    {k:'calcium_ionised',label:'Ionised calcium',unit:'mmol/L',panel:'Bone profile',dir:'range',low:1.15,high:1.35,rec:'Bone/mineral — interpreted by your GP, often with vitamin D.'},
+    {k:'calcium_adjusted',label:'Adjusted calcium',unit:'mmol/L',panel:'Bone profile',dir:'range',low:2.2,high:2.6,rec:'Bone/mineral — interpreted by your GP, often with vitamin D and phosphate.'},
+    {k:'phosphate',label:'Inorganic phosphate',unit:'mmol/L',panel:'Bone profile',dir:'range',low:0.8,high:1.5,rec:'Bone/mineral — interpreted by your GP.'},
+    {k:'vit_d',label:'25-OH Vitamin D',unit:'nmol/L',panel:'Vitamin D',dir:'low',low:50,high:125,rec:'Low vitamin D: sunlight (safely), oily fish and eggs, and a daily supplement (NHS suggests 10µg/400IU, especially in winter). Very low → GP.'}
+  ];
+  var BL_PANELS=['Diabetes','Liver','Lipids','Full blood count','White cell differential','Haematinics','Inflammation','Thyroid','Kidney (U&E)','Bone profile','Vitamin D'];
+  function bloodDef(k){ for(var i=0;i<BLOODS.length;i++) if(BLOODS[i].k===k) return BLOODS[i]; return null; }
+  function bloodRange(b){ var ov=(STATE&&STATE.health&&STATE.health.bloodRanges&&STATE.health.bloodRanges[b.k])||null; var lo=(ov&&ov.low!=null)?+ov.low:b.low, hi=(ov&&ov.high!=null)?+ov.high:b.high; return {low:lo,high:hi,dir:b.dir}; }
+  function bloodSeries(k){ var arr=(STATE&&STATE.health&&Array.isArray(STATE.health.bloods))?STATE.health.bloods:[]; var out=[]; arr.forEach(function(r){ if(r&&r[k]!=null&&r[k]!==''){ var n=parseFloat(r[k]); if(!isNaN(n)) out.push({date:r.date||'',v:n}); } }); out.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');}); return out; }
+  function bloodFlag(b,v){ if(v==null||isNaN(v)) return false; var r=bloodRange(b); if(b.dir==='high') return v>r.high; if(b.dir==='low') return v<r.low; return v<r.low||v>r.high; }
+  function sparkSVG(b,series){
+    if(!series.length) return '<div class="bl-nochart">No results yet — add some below.</div>';
+    var W=280,H=64,pad=7,r=bloodRange(b),vals=series.map(function(p){return p.v;});
+    var lo=Math.min.apply(null,vals.concat([r.low,r.high])), hi=Math.max.apply(null,vals.concat([r.low,r.high]));
+    var span=(hi-lo)||1; lo-=span*0.12; hi+=span*0.12; span=(hi-lo)||1;
+    function Y(v){ return (pad+(H-2*pad)*(1-(v-lo)/span)); }
+    function X(i){ return (pad+(W-2*pad)*(series.length===1?0.5:(i/(series.length-1)))); }
+    var bt,bb;
+    if(b.dir==='high'){ bt=Y(r.high); bb=H-pad; } else if(b.dir==='low'){ bt=pad; bb=Y(r.low); } else { bt=Y(r.high); bb=Y(r.low); }
+    var band='<rect x="0" y="'+Math.min(bt,bb).toFixed(1)+'" width="'+W+'" height="'+Math.max(0,Math.abs(bb-bt)).toFixed(1)+'" fill="#C4F000" opacity="0.13"/>';
+    var line='<polyline points="'+series.map(function(p,i){return X(i).toFixed(1)+','+Y(p.v).toFixed(1);}).join(' ')+'" fill="none" stroke="#C4CCDD" stroke-width="1.6"/>';
+    var dots=series.map(function(p,i){ var bad=bloodFlag(b,p.v); return '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="'+(bad?3.6:2.7)+'" fill="'+(bad?'#ff5a6e':'#C4F000')+'"/>'; }).join('');
+    return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="64" preserveAspectRatio="none" class="bl-svg">'+band+line+dots+'</svg>';
+  }
+  var _blBuilt=false;
+  function renderBloodForm(){ var host=$('[data-blood-form]'); if(!host||_blBuilt) return;
+    var html='<div class="row2"><div><label class="fl">Test date</label><input class="field" data-bl-date type="date"></div><div></div></div>';
+    BL_PANELS.forEach(function(pn){ html+='<div class="bl-grouphd">'+esc(pn)+'</div><div class="bl-grid">';
+      BLOODS.filter(function(b){return b.panel===pn;}).forEach(function(b){ html+='<div class="bl-in"><label class="fl">'+esc(b.label)+(b.unit?(' <span class="bl-u">'+esc(b.unit)+'</span>'):'')+'</label><input class="field" data-bl="'+b.k+'" inputmode="decimal"></div>'; });
+      html+='</div>'; });
+    host.innerHTML=html; var de=$('[data-bl-date]'); if(de&&!de.value) de.value=todayISO(); _blBuilt=true;
+  }
+  function renderBloodPanels(){ var host=$('[data-blood-panels]'); if(!host) return; var html='';
+    BL_PANELS.forEach(function(pn){ html+='<div class="sec">'+esc(pn)+'</div>';
+      BLOODS.filter(function(b){return b.panel===pn;}).forEach(function(b){
+        var s=bloodSeries(b.k), last=s.length?s[s.length-1]:null, r=bloodRange(b), bad=last?bloodFlag(b,last.v):false;
+        var rng=(b.dir==='high')?('≤ '+r.high):(b.dir==='low'?('≥ '+r.low):(r.low+'–'+r.high));
+        var val=last?(last.v+(b.unit?(' '+b.unit):'')):'—';
+        var dt=(last&&last.date)?(' · '+new Date(last.date+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'})):'';
+        html+='<div class="bl-card"><div class="bl-top"><div class="bl-name">'+esc(b.label)+'</div>'+(last?('<div class="bl-chip '+(bad?'out':'in')+'">'+(bad?'out':'in')+' range</div>'):'')+'</div><div class="bl-val">'+esc(val)+dt+'</div>'+sparkSVG(b,s)+'<div class="bl-range">Normal '+esc(rng)+(b.unit?(' '+esc(b.unit)):'')+' · <span class="bl-edit" data-blood-edit="'+b.k+'">edit range</span></div>'+(bad?('<div class="bl-rec">'+esc(b.rec)+'</div>'):'')+'</div>';
+      });
+    });
+    host.innerHTML=html;
+  }
+  function renderBloodRecs(){ var host=$('[data-blood-recs]'); if(!host) return;
+    var out=BLOODS.filter(function(b){ var s=bloodSeries(b.k); return s.length && bloodFlag(b,s[s.length-1].v); });
+    if(!out.length){ host.innerHTML=''; return; }
+    host.innerHTML='<div class="bl-recs"><div class="bl-recs-h">'+out.length+' to look at</div>'+out.map(function(b){return '<div class="bl-recs-item"><b>'+esc(b.label)+'</b> — '+esc(b.rec)+'</div>';}).join('')+'<div class="bl-recs-foot">General guidance, not medical advice — discuss anything abnormal with your GP.</div></div>';
+  }
+  function renderBloods(){ renderBloodForm(); renderBloodRecs(); renderBloodPanels(); }
+  function saveBloods(){ var de=$('[data-bl-date]'); var date=(de&&de.value)||todayISO(); var rec={id:uid('bl'),date:date}, any=false;
+    BLOODS.forEach(function(b){ var el=$('[data-bl="'+b.k+'"]'); if(!el) return; var v=String(el.value||'').trim(); if(v!==''){ var n=parseFloat(v); if(!isNaN(n)){ rec[b.k]=n; any=true; } } });
+    if(!any){ alert('Enter at least one result.'); return; }
+    commit(function(st){ if(!st.health||typeof st.health!=='object') st.health={}; if(!Array.isArray(st.health.bloods)) st.health.bloods=[]; st.health.bloods.push(rec); });
+    BLOODS.forEach(function(b){ var el=$('[data-bl="'+b.k+'"]'); if(el) el.value=''; }); setStatus('saved'); setTimeout(function(){ setStatus(''); },1400);
+  }
+  function editBloodRange(k){ var b=bloodDef(k); if(!b) return; var r=bloodRange(b);
+    var lo=prompt(b.label+' — lower normal'+(b.unit?(' ('+b.unit+')'):''), r.low); if(lo===null) return;
+    var hi=prompt(b.label+' — upper normal'+(b.unit?(' ('+b.unit+')'):''), r.high); if(hi===null) return;
+    var loN=parseFloat(lo), hiN=parseFloat(hi);
+    commit(function(st){ if(!st.health||typeof st.health!=='object') st.health={}; if(!st.health.bloodRanges||typeof st.health.bloodRanges!=='object') st.health.bloodRanges={}; st.health.bloodRanges[k]={low:isNaN(loN)?r.low:loN,high:isNaN(hiN)?r.high:hiN}; });
+  }
+  // ===== Overview ("Me") — status strip, advisory, You/emergency, conditions =====
+  function ovLatest(field){
+    var rs=(STATE&&STATE.health&&Array.isArray(STATE.health.readings))?STATE.health.readings:[];
+    var best=null;
+    rs.forEach(function(r){ if(r&&r[field]!=null&&r[field]!==''){ if(!best||(r.date||'')>(best.date||'')) best=r; } });
+    return best;
+  }
+  function ovDelta(field, days){
+    var rs=(STATE&&STATE.health&&Array.isArray(STATE.health.readings))?STATE.health.readings:[];
+    var pts=[]; rs.forEach(function(r){ if(r&&r[field]!=null&&r[field]!==''&&r.date){ var n=parseFloat(r[field]); if(!isNaN(n)) pts.push({date:r.date,v:n}); } });
+    if(pts.length<2) return null; pts.sort(function(a,b){return a.date.localeCompare(b.date);});
+    var last=pts[pts.length-1], cutoff=addDaysISO(last.date,-days), ref=null;
+    for(var i=0;i<pts.length;i++){ if(pts[i].date<=cutoff) ref=pts[i]; }
+    if(!ref) ref=pts[0]; if(ref.date===last.date) return null;
+    return +(last.v-ref.v).toFixed(1);
+  }
+  function ovBP(sys,dia){ if(sys<130&&dia<80) return 'good'; if(sys<140&&dia<90) return 'warn'; return 'bad'; }
+  function ovRHR(v){ if(v>=40&&v<=70) return 'good'; if(v<=85) return 'warn'; return 'bad'; }
+  function ovBMI(){ var w=ovLatest('weight'); var h=(STATE.health&&STATE.health.profile&&STATE.health.profile.heightCm)||184; if(!w) return null; var m=h/100; return w.weight/(m*m); }
+  function ovBMIStatus(bmi){ if(bmi<25) return 'good'; if(bmi<30) return 'warn'; return 'bad'; }
+  function ovCard(l,v,u,m,cls){ return '<div class="ov-card'+(cls?' '+cls:'')+'"><div class="ov-l">'+l+'</div><div class="ov-v">'+v+(u?'<span class="ov-u">'+u+'</span>':'')+'</div>'+(m?'<div class="ov-m">'+m+'</div>':'')+'</div>'; }
+
+  // Lifestyle plan — same planLog store as the Hub (state.health.planLog[iso][id]).
+  var PLAN_ACTIONS=[
+    {id:'walk',label:'Walk / swim / cardio, 30 min',hint:'Most days — after a meal when you can.',type:'weekly',target:6},
+    {id:'weights',label:'Home weights session',hint:'Short — bands or bodyweight, 3× a week.',type:'weekly',target:3},
+    {id:'drinks',label:'Sugar-free drinks',hint:'No juice or ordinary squash.',type:'daily'},
+    {id:'bread',label:'Bread: seeded, open, or skipped',hint:'Not white; one slice or open-topped.',type:'daily'},
+    {id:'snacks',label:'Green snacks only',hint:'Cheese, olives, hummus, yoghurt + berries.',type:'daily'}
+  ];
+  var PLAN_RAG={
+    green:['Eggs','Chicken','Turkey','White fish','Salmon/mackerel','Prawns','Tuna','Greek yoghurt','Salad, tomatoes, peppers','Broccoli/cauliflower','Spinach/greens','Carrots, mushrooms','Avocado, olives','Berries'],
+    amber:['Seeded/wholemeal bread','Basmati/brown rice','Sweet potato','Cheese, hummus','Bacon/sausages (2×/wk)','Banana, grapes, apple','Diet fizzy','White pasta/potato (small)'],
+    red:['White bread, rolls, bagels','Fruit juice, squash','Biscuits, chocolate','Crisps, chips'],
+    swaps:[['White sandwich/roll','Seeded/open, piled with chicken, tuna, egg or salmon + salad'],['Sandwich for lunch','Big salad + protein + avocado + olive oil'],['Juice or squash','Sugar-free squash, diet fizzy, sparkling water'],['Biscuits/choc/crisps','Cheese, olives, carrots+hummus, or yoghurt+berries'],['Toast for breakfast','Eggs + mushrooms, or yoghurt + berries']]
+  };
+  function planWeekDays(){ var d=new Date(); var day=(d.getDay()+6)%7; var mon=new Date(d); mon.setDate(d.getDate()-day); var out=[]; for(var i=0;i<7;i++){ var x=new Date(mon); x.setDate(mon.getDate()+i); out.push(x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')); } return out; }
+  function planCount(id){ var log=(STATE.health&&STATE.health.planLog)||{}; var n=0; planWeekDays().forEach(function(iso){ if(log[iso]&&log[iso][id]) n++; }); return n; }
+  function planToday(id){ var iso=todayISO(); var log=(STATE.health&&STATE.health.planLog)||{}; return !!(log[iso]&&log[iso][id]); }
+  function planTick(id){ var iso=todayISO(); commit(function(st){ if(!st.health||typeof st.health!=='object') st.health={}; if(!st.health.planLog||typeof st.health.planLog!=='object') st.health.planLog={}; if(!st.health.planLog[iso]) st.health.planLog[iso]={}; st.health.planLog[iso][id]=!st.health.planLog[iso][id]; }); }
+  function renderPlan(){
+    if(!STATE) return; var host=$('[data-ov-plan]'); if(!host) return;
+    var move=PLAN_ACTIONS.filter(function(a){return a.type==='weekly';}).map(function(a){
+      var n=planCount(a.id), pct=Math.max(0,Math.min(100,(n/a.target)*100)), dt=planToday(a.id);
+      return '<div class="pl-act"><div class="pl-actl"><div class="pl-name">'+esc(a.label)+' <span class="pl-count">'+n+'/'+a.target+' wk</span></div><div class="pl-hint">'+esc(a.hint)+'</div><div class="pl-bar"><div class="pl-fill" style="width:'+pct.toFixed(0)+'%"></div></div></div><button class="pl-log'+(dt?' done':'')+'" data-plan-tick="'+a.id+'">'+(dt?'✓':'+')+'</button></div>';
+    }).join('');
+    var food=PLAN_ACTIONS.filter(function(a){return a.type==='daily';}).map(function(a){
+      var d=planToday(a.id);
+      return '<div class="pl-tick'+(d?' done':'')+'" data-plan-tick="'+a.id+'"><span class="pl-box">'+(d?'✓':'')+'</span><span class="pl-tl"><span class="pl-name">'+esc(a.label)+'</span><span class="pl-hint">'+esc(a.hint)+'</span></span></div>';
+    }).join('');
+    var chip=function(arr,c){ return '<div class="pl-chips">'+arr.map(function(x){return '<span class="pl-chip '+c+'">'+esc(x)+'</span>';}).join('')+'</div>'; };
+    var swaps='<table class="pl-swaps">'+PLAN_RAG.swaps.map(function(r){return '<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td></tr>';}).join('')+'</table>';
+    var wc={walk:planCount('walk'),weights:planCount('weights')}, fc={drinks:planCount('drinks'),bread:planCount('bread'),snacks:planCount('snacks')};
+    var anyTicks=wc.walk+wc.weights+fc.drinks+fc.bread+fc.snacks>0, review;
+    if(anyTicks){
+      var fl={drinks:'Sugar-free drinks',bread:'Bread swap',snacks:'Green snacks'};
+      var weakest=Object.keys(fc).sort(function(a,b){return fc[a]-fc[b];})[0];
+      var allGood=fc.drinks>=5&&fc.bread>=5&&fc.snacks>=5;
+      var dW=ovDelta('weight',7);
+      var nudge=allGood?'Food swaps are sticking — hold the pattern.':(fl[weakest]+' slipped to '+fc[weakest]+'/7 — make that next week’s one focus.');
+      if(dW!=null) nudge+=' Weight '+(dW<0?('down '+Math.abs(dW).toFixed(1)+' kg'):(dW>0.2?('up '+dW.toFixed(1)+' kg'):'flat'))+' this week.';
+      var st=function(l,n,t){return '<span class="pl-wks'+(n>=t?' ok':'')+'">'+l+' <b>'+n+'/'+t+'</b></span>';};
+      review='<div class="pl-review"><div class="pl-wkrow">'+st('Walks',wc.walk,6)+st('Weights',wc.weights,3)+st('Drinks',fc.drinks,7)+st('Bread',fc.bread,7)+st('Snacks',fc.snacks,7)+'</div><div class="pl-wknudge">'+esc(nudge)+'</div></div>';
+    } else { review='<div class="pl-review"><div class="pl-wknudge">Start ticking — your first weekly review lands once there’s a few days in.</div></div>'; }
+    host.innerHTML='<div class="pl-lead">One lever runs through your results: <b>visceral fat</b>. Your cholesterol, liver, kidneys, thyroid and blood count are fine — the movers (HbA1c, HDL, waist, BP) improve together as the waist drops. This targets that.</div>'
+      +'<div class="pl-sec">This week</div>'+review
+      +'<div class="pl-sec">Move</div>'+move
+      +'<div class="pl-sec">Food — daily</div>'+food
+      +'<details class="pl-det"><summary>Red / Amber / Green + swaps</summary>'
+      +'<div class="pl-glabel green">Green — freely</div>'+chip(PLAN_RAG.green,'green')
+      +'<div class="pl-glabel amber">Amber — portioned</div>'+chip(PLAN_RAG.amber,'amber')
+      +'<div class="pl-glabel red">Red — cut down</div>'+chip(PLAN_RAG.red,'red')
+      +'<div class="pl-glabel">Swaps</div>'+swaps+'</details>';
+  }
+  function renderWeightLoss(){
+    if(!STATE) return; var host=$('[data-ov-weightloss]'); if(!host) return;
+    var p=(STATE.health&&STATE.health.profile)||{};
+    var w=ovLatest('weight');
+    var start=(typeof p.startWeightKg==='number'&&p.startWeightKg)||null;
+    var target=(typeof p.targetWeightKg==='number'&&p.targetWeightKg)||null;
+    var head='<button class="ov-btn" data-ov-edit-wl style="margin-top:0;margin-bottom:10px">Edit start / target</button>';
+    if(!w||start==null||target==null){ host.innerHTML=head+'<div class="cond-empty">Set a start and target weight, then log a weigh-in on the Log tab to track progress.</div>'; return; }
+    var current=w.weight, totalToLose=Math.max(0.1,start-target), lost=start-current, toGo=current-target, pct=Math.max(0,Math.min(100,(lost/totalToLose)*100)), atOrBelow=current<=target;
+    var d28=ovDelta('weight',28), rateWk=(d28!=null)?d28/4:null, proj='';
+    if(atOrBelow){ proj='Target reached — hold here. Keep the weekly weigh-in.'; }
+    else if(rateWk!=null&&rateWk<-0.05){ var weeks=toGo/Math.abs(rateWk); var eta=new Date(Date.now()+weeks*7*86400000); proj='Losing ~'+Math.abs(rateWk).toFixed(2)+' kg/week. At this rate you hit '+target+' kg around '+eta.toLocaleDateString('en-GB',{month:'long',year:'numeric'})+'.'; }
+    else if(rateWk!=null&&rateWk>0.05){ proj='Up ~'+rateWk.toFixed(2)+' kg/week this month — worth a reset.'; }
+    else { proj='Roughly flat this month. The lever is usually the evening snack.'; }
+    if(p.weightTargetDate){ var td=new Date(p.weightTargetDate+'T00:00:00'); proj+=' Target date: '+td.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+'.'; }
+    var d7=ovDelta('weight',7), wk=(d7!=null)?('<span class="wl-wk '+(d7<0?'good':(d7>0.2?'bad':''))+'">'+(d7<0?'↓ ':'↑ +')+Math.abs(d7).toFixed(1)+' kg this week</span>'):'';
+    host.innerHTML=head
+      +'<div class="wl-nums"><div class="wl-big">'+current.toFixed(1)+'<span class="wl-unit">kg</span></div>'+wk+'</div>'
+      +'<div class="wl-bar"><div class="wl-fill" style="width:'+pct.toFixed(1)+'%"></div></div>'
+      +'<div class="wl-scale"><span>'+start.toFixed(0)+' start</span><span>'+Math.round(pct)+'% there</span><span>'+target.toFixed(0)+' target</span></div>'
+      +'<div class="wl-stats"><div class="wl-stat"><div class="wl-k">Lost</div><div class="wl-v">'+(lost>=0?lost.toFixed(1):'0.0')+'</div></div><div class="wl-stat"><div class="wl-k">To go</div><div class="wl-v">'+(toGo>0?toGo.toFixed(1):'0.0')+'</div></div><div class="wl-stat"><div class="wl-k">BMI</div><div class="wl-v">'+(ovBMI()?ovBMI().toFixed(1):'—')+'</div></div></div>'
+      +'<div class="wl-proj">'+esc(proj)+'</div>';
+  }
+  function ovEditWeightLoss(){ var p=(STATE.health&&STATE.health.profile)||{};
+    var s=prompt('Start weight (kg)',p.startWeightKg||''); var sN=(s===null)?undefined:parseFloat(s);
+    var t=prompt('Target weight (kg)',p.targetWeightKg||''); var tN=(t===null)?undefined:parseFloat(t);
+    var d=prompt('Target date (YYYY-MM-DD, optional)',p.weightTargetDate||'');
+    commit(function(st){ if(!st.health||typeof st.health!=='object') st.health={}; if(!st.health.profile||typeof st.health.profile!=='object') st.health.profile={}; var pp=st.health.profile; if(sN!==undefined&&!isNaN(sN)) pp.startWeightKg=sN; if(tN!==undefined&&!isNaN(tN)) pp.targetWeightKg=tN; if(d!==null) pp.weightTargetDate=d.trim(); });
+  }
+  function renderOverview(){
+    if(!STATE) return;
+    var host=$('[data-ov-strip]'); if(!host) return;
+    var cards=[];
+    var w=ovLatest('weight');
+    if(w){ var d7=ovDelta('weight',7); var m=(d7!=null)?((d7<0?'↓ ':'↑ +')+Math.abs(d7).toFixed(1)+' kg · 7d'):''; cards.push(ovCard('Weight',w.weight.toFixed(1),'kg',m,d7!=null?(d7<0?'good':(d7>0.3?'bad':'')):'')); }
+    else cards.push(ovCard('Weight','—','','no reading',''));
+    var bs=ovLatest('bpSys'), bd=ovLatest('bpDia');
+    if(bs&&bd){ var st=ovBP(bs.bpSys,bd.bpDia); cards.push(ovCard('Blood pressure',bs.bpSys+'/'+bd.bpDia,'',st==='good'?'On target':(st==='warn'?'Watch':'Action'),st)); }
+    else cards.push(ovCard('Blood pressure','—','','no reading',''));
+    var rhr=ovLatest('rhr');
+    if(rhr){ var sr=ovRHR(rhr.rhr); cards.push(ovCard('Resting HR',rhr.rhr,'bpm',sr==='good'?'In range':(sr==='warn'?'Borderline':'High'),sr)); }
+    else cards.push(ovCard('Resting HR','—','','no reading',''));
+    var medDoneN=MEDS.filter(function(m){return medDone(STATE,m[0]);}).length;
+    cards.push(ovCard('Meds today',medDoneN+'/'+MEDS.length,'',medDoneN>=MEDS.length?'All ticked':(MEDS.length-medDoneN)+' to tick',medDoneN>=MEDS.length?'good':'warn'));
+    var td=tezeDate(STATE), du=daysUntil(td);
+    if(du!=null) cards.push(ovCard('Teze',du<=0?'Due':('in '+du+'d'),'',du<=0?'Due now':(du<=3?'Soon':''),du<=0?'bad':(du<=3?'warn':'')));
+    var appts0=(STATE.health&&Array.isArray(STATE.health.appointments))?STATE.health.appointments:[];
+    var na=appts0.filter(function(a){return a.status!=='cancelled'&&a.status!=='done'&&daysUntil(a.date)>=0;}).sort(function(p,q){return (p.date||'').localeCompare(q.date||'');})[0];
+    if(na){ var nd=daysUntil(na.date); cards.push(ovCard('Next appt',nd===0?'Today':(nd===1?'Tomorrow':('in '+nd+'d')),'',(na.title||'').slice(0,20),nd<=1?'warn':'')); }
+    var outN=BLOODS.filter(function(b){var s=bloodSeries(b.k); return s.length&&bloodFlag(b,s[s.length-1].v);}).length;
+    cards.push(ovCard('Bloods to review',String(outN),'',outN?'out of range':'all in range',outN?'warn':'good'));
+    host.innerHTML='<div class="ov-strip">'+cards.join('')+'</div>';
+
+    // Advisory
+    var adv=$('[data-ov-advisory]'); if(adv){ var items=[];
+      var abs=ovLatest('bpSys'), abd=ovLatest('bpDia');
+      if(abs&&abd&&ovBP(abs.bpSys,abd.bpDia)==='bad') items.push({t:'Blood pressure high',d:'Latest '+abs.bpSys+'/'+abd.bpDia+' is in the action range. If repeated readings sit at or above 140/90, book a GP review.'});
+      var bmi=ovBMI(); if(bmi&&ovBMIStatus(bmi)==='bad') items.push({t:'Weight',d:'BMI '+bmi.toFixed(1)+' — weight loss is the priority lever; it compounds into blood pressure, HbA1c and asthma load.'});
+      BLOODS.forEach(function(b){ var s=bloodSeries(b.k); if(s.length&&bloodFlag(b,s[s.length-1].v)) items.push({t:b.label+' out of range',d:b.rec}); });
+      var appts1=(STATE.health&&Array.isArray(STATE.health.appointments))?STATE.health.appointments:[];
+      appts1.filter(function(a){return a.status!=='cancelled'&&a.status!=='done';}).forEach(function(a){ var d=daysUntil(a.date); if(d!=null&&d>=0&&d<=7) items.push({t:'Appointment '+(d===0?'today':(d===1?'tomorrow':'in '+d+' days')),d:(a.title||'Appointment')+(a.provider?(' — '+a.provider):'')+(a.time?(' at '+a.time):'')+'.'}); });
+      adv.innerHTML = items.length ? ('<div class="adv"><div class="adv-h">'+items.length+' to look at</div>'+items.map(function(i){return '<div class="adv-item"><b>'+esc(i.t)+'</b> — '+esc(i.d)+'</div>';}).join('')+'<div class="adv-foot">General guidance, not medical advice — discuss anything abnormal with your GP.</div></div>') : '';
+    }
+
+    // You / Emergency
+    var em=$('[data-ov-emergency]'); if(em){ var p=(STATE.health&&STATE.health.profile)||{};
+      var rows=[['Blood type',p.bloodType],['Allergies',p.allergies],['NHS number',p.nhsNumber],['GP',p.gpName],['GP practice',p.gpPractice],['GP phone',p.gpPhone],['Hospital',p.hospital],['Emergency contact',p.emergencyName],['Emergency phone',p.emergencyPhone]];
+      var any=rows.some(function(r){return r[1];});
+      em.innerHTML=(any?('<div class="you-grid">'+rows.map(function(r){return '<div class="you-cell"><div class="you-k">'+r[0]+'</div><div class="you-v'+(r[1]?'':' dim')+'">'+(r[1]?esc(r[1]):'—')+'</div></div>';}).join('')+'</div>'):('<div class="you-empty">Add your emergency details so they’re in one place if you or someone else ever needs them fast.</div>'))
+        +'<button class="ov-btn" data-ov-edit-em>'+(any?'Edit details':'Add details')+'</button>';
+    }
+
+    // Conditions
+    var co=$('[data-ov-conditions]'); if(co){ var list=(STATE.health&&Array.isArray(STATE.health.conditions))?STATE.health.conditions:[];
+      co.innerHTML=(list.length?list.map(function(c,i){return '<div class="cond"><div><div class="cond-n">'+esc(c.name||'')+'</div>'+(c.note?'<div class="cond-note">'+esc(c.note)+'</div>':'')+'</div><div class="cond-acts"><span class="cond-a" data-ov-cond-edit="'+i+'">edit</span><span class="cond-a" data-ov-cond-del="'+i+'">delete</span></div></div>';}).join(''):'<div class="cond-empty">No conditions logged. Add long-term conditions (asthma, etc.) so advice can take them into account.</div>')
+        +'<button class="ov-btn" data-ov-cond-add>+ Add a condition</button>';
+    }
+
+    // Appointments & screenings
+    var ap=$('[data-ov-appts]'); if(ap){ var appts=(STATE.health&&Array.isArray(STATE.health.appointments))?STATE.health.appointments:[];
+      var live=appts.map(function(a,i){return {a:a,i:i};}).filter(function(x){return x.a.status!=='cancelled';});
+      var up=live.filter(function(x){return x.a.status!=='done'&&daysUntil(x.a.date)>=0;}).sort(function(p,q){return (p.a.date||'').localeCompare(q.a.date||'');});
+      var past=live.filter(function(x){return x.a.status==='done'||daysUntil(x.a.date)<0;}).sort(function(p,q){return (q.a.date||'').localeCompare(p.a.date||'');}).slice(0,6);
+      var h='';
+      if(!appts.length){ h='<div class="cond-empty">No appointments or screenings yet. Add a GP or hospital appointment, a scan, a vaccination, or a recurring screening.</div>'; }
+      else { if(up.length) h+=up.map(function(x){return ovApptCard(x.a,x.i);}).join(''); else h+='<div class="cond-empty">Nothing upcoming logged.</div>'; if(past.length) h+='<div class="ov-l" style="margin:10px 2px 6px">Past &amp; done</div>'+past.map(function(x){return ovApptCard(x.a,x.i);}).join(''); }
+      ap.innerHTML=h+'<button class="ov-btn" data-ov-appt-add>+ Add an appointment</button>';
+    }
+
+    // Symptoms & episodes
+    var ep=$('[data-ov-episodes]'); if(ep){ var eps=(STATE.health&&Array.isArray(STATE.health.episodes))?STATE.health.episodes:[];
+      var rows=eps.map(function(e,i){return {e:e,i:i};}).sort(function(p,q){return (q.e.date||'').localeCompare(p.e.date||'');}).slice(0,20);
+      ep.innerHTML=(eps.length?rows.map(function(x){var e=x.e; var dt=e.date?new Date(e.date+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'}):'';
+        return '<div class="cond'+(e.resolved?' epi-res':'')+'"><div><div class="cond-n">'+esc(e.what||'(unspecified)')+' '+ovSevDots(e.severity)+'</div><div class="cond-note">'+esc(dt)+(e.resolved?' · resolved':'')+'</div>'+(e.notes?'<div class="cond-note">'+esc(e.notes)+'</div>':'')+'</div><div class="cond-acts"><span class="cond-a" data-ov-epi-res="'+x.i+'">'+(e.resolved?'reopen':'done')+'</span><span class="cond-a" data-ov-epi-edit="'+x.i+'">edit</span><span class="cond-a" data-ov-epi-del="'+x.i+'">del</span></div></div>';}).join(''):'<div class="cond-empty">No symptoms or episodes logged. Note a flare, a headache, a bad night — anything worth a pattern over time.</div>')
+        +'<button class="ov-btn" data-ov-epi-add>+ Log an episode</button>';
+    }
+  }
+  function ovSevDots(n){ n=Math.max(0,Math.min(5,parseInt(n,10)||0)); var s=''; for(var k=1;k<=5;k++) s+='<span class="ov-sev-dot'+(k<=n?' on':'')+'"></span>'; return '<span class="ov-sev">'+s+'</span>'; }
+  function ovApptCard(a,i){ var d=daysUntil(a.date); var when=d==null?'':(d===0?'today':(d===1?'tomorrow':(d>1?('in '+d+'d'):(Math.abs(d)+'d ago')))); var soon=d!=null&&d>=0&&d<=7;
+    var dt=a.date?new Date(a.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}):'';
+    var meta=[a.provider,a.location].filter(Boolean).map(esc).join(' · ');
+    return '<div class="cond'+(soon?' appt-soon':'')+'"><div><div class="cond-note" style="font-weight:600;color:'+(soon?'#f0cf8a':'var(--white)')+'">'+esc(dt)+(a.time?(' · '+esc(a.time)):'')+(when?(' · '+when):'')+'</div><div class="cond-n">'+esc(a.title||'(untitled)')+' <span class="appt-type">'+esc(a.type||'appointment')+'</span></div>'+(meta?'<div class="cond-note">'+meta+'</div>':'')+(a.notes?'<div class="cond-note">'+esc(a.notes)+'</div>':'')+(a.recurMonths?'<div class="cond-note" style="font-style:italic">repeats every '+esc(a.recurMonths)+'mo</div>':'')+'</div><div class="cond-acts"><span class="cond-a" data-ov-appt-done="'+i+'">done</span><span class="cond-a" data-ov-appt-edit="'+i+'">edit</span><span class="cond-a" data-ov-appt-del="'+i+'">del</span></div></div>';
+  }
+  function ovAddAppt(){ var date=prompt('Date (YYYY-MM-DD)',todayISO()); if(date===null) return; var title=prompt('What is it? (e.g. GP review, MRI scan, flu jab)'); if(title===null||!title.trim()) return;
+    var type=prompt('Type — appointment / screening / test / vaccination','appointment')||'appointment'; var provider=prompt('Who with? (GP, consultant, hospital)')||''; var time=prompt('Time (optional)')||''; var location=prompt('Location (optional)')||''; var notes=prompt('Notes (optional)')||''; var recur=prompt('Repeat every N months? (blank for one-off)')||''; var rm=parseInt(recur,10);
+    commit(function(st){ if(!st.health||typeof st.health!=='object') st.health={}; if(!Array.isArray(st.health.appointments)) st.health.appointments=[]; st.health.appointments.push({id:uid('ap'),date:date.trim(),time:time.trim(),type:type.trim(),title:title.trim(),provider:provider.trim(),location:location.trim(),notes:notes.trim(),recurMonths:isNaN(rm)?'':rm,status:'upcoming'}); });
+  }
+  function ovEditAppt(i){ var a=((STATE.health&&STATE.health.appointments)||[])[i]; if(!a) return; var date=prompt('Date (YYYY-MM-DD)',a.date||''); if(date===null) return; var title=prompt('What is it?',a.title||''); if(title===null) return; var type=prompt('Type',a.type||'appointment'); var provider=prompt('Who with?',a.provider||''); var time=prompt('Time (optional)',a.time||''); var location=prompt('Location (optional)',a.location||''); var notes=prompt('Notes (optional)',a.notes||'');
+    commit(function(st){ var x=((st.health&&st.health.appointments)||[])[i]; if(!x) return; x.date=date.trim()||x.date; if(title!==null) x.title=title.trim()||x.title; if(type!==null) x.type=(type||'').trim(); if(provider!==null) x.provider=(provider||'').trim(); if(time!==null) x.time=(time||'').trim(); if(location!==null) x.location=(location||'').trim(); if(notes!==null) x.notes=(notes||'').trim(); });
+  }
+  function ovDoneAppt(i){ var a=((STATE.health&&STATE.health.appointments)||[])[i]; if(!a) return; commit(function(st){ var x=((st.health&&st.health.appointments)||[])[i]; if(!x) return; var rm=parseInt(x.recurMonths,10); if(!isNaN(rm)&&rm>0){ var d=new Date((x.date||todayISO())+'T00:00:00'); d.setMonth(d.getMonth()+rm); x.date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); x.status='upcoming'; } else { x.status='done'; } }); }
+  function ovDelAppt(i){ var list=(STATE.health&&STATE.health.appointments)||[]; if(!list[i]) return; if(!confirm('Delete “'+(list[i].title||'')+'”?')) return; commit(function(st){ var l=(st.health&&st.health.appointments)||[]; if(l[i]) l.splice(i,1); }); }
+  function ovAddEpisode(){ var what=prompt('What happened? (e.g. Asthma flare, Headache)'); if(what===null||!what.trim()) return; var date=prompt('Date (YYYY-MM-DD)',todayISO())||todayISO(); var sev=prompt('Severity 1–5 (1 mild, 5 severe)','2')||''; var notes=prompt('Notes (optional)')||'';
+    commit(function(st){ if(!st.health||typeof st.health!=='object') st.health={}; if(!Array.isArray(st.health.episodes)) st.health.episodes=[]; st.health.episodes.push({id:uid('ep'),date:date.trim(),what:what.trim(),severity:Math.max(0,Math.min(5,parseInt(sev,10)||0)),notes:notes.trim(),resolved:false}); });
+  }
+  function ovEditEpisode(i){ var e=((STATE.health&&STATE.health.episodes)||[])[i]; if(!e) return; var what=prompt('What happened?',e.what||''); if(what===null) return; var date=prompt('Date (YYYY-MM-DD)',e.date||''); var sev=prompt('Severity 1–5',String(e.severity||'')); var notes=prompt('Notes (optional)',e.notes||'');
+    commit(function(st){ var x=((st.health&&st.health.episodes)||[])[i]; if(!x) return; if(what!==null) x.what=what.trim()||x.what; if(date!==null) x.date=date.trim()||x.date; if(sev!==null) x.severity=Math.max(0,Math.min(5,parseInt(sev,10)||0)); if(notes!==null) x.notes=notes.trim(); });
+  }
+  function ovToggleEpisode(i){ var e=((STATE.health&&STATE.health.episodes)||[])[i]; if(!e) return; commit(function(st){ var x=((st.health&&st.health.episodes)||[])[i]; if(x) x.resolved=!x.resolved; }); }
+  function ovDelEpisode(i){ var list=(STATE.health&&STATE.health.episodes)||[]; if(!list[i]) return; if(!confirm('Delete this episode?')) return; commit(function(st){ var l=(st.health&&st.health.episodes)||[]; if(l[i]) l.splice(i,1); }); }
+  function ovEditEmergency(){
+    var fields=[['bloodType','Blood type (e.g. O+)'],['allergies','Allergies (or “none known”)'],['nhsNumber','NHS number'],['gpName','GP name'],['gpPractice','GP practice'],['gpPhone','GP phone'],['hospital','Hospital / trust'],['emergencyName','Emergency contact name'],['emergencyPhone','Emergency contact phone']];
+    var p=(STATE.health&&STATE.health.profile)||{}; var vals={};
+    for(var i=0;i<fields.length;i++){ var v=prompt(fields[i][1], p[fields[i][0]]||''); if(v===null) vals[fields[i][0]]=undefined; else vals[fields[i][0]]=v.trim(); }
+    commit(function(st){ if(!st.health||typeof st.health!=='object') st.health={}; if(!st.health.profile||typeof st.health.profile!=='object') st.health.profile={}; fields.forEach(function(f){ if(vals[f[0]]!==undefined) st.health.profile[f[0]]=vals[f[0]]; }); });
+  }
+  function ovAddCondition(){ var name=prompt('Condition name (e.g. Asthma)'); if(name===null) return; name=name.trim(); if(!name) return; var note=prompt('Note (optional) — severity, since when, treatment')||''; commit(function(st){ if(!st.health||typeof st.health!=='object') st.health={}; if(!Array.isArray(st.health.conditions)) st.health.conditions=[]; st.health.conditions.push({name:name,note:note.trim()}); }); }
+  function ovEditCondition(i){ var list=(STATE.health&&STATE.health.conditions)||[]; var c=list[i]; if(!c) return; var name=prompt('Condition name',c.name||''); if(name===null) return; var note=prompt('Note (optional)',c.note||''); commit(function(st){ var l=(st.health&&st.health.conditions)||[]; if(!l[i]) return; l[i].name=(name||'').trim()||l[i].name; if(note!==null) l[i].note=note.trim(); }); }
+  function ovDelCondition(i){ var list=(STATE.health&&STATE.health.conditions)||[]; if(!list[i]) return; if(!confirm('Delete “'+(list[i].name||'')+'”?')) return; commit(function(st){ var l=(st.health&&st.health.conditions)||[]; if(l[i]) l.splice(i,1); }); }
+
+  function render(){ renderToday(); renderWeightLoss(); renderPlan(); renderOverview(); renderReadings(); renderMedRegister(); renderBloods(); }
+
+  // ---- interactions ----
+  document.addEventListener('click', function(e){
+    var t=e.target;
+    var nav=t.closest && t.closest('[data-nav]'); if(nav){ navTo(nav.getAttribute('data-nav')); return; }
+    var tm=t.closest && t.closest('[data-tick-med]'); if(tm){ var key=tm.getAttribute('data-tick-med'); var now=!medDone(STATE,key); commit(function(st){ dc(st,todayISO())[key]=now; }); return; }
+    var th=t.closest && t.closest('[data-tick-habit]'); if(th){ var hk=th.getAttribute('data-tick-habit'); var nowh=!habitDone(STATE,hk); commit(function(st){ dc(st,todayISO())[hk]=nowh; }); return; }
+    var pf=t.closest && t.closest('[data-puff]'); if(pf){ var delta=parseInt(pf.getAttribute('data-puff'),10)||0; var cur=puffs(STATE); var next=Math.max(0,cur+delta); if(next===cur) return; commit(function(st){ dc(st,todayISO()).salbutamolPuffs=next; }); return; }
+    if(t.closest && t.closest('[data-teze-taken]')){ var nd=addDaysISO(todayISO(),28); commit(function(st){ st.tezeNextDate=nd; if(!st.health||typeof st.health!=='object') st.health={}; if(!st.health.profile||typeof st.health.profile!=='object') st.health.profile={}; st.health.profile.tezeNextDate=nd; }); return; }
+    if(t.closest && t.closest('[data-save-reading]')){ saveReading(); return; }
+    if(t.closest && t.closest('[data-save-bloods]')){ saveBloods(); return; }
+    var be=t.closest && t.closest('[data-blood-edit]'); if(be){ editBloodRange(be.getAttribute('data-blood-edit')); return; }
+    var pt=t.closest && t.closest('[data-plan-tick]'); if(pt){ planTick(pt.getAttribute('data-plan-tick')); return; }
+    if(t.closest && t.closest('[data-ov-edit-wl]')){ ovEditWeightLoss(); return; }
+    if(t.closest && t.closest('[data-ov-edit-em]')){ ovEditEmergency(); return; }
+    if(t.closest && t.closest('[data-ov-cond-add]')){ ovAddCondition(); return; }
+    var ce=t.closest && t.closest('[data-ov-cond-edit]'); if(ce){ ovEditCondition(parseInt(ce.getAttribute('data-ov-cond-edit'),10)); return; }
+    var cd=t.closest && t.closest('[data-ov-cond-del]'); if(cd){ ovDelCondition(parseInt(cd.getAttribute('data-ov-cond-del'),10)); return; }
+    if(t.closest && t.closest('[data-ov-appt-add]')){ ovAddAppt(); return; }
+    var ad=t.closest && t.closest('[data-ov-appt-done]'); if(ad){ ovDoneAppt(parseInt(ad.getAttribute('data-ov-appt-done'),10)); return; }
+    var ae=t.closest && t.closest('[data-ov-appt-edit]'); if(ae){ ovEditAppt(parseInt(ae.getAttribute('data-ov-appt-edit'),10)); return; }
+    var axd=t.closest && t.closest('[data-ov-appt-del]'); if(axd){ ovDelAppt(parseInt(axd.getAttribute('data-ov-appt-del'),10)); return; }
+    if(t.closest && t.closest('[data-ov-epi-add]')){ ovAddEpisode(); return; }
+    var er=t.closest && t.closest('[data-ov-epi-res]'); if(er){ ovToggleEpisode(parseInt(er.getAttribute('data-ov-epi-res'),10)); return; }
+    var ee=t.closest && t.closest('[data-ov-epi-edit]'); if(ee){ ovEditEpisode(parseInt(ee.getAttribute('data-ov-epi-edit'),10)); return; }
+    var ed=t.closest && t.closest('[data-ov-epi-del]'); if(ed){ ovDelEpisode(parseInt(ed.getAttribute('data-ov-epi-del'),10)); return; }
+    if(t.closest && t.closest('[data-cfg-save]')){ doConnect(); return; }
+    if(t.closest && t.closest('[data-cfg-signout]')){ if(confirm('Disconnect this device? Your Hub data is untouched.')){ clearCreds(); openSetup(); } return; }
+  });
+
+  function saveReading(){
+    var fields=['weight','waist','neck','chest','hip','bpSys','bpDia','rhr','sleep'];
+    var rec={ id:uid('hr'), date: ($('[data-r="date"]').value || todayISO()) };
+    var any=false;
+    fields.forEach(function(k){ var el=$('[data-r="'+k+'"]'); if(!el) return; var v=String(el.value||'').trim(); if(v!==''){ var n=parseFloat(v); rec[k]= isNaN(n)?v:n; any=true; } });
+    if(!any){ alert('Enter at least one value.'); return; }
+    commit(function(st){ if(!st.health||typeof st.health!=='object') st.health={}; if(!Array.isArray(st.health.readings)) st.health.readings=[]; st.health.readings.push(rec); });
+    ['weight','waist','neck','chest','hip','bpSys','bpDia','rhr','sleep'].forEach(function(k){ var el=$('[data-r="'+k+'"]'); if(el) el.value=''; });
+    navTo('log');
+  }
+
+  function navTo(v){
+    if(v==='setup'){ openSetup(); return; }
+    document.querySelectorAll('[data-view]').forEach(function(s){ s.classList.toggle('on', s.getAttribute('data-view')===v); });
+    document.querySelectorAll('[data-nav]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-nav')===v); });
+    try{ window.scrollTo(0,0); }catch(_){ }
+    render();
+  }
+
+  function openSetup(){ $('#app').hidden=true; $('#setup').hidden=false; $('[data-cfg-id]').value=creds?creds.id:''; $('[data-cfg-token]').value=creds?creds.token:''; $('[data-cfg-signout]').hidden=!creds; $('[data-cfg-err]').hidden=true; }
+  function openApp(){ $('#setup').hidden=true; $('#app').hidden=false; if(!$('[data-r="date"]').value) $('[data-r="date"]').value=todayISO(); navTo('today'); }
+  function doConnect(){
+    var id=$('[data-cfg-id]').value.trim().replace(/^.*\/(?=[0-9a-f]{8,})/i,''); var tk=$('[data-cfg-token]').value.trim(); var err=$('[data-cfg-err]');
+    if(!id||!tk){ err.textContent='Enter both the Gist ID and a token.'; err.hidden=false; return; }
+    saveCreds(id,tk); err.hidden=true; setStatus('connecting…');
+    pull().then(function(){ openApp(); }).catch(function(e){ err.textContent='Could not connect: '+(e.message||'error'); err.hidden=false; });
+  }
+  // boot
+  if(creds){ openApp(); if(STATE) render(); pull().then(render).catch(function(){ setStatus('offline'); }); }
+  else { openSetup(); }
+  setInterval(function(){ if(creds && !document.hidden){ pull().then(render).catch(function(){}); } }, 5*60*1000);
+  if('serviceWorker' in navigator){ try{ var _r=navigator.serviceWorker.register('./sw.js'); if(_r&&_r.catch) _r.catch(function(){}); }catch(_){ } }
+})();
+</script>
+</body>
+</html>

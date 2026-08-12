@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D1B3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Library">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{ --navy:#0D1B3E; --mid:#1A3A6B; --lime:#C4F000; --mist:#C4CCDD; --white:#FFFFFF; --line:#24467e; --gilt:#c8a84e; --serif:'EB Garamond',Georgia,serif; }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--mist);-webkit-font-smoothing:antialiased;padding:0 0 90px}
+  .wrap{max-width:660px;margin:0 auto;padding:14px 15px 0}
+  header.top{display:flex;align-items:baseline;justify-content:space-between;padding:6px 2px 10px}
+  header.top h1{font-size:20px;font-weight:800;color:var(--white);margin:0;letter-spacing:.02em}
+  header.top .eyebrow{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--lime)}
+  .status{font-size:11px;color:var(--mist);opacity:.7}
+  .muted{color:var(--mist);opacity:.7;font-size:13px;padding:16px 4px;line-height:1.5}
+  .view{display:none}.view.on{display:block}
+  .ctl{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+  .ctl input{flex:1;border:1px solid var(--line);background:#0a1530;color:var(--white);border-radius:20px;padding:9px 14px;font:inherit;font-size:13px}
+  .count{font-size:11px;color:var(--mist);opacity:.6;margin:0 2px 8px}
+  /* book row */
+  .book{display:flex;gap:12px;align-items:flex-start;background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:9px;cursor:pointer}
+  .book .rom{flex:0 0 auto;font-family:var(--serif);font-size:15px;font-weight:600;color:var(--gilt);min-width:34px;text-align:center;padding-top:2px}
+  .book .bmain{flex:1;min-width:0}
+  .book .btitle{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--white);line-height:1.25}
+  .book .bmeta{font-size:12px;color:var(--mist);opacity:.85;margin-top:3px}
+  .book .lent{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:#3a2a10;color:var(--gilt);border:1px solid #6b5320;margin-top:7px}
+  /* sheet */
+  .sheet-bg{position:fixed;inset:0;background:rgba(4,9,22,.72);display:none;z-index:40;align-items:flex-end}
+  .sheet-bg.on{display:flex}
+  .sheet{background:var(--navy);border-top:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:660px;margin:0 auto;max-height:92vh;overflow:auto;padding:16px 18px calc(24px + env(safe-area-inset-bottom))}
+  .sheet-close{float:right;background:none;border:0;color:var(--mist);font-size:22px;line-height:1;cursor:pointer}
+  .d-rom{font-family:var(--serif);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gilt)}
+  .d-title{font-family:var(--serif);font-size:23px;font-weight:600;color:var(--white);line-height:1.2;margin:4px 0 2px}
+  .d-sub{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--mist);opacity:.9;line-height:1.35;margin-bottom:8px}
+  .d-byline{font-size:12.5px;color:var(--mist);opacity:.9;margin-bottom:2px}
+  .d-imprint{font-size:12px;color:var(--mist);opacity:.7;line-height:1.5;margin:8px 0}
+  .d-rule{height:1px;background:var(--line);margin:14px 0}
+  .d-essay p{font-family:var(--serif);font-size:15.5px;line-height:1.6;color:var(--mist);margin:0 0 12px}
+  .d-clabel{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);margin:6px 0 8px}
+  .d-contents{list-style:none;margin:0;padding:0}
+  .d-contents li{font-family:var(--serif);font-size:14.5px;line-height:1.45;color:var(--mist);padding:5px 0 5px 16px;position:relative}
+  .d-contents li:before{content:'—';position:absolute;left:0;color:var(--gilt)}
+  .lend-box{background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin:16px 0 4px}
+  .lend-box .l-status{font-size:13.5px;color:var(--white);line-height:1.5}
+  .lend-box .l-status b{color:var(--gilt)}
+  .lend-actions{display:flex;gap:8px;margin-top:11px}
+  .lend-actions button{flex:1;border:1px solid var(--line);background:transparent;color:var(--white);border-radius:10px;padding:10px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+  .lend-actions button.primary{background:var(--lime);border-color:var(--lime);color:var(--navy)}
+  .lend-actions button.ret{background:#12351f;border-color:#2c7a48;color:#7fe0a0}
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0a1530;border-top:1px solid #22375f;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
+  nav.tabs button{flex:1;background:none;border:0;color:var(--mist);opacity:.65;font:inherit;font-size:10.5px;font-weight:600;padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+  nav.tabs button .ic{font-size:17px;line-height:1}
+  nav.tabs button.on{opacity:1;color:var(--lime)}
+  #setup{padding:22px 18px;max-width:520px;margin:0 auto}
+  #setup h1{color:var(--white);font-size:22px;margin:6px 0 6px}
+  #setup p{font-size:13.5px;line-height:1.5}
+  #setup input{width:100%;border:1px solid var(--line);background:#0a1530;color:var(--white);border-radius:10px;padding:11px 12px;font:inherit;font-size:14px;margin-top:6px}
+  #setup label{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--lime);margin-top:14px}
+  #setup .go{margin-top:16px;width:100%;background:var(--lime);color:var(--navy);border:0;border-radius:10px;padding:13px;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+  #setup .err{margin-top:12px;color:#ff9aa8;font-size:13px}
+  #setup .signout{margin-top:20px;background:none;border:0;color:var(--mist);opacity:.7;font:inherit;font-size:12px;text-decoration:underline;cursor:pointer}
+  .hint{font-size:11.5px;opacity:.7;margin-top:6px;line-height:1.4}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="wrap">
+    <header class="top">
+      <div><span class="eyebrow">The Book Room</span><h1>The Library</h1></div>
+      <span class="status" data-status></span>
+    </header>
+
+    <section class="view on" data-view="browse">
+      <div class="ctl"><input data-search placeholder="Search title, author, year…"></div>
+      <div class="count" data-count></div>
+      <div data-list></div>
+    </section>
+
+    <section class="view" data-view="lending">
+      <div class="count" data-lend-count></div>
+      <div data-lend-list></div>
+    </section>
+
+    <section class="view" data-view="setup">
+      <div style="padding:4px 2px">
+        <p class="hint" style="margin-top:0">Browsing the catalogue needs nothing. To record who has a book out, connect to your Hub gist so the lending register syncs.</p>
+        <label>Gist ID</label>
+        <input type="text" data-cfg-id autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="32-character hex ID">
+        <label>Token</label>
+        <input type="password" data-cfg-token autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ghp_… / github_pat_…">
+        <button class="go" data-cfg-save>Connect</button>
+        <div class="err" data-cfg-err hidden></div>
+        <button class="signout" data-cfg-signout hidden>Disconnect this device</button>
+      </div>
+    </section>
+  </div>
+
+  <nav class="tabs">
+    <button data-nav="browse" class="on"><span class="ic">📖</span>Catalogue</button>
+    <button data-nav="lending"><span class="ic">↗</span>On loan</button>
+    <button data-nav="setup"><span class="ic">⚙</span>Setup</button>
+  </nav>
+</div>
+
+<div class="sheet-bg" data-sheet-bg><div class="sheet" data-sheet></div></div>
+
+<script>
+(function(){
+  var _mem={};
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(_){ return (k in _mem)?_mem[k]:null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(_){ _mem[k]=v; } }
+  function lsDel(k){ try{ localStorage.removeItem(k); }catch(_){ delete _mem[k]; } }
+  function $(s){ return document.querySelector(s); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function setStatus(t){ var el=$('[data-status]'); if(el) el.textContent=t||''; }
+
+  var ID_KEY='connolly-sync:gist-id', TOK_KEY='connolly-sync:token', LEND_CACHE='connolly-library:lending', BOOKS_CACHE='connolly-library:books';
+  var creds=null; (function(){ var id=lsGet(ID_KEY), tk=lsGet(TOK_KEY); if(id&&tk) creds={id:id,token:tk}; })();
+  function saveCreds(id,tk){ lsSet(ID_KEY,id); lsSet(TOK_KEY,tk); creds={id:id,token:tk}; }
+  function clearCreds(){ lsDel(ID_KEY); lsDel(TOK_KEY); creds=null; }
+  function headers(){ return { 'Authorization':'Bearer '+creds.token, 'Accept':'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' }; }
+
+  var BOOKS=[]; var LENDING={}; var STATEP=null; var filt={q:''};
+  try{ LENDING=JSON.parse(lsGet(LEND_CACHE)||'{}')||{}; }catch(_){ LENDING={}; }
+  try{ var cb=JSON.parse(lsGet(BOOKS_CACHE)||'null'); if(cb&&cb.length) BOOKS=cb; }catch(_){ }
+
+  function loadBooks(){ return fetch('./books.json',{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ var arr=(j&&Array.isArray(j.books))?j.books:(Array.isArray(j)?j:[]); if(arr.length){ BOOKS=arr; try{ lsSet(BOOKS_CACHE, JSON.stringify(arr)); }catch(_){ } } return BOOKS; }).catch(function(){ return BOOKS; }); }
+
+  // ---- gist (lending only) ----
+  function gistGetRaw(){ return fetch('https://api.github.com/gists/'+creds.id,{headers:headers()}).then(function(r){ if(!r.ok) throw new Error('gist '+r.status); return r.json(); }).then(function(g){ var f=g.files&&g.files['life-twoweek.json']; if(!f) throw new Error('no file'); if(f.truncated&&f.raw_url) return fetch(f.raw_url,{headers:{'Authorization':'Bearer '+creds.token}}).then(function(r){return r.text();}); return f.content; }); }
+  function parseP(t){ var p; try{ p=JSON.parse(t||'{}'); }catch(_){ p={}; } return { payload:p, state:(p.state||p||{}) }; }
+  function pullLending(){ if(!creds) return Promise.resolve(); setStatus('syncing…'); return gistGetRaw().then(function(t){ var ps=parseP(t); STATEP=ps; var lib=ps.state&&ps.state.library; LENDING=(lib&&lib.lending&&typeof lib.lending==='object')?lib.lending:{}; try{ lsSet(LEND_CACHE, JSON.stringify(LENDING)); }catch(_){ } setStatus(''); }).catch(function(){ setStatus('offline'); }); }
+  var chain=Promise.resolve();
+  function commitLending(mutator){
+    try{ mutator(LENDING); }catch(_){ } try{ lsSet(LEND_CACHE, JSON.stringify(LENDING)); }catch(_){ } renderCurrent();
+    if(!creds) return;
+    chain = chain.then(function(){ setStatus('saving…'); return gistGetRaw().then(function(t){ var ps=parseP(t); var st=ps.state; if(!st.library||typeof st.library!=='object') st.library={}; if(!st.library.lending||typeof st.library.lending!=='object') st.library.lending={}; mutator(st.library.lending); var payload=ps.payload; payload.state=st; payload.savedAt=new Date().toISOString(); payload.writer={id:'library',label:'The Library',at:payload.savedAt}; var body={files:{}}; body.files['life-twoweek.json']={content:JSON.stringify(payload)}; return fetch('https://api.github.com/gists/'+creds.id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json'},headers()),body:JSON.stringify(body)}).then(function(r){ if(r.ok){ LENDING=st.library.lending; try{ lsSet(LEND_CACHE, JSON.stringify(LENDING)); }catch(_){ } setStatus(''); } else setStatus('save failed'); }); }).catch(function(){ setStatus('offline'); }); });
+  }
+
+  // ---- render ----
+  function bTitle(b){ return (b.title_lines&&b.title_lines.join(' ')) || b.index_title || 'Untitled'; }
+  function matches(b){ if(!filt.q) return true; var hay=[b.index_title,(b.title_lines||[]).join(' '),b.author,b.date].join(' ').toLowerCase(); return hay.indexOf(filt.q.toLowerCase())>=0; }
+  function bookRow(b){ var l=LENDING[b.roman]; return '<div class="book" data-book="'+esc(b.roman)+'"><div class="rom">'+esc(b.roman||'')+'</div><div class="bmain"><div class="btitle">'+esc(bTitle(b))+'</div><div class="bmeta">'+esc([b.author,b.date].filter(Boolean).join(' · '))+'</div>'+(l?'<span class="lent">On loan — '+esc(l.to||'')+'</span>':'')+'</div></div>'; }
+  function renderBrowse(){ var list=$('[data-list]'); if(!list) return; var items=BOOKS.filter(matches); $('[data-count]').textContent = BOOKS.length? (items.length+' of '+BOOKS.length+' volumes') : ''; if(!BOOKS.length){ list.innerHTML='<div class="muted">Loading the catalogue…</div>'; return; } if(!items.length){ list.innerHTML='<div class="muted">No volumes match.</div>'; return; } list.innerHTML=items.map(bookRow).join(''); }
+  function renderLending(){ var list=$('[data-lend-list]'); if(!list) return; var out=BOOKS.filter(function(b){ return LENDING[b.roman]; }); $('[data-lend-count]').textContent = out.length? (out.length+' on loan') : ''; if(!out.length){ list.innerHTML='<div class="muted">Nothing is out on loan. Open a volume and tap “Lend out” to record one.</div>'; return; } list.innerHTML=out.map(function(b){ var l=LENDING[b.roman]; return '<div class="book" data-book="'+esc(b.roman)+'"><div class="rom">'+esc(b.roman)+'</div><div class="bmain"><div class="btitle">'+esc(bTitle(b))+'</div><div class="bmeta">to <b style="color:var(--gilt)">'+esc(l.to||'')+'</b>'+(l.on?(' · since '+new Date(l.on+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})):'')+'</div></div></div>'; }).join(''); }
+  function renderCurrent(){ var v=$('[data-view="lending"]').classList.contains('on')?'lending':'browse'; if(v==='lending') renderLending(); else renderBrowse(); }
+
+  function detail(roman){ var b=BOOKS.filter(function(x){return x.roman===roman;})[0]; if(!b) return; var l=LENDING[roman];
+    var essay=(b.essay||[]).map(function(p){return '<p>'+esc(p)+'</p>';}).join('');
+    var contents=(b.contents&&b.contents.length)?('<div class="d-clabel">Contents</div><ul class="d-contents">'+b.contents.map(function(c){return '<li>'+esc(c)+'</li>';}).join('')+'</ul>'):'';
+    var sub=(b.subtitle_lines&&b.subtitle_lines.length)?('<div class="d-sub">'+b.subtitle_lines.map(esc).join('<br>')+'</div>'):'';
+    var edition=(b.edition_lines&&b.edition_lines.length)?('<div class="d-imprint">'+b.edition_lines.map(esc).join('<br>')+'</div>'):'';
+    var lendBox = l
+      ? '<div class="lend-box"><div class="l-status">On loan to <b>'+esc(l.to||'')+'</b>'+(l.on?(', since '+new Date(l.on+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})):'')+'.</div><div class="lend-actions"><button class="ret" data-return="'+esc(roman)+'">Mark returned</button></div></div>'
+      : '<div class="lend-box"><div class="l-status">In the cabinet.</div><div class="lend-actions"><button class="primary" data-lend="'+esc(roman)+'">Lend out</button></div></div>';
+    $('[data-sheet]').innerHTML='<button class="sheet-close" data-sheet-close>×</button>'
+      +'<div class="d-rom">'+esc(b.eyebrow||('Catalogue No. '+b.roman))+'</div>'
+      +'<div class="d-title">'+esc(bTitle(b))+'</div>'+sub
+      +'<div class="d-byline">'+esc([b.author,b.date].filter(Boolean).join(' · '))+'</div>'+edition
+      +(b.imprint?'<div class="d-imprint">'+esc(b.imprint)+'</div>':'')
+      +lendBox
+      +'<div class="d-rule"></div><div class="d-essay">'+essay+'</div>'+contents;
+    $('[data-sheet-bg]').classList.add('on');
+  }
+  function closeSheet(){ $('[data-sheet-bg]').classList.remove('on'); }
+
+  // ---- interactions ----
+  document.addEventListener('click', function(e){
+    var t=e.target;
+    var nav=t.closest && t.closest('[data-nav]'); if(nav){ navTo(nav.getAttribute('data-nav')); return; }
+    if(t.closest && t.closest('[data-sheet-close]')){ closeSheet(); return; }
+    if(t===$('[data-sheet-bg]')){ closeSheet(); return; }
+    var bk=t.closest && t.closest('[data-book]'); if(bk){ detail(bk.getAttribute('data-book')); return; }
+    var ln=t.closest && t.closest('[data-lend]'); if(ln){ var roman=ln.getAttribute('data-lend'); if(!creds){ alert('Connect to your Hub in Setup to record lending.'); navTo('setup'); return; } var who=prompt('Lent to whom?'); if(who && who.trim()){ commitLending(function(L){ L[roman]={to:who.trim(),on:todayISO()}; }); detail(roman); } return; }
+    var rt=t.closest && t.closest('[data-return]'); if(rt){ var r2=rt.getAttribute('data-return'); commitLending(function(L){ delete L[r2]; }); detail(r2); return; }
+    if(t.closest && t.closest('[data-cfg-save]')){ doConnect(); return; }
+    if(t.closest && t.closest('[data-cfg-signout]')){ if(confirm('Disconnect this device? Your Hub data is untouched.')){ clearCreds(); $('[data-cfg-signout]').hidden=true; setStatus(''); alert('Disconnected. Browsing still works; lending is read-only until you reconnect.'); } return; }
+  });
+  document.addEventListener('input', function(e){ var s=e.target.closest && e.target.closest('[data-search]'); if(s){ filt.q=s.value; renderBrowse(); } });
+
+  function navTo(v){ document.querySelectorAll('[data-view]').forEach(function(s){ s.classList.toggle('on', s.getAttribute('data-view')===v); }); document.querySelectorAll('[data-nav]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-nav')===v); }); try{ window.scrollTo(0,0); }catch(_){ } if(v==='browse') renderBrowse(); else if(v==='lending') renderLending(); else if(v==='setup'){ $('[data-cfg-id]').value=creds?creds.id:''; $('[data-cfg-token]').value=creds?creds.token:''; $('[data-cfg-signout]').hidden=!creds; $('[data-cfg-err]').hidden=true; } }
+  function doConnect(){ var id=$('[data-cfg-id]').value.trim().replace(/^.*\/(?=[0-9a-f]{8,})/i,''); var tk=$('[data-cfg-token]').value.trim(); var err=$('[data-cfg-err]'); if(!id||!tk){ err.textContent='Enter both the Gist ID and a token.'; err.hidden=false; return; } saveCreds(id,tk); err.hidden=true; setStatus('connecting…'); pullLending().then(function(){ $('[data-cfg-signout]').hidden=false; renderCurrent(); setStatus(''); alert('Connected — the lending register will sync.'); }).catch(function(e){ err.textContent='Could not connect.'; err.hidden=false; }); }
+
+  // boot
+  renderBrowse();
+  loadBooks().then(renderCurrent);
+  if(creds) pullLending().then(renderCurrent);
+  setInterval(function(){ if(creds && !document.hidden){ pullLending().then(renderCurrent).catch(function(){}); } }, 5*60*1000);
+  if('serviceWorker' in navigator){ try{ var _r=navigator.serviceWorker.register('./sw.js'); if(_r&&_r.catch) _r.catch(function(){}); }catch(_){ } }
+})();
+</script>
+</body>
+</html>

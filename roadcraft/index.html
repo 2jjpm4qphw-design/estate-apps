@@ -1,0 +1,2647 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0D1B3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Roadcraft">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Roadcraft</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+/* ============ palette: sampled from the House canon ============ */
+:root{
+  --navy:#0D1B3E;
+  --lime:#C4F000;
+
+  --bg:#0D1B3E;
+  --bg-deep:#0A1530;
+  --surface:#14244C;
+  --surface-2:#1B2E58;
+  --rule:#22375F;
+  --rule-2:#2A4778;
+
+  --ink:#FFFFFF;
+  --ink-2:#8D97AD;
+
+  --accent:#C4F000;
+  --accent-ink:#0D1B3E;
+  --accent-text:#C4F000;
+  --graph:#C4F000;
+
+  --good:#C4F000;
+  --warn:#F2A93B;
+  --bad:#E5484D;
+
+  --r:14px;
+}
+body[data-theme="day"]{
+  --bg:#EEF1F6;
+  --bg-deep:#FFFFFF;
+  --surface:#FFFFFF;
+  --surface-2:#E3E8F0;
+  --rule:#D2DAE6;
+  --rule-2:#BFC9D9;
+
+  --ink:#0D1B3E;
+  --ink-2:#5A6784;
+
+  --accent:#C4F000;
+  --accent-ink:#0D1B3E;
+  --accent-text:#5C7300;
+  --graph:#2A4778;
+
+  --good:#5C7300;
+  --warn:#A96500;
+  --bad:#C0272D;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:'Montserrat',system-ui,sans-serif;font-size:15px;
+  overflow:hidden;-webkit-user-select:none;user-select:none;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  transition:background .25s,color .25s;
+}
+.num{font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer}
+/* Tap highlight is suppressed globally, so every control needs its own
+   press state — otherwise a working button is indistinguishable from a dead one. */
+.btn:active{filter:brightness(.88)}
+.sw{cursor:pointer}
+.sw:active{filter:brightness(1.2)}
+.jrow:active{background:var(--surface-2)}
+#tabs button:active{opacity:.55}
+.seg button:active{filter:brightness(.9)}
+select,input[type=color]{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* ---------- shell ---------- */
+#app{display:flex;flex-direction:column;height:100%}
+#screens{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;padding:18px 16px 28px}
+.screen.on{display:block}
+#tabs{display:flex;background:var(--bg-deep);border-top:1px solid var(--rule);flex:0 0 auto}
+#tabs button{flex:1;padding:11px 4px 13px;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2);position:relative}
+#tabs button.on{color:var(--accent-text)}
+#tabs button.on:after{content:'';position:absolute;top:0;left:22%;right:22%;height:2px;background:var(--accent)}
+#tabs.hide{display:none}
+
+/* ---------- brand ---------- */
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.brand .mark{width:26px;height:26px;flex:0 0 auto}
+.brand .mark path,.brand .mark circle{stroke:var(--accent-text);fill:none}
+.brand .mark circle{fill:var(--accent-text);stroke:none}
+.eyebrow{font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--accent-text);display:block;margin-bottom:2px}
+.brand h1{font-size:22px;font-weight:800;letter-spacing:-.01em}
+.brand .right{font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--ink-2);text-transform:uppercase;margin-left:auto;text-align:right}
+
+h2{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);margin:26px 0 10px}
+.card{background:var(--surface);border-radius:var(--r);padding:16px;margin-bottom:12px;border:1px solid var(--rule)}
+.tiny{font-size:11px;color:var(--ink-2);line-height:1.55}
+.muted{color:var(--ink-2);font-size:13px;line-height:1.55}
+
+.btn{display:block;width:100%;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:16px;border-radius:var(--r);text-align:center}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--rule-2)}
+.btn+.btn{margin-top:9px}
+
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--rule)}
+.row:last-child{border-bottom:0}
+.row label{font-size:13px;font-weight:500}
+.sw{width:46px;height:27px;border-radius:14px;background:var(--surface-2);position:relative;flex:0 0 auto;transition:background .18s}
+.sw:after{content:'';position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:var(--ink-2);transition:transform .18s,background .18s}
+.sw.on{background:var(--accent)}
+.sw.on:after{transform:translateX(19px);background:var(--accent-ink)}
+select{background:var(--surface-2);color:var(--ink);border:1px solid var(--rule);border-radius:9px;padding:9px 11px;font-family:inherit;font-size:13px;font-weight:600}
+input[type=number]{background:var(--surface-2);color:var(--ink);border:1px solid var(--rule);
+  border-radius:9px;padding:9px 11px;font-family:inherit;font-size:13px;font-weight:600;width:110px;text-align:right}
+input[type=color]{width:52px;height:34px;border:1px solid var(--rule);border-radius:9px;background:var(--surface-2);padding:3px}
+
+/* segmented */
+.seg{display:flex;background:var(--surface-2);border-radius:11px;padding:3px;gap:3px}
+.seg button{flex:1;padding:9px 4px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2)}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+
+/* ---------- drive ---------- */
+#drive{padding:0}
+#drive.on{display:flex;flex-direction:column}
+#driveInner{flex:1;display:flex;flex-direction:column;padding:14px 16px 16px}
+.status{display:flex;gap:14px;align-items:center;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-bottom:4px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--bad);display:inline-block;margin-right:5px;vertical-align:middle}
+.dot.ok{background:var(--good)}
+.dot.warn{background:var(--warn)}
+
+.speedwrap{text-align:center;margin:4px 0 2px}
+#speedVal{font-size:112px;font-weight:800;line-height:.92;display:block}
+.speedunit{font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--ink-2);text-transform:uppercase}
+
+#gg{width:100%;max-width:280px;aspect-ratio:1;margin:8px auto 0;display:block}
+#limitRow{display:none;align-items:center;justify-content:center;gap:11px;margin:2px 0 4px}
+#limitRow.on{display:flex}
+#roundel{width:52px;height:52px;border-radius:50%;background:#fff;border:6px solid #D6001C;
+  display:grid;place-items:center;flex:0 0 auto}
+#limitRow.muted #roundel{border-color:var(--rule-2);background:var(--surface)}
+#limitRow.muted #roundel span{color:var(--ink-2)}
+#roundel.assumed{border-style:dashed;border-color:#D6001C;opacity:.82}
+#camBadge{display:none;align-items:center;gap:6px;background:var(--surface);border:1.5px solid var(--warn);
+  color:var(--warn);border-radius:20px;padding:6px 11px;font-size:12px;font-weight:800;flex:0 0 auto}
+#camBadge.on{display:flex}
+#camBadge.close{background:var(--warn);color:#0D1B3E;border-color:var(--warn)}
+#roundelMin{width:44px;height:44px;border-radius:50%;background:#0B4EA2;border:3px solid #fff;
+  display:none;place-items:center;flex:0 0 auto;box-shadow:0 0 0 1px var(--rule-2)}
+#roundelMin.on{display:grid}
+#roundelMin span{color:#fff;font-size:17px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+#roundel span{color:#111;font-size:21px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+#limitTxt{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+#limitRoad{font-size:10px;font-weight:600;color:var(--ink-2);opacity:.75;margin-top:2px}
+#driveMapWrap{display:none;margin-top:8px;position:relative;height:240px;border-radius:11px;overflow:hidden;background:var(--surface-2)}
+#driveMapWrap.on{display:block}
+#mapClip{position:absolute;inset:0;overflow:hidden}
+#driveMap{position:absolute;transform-origin:50% 50%;will-change:transform}
+#mapArrow{position:absolute;left:50%;top:50%;transform:translate(-50%,-52%);z-index:600;pointer-events:none;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,.5))}
+#mapNorth{position:absolute;right:8px;top:8px;z-index:600;pointer-events:none}
+#northNeedle{transform-origin:15px 15px}
+#mapAttrib{display:none;font-size:9px;color:var(--ink-2);text-align:right;margin-top:4px;line-height:1.5}
+#mapKey{color:var(--accent-text);font-weight:700}
+#driveMapWrap.on ~ #mapAttrib{display:block}
+.leaflet-control-attribution{display:none!important}
+#gg.hide{display:none}
+#tel{width:100%;max-width:330px;margin:8px auto 0;display:block}
+#tel.hide{display:none}
+.seg button{padding:9px 2px;font-size:10px}
+#driveMap{height:240px}
+#limitTxt.over{color:var(--bad)}
+#speedVal.over{color:var(--bad)}
+#driveMap,#reviewMap{width:100%;height:230px;border-radius:11px;background:var(--surface-2)}
+.leaflet-container{background:var(--surface-2)!important;font-family:'Montserrat',sans-serif}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:auto;padding-top:14px}
+.stat{background:var(--surface);border:1px solid var(--rule);border-radius:11px;padding:11px 8px;text-align:center}
+.stat b{display:block;font-size:22px;font-weight:800;line-height:1.15}
+.stat small{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+
+#endBtn{margin-top:10px;position:relative;overflow:hidden;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--rule-2);color:var(--ink)}
+#endFill{position:absolute;inset:0;background:var(--bad);width:0;transition:width .05s linear}
+#endBtn span{position:relative}
+
+#coach{position:fixed;left:14px;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));background:var(--warn);color:#0D1B3E;font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;padding:15px;border-radius:var(--r);text-align:center;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .25s,transform .25s;z-index:40}
+#coach.on{opacity:1;transform:none}
+
+/* ---------- lists ---------- */
+.jrow{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:14px;margin-bottom:9px;width:100%;text-align:left}
+.score{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:18px;flex:0 0 auto;background:var(--surface-2)}
+.jmeta b{display:block;font-size:14px;font-weight:700;margin-bottom:3px}
+.jmeta small{font-size:11px;color:var(--ink-2);font-weight:500}
+
+.bd{display:grid;grid-template-columns:1fr auto;gap:9px 14px;font-size:13px;align-items:center}
+.bd span{color:var(--ink-2)}
+.bd b{font-weight:700;text-align:right}
+.pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:20px;background:var(--surface-2);color:var(--ink-2)}
+.pill.good{background:var(--accent);color:var(--accent-ink)}
+.pill.bad{background:var(--bad);color:#fff}
+
+svg.chart{width:100%;display:block}
+canvas.gg2{width:100%;max-width:250px;aspect-ratio:1;margin:8px auto 0;display:block}
+
+/* timeline */
+.tl{position:relative;height:52px;margin-top:4px;border-radius:9px;background:var(--surface-2);overflow:hidden}
+.tl i{position:absolute;top:6px;width:3px;height:40px;border-radius:2px}
+.tl .brake{background:var(--bad)}
+.tl .accel{background:var(--warn)}
+.tl .corner{background:var(--accent-text)}
+.tl .jerk{background:var(--ink-2);height:22px;top:15px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.legend em{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}
+
+.steps li{list-style:none;display:flex;gap:12px;padding:11px 0;font-size:13px;line-height:1.5;color:var(--ink-2)}
+.steps li:before{counter-increment:s;content:counter(s);flex:0 0 22px;height:22px;border-radius:50%;background:var(--surface-2);color:var(--accent-text);font-size:11px;font-weight:800;display:grid;place-items:center}
+.steps{counter-reset:s}
+.steps li.done{color:var(--ink)}
+.steps li.done:before{background:var(--accent);color:var(--accent-ink);content:'✓'}
+
+.bar{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden;margin-top:9px}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+#calRing{width:150px;height:150px;margin:14px auto;display:block}
+
+.note{background:var(--surface);border-left:3px solid var(--warn);border-radius:0 10px 10px 0;padding:12px 14px;font-size:12px;line-height:1.55;margin-bottom:12px}
+.swatches{display:flex;gap:8px;margin-top:10px}
+.swatches div{flex:1;height:34px;border-radius:8px;border:1px solid var(--rule)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body data-theme="night">
+
+<svg width="0" height="0" style="position:absolute"><symbol id="mk" viewBox="0 0 32 32"><path d="M4 26 L16 5 L28 26" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="16" cy="21.5" r="2.8"/></symbol></svg>
+
+<div id="app">
+  <div id="screens">
+
+    <!-- ============ DRIVE ============ -->
+    <section class="screen on" id="drive">
+      <div id="driveInner">
+        <div class="brand" style="margin-bottom:8px">
+          <svg class="mark"><use href="#mk"/></svg>
+          <div><span class="eyebrow">The Reading Room</span><h1 style="font-size:16px;letter-spacing:.16em;text-transform:uppercase">Roadcraft</h1></div>
+          <span class="right" id="vehLabel">—</span>
+        </div>
+
+        <div class="status">
+          <div><i class="dot" id="dGps"></i><span id="tGps">GPS</span></div>
+          <div><i class="dot" id="dMot"></i><span id="tMot">Motion</span></div>
+          <div style="margin-left:auto" id="tClock">00:00</div>
+        </div>
+
+        <div class="speedwrap">
+          <b class="num" id="speedVal">—</b>
+          <div class="speedunit" id="speedUnit">mph</div>
+        </div>
+        <div id="limitRow"><div id="roundel"><span id="limitVal">30</span></div>
+          <div id="roundelMin"><span id="limitMinVal">30</span></div>
+          <div><div id="limitTxt">—</div><div id="limitRoad"></div></div>
+          <div id="camBadge"><svg viewBox="0 0 24 24" width="17" height="17"><path d="M4 7h4l1.5-2h5L16 7h4v12H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/></svg><span id="camDist">—</span></div></div>
+        <div class="seg" id="viewSeg" style="margin:6px 0 0">
+          <button data-v="gg" class="on">G-force</button><button data-v="tel">Telemetry</button><button data-v="map">Map</button>
+        </div>
+        <canvas id="tel" width="620" height="600" class="hide"></canvas>
+        <div id="driveMapWrap">
+          <div id="mapClip"><div id="driveMap"></div></div>
+          <div id="mapArrow"><svg viewBox="0 0 24 30" width="26" height="32">
+            <path d="M12 1 L22 27 L12 21 L2 27 Z" fill="#C4F000" stroke="#0D1B3E" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg></div>
+          <div id="mapNorth"><svg viewBox="0 0 30 30" width="30" height="30">
+            <circle cx="15" cy="15" r="13" fill="rgba(0,0,0,.45)"/>
+            <path id="northNeedle" d="M15 4 L19 16 L15 13 L11 16 Z" fill="#E5484D"/>
+            <text x="15" y="26" font-size="8" font-weight="700" fill="#fff" text-anchor="middle">N</text>
+          </svg></div>
+        </div>
+        <div id="mapAttrib"><span id="mapKey">▲ you · lime trail = your route · everything else is OpenStreetMap</span><br>© OpenStreetMap contributors</div>
+
+        <canvas id="gg" width="560" height="560"></canvas>
+
+        <div class="stats">
+          <div class="stat"><b class="num" id="sDist">0.0</b><small id="sDistU">miles</small></div>
+          <div class="stat"><b class="num" id="sScore">—</b><small>smoothness</small></div>
+          <div class="stat"><b class="num" id="sEvents">0</b><small>events</small></div>
+        </div>
+
+        <button class="btn" id="startBtn">Start drive</button>
+        <button class="btn" id="endBtn" style="display:none"><i id="endFill"></i><span>Hold to end drive</span></button>
+      </div>
+    </section>
+
+    <!-- ============ HISTORY ============ -->
+    <section class="screen" id="history">
+      <div class="brand"><svg class="mark"><use href="#mk"/></svg><div><span class="eyebrow">The Reading Room</span><h1>Drives</h1></div></div>
+      <div id="spotWrap"></div>
+      <div id="trendWrap"></div>
+      <div id="histList"></div>
+    </section>
+
+    <!-- ============ DETAIL ============ -->
+    <section class="screen" id="detail">
+      <button class="btn ghost" id="backBtn" style="margin-bottom:16px">← All drives</button>
+      <div id="detailBody"></div>
+    </section>
+
+
+    <!-- ============ GUIDE ============ -->
+    <section class="screen" id="guide">
+      <div class="brand"><svg class="mark"><use href="#mk"/></svg><div><span class="eyebrow">The Reading Room</span><h1>How this works</h1></div></div>
+
+      <div class="note" style="border-left-color:var(--accent)">Roadcraft measures <b>how you move the car</b> — nothing else. It cannot see other traffic, the car in front, or the road ahead. Everything here is reviewed when parked.</div>
+
+      <h2>Starting a drive</h2>
+      <div class="card"><p class="muted">Tap <b>Start drive</b>. That arms the accelerometer and GPS together; after the first time it re-arms silently on every open. End it with a 1.4-second hold on the button — deliberate, so it can't happen by accident.<br><br>Calibration is stored per vehicle and survives forever. You only redo it if the phone mount moves.</p></div>
+
+      <h2>Calibration</h2>
+      <div class="card"><p class="muted">The phone doesn't know which way it's facing relative to the car, so two things get established.<br><br><b>Mount calibration</b> finds which way is down. Sit still, parked, for five seconds. Once set, that reference is frozen and only re-levels when the car is genuinely still — otherwise a long pull away would be absorbed into "gravity" and vanish.<br><br><b>Forward axis</b> finds which way is forwards. It learns automatically by correlating accelerometer readings against GPS speed changes, or you can set it in ten seconds with <b>Capture forward axis manually</b>: tap it stopped, then pull away firmly in a straight line.</p></div>
+
+      <h2>The three drive views</h2>
+      <div class="card">
+        <p class="muted"><b>G-force</b> — a traction circle. Up is acceleration, down is braking, left and right are cornering. The lime trail shows recent history, the ring shows where you are now. Rings mark 0.25 g intervals to 1.0 g.<br><br>
+        <b>Telemetry</b> — six live bars. Green ends at 60% of the event threshold, amber at the threshold, red above. The bar warns you <i>before</i> something counts against you. The white tick is peak-hold: the worst value so far this drive.<br><br>
+        <b>Map</b> — rotates so the road ahead is at the top. The lime arrow is you; the compass shows where north has gone. It freezes rotation below 5 mph, because a stationary GPS heading is noise.</p>
+      </div>
+
+      <h2>The six telemetry channels</h2>
+      <div class="card"><div class="bd">
+        <span><b>Acceleration</b></span><b>g</b>
+        <span><b>Braking</b></span><b>g</b>
+        <span><b>Cornering</b></span><b>g, left/right</b>
+        <span><b>Grip used</b></span><b>g, combined</b>
+        <span><b>Yaw rate</b></span><b>°/s</b>
+        <span><b>Input smoothness</b></span><b>m/s³</b>
+      </div>
+      <p class="tiny" style="margin-top:10px"><b>Grip used</b> is the vector sum of braking/acceleration and cornering — the actual demand on the tyres however you got there. It's the number that matters on a wet roundabout.<br><br><b>Yaw rate</b> is how fast the car is rotating. It's also what stops potholes being counted as corners.<br><br><b>Input smoothness</b> is jerk, the rate of change of acceleration. Low jerk means you read the road early.</p></div>
+
+      <h2>Modes</h2>
+      <div class="card"><p class="muted">A mode describes <b>how strictly you are judged</b> — not what kind of journey it is. It sets the thresholds <i>and</i> how much each event costs, and is stored per vehicle.<br><br>For a mixed run — lanes out of Harpenden, motorway, then across town — use <b>Road</b>. Careful's thresholds are tight enough that correct defensive braking in city traffic gets logged as a fault, which teaches you nothing. Switching between Road on weekdays and Spirited at the weekend is fine: the trend chart only ever compares drives recorded in the same mode, so you get two clean series rather than one muddled average.</p>
+      <div class="bd" style="margin-top:12px">
+        <span><b>Careful</b></span><b>strictest</b>
+        <span><b>Road</b></span><b>balanced</b>
+        <span><b>Spirited</b></span><b>throttle forgiven</b>
+        <span><b>Track</b></span><b>no scoring</b>
+      </div>
+      <p class="tiny" style="margin-top:12px">Spirited barely scores acceleration — hard acceleration in a straight line on a clear road says more about the car than the driver. Braking weight does <b>not</b> drop in Spirited, deliberately. Hard braking means the road ahead surprised you, and no car justifies relaxing that.</p></div>
+
+      <h2>The scores</h2>
+      <div class="card"><p class="muted"><b>Smoothness</b> — starts at 100, subtracts a penalty for each event scaled per 10 miles, so a short trip isn't punished. Under 0.3 miles it shows nothing at all.<br><br>
+      <b>Anticipation</b> — the ratio of gentle early decelerations to hard late ones. High means you were coming off the throttle in good time. Low means the brakes were doing work your eyes should have done.<br><br>
+      <b>Corner discipline</b> — the share of your cornering time that also carried brake. Braking should be finished before turn-in; the tyres can do one job well or two badly. Under 12% is tidy.</p></div>
+
+      <h2>What counts as an event</h2>
+      <div class="card"><p class="muted">Three tests, all of which must pass:</p>
+      <ol class="steps" style="margin-top:6px">
+        <li class="done">Exceed the threshold for your mode</li>
+        <li class="done">Sustain it for 280 ms — a driver input lasts that long, a pothole lasts twenty milliseconds</li>
+        <li class="done">Be above 5 mph, and for cornering, show real yaw</li>
+      </ol>
+      <p class="tiny" style="margin-top:8px">Both acceleration channels are low-pass filtered at about 2 Hz first. Vehicle dynamics happen below that; road texture and suspension happen above.</p></div>
+
+      <h2>Speed limits</h2>
+      <div class="card"><p class="muted">Roads come from OpenStreetMap, cached locally, matched to the nearest one weighted by how well its bearing agrees with your heading. The match radius scales with your GPS accuracy.</p>
+      <div class="legend" style="margin-top:12px">
+        <span><em style="background:#D6001C;border-radius:50%"></em>Solid red ring — a limit tagged in OSM</span>
+      </div>
+      <div class="legend" style="margin-top:6px">
+        <span><em style="background:transparent;border:2px dashed #D6001C"></em>Dashed ring — assumed from road type</span>
+      </div>
+      <div class="legend" style="margin-top:6px">
+        <span><em style="background:#0B4EA2;border-radius:50%"></em>Blue roundel — a minimum limit, information only</span>
+      </div>
+      <p class="tiny" style="margin-top:12px">Assumed figures use the statutory defaults: motorway 70, single carriageway 60, residential 30, and the street-lighting rule — a road with a system of lighting is 30 unless signed otherwise. These are inferences, and they will be wrong wherever a lower limit is signed but untagged.<br><br><b>The signs are the authority. Always.</b> This will be wrong on slip roads, parallel roads, roadworks and every smart-motorway gantry.</p></div>
+
+      <h2>Fuel and tyres — both are models</h2>
+      <div class="card"><p class="muted">Neither is measured. There is no connection to the car.<br><br>
+      <b>Fuel</b> is calculated from physics: the energy needed to push a known mass against rolling resistance and air, plus the energy spent accelerating it. That is converted to fuel using an engine model with a fixed efficiency term and a running-loss term — the second is why town driving costs so much more per mile than a cruise. Parameters were fitted against published real-world figures, then you scale the whole thing with a brim-to-brim fill-up in Setup.<br><br>
+      The number worth reading is not mpg, it is <b>waste</b>: the share of energy you put into the car and then turned into brake heat. Accelerating towards something you then have to stop for. Under 15% is efficient; over 30% means a lot of wasted work.<br><br>
+      <b>Tyre load</b> distributes measured force to each corner. Cornering loads the outside pair, braking loads the front, driving loads whichever axle drives. Wear rises faster than force, so the square is used — good for ranking drives against each other, meaningless as tread depth. It cannot see pressure, compound, or alignment, and misalignment is the commonest cause of genuinely uneven wear. What it is good for is spotting a persistent one-sided bias across many drives, which is worth a tracking check.</p></div>
+
+      <h2>Conditions</h2>
+      <div class="card"><p class="muted">Each drive is tagged wet or dry with a temperature, fetched from Open-Meteo when the drive ends. Wet drives are marked in the list. Your smoothness in November rain is not comparable to a dry August evening, and grip demand should visibly fall when the road is wet — the g-g plot will show whether yours actually does.</p></div>
+
+      <h2>Backing up</h2>
+      <div class="card"><p class="muted">Everything lives in this browser. Safari clears storage for sites left unopened for about a week, which would take every drive, your calibration and your settings with it. Back up from Setup and keep the file somewhere real. Restoring merges by drive, so nothing recorded since the backup is lost, and it asks separately before touching calibration or settings.</p></div>
+
+      <h2>Driving instructor</h2>
+      <div class="card"><p class="muted">Off by default. When on, it comments aloud on what you have just done — and says nothing the rest of the time, which is most of the time.<br><br>
+      It only speaks when an event is <b>15% or more past</b> the threshold for your mode, so a marginal event passes without comment. It defers while combined g is above 0.32, because talking to someone mid-corner is the opposite of helpful. It will not speak within nine seconds of a speed limit or camera warning, and not below 8 mph.<br><br>
+      Praise is deliberately hard to earn and gets rarer as the drive goes on: three clean minutes for the first, six for the second, ten for the third, and then it stops offering unprompted compliments altogether. Acknowledging a recovery after a rough patch stays available, because that one actually tells you something. A motorway cruise will never be complimented for doing nothing.<br><br>
+      Everything is past tense. Events are only recognised once they finish, so it is describing the corner you just took — never predicting the one ahead. It cannot see the road, so it will never warn you about anything coming up.</p></div>
+
+      <h2>Speed cameras</h2>
+      <div class="card"><p class="muted">Cameras come from OpenStreetMap, cached alongside the road data. A warning fires once per camera per drive, and only for cameras inside a 50° cone ahead of you — so the one on the opposite carriageway stays quiet. Where OSM records which way a camera faces, that's respected too.<br><br>Warning distance scales with speed, about 13 seconds ahead: roughly 180 m in town, up to 700 m at motorway speeds. The badge turns solid inside 250 m.</p>
+      <p class="tiny" style="margin-top:10px"><b>Coverage is incomplete and always will be.</b> Mobile camera vans appear in no database. A new fixed camera may take months to be tagged. <b>No warning means nothing at all</b> — never treat silence as clear road.<br><br>GPS camera-location data is legal in the UK. Radar and laser jammers are not; this app does neither, it only reads a map.</p></div>
+
+      <h2>Map colours</h2>
+      <div class="card">
+        <div class="legend">
+          <span><em style="background:#C4F000"></em>Your route, live map</span>
+          <span><em style="background:#2A4778"></em>Your route, review map</span>
+        </div>
+        <div class="legend" style="margin-top:8px">
+          <span><em style="background:#5C7300"></em>Start of drive</span>
+          <span><em style="background:#5A6784"></em>End of drive</span>
+        </div>
+        <div class="legend" style="margin-top:8px">
+          <span><em style="background:#C0272D"></em>Harsh braking</span>
+          <span><em style="background:#A96500"></em>Harsh acceleration</span>
+          <span><em style="background:#5C7300"></em>Harsh cornering</span>
+        </div>
+        <p class="tiny" style="margin-top:12px">The blue-grey dot at the end of a route is simply where you stopped. Jerky inputs are never plotted — there are too many to read. On the Recurring spots map, circle size means number of events, not severity.</p>
+        <p class="tiny" style="margin-top:10px"><b>On the live map, Roadcraft only ever draws in lime</b> — the arrow for you, the trail for your route. Anything else you can see is OpenStreetMap's own cartography, not this app. Small pale-blue rectangles among houses are usually swimming pools; larger blue shapes are ponds and lakes. If you want to know what something is, find it on openstreetmap.org and tap it.</p>
+      </div>
+
+      <h2>Recurring spots</h2>
+      <div class="card"><p class="muted">Harsh braking and cornering clustered within 60 m across every drive you've recorded, against how many times you passed that point. A spot needs at least three events across two separate drives before it appears, so one bad morning won't create one.<br><br>This is the most useful thing here. A score tells you how a drive went; a recurring spot tells you about a specific corner you keep getting wrong.</p></div>
+
+      <h2>What it cannot do</h2>
+      <div class="card"><p class="muted">No following distance, no other traffic, no mirror checks, no fuel. iOS suspends the app when the screen locks or you switch away, so it only records while it's open and in front. Speed limits need a data connection.<br><br>Holding a phone while driving is an offence in the UK, and glancing at a mounted screen can still be careless driving. Every control locks above 3 mph for that reason.</p></div>
+
+      <p class="tiny" style="margin-top:18px">Roadcraft · House Ó Conghaile</p>
+    </section>
+
+    <!-- ============ SETUP ============ -->
+    <section class="screen" id="setup">
+      <div class="brand"><svg class="mark"><use href="#mk"/></svg><div><span class="eyebrow">The Reading Room</span><h1>Setup</h1></div></div>
+
+      <h2>Appearance</h2>
+      <div class="card">
+        <div class="row"><label>Theme</label>
+          <div class="seg" id="segTheme" style="flex:0 0 190px">
+            <button data-t="auto">Auto</button><button data-t="night">Night</button><button data-t="day">Day</button>
+          </div>
+        </div>
+        <div class="row"><label>Navy</label><input type="color" id="cNavy"></div>
+        <div class="row"><label>Lime</label><input type="color" id="cLime"></div>
+        <div class="swatches" id="swatches"></div>
+      </div>
+      <button class="btn ghost" id="resetCol">Reset to canon colours</button>
+      <p class="tiny">Navy #0D1B3E and lime #C4F000, matched to Bulletin. Surfaces and rules are derived from the navy, so changing it re-tunes the whole app. Day theme darkens the lime for text, because lime on white is unreadable.</p>
+
+      <h2>Vehicle</h2>
+      <div class="card">
+        <div class="row"><label>Current vehicle</label><select id="vehSel"></select></div>
+        <div class="row"><label>Mode</label><select id="modeSel">
+          <option value="commute">Careful</option><option value="road">Road</option>
+          <option value="spirited">Spirited</option><option value="track">Track</option>
+        </select></div>
+        <p class="tiny" id="modeBlurb" style="padding:4px 0 10px"></p>
+        <div class="row"><label>Mount calibration</label><b id="calState" style="font-size:12px">Not set</b></div>
+        <div class="row"><label>Forward axis</label><b id="fwdState" style="font-size:12px">Not learned</b></div>
+      </div>
+      <button class="btn" id="calBtn">Calibrate mount</button>
+      <button class="btn ghost" id="clearCalBtn">Clear this vehicle's calibration</button>
+
+      <ol class="steps" id="calSteps">
+        <li id="cs1">Mount the phone where it will stay for the whole drive. Any angle is fine — it just can't move.</li>
+        <li id="cs2">Stay parked and still for 5 seconds. This finds which way is down.</li>
+        <li id="cs3">Drive normally. The forward axis is learned from your first few accelerations and stops, then locked.</li>
+      </ol>
+      <canvas id="calRing" width="300" height="300" style="display:none"></canvas>
+      <div class="bar" id="calBar" style="display:none"><i></i></div>
+
+      <button class="btn ghost" id="capBtn" style="margin-top:10px">Capture forward axis manually</button>
+      <p class="tiny">Use this if the axis won't lock on its own. Tap it while stopped, then pull away firmly in a straight line for four seconds.</p>
+
+      <h2>Live sensors</h2>
+      <div class="card"><div class="bd" id="diag">
+        <span>Motion rate</span><b>—</b>
+      </div>
+      <p class="tiny" style="margin-top:10px" id="diagHelp">Tap Calibrate to begin.</p>
+      </div>
+      <button class="btn" id="motionBtn">Enable motion sensors</button>
+      <button class="btn ghost" id="gpsBtn">Start GPS</button>
+
+      <h2>Warnings</h2>
+      <div class="card">
+        <div class="row"><label>Spoken warnings</label><button class="sw on" id="swVoice" role="switch" aria-checked="true" aria-label="Spoken warnings"></button></div>
+        <div class="row"><label>Voice</label><select id="voiceSel" style="max-width:170px"></select></div>
+        <div class="row"><label>Test</label><button class="btn ghost" id="testVoice" style="width:auto;padding:9px 16px;font-size:11px">Play sample</button></div>
+        <div class="row"><label>Speaking rate</label><select id="rateSel">
+          <option value="0.85">Slower</option><option value="0.98" selected>Normal</option><option value="1.15">Faster</option>
+        </select></div>
+        <div class="row"><label>Break reminder (2 hours)</label><button class="sw on" id="swBreak" role="switch" aria-checked="true" aria-label="Break reminder"></button></div>
+        <div class="row"><label>Keep screen awake</label><button class="sw on" id="swWake" role="switch" aria-checked="true" aria-label="Keep screen awake"></button></div>
+      </div>
+
+      <div class="note">Siri's voices can't be used here. Apple doesn't expose them to web apps at all — no browser on any device can reach them, so this isn't something the app can add.<br><br>The best available substitute is a downloaded high-quality voice: <b>Settings › Accessibility › Spoken Content › Voices › English › Daniel</b>, then choose the Premium or Enhanced download. It appears in the list above once installed and sounds dramatically better than the compact default.</div>
+
+      <h2>Driving instructor</h2>
+      <div class="card">
+        <div class="row"><label>Spoken commentary</label><button class="sw" id="swCoach" role="switch" aria-checked="false" aria-label="Instructor mode"></button></div>
+        <div class="row"><label>How often</label><select id="coachRate">
+          <option value="0">Sparse — 95 s apart</option><option value="1">Normal — 55 s apart</option><option value="2">Talkative — 30 s apart</option>
+        </select></div>
+      </div>
+      <div class="note">Silence is the normal state. It only speaks when something is clearly over the threshold — not marginal — and it stays quiet while you are actually busy cornering or braking, and for nine seconds after any limit or camera warning.<br><br>Praise needs clean minutes that <b>contained real cornering</b>, so a motorway straight earns nothing — and the bar rises each time, stopping after three. Recovery after a rough patch is always acknowledged. Criticism is past tense: an event is only recognised once it has finished, so it is telling you about the corner you just took, not the one you are in.<br><br>A voice is still a distraction even without a screen. If it starts feeling like company rather than coaching, turn it off.</div>
+
+      <h2>Map</h2>
+      <div class="card">
+        <div class="row"><label>Rotate to direction of travel</label><button class="sw on" id="swMapUp" role="switch" aria-checked="true" aria-label="Heading up"></button></div>
+      </div>
+      <p class="tiny">Heading up turns the map so the road ahead is always at the top, with a compass showing where north has gone. Off gives a conventional north-up map. Route maps in Drives stay north-up either way.</p>
+
+      <h2>Speed cameras</h2>
+      <div class="card">
+        <div class="row"><label>Warn of cameras ahead</label><button class="sw on" id="swCams" role="switch" aria-checked="true" aria-label="Speed cameras"></button></div>
+        <div class="row"><label>Cameras cached</label><b id="camCount" style="font-size:12px">0</b></div>
+      </div>
+      <div class="note">Camera locations come from OpenStreetMap and are <b>incomplete</b>. Mobile camera vans are in no database at all, and a fixed camera added last month may not be tagged yet. Absence of a warning means nothing.<br><br>Warnings only fire for cameras genuinely ahead of you, and only once each per drive. GPS camera databases are legal in the UK; radar and laser jammers are not, and this app does neither.</div>
+
+      <h2>Speed limits</h2>
+      <div class="card">
+        <div class="row"><label>Show likely speed limit</label><button class="sw on" id="swLimits" role="switch" aria-checked="true" aria-label="Speed limits"></button></div>
+        <div class="row"><label>Matched road</label><b id="limRoad" style="font-size:12px">—</b></div>
+      </div>
+      <button class="btn ghost" id="limTestBtn">Test speed limit lookup</button>
+      <p class="tiny" id="limTestOut" style="margin-top:8px;white-space:pre-line">Tap to query OpenStreetMap at your current position and see exactly what comes back.</p>
+      <div class="note">These come from OpenStreetMap and are a <b>prompt, not an authority</b>. They will be wrong on slip roads, parallel roads, unsigned streets, roadworks and every smart-motorway gantry. Where a road is tagged only as "national speed limit", the figure is <i>inferred</i> from the road type, so it assumes a single carriageway is 60 and a motorway or trunk road is 70 — which is wrong wherever a lower limit is signed but untagged. The signs are the authority — always.<br><br>A blue roundel is a <b>minimum</b> speed limit, shown for information only. Exceeding a minimum is the normal legal state, so there is no warning attached to it.</div>
+
+      <h2>Units</h2>
+      <div class="card">
+        <div class="row"><label>Speed and distance</label><select id="unitSel"><option value="imp">mph / miles</option><option value="met">km/h / km</option></select></div>
+      </div>
+
+      <h2>Fine tuning</h2>
+      <p class="tiny" style="margin-bottom:10px">The mode sets these. Adjust if you disagree with it — your changes stick until you pick a mode again.</p>
+      <div class="card">
+        <div class="row"><label>Harsh braking</label><select id="thBrake"></select></div>
+        <div class="row"><label>Harsh acceleration</label><select id="thAccel"></select></div>
+        <div class="row"><label>Harsh cornering</label><select id="thCorner"></select></div>
+      </div>
+      <p class="tiny">Insurer telematics typically flags around 0.35 g. Strict settings are for deliberate practice, not everyday scoring.</p>
+
+      <h2>Fuel calibration</h2>
+      <div class="card">
+        <div class="row"><label>Miles since last fill</label><input type="number" id="calMiles" inputmode="decimal" placeholder="e.g. 312"></div>
+        <div class="row"><label>Litres to fill up</label><input type="number" id="calLitres" inputmode="decimal" placeholder="e.g. 34.6"></div>
+        <div class="row"><label>Current correction</label><b id="fuelScaleTxt" style="font-size:12px">none</b></div>
+      </div>
+      <button class="btn ghost" id="calFuelBtn">Calibrate from this fill-up</button>
+      <p class="tiny">Enter a real brim-to-brim fill and the model scales itself to your car. Until you do, treat mpg as indicative and the waste percentage as the number worth reading.</p>
+
+      <h2>Backup</h2>
+      <div class="card">
+        <div class="row"><label>Drives stored</label><b id="driveCount" style="font-size:12px">0</b></div>
+        <div class="row"><label>Last backup</label><b id="lastBackup" style="font-size:12px">never</b></div>
+      </div>
+      <button class="btn" id="exportBtn">Back up everything</button>
+      <button class="btn ghost" id="importBtn">Restore from a backup</button>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+      <div class="note">Safari clears storage for sites you have not opened in about a week. <b>Everything here lives in this browser only</b> — drives, calibration, settings. Back up now and then, and keep the file somewhere real. Restoring merges rather than overwrites, so nothing already recorded is lost.</div>
+
+      <button class="btn ghost" id="wipeBtn">Delete all drives</button>
+
+      <h2>What this is not</h2>
+      <div class="note">
+        Roadcraft has no idea what the speed limit is, where other traffic is, or how close you are to the car in front. It measures how <i>you</i> move the car, nothing else. Read the road and the signs — this app is reviewed when parked.
+      </div>
+      <p class="tiny">Mount the phone properly. Holding it while driving is an offence in the UK, and glancing at a mounted screen can still be careless driving. Every control locks while the car is moving.</p>
+      <p class="tiny" style="margin-top:14px">Roadcraft · <b id="buildId">build 2026-08-09.30</b> · House Ó Conghaile</p>
+    </section>
+
+  </div>
+
+  <nav id="tabs">
+    <button class="on" data-s="drive">Drive</button>
+    <button data-s="history">Drives</button>
+    <button data-s="guide">Guide</button>
+    <button data-s="setup">Setup</button>
+  </nav>
+</div>
+
+<div id="coach"></div>
+
+<script>
+/* ================= storage shim ================= */
+var LS=(function(){
+  try{var k='__t';localStorage.setItem(k,'1');localStorage.removeItem(k);return localStorage}
+  catch(e){var m={};return{getItem:function(k){return k in m?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]}}}
+})();
+function load(k,d){try{var v=LS.getItem('rc_'+k);return v===null?d:JSON.parse(v)}catch(e){return d}}
+function save(k,v){try{LS.setItem('rc_'+k,JSON.stringify(v))}catch(e){}}
+
+/* ================= constants ================= */
+var G=9.80665;
+var VEHICLES=['Fiat 124 Spider','Kia Picanto','Other'];
+var CANON={navy:'#0D1B3E',lime:'#C4F000'};
+
+/* Modes set both the thresholds AND how much each event costs. Acceleration is
+   the least safety-relevant of the three — it says more about the car than the
+   driver — so its weight falls away fastest. Braking and cornering stay honest
+   in every road mode, because those are the ones that describe roadcraft. */
+/* Vehicle physics. Mass includes a driver. CdA is drag coefficient times
+   frontal area. Crr is rolling resistance. These drive the fuel model, which
+   is a physics estimate — not a measurement — and is scaled by fuelScale,
+   which you set from a real fill-up. */
+var VEHDATA=[
+  {m:1130,CdA:0.65,Crr:0.011,drive:'rwd',tank:45},   // Fiat 124 Spider
+  {m:1080,CdA:0.67,Crr:0.012,drive:'fwd',tank:35},   // Kia Picanto
+  {m:1380,CdA:0.70,Crr:0.012,drive:'fwd',tank:50}    // Other
+];
+function VD(){return VEHDATA[cfg.veh]||VEHDATA[2]}
+/* A Willans-line engine model: fuel power = tractive power divided by
+   indicated efficiency, plus running losses that exist whenever the engine
+   turns. The constant loss term is what makes town driving expensive and a
+   fixed-efficiency model badly wrong. Parameters fitted against published
+   real-world figures for this car. */
+var PETROL_MJ=34.2e6, ETA_IND=0.27, PLOSS0=9000, PLOSS_V=120;
+
+var MODES={
+  commute:{name:'Careful',  brake:0.30,accel:0.28,corner:0.38,
+    wBrake:5,wAccel:3.5,wCorner:4,wJerk:1.5,
+    blurb:'The strictest setting. For carrying passengers, or a deliberate week of practising smoothness. Too strict for traffic that forces defensive braking.'},
+  road:{name:'Road',        brake:0.35,accel:0.35,corner:0.45,
+    wBrake:4,wAccel:2,wCorner:3,wJerk:1.2,
+    blurb:'Balanced, and the right default for mixed journeys — lanes, motorway and town in one run. Forgiving enough that defensive braking in traffic is not scored as a fault.'},
+  spirited:{name:'Spirited',brake:0.40,accel:0.55,corner:0.55,
+    wBrake:4,wAccel:0.4,wCorner:2,wJerk:0.8,
+    blurb:'For a car meant to be driven. Acceleration is recorded but barely scored. Braking and cornering are judged just as hard — those are the ones that describe roadcraft.'},
+  track:{name:'Track',      brake:0.95,accel:0.95,corner:1.10,
+    wBrake:0,wAccel:0,wCorner:0,wJerk:0,noScore:true,
+    blurb:'No scoring at all. Peak g, grip envelope and speed trace only. Not for the public road.'}
+};
+function M(){return MODES[cfg.mode]||MODES.road}
+function modeOf(d){return MODES[d&&d.mode]||MODES.road}
+function applyMode(m){
+  cfg.mode=m;
+  var x=MODES[m]||MODES.road;
+  cfg.thBrake=x.brake;cfg.thAccel=x.accel;cfg.thCorner=x.corner;
+  cfg.vehMode=cfg.vehMode||{};cfg.vehMode[cfg.veh]=m;
+  save('cfg',cfg);
+}
+
+var DEFAULTS={veh:0,voice:1,brk:1,wake:1,units:'imp',thBrake:0.35,thAccel:0.30,thCorner:0.45,
+  theme:'auto',navy:CANON.navy,lime:CANON.lime,voiceName:'',voiceRate:0.98,limits:1,view:'gg',
+  mode:'road',vehMode:{},mapUp:1,cameras:1,fuelScale:{},coach:0,coachRate:1};
+/* Merge defaults OVER a stored config rather than using them as a fallback for
+   the whole object. Without this, any setting added in a later build stays
+   undefined forever for anyone who already had settings saved — which is
+   exactly why speed limits never appeared. */
+var cfg=(function(){
+  var stored=load('cfg',{})||{},out={};
+  for(var k in DEFAULTS)out[k]=(stored[k]===undefined||stored[k]===null)?DEFAULTS[k]:stored[k];
+  save('cfg',out);return out;
+})();
+
+var cals=load('cals',{});
+var drives=load('drives',[]);
+var live=null, motionOK=false, gpsOK=false, gpsAcc=null, wakeLock=null, watchId=null;
+
+/* ================= colour maths ================= */
+function hex2rgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(function(c){return c+c}).join('');
+  return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]}
+function rgb2hex(r){return '#'+r.map(function(v){return ('0'+Math.max(0,Math.min(255,Math.round(v))).toString(16)).slice(-2)}).join('').toUpperCase()}
+function rgb2hsl(c){
+  var r=c[0]/255,g=c[1]/255,b=c[2]/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),h=0,s=0,l=(mx+mn)/2,d=mx-mn;
+  if(d){s=l>0.5?d/(2-mx-mn):d/(mx+mn);
+    h=mx===r?((g-b)/d+(g<b?6:0)):mx===g?((b-r)/d+2):((r-g)/d+4);h/=6}
+  return [h*360,s*100,l*100];
+}
+function hsl2hex(h,s,l){
+  h=((h%360)+360)%360;s/=100;l/=100;
+  var c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2,r,g,b;
+  if(h<60){r=c;g=x;b=0}else if(h<120){r=x;g=c;b=0}else if(h<180){r=0;g=c;b=x}
+  else if(h<240){r=0;g=x;b=c}else if(h<300){r=x;g=0;b=c}else{r=c;g=0;b=x}
+  return rgb2hex([(r+m)*255,(g+m)*255,(b+m)*255]);
+}
+function lum(c){var a=c.map(function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});
+  return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2]}
+function contrast(a,b){var l1=lum(hex2rgb(a)),l2=lum(hex2rgb(b));return (Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05)}
+/* darken a hue until it clears 4.5:1 against a light background */
+function readableOn(colour,bg){
+  var h=rgb2hsl(hex2rgb(colour)),l=h[2],out=colour,guard=0;
+  while(contrast(out,bg)<4.5&&l>2&&guard++<70){l-=1.5;out=hsl2hex(h[0],Math.min(100,h[1]+6),l)}
+  return out;
+}
+
+function applyTheme(){
+  var mode=cfg.theme;
+  if(mode==='auto'){
+    var pref=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches;
+    var hr=new Date().getHours();
+    mode=pref||(hr>=7&&hr<19)?'day':'night';
+    if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)mode='night';
+  }
+  document.body.dataset.theme=mode;
+
+  var n=rgb2hsl(hex2rgb(cfg.navy)), lime=cfg.lime;
+  var s=document.documentElement.style;
+  s.setProperty('--accent',lime);
+
+  if(mode==='night'){
+    s.setProperty('--bg',cfg.navy);
+    s.setProperty('--bg-deep',hsl2hex(n[0],n[1],Math.max(2,n[2]-4)));
+    s.setProperty('--surface',hsl2hex(n[0],n[1],n[2]+5));
+    s.setProperty('--surface-2',hsl2hex(n[0],n[1],n[2]+9));
+    s.setProperty('--rule',hsl2hex(n[0],Math.max(10,n[1]-16),n[2]+11));
+    s.setProperty('--rule-2',hsl2hex(n[0],Math.max(10,n[1]-16),n[2]+16));
+    s.setProperty('--ink','#FFFFFF');
+    s.setProperty('--ink-2',hsl2hex(n[0],18,64));
+    s.setProperty('--accent-ink',cfg.navy);
+    s.setProperty('--accent-text',lime);
+    s.setProperty('--graph',lime);
+    s.setProperty('--good',lime);
+    s.setProperty('--warn','#F2A93B');
+    s.setProperty('--bad','#E5484D');
+    document.querySelector('meta[name=theme-color]').setAttribute('content',cfg.navy);
+  }else{
+    var light=hsl2hex(n[0],26,95);
+    s.setProperty('--bg',light);
+    s.setProperty('--bg-deep','#FFFFFF');
+    s.setProperty('--surface','#FFFFFF');
+    s.setProperty('--surface-2',hsl2hex(n[0],24,90));
+    s.setProperty('--rule',hsl2hex(n[0],22,84));
+    s.setProperty('--rule-2',hsl2hex(n[0],20,76));
+    s.setProperty('--ink',cfg.navy);
+    s.setProperty('--ink-2',hsl2hex(n[0],20,42));
+    s.setProperty('--accent-ink',cfg.navy);
+    s.setProperty('--accent-text',readableOn(lime,'#FFFFFF'));
+    s.setProperty('--graph',hsl2hex(n[0],48,34));
+    s.setProperty('--good',readableOn(lime,'#FFFFFF'));
+    s.setProperty('--warn',readableOn('#F2A93B','#FFFFFF'));
+    s.setProperty('--bad',readableOn('#E5484D','#FFFFFF'));
+    document.querySelector('meta[name=theme-color]').setAttribute('content',light);
+  }
+  paintSwatches();
+  if(cur==='drive')render();
+  if(cur==='history')paintHistory();
+}
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+if(window.matchMedia)try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){if(cfg.theme==='auto')applyTheme()})}catch(e){}
+
+function paintSwatches(){
+  var el=document.getElementById('swatches');if(!el)return;
+  var keys=['--bg','--surface','--rule','--accent','--ink-2'];
+  el.innerHTML=keys.map(function(k){return '<div style="background:'+cssVar(k)+'"></div>'}).join('');
+}
+
+/* ================= maths ================= */
+function nrm(v){var m=Math.hypot(v[0],v[1],v[2])||1;return [v[0]/m,v[1]/m,v[2]/m]}
+function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]}
+function sub(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]]}
+function scl(a,s){return [a[0]*s,a[1]*s,a[2]*s]}
+function cross(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
+function haversine(a,b){
+  var R=6371000,t1=a[0]*Math.PI/180,t2=b[0]*Math.PI/180;
+  var dt=(b[0]-a[0])*Math.PI/180,dl=(b[1]-a[1])*Math.PI/180;
+  var h=Math.sin(dt/2)*Math.sin(dt/2)+Math.cos(t1)*Math.cos(t2)*Math.sin(dl/2)*Math.sin(dl/2);
+  return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));
+}
+function buildBasis(gv){
+  var gh=nrm(gv);
+  var seed=Math.abs(gh[1])<0.9?[0,1,0]:[1,0,0];
+  var e1=nrm(sub(seed,scl(gh,dot(seed,gh))));
+  return {g:gh,e1:e1,e2:cross(gh,e1)};
+}
+
+/* ================= sensors ================= */
+var grav=null,lastMotion=0,hAcc=[0,0],yawRate=0,lon=0,lat=0,jerk=0,lonSm=0,tPrev=0;
+var calibrating=false,motionHz=0,accBuf=[],lastHzT=0;
+var staleSince=0,gravOff=0,relevelling=false,lonSlow=0,jerkBuf=[];
+
+/* Gravity must be a slow reference, not a running average of everything.
+   During calibration it tracks fast. Afterwards it only creeps, and it
+   FREEZES whenever real acceleration is present — otherwise a five-second
+   pull away from a junction gets absorbed into "gravity" and disappears. */
+function onMotion(e){
+  var a=e.accelerationIncludingGravity;
+  if(!a||a.x===null)return;
+  var now=performance.now();
+  if(lastHzT)motionHz=0.9*motionHz+0.1*(1000/Math.max(1,now-lastHzT));
+  lastHzT=now;lastMotion=now;motionOK=true;
+
+  var raw=[a.x,a.y,a.z];
+  /* On a fresh page load grav is null. Seeding it from the raw reading treats
+     whatever angle the phone happens to be at as level, which silently
+     invalidates a stored calibration. Seed from the calibration instead. */
+  if(!grav){
+    var c0=cals[cfg.veh];
+    grav=c0?(c0.gv?c0.gv.slice():scl(c0.g,G)):raw.slice();
+  }
+
+  if(calibrating){
+    grav=[0.9*grav[0]+0.1*raw[0],0.9*grav[1]+0.1*raw[1],0.9*grav[2]+0.1*raw[2]];
+    staleSince=0;
+  }else{
+    var q=sub(raw,grav);
+    var qm=Math.hypot(q[0],q[1],q[2]);
+    gravOff=qm;
+    if(qm<0.6){                                    // quiet: safe to creep
+      staleSince=0;
+      grav=[0.997*grav[0]+0.003*raw[0],0.997*grav[1]+0.003*raw[1],0.997*grav[2]+0.003*raw[2]];
+    }else{
+      /* A large offset that persists is the phone having moved, not the car
+         accelerating — no car holds 0.6 g for three seconds without the speed
+         collapsing. Without this the reference can never recover. */
+      if(!staleSince)staleSince=now;
+      var parked=!gpsOK||(window.__v||0)<2;
+      if(now-staleSince>3000&&parked){
+        relevelling=true;
+        grav=[0.93*grav[0]+0.07*raw[0],0.93*grav[1]+0.07*raw[1],0.93*grav[2]+0.07*raw[2]];
+      }
+    }
+    if(qm<0.25)relevelling=false;
+  }
+
+  var cal=cals[cfg.veh];if(!cal)return;
+  var lin=sub(raw,grav),gh=cal.g;
+  var horiz=sub(lin,scl(gh,dot(lin,gh)));
+  hAcc=[dot(horiz,cal.e1),dot(horiz,cal.e2)];
+  if(!cal.fwd){accBuf.push(hAcc[0],hAcc[1]);if(accBuf.length>400)accBuf.splice(0,2)}
+
+  if(e.rotationRate){
+    var rr=[(e.rotationRate.alpha||0)*Math.PI/180,(e.rotationRate.beta||0)*Math.PI/180,(e.rotationRate.gamma||0)*Math.PI/180];
+    yawRate=dot(rr,gh);
+  }
+  if(cal.fwd){
+    var f=cal.fwd,p=[-f[1],f[0]];
+    var lonRaw=hAcc[0]*f[0]+hAcc[1]*f[1];
+    var latRaw=(hAcc[0]*p[0]+hAcc[1]*p[1])*(cal.latSign||1);
+    /* Vehicle dynamics live below ~2 Hz; road texture, suspension and engine
+       vibration live above it. Detecting events on raw 60 Hz samples counted
+       every pothole as a corner. */
+    lon=0.81*lon+0.19*lonRaw;
+    lat=0.81*lat+0.19*latRaw;
+    tPrev=now;
+    lonSm=0.82*lonSm+0.18*lon;
+    /* Jerk was differentiating a lightly-smoothed signal sample-to-sample at
+       60 Hz, so road vibration alone cleared the threshold — 114 false events
+       on a half-mile drive. Differentiate a heavily smoothed signal over a
+       250 ms window instead, which is the timescale a driver's input acts on. */
+    lonSlow=0.96*lonSlow+0.04*lon;
+    jerkBuf.push([now,lonSlow]);
+    while(jerkBuf.length>2&&now-jerkBuf[0][0]>250)jerkBuf.shift();
+    if(jerkBuf.length>1){
+      var span=(now-jerkBuf[0][0])/1000;
+      if(span>0.15)jerk=(lonSlow-jerkBuf[0][1])/span;
+    }
+    if(live)ingest(lon,lat,jerk,now);
+  }
+}
+
+var learnAcc=[0,0],learnN=0,learnLat=0,gpsPrev=null;
+var LEARN_TARGET=10, learnLastMag=0;
+
+/* Average every motion sample taken since the previous GPS fix, then correlate
+   that average with the speed change over the same interval. Comparing a
+   one-second average against a one-second dv/dt is like for like; comparing a
+   single instantaneous reading against it, as before, was not. */
+function learnStep(dvdt){
+  var n=accBuf.length/2;
+  var mean=[0,0];
+  if(n){for(var i=0;i<accBuf.length;i+=2){mean[0]+=accBuf[i];mean[1]+=accBuf[i+1]}
+    mean=[mean[0]/n,mean[1]/n]}
+  accBuf.length=0;
+  learnLastMag=Math.hypot(mean[0],mean[1]);
+  if(!n||Math.abs(dvdt)<0.35||learnLastMag<0.2)return;
+
+  learnAcc[0]+=mean[0]*dvdt;learnAcc[1]+=mean[1]*dvdt;learnN++;
+  var cal=cals[cfg.veh];
+  if(learnN>=LEARN_TARGET&&cal&&!cal.fwd){
+    var m=Math.hypot(learnAcc[0],learnAcc[1]);
+    if(m>0.3){
+      cal.fwd=[learnAcc[0]/m,learnAcc[1]/m];cal.latSign=1;
+      save('cals',cals);paintSetup();lastVoice=0;say('Forward axis locked.');
+    }
+  }
+}
+/* Manual fallback: hold the button and accelerate hard in a straight line. */
+var capT=null;
+function captureForward(){
+  var cal=cals[cfg.veh];
+  if(!cal){alert('Calibrate the mount first.');return}
+  var acc=[0,0],n=0,t0=Date.now();
+  clearInterval(capT);
+  lastVoice=0;say('Accelerate in a straight line now.');
+  capT=setInterval(function(){
+    acc[0]+=hAcc[0];acc[1]+=hAcc[1];n++;
+    var p=(Date.now()-t0)/4000;
+    var b=document.getElementById('capBtn');
+    if(b)b.textContent='Capturing… '+Math.max(0,Math.ceil(4-p*4))+'s';
+    if(p>=1){
+      clearInterval(capT);
+      var m=Math.hypot(acc[0],acc[1]);
+      if(m/Math.max(n,1)<0.25){alert('Not enough acceleration detected. Try again with a firmer pull away.');}
+      else{cal.fwd=[acc[0]/m,acc[1]/m];cal.latSign=1;save('cals',cals);lastVoice=0;say('Forward axis set.')}
+      if(b)b.textContent='Capture forward axis manually';
+      paintSetup();
+    }
+  },120);
+}
+function learnLateral(speed){
+  var cal=cals[cfg.veh];
+  if(!cal||!cal.fwd||cal.latLocked)return;
+  if(speed<6||Math.abs(yawRate)<0.09)return;
+  var f=cal.fwd,p=[-f[1],f[0]];
+  learnLat+=(hAcc[0]*p[0]+hAcc[1]*p[1])*(speed*yawRate);
+  if(Math.abs(learnLat)>28){cal.latSign=learnLat>0?1:-1;cal.latLocked=1;save('cals',cals)}
+}
+
+/* ================= events ================= */
+var evState={b:0,a:0,c:0,j:0},evPeak={b:0,a:0,c:0},evT={b:0,a:0,c:0},evYaw=0,lastEvT=0,trailT=0,trailFlag=0;
+var MIN_EVENT_MS=280;
+function ingest(lo,la,jk,now){
+  /* Below about 5 mph the accelerometer sees parking shuffles, kerbs and
+     idle vibration, none of which say anything about driving quality. */
+  if((window.__v||0)*2.23694<5){evState={b:0,a:0,c:0,j:0};evT={b:0,a:0,c:0};evYaw=0;return}
+  var tb=cfg.thBrake*G,ta=cfg.thAccel*G,tc=cfg.thCorner*G;
+  /* An event must be SUSTAINED, not a single spike. A driver input lasts a
+     few hundred milliseconds; a bump lasts twenty. */
+  if(-lo>tb){if(!evT.b)evT.b=now;evState.b=1;evPeak.b=Math.max(evPeak.b,-lo)}
+  else if(evState.b&&-lo<tb*0.6){
+    if(now-evT.b>MIN_EVENT_MS)pushEvent('brake',evPeak.b);
+    evState.b=0;evPeak.b=0;evT.b=0}
+
+  if(lo>ta){if(!evT.a)evT.a=now;evState.a=1;evPeak.a=Math.max(evPeak.a,lo)}
+  else if(evState.a&&lo<ta*0.6){
+    if(now-evT.a>MIN_EVENT_MS)pushEvent('accel',evPeak.a);
+    evState.a=0;evPeak.a=0;evT.a=0}
+
+  /* Cornering additionally requires the car to actually be rotating. Lateral g
+     without yaw is a camber change, a pothole or a calibration error — not a
+     corner. This is what produced 22 "corners" on a straight road. */
+  if(Math.abs(la)>tc){
+    if(!evT.c)evT.c=now;
+    evState.c=1;evPeak.c=Math.max(evPeak.c,Math.abs(la));
+    evYaw=Math.max(evYaw,Math.abs(yawRate));
+  }else if(evState.c&&Math.abs(la)<tc*0.6){
+    if(now-evT.c>MIN_EVENT_MS&&evYaw>0.07)pushEvent('corner',evPeak.c);
+    evState.c=0;evPeak.c=0;evT.c=0;evYaw=0}
+  if(Math.abs(jk)>9){if(!evState.j){evState.j=1;pushEvent('jerk',Math.abs(jk))}}
+  else if(Math.abs(jk)<5)evState.j=0;
+
+  if(-lo>0.08*G&&-lo<cfg.thBrake*G*0.72)live.gentleTicks++;
+  live.ticks++;
+
+  /* Roadcraft: braking should be finished before turn-in. Measuring how much
+     of your cornering time also carries brake is the difference between tidy
+     and merely quick. Requires real yaw so camber cannot fake it. */
+  if(Math.abs(la)>0.15*G&&Math.abs(yawRate)>0.05){
+    live.cornerTicks=(live.cornerTicks||0)+1;
+    if(lo<-0.15*G){
+      live.trailTicks=(live.trailTicks||0)+1;
+      if(!trailT)trailT=now;
+      else if(now-trailT>400&&!trailFlag){trailFlag=1;live.trailEvents=(live.trailEvents||0)+1;coachTrail()}
+    }else{trailT=0;trailFlag=0}
+  }else{trailT=0;trailFlag=0}
+  if(now-live.lastCloud>140){live.lastCloud=now;
+    live.cloud.push([+(lo/G).toFixed(2),+(la/G).toFixed(2)]);
+    if(live.cloud.length>900)live.cloud.shift()}
+  live.peakLon=Math.max(live.peakLon,Math.abs(lo)/G);
+  live.peakLat=Math.max(live.peakLat,Math.abs(la)/G);
+  live.peakYaw=Math.max(live.peakYaw||0,Math.abs(yawRate));
+  accrueTyre(lo,la);
+}
+function pushEvent(type,mag){
+  var t=Date.now();if(t-lastEvT<700)return;lastEvT=t;
+  var ev={t:t-live.start,type:type,g:+(mag/G).toFixed(2)};
+  if(gpsPrev){ev.lat=+gpsPrev.lat.toFixed(5);ev.lon=+gpsPrev.lon.toFixed(5)}
+  if(limMatch&&limMatch.name)ev.road=limMatch.name;
+  live.events.push(ev);
+  coachEvent(type,mag/G);
+  live.counts[type]=(live.counts[type]||0)+1;
+  flash(type,mag);render();
+}
+
+/* ================= speed limits (advisory only) =================
+   OpenStreetMap maxspeed tags fetched from Overpass, cached locally, matched
+   to the nearest road segment weighted by how well its bearing agrees with
+   your heading. It will be wrong sometimes: parallel roads, slip roads,
+   unsigned streets, roadworks, and every smart-motorway gantry. Prompt, not
+   authority — the signs are the authority. */
+var limSet=load('limSet',[]),limNow=null,limFetching=false,limCentre=load('limCentre',null),limMatch=null,limErr='';
+
+/* Where OSM carries no maxspeed, fall back to the statutory defaults. The
+   street-lighting rule is real law: a road with a system of lighting is 30
+   unless signed otherwise. Everything here is flagged as assumed, never shown
+   as though it were read off a sign. */
+function inferLimit(t){
+  var hw=t.highway||'';
+  if(/^motorway/.test(hw))return{v:70,u:'mph',inf:true};
+  if(/^trunk/.test(hw))return{v:(t.dual_carriageway==='yes'||t.oneway==='yes')?70:60,u:'mph',inf:true};
+  if(hw==='living_street')return{v:20,u:'mph',inf:true};
+  if(hw==='residential')return{v:30,u:'mph',inf:true};
+  if(t.lit==='yes')return{v:30,u:'mph',inf:true};
+  if(/^(primary|secondary|tertiary|unclassified)/.test(hw))return{v:60,u:'mph',inf:true};
+  return null;
+}
+
+/* UK roads are frequently tagged with national-speed-limit codes rather than a
+   number. Without these, most rural lanes and every motorway return nothing. */
+function parseLimit(s,hw){
+  if(!s)return null;
+  s=String(s).trim();
+  var m=/^(\d+)\s*mph$/i.exec(s); if(m)return{v:+m[1],u:'mph'};
+  m=/^(\d+)\s*km\/?h$/i.exec(s); if(m)return{v:+m[1],u:'kmh'};
+  m=/^(\d+)$/.exec(s); if(m)return{v:+m[1],u:'kmh'};
+  var k=s.toLowerCase();
+  if(k==='none'||k==='signals'||k==='variable')return null;
+  if(k==='walk')return{v:5,u:'mph',nsl:true};
+  if(/gb:motorway/.test(k))return{v:70,u:'mph',nsl:true};
+  if(/gb:nsl_dual/.test(k))return{v:70,u:'mph',nsl:true};
+  if(/gb:nsl_single/.test(k))return{v:60,u:'mph',nsl:true};
+  if(k==='national'||k==='default'){
+    var motor=/^(motorway|trunk)/.test(hw||'');
+    return{v:motor?70:60,u:'mph',nsl:true};
+  }
+  return null;
+}
+function segDist(p,a,b){
+  var mx=111320*Math.cos(p[0]*Math.PI/180),my=110540;
+  var ax=(a[1]-p[1])*mx,ay=(a[0]-p[0])*my;
+  var bx=(b[1]-p[1])*mx,by=(b[0]-p[0])*my;
+  var dx=bx-ax,dy=by-ay,L2=dx*dx+dy*dy;
+  var t=L2?Math.max(0,Math.min(1,-(ax*dx+ay*dy)/L2)):0;
+  var cx=ax+t*dx,cy=ay+t*dy;
+  return{d:Math.hypot(cx,cy),brg:(Math.atan2(dx,dy)*180/Math.PI+360)%360};
+}
+/* One active set of ways covering a 1200 m radius, refetched once you are
+   700 m from its centre. The previous version keyed the cache by a rounded
+   lat/lon tile that did not line up with the fetch radius, so the lookup
+   missed as soon as you crossed a tile edge. */
+var OVERPASS=[
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
+];
+var limFailAt=0,limStats='',limTrace=[];
+
+/* First success wins; only reject once every server has failed. */
+function anyOf(ps){
+  return new Promise(function(resolve,reject){
+    var errs=[],left=ps.length;
+    if(!left)return reject(new Error('no endpoints'));
+    ps.forEach(function(p){
+      p.then(resolve,function(e){
+        errs.push(e.message||'failed');
+        if(--left===0)reject(new Error(errs.join(' · ')));
+      });
+    });
+  });
+}
+function raceOverpass(q){
+  return anyOf(OVERPASS.map(function(url){
+    var host=url.split('/')[2];
+    var ctl=(typeof AbortController!=='undefined')?new AbortController():null;
+    var timer=setTimeout(function(){if(ctl)ctl.abort()},22000);
+    return fetch(url+'?data='+encodeURIComponent(q),ctl?{signal:ctl.signal}:{})
+      .then(function(r){
+        clearTimeout(timer);
+        if(!r.ok)throw new Error(host+' HTTP '+r.status);
+        return r.json().then(function(j){return{j:j,host:host,url:url}});
+      })
+      .catch(function(e){
+        clearTimeout(timer);
+        throw new Error(host+' '+((e&&e.name==='AbortError')?'timeout':(e.message||'blocked')));
+      });
+  }));
+}
+async function fetchLimits(lat,lon){
+  if(limFetching)return;
+  /* Back off after a failure. Without this a failing lookup retried on every
+     GPS fix, which Overpass answers by rate-limiting the IP outright. */
+  if(limFailAt&&Date.now()-limFailAt<60000)return;
+  limFetching=true; limErr='';
+  var c=lat.toFixed(5)+','+lon.toFixed(5);
+  /* `out geom` = body mode plus coordinates. `out tags geom` returns tags with
+     NO geometry, which silently emptied every result. */
+  /* GET with no custom headers is a CORS "simple request" — no preflight, and
+     far less likely to be blocked by a proxy, content blocker or Lockdown Mode
+     than a POST carrying a Content-Type header. */
+  var R=limRadius();
+  /* Most gaps were roads with no maxspeed tag at all, which the old query
+     never even asked for. Fetch every real road and infer a limit where OSM
+     has none. At speed, restrict to major classes to keep the payload sane. */
+  var cls=R>1500?'motorway|trunk|primary|secondary|motorway_link|trunk_link|primary_link|secondary_link'
+                :'motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link';
+  var q='[out:json][timeout:25];('+
+        'way(around:'+R+','+c+')[highway~"^('+cls+')$"];'+
+        'node(around:'+R+','+c+')[highway=speed_camera];);out geom;';
+  limTrace=[];
+  try{
+    /* Race every server at once and take the first that answers. Trying them in
+       sequence meant waiting out each failure before reaching a working one —
+       which is how a 20 s budget got spent on three dead servers. */
+    var t0=Date.now();
+    var res=await raceOverpass(q);
+    limTrace.push(res.host+' ok in '+((Date.now()-t0)/1000).toFixed(1)+'s');
+    save('overpassOK',res.url);
+    var j=res.j;
+    var raw=(j.elements||[]).length;
+    var withGeom=(j.elements||[]).filter(function(e){return e.geometry&&e.geometry.length>1}).length;
+    var freshCams=(j.elements||[]).filter(function(e){return e.type==='node'&&e.lat})
+      .map(function(e){
+        var t=e.tags||{};
+        return{id:e.id,lat:e.lat,lon:e.lon,
+               kind:(t['speed_camera']||t.enforcement||'fixed'),
+               dir:(t.direction!==undefined&&!isNaN(+t.direction))?+t.direction:null,
+               s:parseLimit(t.maxspeed,'')};
+      });
+    var camSeen={};
+    camSet=freshCams.concat(camSet).filter(function(x){
+      if(camSeen[x.id])return false;camSeen[x.id]=1;return true;
+    }).slice(0,400);
+    try{save('camSet',camSet)}catch(e){}
+
+    var fresh=(j.elements||[]).filter(function(e){return e.type==='way'&&e.geometry&&e.geometry.length>1})
+      .map(function(e){
+        var t=e.tags||{},hw=t.highway;
+        var mx=parseLimit(t.maxspeed,hw)||parseLimit(t['source:maxspeed'],hw)||inferLimit(t);
+        var mn=parseLimit(t.minspeed,hw);
+        if(!mx&&!mn)return null;
+        return{mx:mx,mn:mn,n:(t.name||t.ref||''),g:e.geometry.map(function(p){return[+p.lat.toFixed(5),+p.lon.toFixed(5)]})};
+      }).filter(Boolean);
+    var tagged=fresh.filter(function(w){return w.mx&&!w.mx.inf}).length;
+    /* Merge rather than replace, so crossing a fetch boundary or a failed
+       lookup does not blank the limit that was working a moment ago. */
+    var seen={};
+    limSet=fresh.concat(limSet).filter(function(w){
+      var k=w.g[0][0]+','+w.g[0][1]+','+w.g.length;
+      if(seen[k])return false;seen[k]=1;return true;
+    }).slice(0,2500);
+    limCentre=[lat,lon];limFailAt=0;
+    limStats=raw+' returned · '+withGeom+' with geometry · '+fresh.length+' usable ('+tagged+' signed, '+(fresh.length-tagged)+' assumed) · '+limSet.length+' cached';
+    /* Geometry is bulky; only persist if it comfortably fits. */
+    try{
+      var blob=JSON.stringify(limSet);
+      if(blob.length<1500000){save('limSet',limSet);save('limCentre',limCentre)}
+    }catch(e){}
+  }catch(e){limErr=e.message||'lookup failed';limFailAt=Date.now();limStats=''}
+  limFetching=false;
+  if(cur==='setup')paintDiag();
+}
+
+/* One-tap diagnostic: runs a lookup against the current position and reports
+   exactly what came back, so a failure is legible instead of silent. */
+async function testLimits(){
+  var b=document.getElementById('limTestBtn');
+  if(!gpsPrev){if(b)b.textContent='No GPS fix yet — tap Start GPS';return}
+  if(b)b.textContent='Testing…';
+  limFailAt=0;limCentre=null;
+  await fetchLimits(gpsPrev.lat,gpsPrev.lon);
+  var m=matchLimit(gpsPrev.lat,gpsPrev.lon,window.__hdg);
+  var acc=gpsAcc?('GPS ±'+Math.round(gpsAcc)+' m · accept '+Math.round(Math.min(85,Math.max(35,gpsAcc*1.5)))+' m'):'GPS accuracy unknown';
+  var near=limNearest?('nearest road '+limNearest.name+' at '+limNearest.d.toFixed(0)+' m'):'no roads to compare';
+  var out=limErr?('FAILED · '+limErr+
+      '\n\nAll four servers failed. Timeouts usually mean a slow or filtered connection rather than a broken app — Overpass is a free service and can be genuinely slow. Try again, and try mobile data with Wi-Fi off. If mobile data works and Wi-Fi does not, something on the home network is filtering it.'):
+    (limTrace.join(' · ')+'\n'+limStats+'\n'+acc+'\n'+
+      (m?('MATCHED '+(m.name||'unnamed')+' at '+m.d.toFixed(0)+' m · '+
+          (m.limit?m.limit.v+' '+(m.limit.u==='mph'?'mph':'km/h'):'no maximum tagged')):
+         ('NO MATCH · '+near+'\n\nIf the nearest road is far away, the GPS fix is drifting — this is normal indoors. Test again outside or in the car.')));
+  if(b)b.textContent='Test speed limit lookup';
+  var el=document.getElementById('limTestOut');
+  if(el)el.textContent=out;
+  paintDiag();
+}
+var camSet=load('camSet',[]),camAhead=null,camWarned={};
+
+function bearingTo(a,b){
+  var la1=a[0]*Math.PI/180,la2=b[0]*Math.PI/180,dLon=(b[1]-a[1])*Math.PI/180;
+  var y=Math.sin(dLon)*Math.cos(la2);
+  var x=Math.cos(la1)*Math.sin(la2)-Math.sin(la1)*Math.cos(la2)*Math.cos(dLon);
+  return (Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+function angDiff(a,b){return Math.abs(((a-b+180)%360+360)%360-180)}
+
+/* Only cameras genuinely ahead of you count — inside a 50 degree cone on your
+   heading. Warning distance is time-based, so 70 mph gets more notice than 30. */
+function updateCameras(lat,lon,heading,v){
+  camAhead=null;
+  if(!cfg.cameras||!camSet.length)return;
+  var warnM=Math.max(180,Math.min(700,v*13));
+  var best=null;
+  for(var i=0;i<camSet.length;i++){
+    var c=camSet[i];
+    var d=haversine([lat,lon],[c.lat,c.lon]);
+    if(d>warnM+250)continue;
+    if(heading!==null&&heading!==undefined&&!isNaN(heading)&&v>3){
+      if(angDiff(bearingTo([lat,lon],[c.lat,c.lon]),heading)>50)continue;
+      if(c.dir!==null&&angDiff(c.dir,heading)>70)continue;   // camera faces the other way
+    }
+    if(!best||d<best.d)best={d:d,c:c};
+  }
+  if(!best)return;
+  camAhead=best;
+  if(best.d<=warnM&&!camWarned[best.c.id]&&v>3){
+    camWarned[best.c.id]=1;
+    var lim=best.c.s||limNow;
+    var avg=/average/i.test(best.c.kind);
+    lastVoice=0;
+    speak((avg?'Average speed camera ahead':'Speed camera ahead')+
+          (lim?', limit '+(lim.u==='mph'?lim.v:Math.round(lim.v*0.621371)):'')+'.',true);
+  }
+}
+
+var limNearest=null;
+/* At 60 mph you cover 500 m in under 20 s, so a fixed small radius means
+   constant refetching. Widen it with speed instead. */
+function limRadius(){
+  var v=(window.__v||0);
+  return v>20?2000:v>9?1200:800;
+}
+function matchLimit(lat,lon,heading){
+  limNearest=null;
+  if(!limSet||!limSet.length)return null;
+  /* A fixed 30 m radius ignored how good the fix actually was. Indoors or under
+     trees a fix can be 50 m out, and every road is then "too far". Scale the
+     acceptance radius to the reported accuracy instead. */
+  var accept=Math.min(85,Math.max(35,(gpsAcc||25)*1.5));
+  var best=null;
+  limSet.forEach(function(w){
+    for(var i=0;i<w.g.length-1;i++){
+      var r=segDist([lat,lon],w.g[i],w.g[i+1]);
+      if(!limNearest||r.d<limNearest.d)limNearest={d:r.d,name:w.n||'unnamed'};
+      if(r.d>accept)continue;
+      var pen=0;
+      if(heading!==null&&heading!==undefined&&!isNaN(heading)){
+        var diff=Math.abs(((r.brg-heading+90)%180)-90);   // roads are bidirectional
+        pen=diff*0.55;
+      }
+      var score=r.d+pen;
+      if(!best||score<best.score)best={score:score,d:r.d,limit:w.mx,min:w.mn,name:w.n};
+    }
+  });
+  return best;
+}
+function limStatus(){
+  if(!cfg.limits)return 'off';
+  if(limFetching)return 'looking up…';
+  if(limErr)return 'error: '+limErr;
+  if(!limSet.length)return 'no data yet';
+  return limSet.length+' roads'+(limMatch?' · matched':
+    (limNearest?' · nearest '+limNearest.d.toFixed(0)+' m':' · no match'));
+}
+var overSince=0,limMin=null;
+function updateLimit(lat,lon,heading,speedMs){
+  if(!cfg.limits)  {limNow=null;return}
+  if(!limCentre||haversine(limCentre,[lat,lon])>limRadius()*0.55)fetchLimits(lat,lon);
+  limMatch=matchLimit(lat,lon,heading);
+  limNow=limMatch?limMatch.limit:null;
+  limMin=limMatch?limMatch.min:null;
+  if(!limNow){overSince=0;return}
+  var mph=speedMs*2.23694;
+  var limMph=limNow.u==='mph'?limNow.v:limNow.v*0.621371;
+  if(mph>limMph+3){
+    if(!overSince)overSince=Date.now();
+    else if(Date.now()-overSince>6000){
+      overSince=Date.now();
+      say('Speed limit '+Math.round(limMph)+'.');
+    }
+  }else overSince=0;
+}
+
+/* ================= fuel and tyres =================
+   Both are MODELS, not measurements. Fuel comes from the energy needed to move
+   a known mass against drag and rolling resistance; tyre load from the forces
+   measured at each corner. Relative comparisons are sound; absolute numbers
+   are only as good as the vehicle figures and your calibration. */
+function accrueEnergy(v,vPrev,dt){
+  if(!live||dt<=0||dt>8)return;
+  var V=VD(),vAvg=Math.max(0,(v+vPrev)/2),a=(v-vPrev)/dt;
+  var Proll=V.Crr*V.m*9.80665*vAvg;
+  var Paero=0.5*1.225*V.CdA*vAvg*vAvg*vAvg;
+  var Pacc=V.m*a*vAvg;
+  var Pt=Math.max(0,Proll+Paero+Pacc);
+  live.eTract=(live.eTract||0)+Pt*dt;
+  live.eDrag=(live.eDrag||0)+(Proll+Paero)*dt;
+  live.eFuel=(live.eFuel||0)+(Pt/ETA_IND+PLOSS0+PLOSS_V*vAvg)*dt;
+  if(Pacc<0)live.eBraked=(live.eBraked||0)+(-Pacc)*dt;
+  if(v<0.6)live.idleT=(live.idleT||0)+dt;
+}
+
+function fuelOf(d){
+  var scale=((cfg.fuelScale||{})[d.veh])||1;
+  if(!d.eFuel||!d.dist)return null;
+  var litres=(d.eFuel/PETROL_MJ)*scale;
+  var mi=d.dist/1609.34;
+  return{litres:litres,mpg:mi/(litres*0.219969),
+         wastePct:Math.round((d.eBraked||0)/Math.max(d.eTract,1)*100),
+         calibrated:!!((cfg.fuelScale||{})[d.veh])};
+}
+
+/* Lateral load goes to the OUTSIDE tyres; braking loads the front, driving
+   loads whichever axle is driven. Wear rises faster than force, so the square
+   is used as the proxy — good for ranking drives, meaningless in millimetres. */
+function accrueTyre(lo,la){
+  if(!live)return;
+  var V=VD();
+  var L=Math.abs(la)/G, B=Math.max(0,-lo)/G, A=Math.max(0,lo)/G;
+  if(L<0.03&&B<0.03&&A<0.03)return;
+  var t=live.tyre||(live.tyre={fl:0,fr:0,rl:0,rr:0});
+  var latW=L*L, braW=B*B, accW=A*A;
+  var right=la>0;                       // turning right loads the left-hand pair
+  if(right){t.fl+=latW*0.55;t.rl+=latW*0.45}
+  else{t.fr+=latW*0.55;t.rr+=latW*0.45}
+  t.fl+=braW*0.35;t.fr+=braW*0.35;t.rl+=braW*0.15;t.rr+=braW*0.15;
+  if(V.drive==='rwd'){t.rl+=accW*0.4;t.rr+=accW*0.4;t.fl+=accW*0.1;t.fr+=accW*0.1}
+  else{t.fl+=accW*0.4;t.fr+=accW*0.4;t.rl+=accW*0.1;t.rr+=accW*0.1}
+}
+function tyreIndex(d){
+  var t=d.tyre;if(!t||!d.dist)return null;
+  var total=t.fl+t.fr+t.rl+t.rr;
+  if(total<1)return null;
+  var per=total/(d.dist/1609.34);
+  return{per:per,fl:t.fl/total,fr:t.fr/total,rl:t.rl/total,rr:t.rr/total,
+         leftBias:Math.round(((t.fl+t.rl)/total-0.5)*200)};
+}
+
+/* ================= analysis ================= */
+function trailPct(d){
+  if(!d.cornerTicks||d.cornerTicks<40)return null;
+  return Math.round((d.trailTicks||0)/d.cornerTicks*100);
+}
+
+/* Events recorded before positions were stored are recovered by matching their
+   timestamp against the speed trace. */
+function eventsWithPos(d){
+  var out=[];
+  var t0=(d.trace&&d.trace.length)?d.trace[0][0]:null;
+  (d.events||[]).forEach(function(ev){
+    if(ev.lat!==undefined){out.push({type:ev.type,g:ev.g,lat:ev.lat,lon:ev.lon,road:ev.road||''});return}
+    if(t0===null)return;
+    var target=t0+ev.t,best=null,bd=1e12;
+    for(var i=0;i<d.trace.length;i++){
+      var t=d.trace[i];
+      if(t.length>3){var gap=Math.abs(t[0]-target);if(gap<bd){bd=gap;best=t}}
+    }
+    if(best&&bd<8000)out.push({type:ev.type,g:ev.g,lat:best[2],lon:best[3],road:''});
+  });
+  return out;
+}
+
+function troubleSpots(){
+  var clusters=[];
+  drives.forEach(function(d){
+    eventsWithPos(d).forEach(function(e){
+      if(e.type==='jerk'||e.type==='accel')return;      // only braking and cornering
+      var c=null;
+      for(var i=0;i<clusters.length;i++)
+        if(haversine([clusters[i].lat,clusters[i].lon],[e.lat,e.lon])<60){c=clusters[i];break}
+      if(!c){c={lat:e.lat,lon:e.lon,n:0,dset:{},types:{},road:''};clusters.push(c)}
+      c.n++;c.dset[d.id]=1;c.types[e.type]=(c.types[e.type]||0)+1;
+      if(e.road&&!c.road)c.road=e.road;
+      c.lat=(c.lat*(c.n-1)+e.lat)/c.n;c.lon=(c.lon*(c.n-1)+e.lon)/c.n;
+    });
+  });
+  clusters.forEach(function(c){
+    var passes=0;
+    drives.forEach(function(d){
+      var tr=d.trace||[],hit=false;
+      for(var i=0;i<tr.length&&!hit;i+=2)
+        if(tr[i].length>3&&haversine([c.lat,c.lon],[tr[i][2],tr[i][3]])<75)hit=true;
+      if(hit)passes++;
+    });
+    c.passes=Math.max(passes,Object.keys(c.dset).length);
+    c.drives=Object.keys(c.dset).length;
+  });
+  return clusters.filter(function(c){return c.n>=3&&c.drives>=2})
+                 .sort(function(a,b){return b.n-a.n}).slice(0,6);
+}
+
+/* One observation, not a dashboard. Compares this drive with the median of
+   recent drives in the same mode and reports only the largest deviation. */
+function verdict(d){
+  var mi=d.dist/1609.34;
+  if(mi<0.5)return 'Too short to draw anything useful from.';
+  var per=function(x,k){return (x.counts[k]||0)/Math.max(x.dist/16093.4,0.05)};
+  var peers=drives.filter(function(x){
+    return x.id!==d.id&&(x.mode||'road')===(d.mode||'road')&&x.dist>800;
+  }).slice(0,10);
+  var tp=trailPct(d);
+  var bits=[];
+
+  if(peers.length>=3){
+    var med=function(k){
+      var a=peers.map(function(x){return per(x,k)}).sort(function(p,q){return p-q});
+      return a[Math.floor(a.length/2)];
+    };
+    var cand=[
+      {k:'brake',label:'braking',now:per(d,'brake'),was:med('brake'),weight:1.5},
+      {k:'corner',label:'cornering',now:per(d,'corner'),was:med('corner'),weight:1.2},
+      {k:'accel',label:'acceleration',now:per(d,'accel'),was:med('accel'),weight:0.6}
+    ];
+    cand.forEach(function(c){c.delta=(c.now-c.was)*c.weight});
+    cand.sort(function(a,b){return Math.abs(b.delta)-Math.abs(a.delta)});
+    var top=cand[0];
+    if(Math.abs(top.now-top.was)<0.6)bits.push('Much like your usual drives in this mode.');
+    else if(top.delta>0)bits.push('More harsh '+top.label+' than usual — '+
+      top.now.toFixed(1)+' per 10 miles against your typical '+top.was.toFixed(1)+'.');
+    else bits.push('Less harsh '+top.label+' than usual — '+
+      top.now.toFixed(1)+' per 10 miles against your typical '+top.was.toFixed(1)+'.');
+  }else{
+    var b=(d.counts.brake||0),c2=(d.counts.corner||0);
+    bits.push(b+c2===0?'Clean run — no harsh braking or cornering at all.':
+      b+' harsh braking and '+c2+' cornering events over '+mi.toFixed(1)+' miles.');
+  }
+
+  if(tp!==null&&tp>25)bits.push('You were still braking through '+tp+
+    '% of your cornering — try to finish braking before turn-in.');
+  else if(d.antic!==null&&d.antic!==undefined&&d.antic<35)
+    bits.push('Decelerations were mostly late and hard; look further ahead.');
+  else if(tp!==null&&tp<10&&peers.length>=3)
+    bits.push('Braking and cornering were cleanly separated.');
+
+  return bits.join(' ');
+}
+
+/* ================= scoring ================= */
+function scoreParts(x,c,distM){
+  if(x.noScore)return null;
+  var mi=distM/1609.34;if(mi<0.3)return null;
+  var per=10/Math.max(mi,0.5);
+  var pen=((c.brake||0)*x.wBrake+(c.accel||0)*x.wAccel+
+           (c.corner||0)*x.wCorner+(c.jerk||0)*x.wJerk)*per;
+  return Math.max(0,Math.min(100,Math.round(100-pen)));
+}
+function scoreOf(d){return scoreParts(modeOf(d),d.counts||{},d.dist)}
+
+/* A run into London is really three journeys. Scoring them as one blends a
+   motorway cruise with stop-start traffic and describes neither. Split by
+   speed band using a rolling median so a single queue or slip road does not
+   start a new section. */
+var BANDS=[{k:0,name:'Town',max:30},{k:1,name:'A-roads',max:55},{k:2,name:'Motorway',max:999}];
+function bandOf(mph){return mph<30?0:mph<55?1:2}
+
+function segments(d){
+  var tr=d.trace||[];
+  if(tr.length<8)return [];
+  var mph=tr.map(function(t){return t[1]*2.23694});
+  var sm=mph.map(function(_,i){
+    var a=mph.slice(Math.max(0,i-4),i+5).slice().sort(function(x,y){return x-y});
+    return a[Math.floor(a.length/2)];
+  });
+  var runs=[],curB=bandOf(sm[0]),startI=0;
+  for(var i=1;i<sm.length;i++){
+    var b=bandOf(sm[i]);
+    if(b!==curB){runs.push({b:curB,i0:startI,i1:i-1});curB=b;startI=i}
+  }
+  runs.push({b:curB,i0:startI,i1:sm.length-1});
+
+  var segDistOf=function(r){
+    var m=0;
+    for(var i=r.i0;i<r.i1;i++){
+      var a=tr[i],b2=tr[i+1];
+      if(a.length>3&&b2.length>3)m+=haversine([a[2],a[3]],[b2[2],b2[3]]);
+      else m+=((a[1]+b2[1])/2)*Math.max(0,(b2[0]-a[0])/1000);
+    }
+    return m;
+  };
+  // fold anything too small into the neighbour it most resembles
+  var merged=[];
+  runs.forEach(function(r){
+    r.dist=segDistOf(r);r.ms=tr[r.i1][0]-tr[r.i0][0];
+    /* A slip road is a transition, not a section. Fold anything under two
+       miles or two and a half minutes into what came before. */
+    if(merged.length&&(r.dist<3200||r.ms<150000)){
+      var prev=merged[merged.length-1];
+      prev.i1=r.i1;prev.dist+=r.dist;prev.ms+=r.ms;
+    }else merged.push(r);
+  });
+  if(merged.length<2)return [];
+
+  var t0=tr[0][0];
+  return merged.map(function(r){
+    var a=tr[r.i0][0],b2=tr[r.i1][0],counts={},top=0,sum=0,cnt=0;
+    for(var i=r.i0;i<=r.i1;i++){top=Math.max(top,tr[i][1]);sum+=tr[i][1];cnt++}
+    (d.events||[]).forEach(function(ev){
+      var abs=t0+ev.t;
+      if(abs>=a&&abs<=b2)counts[ev.type]=(counts[ev.type]||0)+1;
+    });
+    return{band:BANDS[r.b].name,dist:r.dist,ms:r.ms,counts:counts,
+           top:top,avg:cnt?sum/cnt:0,
+           score:scoreParts(modeOf(d),counts,r.dist)};
+  }).filter(function(s){return s.dist>640});
+}
+function anticipation(d){
+  if(!d.ticks)return null;
+  var r=((d.gentleTicks/d.ticks)*100)/(1+(d.counts.brake||0));
+  return Math.max(0,Math.min(100,Math.round(r*9)));
+}
+function scoreColour(s){return s>=80?cssVar('--good'):s>=60?cssVar('--warn'):cssVar('--bad')}
+
+/* ================= voice ================= */
+var lastVoice=0,coachT=null;
+var voices=[],pickedVoice=null;
+function loadVoices(){
+  try{voices=speechSynthesis.getVoices()||[]}catch(e){voices=[]}
+  var en=voices.filter(function(v){return /^en([-_]|$)/i.test(v.lang)});
+  if(cfg.voiceName)pickedVoice=en.filter(function(v){return v.name===cfg.voiceName})[0]||null;
+  if(!pickedVoice){
+    /* The flat robotic default is usually the compact system voice. Prefer an
+       enhanced or premium British voice when the phone has one installed. */
+    var rank=function(v){
+      var s=0, n=v.name.toLowerCase();
+      if(/en[-_]gb/i.test(v.lang))s+=40;
+      if(/enhanced|premium|siri|neural/.test(n))s+=30;
+      if(v.localService)s+=5;
+      if(/daniel|kate|serena|arthur|martha|jamie/.test(n))s+=10;
+      if(/compact|eloquence|novelty|fred|albert|zarvox|trinoids/.test(n))s-=60;
+      return s;
+    };
+    en.sort(function(a,b){return rank(b)-rank(a)});
+    pickedVoice=en[0]||null;
+  }
+  var sel=document.getElementById('voiceSel');
+  if(sel){
+    if(!en.length){sel.innerHTML='<option>No voices available yet</option>';return}
+    en.sort(function(a,b){return rank2(b)-rank2(a)});
+    sel.innerHTML=en.map(function(v){
+      var q=/premium/i.test(v.name)?'Premium':/enhanced/i.test(v.name)?'Enhanced':
+            /compact/i.test(v.name)?'Compact':'';
+      var gb=/en[-_]gb/i.test(v.lang)?'UK':/en[-_]us/i.test(v.lang)?'US':v.lang.slice(3);
+      var label=v.name.replace(/\s*\((premium|enhanced|compact)\)/i,'')+' · '+gb+(q?' · '+q:'');
+      return '<option value="'+v.name.replace(/"/g,'')+'"'+
+        (pickedVoice&&v.name===pickedVoice.name?' selected':'')+'>'+label+'</option>';
+    }).join('');
+  }
+}
+function rank2(v){
+  var s=0,n=v.name.toLowerCase();
+  if(/en[-_]gb/i.test(v.lang))s+=40;
+  if(/premium/.test(n))s+=34; else if(/enhanced/.test(n))s+=28;
+  if(/daniel|kate|serena|arthur|martha|jamie|stephanie|oliver/.test(n))s+=10;
+  if(/compact|eloquence|novelty|fred|albert|zarvox|trinoids|whisper|bells/.test(n))s-=60;
+  return s;
+}
+try{speechSynthesis.onvoiceschanged=loadVoices}catch(e){}
+
+function speak(t,force){
+  if(!cfg.voice)return;
+  try{
+    var u=new SpeechSynthesisUtterance(t);
+    if(pickedVoice)u.voice=pickedVoice;
+    u.lang=pickedVoice?pickedVoice.lang:'en-GB';
+    u.rate=cfg.voiceRate||0.98;      // slightly under 1 reads far less clipped
+    u.pitch=1.0;u.volume=1;
+    if(force)speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function say(t){
+  if(!cfg.voice)return;
+  var n=Date.now();if(n-lastVoice<25000)return;lastVoice=n;
+  speak(t);
+}
+function flash(type,mag){
+  var msg={brake:'Harsh braking',accel:'Harsh acceleration',corner:'Harsh cornering',jerk:'Jerky input'}[type];
+  var el=document.getElementById('coach');
+  el.textContent=msg+' · '+(mag/G).toFixed(2)+' g';
+  el.classList.add('on');
+  clearTimeout(coachT);coachT=setTimeout(function(){el.classList.remove('on')},2600);
+  var x=M();
+  if(x.noScore)return;
+  if(type==='brake'&&mag/G>cfg.thBrake*1.25)say('Braking late. Look further ahead.');
+  else if(type==='corner')say('Carrying too much speed into the corner.');
+  else if(type==='accel'&&x.wAccel>=2)say('Easier on the throttle.');
+}
+
+/* ================= instructor =================
+   Silence is the default. Every remark passes a budget, defers while you are
+   busy, and never treads on a limit or camera warning. Criticism is past tense
+   because an event is only recognised once it has finished. Praise requires a
+   sustained clean stretch that actually contained some cornering — otherwise a
+   motorway straight would earn compliments for doing nothing. */
+var CO={last:0,cleanSince:0,rough:false,lastCorner:0,started:false,praises:0};
+function coachGap(){return cfg.coachRate===0?95000:cfg.coachRate===2?30000:55000}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+
+function coachSay(txt){
+  if(!cfg.coach||!cfg.voice||!live)return false;
+  var now=Date.now();
+  if(now-CO.last<coachGap())return false;
+  if(now-lastVoice<9000)return false;                 // a warning just spoke
+  if(Math.hypot(lon,lat)/G>0.32)return false;         // you are busy — stay quiet
+  if((window.__v||0)*2.23694<8)return false;          // manoeuvring
+  CO.last=now;lastVoice=now;
+  speak(txt,false);
+  return true;
+}
+
+function coachEvent(type,magG){
+  if(!cfg.coach)return;
+  var th={brake:cfg.thBrake,accel:cfg.thAccel,corner:cfg.thCorner}[type];
+  if(!th||magG<th*1.15)return;                        // only clearly over, not marginal
+  if(type==='accel'&&M().wAccel<2)return;             // not scored in this mode, so not coached
+  CO.rough=true;CO.cleanSince=Date.now();
+  coachSay(pick({
+    brake:['Late on the brakes there. Look further ahead.',
+           'That was a hard stop — read the road earlier.',
+           'You left that one late. Lift sooner next time.'],
+    corner:['Too much speed into that corner.',
+            'That corner was quick. Slow in, faster out.',
+            'You carried too much into that one.'],
+    accel:['Easier on the throttle.',
+           'That was a sharp pull away.'],
+    jerk:['Smooth your inputs.',
+          'Try to be gentler with the controls.']
+  }[type]||['Watch that.']));
+}
+function coachTrail(){
+  if(!cfg.coach)return;
+  CO.rough=true;CO.cleanSince=Date.now();
+  coachSay(pick(['You were still braking as you turned in. Finish braking first.',
+                 'Brakes and steering together there — separate them.']));
+}
+function coachTick(v){
+  if(!cfg.coach||!live)return;
+  var now=Date.now(),mph=v*2.23694;
+  if(!CO.started&&mph>10){CO.started=true;CO.cleanSince=now;CO.lastCorner=live.cornerTicks||0}
+  if(mph<18){if(!CO.cleanSince)CO.cleanSince=now;return}
+  if(!CO.cleanSince)CO.cleanSince=now;
+  var clean=now-CO.cleanSince;
+  var corneredSince=(live.cornerTicks||0)-CO.lastCorner;
+  /* Praise decays. Acknowledging a recovery is informative and stays available;
+     unprompted compliments get rarer and stop after three, because praise on a
+     timer is just noise with a nice vocabulary. */
+  var need=CO.rough?150000:Math.min(600000,180000*(1+CO.praises));
+  if(!CO.rough&&CO.praises>=3)return;
+  if(clean>need&&corneredSince>240){
+    if(coachSay(CO.rough?
+        pick(['Much tidier now.','That is better — keep that.','Good recovery.']):
+        pick(['Nicely done.','That is smooth.','Good, steady work.','Well controlled.','Tidy driving.']))){
+      CO.cleanSince=now;CO.lastCorner=live.cornerTicks||0;
+      if(!CO.rough)CO.praises++;
+      CO.rough=false;
+    }
+  }
+}
+
+/* ================= lifecycle ================= */
+function newDrive(){
+  return{id:Date.now(),start:Date.now(),end:null,veh:cfg.veh,mode:cfg.mode||'road',dist:0,maxSpeed:0,
+    events:[],counts:{},trace:[],cloud:[],lastCloud:0,ticks:0,gentleTicks:0,
+    cornerTicks:0,trailTicks:0,trailEvents:0,peakLon:0,peakLat:0,moving:0,
+    eTract:0,eDrag:0,eBraked:0,eFuel:0,idleT:0,limTime:0,overTime:0,tyre:{fl:0,fr:0,rl:0,rr:0}};
+}
+function startDrive(){
+  live=newDrive();resetPeaks();camWarned={};gpsPrev=null;lastEvT=0;
+  CO={last:0,cleanSince:0,rough:false,lastCorner:0,started:false,praises:0};learnAcc=[0,0];learnN=0;learnLat=0;breakWarned=0;
+  document.getElementById('startBtn').style.display='none';
+  document.getElementById('endBtn').style.display='block';
+  requestWake();render();say('Drive started.');
+}
+async function fetchWeather(d){
+  if(!gpsPrev)return;
+  try{
+    var u='https://api.open-meteo.com/v1/forecast?latitude='+gpsPrev.lat.toFixed(3)+
+          '&longitude='+gpsPrev.lon.toFixed(3)+
+          '&current=temperature_2m,precipitation,weather_code,wind_speed_10m';
+    var r=await fetch(u);if(!r.ok)return;
+    var j=await r.json(),c=j.current||{};
+    d.wx={t:c.temperature_2m,p:c.precipitation,code:c.weather_code,wind:c.wind_speed_10m};
+    d.wet=(c.precipitation>0||[51,53,55,61,63,65,66,67,71,73,75,80,81,82,95,96,99].indexOf(c.weather_code)>=0)?1:0;
+    save('drives',drives);
+    if(cur==='detail')paintDetail(d);
+    if(cur==='history')paintHistory();
+  }catch(e){}
+}
+function wxLabel(d){
+  if(!d.wx)return null;
+  var t=Math.round(d.wx.t);
+  return (d.wet?'Wet':'Dry')+' · '+t+'°C'+(d.wx.t<=3?' · risk of ice':'');
+}
+
+function endDrive(){
+  if(!live)return;
+  var now=performance.now();
+  if(evState.b&&now-evT.b>MIN_EVENT_MS)pushEvent('brake',evPeak.b);
+  if(evState.a&&now-evT.a>MIN_EVENT_MS)pushEvent('accel',evPeak.a);
+  if(evState.c&&now-evT.c>MIN_EVENT_MS&&evYaw>0.07)pushEvent('corner',evPeak.c);
+  evState={b:0,a:0,c:0,j:0};evT={b:0,a:0,c:0};evPeak={b:0,a:0,c:0};evYaw=0;
+  live.end=Date.now();live.score=scoreOf(live);live.antic=anticipation(live);
+  delete live.lastCloud;
+  var keep=live.dist>60;
+  if(keep){drives.unshift(live);if(drives.length>60)drives.pop();save('drives',drives)}
+  var done=live;live=null;releaseWake();
+  document.getElementById('startBtn').style.display='block';
+  document.getElementById('endBtn').style.display='none';
+  document.getElementById('tabs').classList.remove('hide');
+  render();paintHistory();
+  if(keep){go('detail');paintDetail(done);fetchWeather(done)}
+}
+
+/* ================= GPS ================= */
+var breakWarned=0;
+function startGPS(){
+  if(!navigator.geolocation||watchId)return;
+  watchId=navigator.geolocation.watchPosition(onPos,function(){gpsOK=false;render()},
+    {enableHighAccuracy:true,maximumAge:900,timeout:12000});
+}
+function onPos(p){
+  gpsOK=true;gpsAcc=p.coords.accuracy;
+  var v=p.coords.speed;if(v===null||isNaN(v)||v<0)v=0;
+  var now=p.timestamp;
+  if(gpsPrev){
+    var dt=(now-gpsPrev.t)/1000;
+    if(dt>0.25&&dt<8){
+      var cal=cals[cfg.veh];
+      if(cal&&!cal.fwd)learnStep((v-gpsPrev.v)/dt);
+      if(cal&&cal.fwd)learnLateral(v);
+      if(live){
+        var d=haversine([gpsPrev.lat,gpsPrev.lon],[p.coords.latitude,p.coords.longitude]);
+        if(d<220&&v>0.7){live.dist+=d;live.moving+=dt}
+        accrueEnergy(v,gpsPrev.v,dt);
+        if(limNow){
+          var lm=limNow.u==='mph'?limNow.v:limNow.v*0.621371;
+          live.limTime=(live.limTime||0)+dt;
+          if(v*2.23694>lm+2)live.overTime=(live.overTime||0)+dt;
+        }
+        live.maxSpeed=Math.max(live.maxSpeed,v);
+        if(!live.trace.length||now-live.trace[live.trace.length-1][0]>2000)
+          live.trace.push([now,+v.toFixed(1),+p.coords.latitude.toFixed(5),+p.coords.longitude.toFixed(5)]);
+      }
+    }
+  }
+  var hdg=p.coords.heading;
+  if((hdg===null||isNaN(hdg))&&gpsPrev&&v>2){
+    var dLat=p.coords.latitude-gpsPrev.lat,dLon=(p.coords.longitude-gpsPrev.lon)*Math.cos(p.coords.latitude*Math.PI/180);
+    if(Math.hypot(dLat,dLon)>1e-6)hdg=(Math.atan2(dLon,dLat)*180/Math.PI+360)%360;
+  }
+  gpsPrev={t:now,v:v,lat:p.coords.latitude,lon:p.coords.longitude};
+  window.__v=v;window.__hdg=hdg;
+  updateLimit(p.coords.latitude,p.coords.longitude,hdg,v);
+  updateCameras(p.coords.latitude,p.coords.longitude,hdg,v);
+  if(live&&cfg.brk&&(Date.now()-live.start)/3600000>2&&!breakWarned){
+    breakWarned=1;lastVoice=0;say('Two hours driving. Time to stop for a break.');
+  }
+  coachTick(v);
+  lockUI(v);render();
+}
+function lockUI(v){
+  var moving=v*2.23694>3;
+  document.getElementById('tabs').classList.toggle('hide',!!(live&&moving));
+  if(live&&moving&&cur!=='drive')go('drive');
+}
+
+/* ================= permissions ================= */
+async function requestAll(){
+  await enableMotion();          // records the grant so later loads self-arm
+  startGPS();
+  try{speechSynthesis.speak(new SpeechSynthesisUtterance(' '))}catch(e){}
+}
+async function requestWake(){
+  if(!cfg.wake||!('wakeLock' in navigator))return;
+  try{wakeLock=await navigator.wakeLock.request('screen')}catch(e){}
+}
+function releaseWake(){if(wakeLock){try{wakeLock.release()}catch(e){}wakeLock=null}}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&live)requestWake()});
+
+/* ================= calibration ================= */
+async function enableMotion(){
+  if(motionOK)return true;
+  if(typeof DeviceMotionEvent!=='undefined'&&DeviceMotionEvent.requestPermission){
+    try{
+      var r=await DeviceMotionEvent.requestPermission();
+      if(r!=='granted'){alert('Motion access denied. Enable it in Settings › Apps › Safari › Motion & Orientation Access, then reload.');return false}
+    }catch(e){alert('Could not request motion access. Tap again.');return false}
+  }
+  window.addEventListener('devicemotion',onMotion);
+  save('granted',1);
+  await new Promise(function(r){setTimeout(r,600)});
+  return motionOK;
+}
+
+var calTimer=null;
+async function runCal(){
+  if(!await enableMotion()){
+    if(!motionOK){alert('Still no motion data. If this is a desktop browser there are no sensors to read.');return}
+  }
+  var ring=document.getElementById('calRing'),bar=document.getElementById('calBar');
+  ring.style.display='block';bar.style.display='block';
+  var samples=[],t0=Date.now();
+  calibrating=true;
+  document.getElementById('cs2').classList.remove('done');
+  clearInterval(calTimer);
+  calTimer=setInterval(function(){
+    if(grav)samples.push(grav.slice());
+    var p=Math.min(1,(Date.now()-t0)/5000);
+    bar.querySelector('i').style.width=(p*100)+'%';
+    drawRing(ring,p);
+    if(p>=1){
+      clearInterval(calTimer);calibrating=false;
+      var s=samples.slice(-40);
+      if(!s.length){alert('No motion data captured.');bar.style.display='none';ring.style.display='none';return}
+      var m=[0,0,0];s.forEach(function(v){m[0]+=v[0];m[1]+=v[1];m[2]+=v[2]});
+      var gv=scl(m,1/s.length);
+      var b=buildBasis(gv);
+      cals[cfg.veh]={g:b.g,e1:b.e1,e2:b.e2,gv:gv,fwd:null,latSign:1};
+      grav=gv.slice();                       // frozen reference from here on
+      save('cals',cals);learnAcc=[0,0];learnN=0;learnLat=0;accBuf.length=0;
+      bar.style.display='none';ring.style.display='none';
+      paintSetup();lastVoice=0;
+      say('Mount calibrated. Drive normally and the forward axis will lock itself.');
+    }
+  },100);
+}
+function drawRing(c,p){
+  var x=c.getContext('2d');x.clearRect(0,0,300,300);
+  x.lineWidth=14;x.strokeStyle=cssVar('--surface-2');x.beginPath();x.arc(150,150,120,0,7);x.stroke();
+  x.strokeStyle=cssVar('--accent');x.lineCap='round';
+  x.beginPath();x.arc(150,150,120,-Math.PI/2,-Math.PI/2+p*6.2832);x.stroke();
+  x.fillStyle=cssVar('--ink');x.font='700 44px Montserrat, sans-serif';x.textAlign='center';x.textBaseline='middle';
+  x.fillText(String(Math.ceil(5-p*5)),150,150);
+}
+
+/* ================= rendering ================= */
+function fmtSpeed(ms){return cfg.units==='imp'?ms*2.23694:ms*3.6}
+function fmtDist(m){return cfg.units==='imp'?m/1609.34:m/1000}
+function uSpeed(){return cfg.units==='imp'?'mph':'km/h'}
+function uDist(){return cfg.units==='imp'?'mi':'km'}
+function dur(ms){var s=Math.round(ms/1000);return (s>=3600?((s/3600|0)+'h '):'')+(((s%3600)/60|0))+'m'}
+
+var ggC=document.getElementById('gg');
+function drawGG(canvas,cloud,liveLon,liveLat){
+  var x=canvas.getContext('2d'),w=canvas.width,c=w/2,R=w/2-16;
+  x.clearRect(0,0,w,w);
+  x.strokeStyle=cssVar('--rule');x.lineWidth=2;
+  [0.25,0.5,0.75,1].forEach(function(r){x.beginPath();x.arc(c,c,R*r,0,7);x.stroke()});
+  x.beginPath();x.moveTo(c-R,c);x.lineTo(c+R,c);x.moveTo(c,c-R);x.lineTo(c,c+R);x.stroke();
+  x.fillStyle=cssVar('--ink-2');x.font='600 20px Montserrat, sans-serif';x.textAlign='center';
+  x.fillText('1.0 g',c,c-R+22);
+  var gr=hex2rgb(cssVar('--graph'));
+  if(cloud)for(var i=0;i<cloud.length;i++){
+    var p=cloud[i],a=0.15+0.55*(i/cloud.length);
+    x.fillStyle='rgba('+gr[0]+','+gr[1]+','+gr[2]+','+a.toFixed(2)+')';
+    x.beginPath();x.arc(c+p[1]*R,c-p[0]*R,3.5,0,7);x.fill();
+  }
+  if(liveLon!==undefined){
+    var px=c+Math.max(-1.2,Math.min(1.2,liveLat))*R,py=c-Math.max(-1.2,Math.min(1.2,liveLon))*R;
+    x.fillStyle=cssVar('--ink');x.beginPath();x.arc(px,py,11,0,7);x.fill();
+    x.strokeStyle=cssVar('--accent');x.lineWidth=4;x.beginPath();x.arc(px,py,17,0,7);x.stroke();
+  }
+}
+
+function render(){
+  var v=window.__v||0;
+  document.getElementById('speedVal').textContent=gpsOK?Math.round(fmtSpeed(v)):'—';
+  document.getElementById('speedUnit').textContent=uSpeed();
+  document.getElementById('dGps').className='dot '+(gpsOK?(gpsAcc&&gpsAcc<25?'ok':'warn'):'');
+  document.getElementById('tGps').textContent=gpsOK?(gpsAcc?('GPS ±'+Math.round(gpsAcc)+'m'):'GPS'):'No GPS';
+  var cal=cals[cfg.veh];
+  document.getElementById('dMot').className='dot '+(motionOK?(cal&&cal.fwd?'ok':'warn'):'');
+  document.getElementById('tMot').textContent=!motionOK?'No motion':!cal?'Not calibrated':
+    !cal.fwd?('Learning '+learnN+'/'+LEARN_TARGET):'Motion';
+  document.getElementById('vehLabel').innerHTML=(VEHICLES[cfg.veh]||'—')+'<br>'+M().name;
+
+  var cb=document.getElementById('camBadge');
+  if(camAhead){
+    var m=Math.round(camAhead.d/10)*10;
+    document.getElementById('camDist').textContent=
+      (cfg.units==='imp'?(m<400?m+' m':(m/1609.34).toFixed(1)+' mi'):(m<1000?m+' m':(m/1000).toFixed(1)+' km'))+
+      (/average/i.test(camAhead.c.kind)?' avg':'');
+    cb.classList.add('on');cb.classList.toggle('close',camAhead.d<250);
+  }else cb.classList.remove('on');
+
+  var lr=document.getElementById('limitRow');
+  if(limNow){
+    var limMph=limNow.u==='mph'?limNow.v:Math.round(limNow.v*0.621371);
+    document.getElementById('limitVal').textContent=cfg.units==='imp'?limMph:limNow.v;
+    var mph=(window.__v||0)*2.23694, over=mph>limMph+3;
+    document.getElementById('limitTxt').textContent=
+      over?('over by '+Math.round(mph-limMph)):'within limit';
+    document.getElementById('limitTxt').classList.toggle('over',over);
+    document.getElementById('roundel').classList.toggle('assumed',!!limNow.inf);
+    document.getElementById('limitRoad').textContent=
+      ((limMatch&&limMatch.name)?limMatch.name:'')+(limNow.inf?' · assumed from road type':'');
+    var rm=document.getElementById('roundelMin');
+    if(limMin){
+      var minMph=limMin.u==='mph'?limMin.v:Math.round(limMin.v*0.621371);
+      document.getElementById('limitMinVal').textContent=cfg.units==='imp'?minMph:limMin.v;
+      rm.classList.add('on');
+    }else rm.classList.remove('on');
+    document.getElementById('speedVal').classList.toggle('over',over);
+    lr.classList.add('on');
+  }else if(cfg.limits&&gpsOK){
+    document.getElementById('roundelMin').classList.remove('on');
+    document.getElementById('limitVal').textContent='–';
+    document.getElementById('limitTxt').textContent=limFetching?'looking up limit':'no limit for this road';
+    document.getElementById('limitTxt').classList.remove('over');
+    document.getElementById('limitRoad').textContent='';
+    document.getElementById('speedVal').classList.remove('over');
+    lr.classList.add('on');lr.classList.add('muted');
+  }else{lr.classList.remove('on');document.getElementById('speedVal').classList.remove('over')}
+  if(limNow)lr.classList.remove('muted');
+
+  if(live){
+    document.getElementById('tClock').textContent=dur(Date.now()-live.start);
+    document.getElementById('sDist').textContent=fmtDist(live.dist).toFixed(1);
+    document.getElementById('sDistU').textContent=cfg.units==='imp'?'miles':'km';
+    var s=scoreOf(live),el=document.getElementById('sScore');
+    if(M().noScore){el.textContent=(live.peakLat||0).toFixed(2);el.style.color=cssVar('--accent-text');
+      document.querySelector('#sScore + small').textContent='peak lateral g';}
+    else{el.textContent=s===null?'—':s;el.style.color=s===null?'':scoreColour(s);
+      document.querySelector('#sScore + small').textContent='smoothness';}
+    document.getElementById('sEvents').textContent=live.events.length;
+  }else document.getElementById('tClock').textContent='00:00';
+  if(cfg.view==='gg')drawGG(ggC,live?live.cloud:[],lon/G,lat/G);
+  updateDriveMap();
+  if(cfg.view==='tel'&&!telRAF)telLoop();
+}
+
+/* ---- telemetry bars ----
+   Each channel is drawn against its own green / amber / red zones, taken from
+   the active mode's thresholds. Amber begins at 60% of the event threshold, so
+   the bar warns you before it counts against you. Peak-hold ticks show the
+   worst value so far this drive. */
+var peaks={acc:0,brk:0,lat:0,grip:0,yaw:0,jerk:0};
+function resetPeaks(){peaks={acc:0,brk:0,lat:0,grip:0,yaw:0,jerk:0}}
+
+function rgba(hex,a){var c=hex2rgb(hex);return 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')'}
+
+function bar(bx,y,bw,h,opt){
+  var ctx=opt.ctx;
+  var g=cssVar('--good'),am=cssVar('--warn'),bd=cssVar('--bad'),ink=cssVar('--ink'),ink2=cssVar('--ink-2');
+  var centre=opt.centre, max=opt.max, val=opt.val, lim=opt.lim, amber=lim*0.6;
+  var by=y+26, bh=h-34;
+  var mid=centre?bx+bw/2:bx;
+  var span=centre?bw/2:bw;
+  function px(v){return Math.min(span,(Math.abs(v)/max)*span)}
+
+  ctx.fillStyle=rgba(g,.16);
+  if(centre){ctx.fillRect(mid-px(amber),by,px(amber)*2,bh)}else{ctx.fillRect(bx,by,px(amber),bh)}
+  ctx.fillStyle=rgba(am,.20);
+  if(centre){ctx.fillRect(mid-px(lim),by,px(lim)-px(amber),bh);ctx.fillRect(mid+px(amber),by,px(lim)-px(amber),bh)}
+  else ctx.fillRect(bx+px(amber),by,px(lim)-px(amber),bh);
+  ctx.fillStyle=rgba(bd,.20);
+  if(centre){ctx.fillRect(mid-span,by,span-px(lim),bh);ctx.fillRect(mid+px(lim),by,span-px(lim),bh)}
+  else ctx.fillRect(bx+px(lim),by,span-px(lim),bh);
+
+  // live fill
+  var a=Math.abs(val), col=a>lim?bd:a>amber?am:g;
+  ctx.fillStyle=col;
+  if(centre){
+    if(val>=0)ctx.fillRect(mid,by,px(val),bh); else ctx.fillRect(mid-px(val),by,px(val),bh);
+    ctx.fillStyle=rgba(ink2,.6);ctx.fillRect(mid-1,by-3,2,bh+6);
+  }else ctx.fillRect(bx,by,px(val),bh);
+
+  // peak hold
+  if(opt.peak>0.001){
+    ctx.fillStyle=ink;
+    if(centre){ctx.fillRect(mid+px(opt.peak)-2,by-4,3,bh+8)}
+    else ctx.fillRect(bx+px(opt.peak)-2,by-4,3,bh+8);
+  }
+  // labels
+  ctx.fillStyle=ink2;ctx.font='700 17px Montserrat, sans-serif';ctx.textAlign='left';
+  ctx.fillText(opt.label.toUpperCase(),bx,y+16);
+  ctx.fillStyle=col;ctx.font='800 19px Montserrat, sans-serif';ctx.textAlign='right';
+  ctx.fillText(opt.text,bx+bw,y+16);
+}
+
+function drawTelemetry(){
+  var c=document.getElementById('tel');if(!c)return;
+  var ctx=c.getContext('2d'),W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);
+  var pad=10,w=W-pad*2,rowH=H/6;
+
+  var lg=lon/G, lt=lat/G, grip=Math.hypot(lg,lt);
+  var yawD=yawRate*57.2958, jk=jerk;
+  peaks.acc=Math.max(peaks.acc,Math.max(0,lg));
+  peaks.brk=Math.max(peaks.brk,Math.max(0,-lg));
+  peaks.lat=Math.max(peaks.lat,Math.abs(lt));
+  peaks.grip=Math.max(peaks.grip,grip);
+  peaks.yaw=Math.max(peaks.yaw,Math.abs(yawD));
+  peaks.jerk=Math.max(peaks.jerk,Math.abs(jk));
+
+  var tA=cfg.thAccel,tB=cfg.thBrake,tC=cfg.thCorner;
+  var rows=[
+    {label:'Acceleration',val:Math.max(0,lg),lim:tA,max:tA*1.7,centre:false,
+     peak:peaks.acc,text:Math.max(0,lg).toFixed(2)+' g'},
+    {label:'Braking',val:Math.max(0,-lg),lim:tB,max:tB*1.7,centre:false,
+     peak:peaks.brk,text:Math.max(0,-lg).toFixed(2)+' g'},
+    {label:'Cornering',val:lt,lim:tC,max:tC*1.7,centre:true,
+     peak:peaks.lat,text:Math.abs(lt).toFixed(2)+' g '+(lt>0.02?'R':lt<-0.02?'L':'')},
+    {label:'Grip used',val:grip,lim:Math.max(tB,tC),max:1.2,centre:false,
+     peak:peaks.grip,text:grip.toFixed(2)+' g'},
+    {label:'Yaw rate',val:yawD,lim:35,max:70,centre:true,
+     peak:peaks.yaw,text:Math.abs(yawD).toFixed(0)+' °/s'},
+    {label:'Input smoothness',val:Math.abs(jk),lim:9,max:16,centre:false,
+     peak:peaks.jerk,text:Math.abs(jk).toFixed(1)+' m/s³'}
+  ];
+  rows.forEach(function(r,i){r.ctx=ctx;bar(pad,i*rowH+6,w,rowH-6,r)});
+}
+
+var telRAF=null;
+function telLoop(){
+  if(cfg.view!=='tel'||cur!=='drive'){telRAF=null;return}
+  drawTelemetry();
+  telRAF=requestAnimationFrame(telLoop);
+}
+
+/* ---- live map: follows position, and locks out touch while moving so a
+   stray hand can't drag it off-centre mid-drive ---- */
+var driveMapObj=null,driveMarker=null,driveLine=null;
+function initDriveMap(){
+  if(driveMapObj||typeof L==='undefined')return;
+  var el=document.getElementById('driveMap');if(!el)return;
+  sizeDriveMap();
+  driveMapObj=L.map(el,{zoomControl:false,attributionControl:false,dragging:false,
+    scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false,keyboard:false});
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(driveMapObj);
+  driveMapObj.setView([51.8,-0.35],16);
+  driveLine=L.polyline([],{color:cssVar('--accent'),weight:5,opacity:.95}).addTo(driveMapObj);
+  driveMarker=L.circleMarker([51.8,-0.35],
+    {radius:8,weight:3,color:'#fff',fillColor:cssVar('--accent'),fillOpacity:1}).addTo(driveMapObj);
+  setTimeout(function(){try{driveMapObj.invalidateSize()}catch(e){}},250);
+}
+/* The rotated surface must be big enough that its corners never expose blank
+   space, so it is sized to the diagonal of the visible window and centred. */
+function sizeDriveMap(){
+  var wrap=document.getElementById('driveMapWrap'),el=document.getElementById('driveMap');
+  if(!wrap||!el)return;
+  var w=wrap.clientWidth||340,hgt=wrap.clientHeight||240;
+  var side=Math.ceil(Math.hypot(w,hgt))+8;
+  el.style.width=side+'px';el.style.height=side+'px';
+  el.style.left=Math.round((w-side)/2)+'px';
+  el.style.top=Math.round((hgt-side)/2)+'px';
+}
+window.addEventListener('resize',function(){
+  sizeDriveMap();
+  if(driveMapObj)setTimeout(function(){try{driveMapObj.invalidateSize()}catch(e){}},80);
+});
+
+/* Heading is smoothed as a unit vector so it averages correctly across the
+   359°/0° wrap, and it freezes below walking pace — a stationary GPS heading
+   is noise and would spin the map. */
+var hdgVec=null,mapHdg=0;
+function smoothHeading(){
+  var hd=window.__hdg, v=window.__v||0;
+  if(hd===null||hd===undefined||isNaN(hd)||v<2.2)return mapHdg;
+  var r=hd*Math.PI/180, cur=[Math.sin(r),Math.cos(r)];
+  if(!hdgVec)hdgVec=cur;
+  else hdgVec=[0.82*hdgVec[0]+0.18*cur[0],0.82*hdgVec[1]+0.18*cur[1]];
+  mapHdg=(Math.atan2(hdgVec[0],hdgVec[1])*180/Math.PI+360)%360;
+  return mapHdg;
+}
+
+function updateDriveMap(){
+  if(cfg.view!=='map'||!driveMapObj||!gpsPrev)return;
+  var pos=[gpsPrev.lat,gpsPrev.lon];
+  try{
+    var up=cfg.mapUp!==0;
+    var deg=up?smoothHeading():0;
+    document.getElementById('driveMap').style.transform=up?('rotate('+(-deg).toFixed(1)+'deg)'):'none';
+    var nn=document.getElementById('northNeedle');
+    if(nn)nn.style.transform='rotate('+(-deg).toFixed(1)+'deg)';
+    document.getElementById('mapNorth').style.display=up?'block':'none';
+    document.getElementById('mapArrow').style.display=up?'block':'none';
+    driveMarker.setLatLng(pos);
+    driveMapObj.setView(pos,driveMapObj.getZoom()||16,{animate:false});
+    if(live&&live.trace&&live.trace.length){
+      driveLine.setLatLngs(live.trace.filter(function(t){return t.length>3})
+        .map(function(t){return [t[2],t[3]]}));
+    }
+  }catch(e){}
+}
+function setView(v){
+  cfg.view=v;save('cfg',cfg);
+  document.querySelectorAll('#viewSeg button').forEach(function(b){b.classList.toggle('on',b.dataset.v===v)});
+  document.getElementById('gg').classList.toggle('hide',v!=='gg');
+  document.getElementById('tel').classList.toggle('hide',v!=='tel');
+  document.getElementById('driveMapWrap').classList.toggle('on',v==='map');
+  if(v==='map'){initDriveMap();setTimeout(function(){try{driveMapObj.invalidateSize()}catch(e){}},120);updateDriveMap()}
+  if(v==='tel'&&!telRAF)telLoop();
+}
+setInterval(function(){if(cur==='drive')render()},250);
+
+/* ---- trend ---- */
+function paintTrend(){
+  /* Only compare drives recorded in the same mode — a Spirited run and a
+     Commute run are not measuring the same thing. */
+  var scored=drives.filter(function(d){
+    return d.score!==null&&d.score!==undefined&&(d.mode||'road')===(cfg.mode||'road');
+  }).slice(0,12).reverse();
+  var el=document.getElementById('trendWrap');
+  if(scored.length<3){el.innerHTML='';return}
+  var W=300,H=96,n=scored.length;
+  var pts=scored.map(function(d,i){return [(i/(n-1))*W,H-4-(d.score/100)*(H-14)]});
+  var line=pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ');
+  var dots=pts.map(function(p,i){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" fill="'+scoreColour(scored[i].score)+'"/>'}).join('');
+  var avg=Math.round(scored.reduce(function(a,d){return a+d.score},0)/n);
+  var first=scored.slice(0,Math.ceil(n/2)),last=scored.slice(-Math.ceil(n/2));
+  var f=first.reduce(function(a,d){return a+d.score},0)/first.length;
+  var l=last.reduce(function(a,d){return a+d.score},0)/last.length;
+  var delta=Math.round(l-f);
+  el.innerHTML='<h2 style="margin-top:0">Trend · last '+n+' '+M().name+' drives</h2><div class="card">'+
+    '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">'+
+      '<b class="num" style="font-size:30px;font-weight:800;color:'+scoreColour(avg)+'">'+avg+'</b>'+
+      '<span class="pill '+(delta>2?'good':delta<-2?'bad':'')+'">'+(delta>0?'+':'')+delta+' vs earlier</span></div>'+
+    '<svg class="chart" viewBox="0 0 300 96" preserveAspectRatio="none" style="height:96px">'+
+      '<line x1="0" y1="'+(H-4-0.8*(H-14)).toFixed(1)+'" x2="300" y2="'+(H-4-0.8*(H-14)).toFixed(1)+'" stroke="'+cssVar('--rule')+'" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>'+
+      '<polyline points="'+line+'" fill="none" stroke="'+cssVar('--graph')+'" stroke-width="2" vector-effect="non-scaling-stroke"/>'+dots+
+    '</svg><p class="tiny" style="margin-top:6px">Dashed line is 80 — the point where a drive stops costing you.</p></div>';
+}
+
+var spotMapObj=null;
+function paintSpots(){
+  var el=document.getElementById('spotWrap');if(!el)return;
+  var spots=troubleSpots();
+  if(!spots.length){el.innerHTML='';return}
+  el.innerHTML='<h2 style="margin-top:0">Recurring spots</h2>'+
+    '<div class="card"><div id="spotMap" style="height:230px;border-radius:11px"></div>'+
+    '<div class="legend" style="margin-top:10px">'+
+      '<span><em style="background:'+cssVar('--bad')+'"></em>Hard braking</span>'+
+      '<span><em style="background:'+cssVar('--accent-text')+'"></em>Hard cornering</span>'+
+      '<span style="opacity:.7">Bigger circle = more events</span></div>'+
+    '<p class="tiny" style="margin-top:8px">Places where the same thing keeps happening across different drives. Worth a deliberate look next time you are there.</p></div>'+
+    spots.map(function(c){
+      var kind=(c.types.brake||0)>=(c.types.corner||0)?'Hard braking':'Hard cornering';
+      var pct=Math.round(c.drives/Math.max(c.passes,1)*100);
+      return '<div class="card" style="padding:13px"><b style="font-size:14px">'+kind+
+        (c.road?' · '+c.road:'')+'</b><div class="tiny" style="margin-top:4px">'+
+        c.n+' events on '+c.drives+' of '+c.passes+' passes ('+pct+'%)</div></div>';
+    }).join('');
+
+  if(typeof L==='undefined')return;
+  setTimeout(function(){
+    var m=document.getElementById('spotMap');if(!m)return;
+    if(spotMapObj){try{spotMapObj.remove()}catch(e){}spotMapObj=null}
+    spotMapObj=L.map(m,{scrollWheelZoom:false,attributionControl:true});
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {maxZoom:19,attribution:'© OpenStreetMap'}).addTo(spotMapObj);
+    var pts=spots.map(function(c){return [c.lat,c.lon]});
+    spots.forEach(function(c){
+      var brake=(c.types.brake||0)>=(c.types.corner||0);
+      L.circleMarker([c.lat,c.lon],{
+        radius:Math.min(18,7+c.n*1.6),weight:2,color:'#fff',
+        fillColor:brake?cssVar('--bad'):cssVar('--accent-text'),fillOpacity:.85
+      }).bindPopup((brake?'Hard braking':'Hard cornering')+' · '+c.n+' times').addTo(spotMapObj);
+    });
+    spotMapObj.fitBounds(L.latLngBounds(pts).pad(0.35));
+    setTimeout(function(){try{spotMapObj.invalidateSize()}catch(e){}},200);
+  },60);
+}
+
+/* ---- history ---- */
+function paintHistory(){
+  paintSpots();paintTrend();
+  var el=document.getElementById('histList');
+  if(!drives.length){el.innerHTML='<div class="card"><p class="muted">No drives yet. Calibrate your mount in Setup, then tap Start drive.</p></div>';return}
+  el.innerHTML='<h2>All drives</h2>';
+  drives.forEach(function(d){
+    var b=document.createElement('button');b.className='jrow';
+    var s=(d.score===undefined?null:d.score);
+    b.innerHTML='<div class="score" style="color:'+(s===null?cssVar('--ink-2'):scoreColour(s))+'">'+(s===null?'–':s)+'</div>'+
+      '<div class="jmeta"><b>'+new Date(d.start).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+
+      ' · '+new Date(d.start).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+'</b>'+
+      '<small>'+fmtDist(d.dist).toFixed(1)+' '+uDist()+' · '+dur((d.end||d.start)-d.start)+' · '+d.events.length+' events · '+modeOf(d).name+(d.wet?' · wet':'')+'</small></div>';
+    b.onclick=function(){go('detail');paintDetail(d)};
+    el.appendChild(b);
+  });
+}
+
+function paintDetail(d){
+  var s=(d.score===undefined?null:d.score),a=(d.antic===undefined?null:d.antic),c=d.counts||{};
+  var total=(d.end||d.start)-d.start;
+  document.getElementById('detailBody').innerHTML=
+  '<h2 style="margin-top:0">'+new Date(d.start).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})+'</h2>'+
+  '<div class="card" style="text-align:center;padding:22px">'+
+    '<div class="num" style="font-size:62px;font-weight:800;line-height:1;color:'+(s===null?cssVar('--ink-2'):scoreColour(s))+'">'+(s===null?'–':s)+'</div>'+
+    '<div class="tiny" style="margin-top:6px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">'+
+      (modeOf(d).noScore?'Track — telemetry only':'Smoothness')+'</div>'+
+    '<div class="tiny" style="margin-top:8px">'+modeOf(d).name+' mode'+
+      (s===null&&!modeOf(d).noScore?' · too short to score':'')+'</div></div>'+
+  '<div class="card" style="border-left:3px solid var(--accent)"><p style="font-size:14px;line-height:1.6;font-weight:500">'+
+    verdict(d)+'</p></div>'+
+  '<div class="card"><div class="bd">'+
+    '<span>Distance</span><b>'+fmtDist(d.dist).toFixed(1)+' '+uDist()+'</b>'+
+    '<span>Duration</span><b>'+dur(total)+'</b>'+
+    '<span>Top speed</span><b>'+Math.round(fmtSpeed(d.maxSpeed))+' '+uSpeed()+'</b>'+
+    '<span>Peak longitudinal</span><b>'+(d.peakLon||0).toFixed(2)+' g</b>'+
+    '<span>Peak lateral</span><b>'+(d.peakLat||0).toFixed(2)+' g</b>'+
+    '<span>Peak yaw rate</span><b>'+Math.round((d.peakYaw||0)*57.3)+' °/s</b>'+
+    '<span>Braking in corners</span><b>'+(trailPct(d)===null?'—':trailPct(d)+'%')+'</b>'+
+    (wxLabel(d)?'<span>Conditions</span><b>'+wxLabel(d)+'</b>':'')+
+    ((d.limTime>30)?'<span>Above the limit</span><b>'+
+      Math.round((d.overTime||0)/d.limTime*100)+'% of matched time</b>':'')+
+  '</div></div>'+
+  '<h2>Events</h2><div class="card"><div class="bd">'+
+    '<span>Harsh braking</span><b>'+(c.brake||0)+'</b>'+
+    '<span>Harsh acceleration</span><b>'+(c.accel||0)+'</b>'+
+    '<span>Harsh cornering</span><b>'+(c.corner||0)+'</b>'+
+    '<span>Jerky inputs</span><b>'+(c.jerk||0)+'</b>'+
+  '</div><div class="tl" id="tl"></div>'+
+  '<div class="legend">'+
+    '<span><em style="background:'+cssVar('--bad')+'"></em>Braking</span>'+
+    '<span><em style="background:'+cssVar('--warn')+'"></em>Acceleration</span>'+
+    '<span><em style="background:'+cssVar('--accent-text')+'"></em>Cornering</span>'+
+    '<span><em style="background:'+cssVar('--ink-2')+'"></em>Jerk</span></div>'+
+  '<p class="tiny" style="margin-top:8px">Left is the start of the drive. Clusters usually mean a particular road, not a bad day.</p></div>'+
+  (trailPct(d)===null?'':
+   '<h2>Corner discipline</h2><div class="card">'+
+   '<div style="display:flex;align-items:baseline;gap:10px"><b class="num" style="font-size:34px;font-weight:800">'+
+     trailPct(d)+'%</b><span class="pill '+(trailPct(d)<12?'good':trailPct(d)<25?'':'bad')+'">'+
+     (trailPct(d)<12?'brakes done early':trailPct(d)<25?'some overlap':'braking into corners')+'</span></div>'+
+   '<p class="tiny" style="margin-top:10px">Share of your cornering time that also carried brake. Roadcraft says braking should be finished before you turn in — the tyres can do one job well or two jobs badly. Under about 12% is tidy.</p></div>')+
+  '<h2>Anticipation</h2><div class="card">'+
+    '<div style="display:flex;align-items:baseline;gap:10px"><b class="num" style="font-size:34px;font-weight:800">'+(a===null?'–':a)+'</b>'+
+    '<span class="pill '+(a>=60?'good':a>=35?'':'bad')+'">'+(a>=60?'reading ahead':a>=35?'mixed':'reacting late')+'</span></div>'+
+    '<p class="tiny" style="margin-top:10px">Ratio of gentle, early decelerations to hard ones. High means you were slowing off the throttle in good time. Low means the brakes were doing work your eyes should have done.</p></div>'+
+  (function(){
+    var segs=segments(d);
+    if(!segs.length)return '';
+    return '<h2>Journey sections</h2>'+segs.map(function(s){
+      var c=s.counts,ev=(c.brake||0)+(c.accel||0)+(c.corner||0);
+      return '<div class="card" style="padding:14px">'+
+        '<div style="display:flex;align-items:center;gap:12px">'+
+          '<div class="score" style="width:42px;height:42px;font-size:16px;color:'+
+            (s.score===null?cssVar('--ink-2'):scoreColour(s.score))+'">'+
+            (s.score===null?'–':s.score)+'</div>'+
+          '<div class="jmeta"><b>'+s.band+'</b><small>'+
+            fmtDist(s.dist).toFixed(1)+' '+uDist()+' · '+dur(s.ms)+' · avg '+
+            Math.round(fmtSpeed(s.avg))+' '+uSpeed()+' · top '+Math.round(fmtSpeed(s.top))+'</small></div>'+
+        '</div>'+
+        (ev?'<div class="tiny" style="margin-top:8px">'+
+          (c.brake||0)+' braking · '+(c.corner||0)+' cornering · '+(c.accel||0)+' acceleration</div>':
+          '<div class="tiny" style="margin-top:8px">No harsh events in this section.</div>')+
+      '</div>';
+    }).join('')+
+    '<p class="tiny" style="margin-bottom:14px">Split by speed, so a motorway cruise is not averaged together with stop-start traffic. Short links and slip roads are folded into the section before them.</p>';
+  })()+
+  (function(){
+    var f=fuelOf(d),ti=tyreIndex(d);
+    var out='';
+    if(f){
+      out+='<h2>Fuel — estimated</h2><div class="card">'+
+        '<div style="display:flex;align-items:baseline;gap:12px">'+
+        '<b class="num" style="font-size:34px;font-weight:800">'+f.mpg.toFixed(1)+'</b>'+
+        '<span class="tiny">mpg · '+f.litres.toFixed(2)+' litres'+
+          (f.calibrated?'':' · uncalibrated')+'</span></div>'+
+        '<div class="bd" style="margin-top:12px">'+
+          '<span>Thrown away braking</span><b>'+f.wastePct+'%</b>'+
+          '<span>Idling</span><b>'+Math.round((d.idleT||0)/60)+' min</b>'+
+        '</div>'+
+        '<p class="tiny" style="margin-top:10px">Modelled from mass, drag and the energy spent accelerating — <b>not measured</b>. The useful figure is the waste: energy you put in and then turned into brake heat. Under 15% is efficient driving; over 30% means a lot of accelerating into things you then had to stop for. Calibrate against a real fill-up in Setup.</p></div>';
+    }
+    if(ti){
+      var pc=function(x){return Math.round(x*100)+'%'};
+      out+='<h2>Tyre load — relative</h2><div class="card">'+
+        '<div class="bd">'+
+          '<span>Front left</span><b>'+pc(ti.fl)+'</b>'+
+          '<span>Front right</span><b>'+pc(ti.fr)+'</b>'+
+          '<span>Rear left</span><b>'+pc(ti.rl)+'</b>'+
+          '<span>Rear right</span><b>'+pc(ti.rr)+'</b>'+
+        '</div>'+
+        '<p class="tiny" style="margin-top:10px">'+
+        (Math.abs(ti.leftBias)<8?'Evenly balanced left to right.':
+          (ti.leftBias>0?'Left-hand tyres worked '+ti.leftBias+'% harder — more right-hand cornering this drive.':
+                         'Right-hand tyres worked '+(-ti.leftBias)+'% harder — more left-hand cornering this drive.'))+
+        '<br><br>A model of force at each corner, not tread depth. It cannot see pressure, compound or alignment — and misalignment is the commonest cause of genuinely uneven wear. Persistent one-sided bias across many drives is worth a tracking check.</p></div>';
+    }
+    return out;
+  })()+
+  '<h2>Route</h2><div class="card"><div id="reviewMap"></div>'+
+    '<div class="legend" style="margin-top:10px">'+
+      '<span><em style="background:'+cssVar('--good')+'"></em>Start</span>'+
+      '<span><em style="background:'+cssVar('--ink-2')+'"></em>End</span>'+
+      '<span><em style="background:'+cssVar('--bad')+'"></em>Harsh braking</span>'+
+      '<span><em style="background:'+cssVar('--warn')+'"></em>Harsh acceleration</span>'+
+      '<span><em style="background:'+cssVar('--accent-text')+'"></em>Harsh cornering</span>'+
+      '<span><em style="background:'+cssVar('--graph')+'"></em>Route driven</span></div>'+
+    '<p class="tiny" style="margin-top:8px">Jerky inputs are not plotted — there are usually too many to read. Tap a dot for its g figure.</p></div>'+
+  '<h2>Speed</h2><div class="card"><svg id="trace" class="chart" viewBox="0 0 300 110" preserveAspectRatio="none" style="height:110px"></svg></div>'+
+  '<h2>Grip used</h2><div class="card"><canvas id="ggReview" class="gg2" width="500" height="500"></canvas>'+
+    '<p class="tiny" style="margin-top:8px;text-align:center">Up is acceleration, down is braking, sides are cornering.</p></div>'+
+  '<button class="btn ghost" id="delOne">Delete this drive</button>';
+
+  var svg=document.getElementById('trace');
+  if(d.trace&&d.trace.length>1){
+    var t0=d.trace[0][0],t1=d.trace[d.trace.length-1][0];
+    var mx=Math.max.apply(null,d.trace.map(function(p){return p[1]}))||1;
+    var pts=d.trace.map(function(p){return (((p[0]-t0)/(t1-t0||1))*300).toFixed(1)+','+(105-(p[1]/mx)*98).toFixed(1)}).join(' ');
+    svg.innerHTML='<polyline points="'+pts+'" fill="none" stroke="'+cssVar('--graph')+'" stroke-width="1.6" vector-effect="non-scaling-stroke"/>';
+  }else svg.innerHTML='<text x="150" y="58" fill="'+cssVar('--ink-2')+'" font-size="10" text-anchor="middle">Not enough data</text>';
+
+  var tl=document.getElementById('tl');
+  (d.events||[]).forEach(function(ev){
+    var i=document.createElement('i');i.className=ev.type;
+    i.style.left=Math.max(0,Math.min(99,(ev.t/(total||1))*100))+'%';
+    tl.appendChild(i);
+  });
+
+  drawMap(d);
+  drawGG(document.getElementById('ggReview'),d.cloud||[]);
+  document.getElementById('delOne').onclick=function(){
+    if(!confirm('Delete this drive?'))return;
+    drives=drives.filter(function(x){return x.id!==d.id});
+    save('drives',drives);paintHistory();go('history');
+  };
+}
+
+var reviewMapObj=null;
+function drawMap(d){
+  var el=document.getElementById('reviewMap');if(!el)return;
+  var pts=(d.trace||[]).filter(function(t){return t.length>3}).map(function(t){return [t[2],t[3]]});
+  if(!pts.length||typeof L==='undefined'){
+    el.outerHTML='<p class="tiny">No route recorded for this drive. Drives logged before this update did not store position.</p>';
+    return;
+  }
+  if(reviewMapObj){try{reviewMapObj.remove()}catch(e){}reviewMapObj=null}
+  reviewMapObj=L.map(el,{attributionControl:true,zoomControl:true,scrollWheelZoom:false});
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {maxZoom:19,attribution:'© OpenStreetMap'}).addTo(reviewMapObj);
+  var line=L.polyline(pts,{color:cssVar('--graph'),weight:4,opacity:.9}).addTo(reviewMapObj);
+  reviewMapObj.fitBounds(line.getBounds(),{padding:[22,22]});
+  L.circleMarker(pts[0],{radius:6,color:'#fff',weight:2,fillColor:cssVar('--good'),fillOpacity:1}).addTo(reviewMapObj);
+  L.circleMarker(pts[pts.length-1],{radius:6,color:'#fff',weight:2,fillColor:cssVar('--ink-2'),fillOpacity:1}).addTo(reviewMapObj);
+
+  var colour={brake:cssVar('--bad'),accel:cssVar('--warn'),corner:cssVar('--accent-text'),jerk:cssVar('--ink-2')};
+  var t0=d.trace[0][0];
+  (d.events||[]).forEach(function(ev){
+    if(ev.type==='jerk')return;                       // far too many to plot usefully
+    var target=t0+ev.t,best=null,bd=1e12;
+    d.trace.forEach(function(t){if(t.length>3){var g=Math.abs(t[0]-target);if(g<bd){bd=g;best=t}}});
+    if(best&&bd<8000)L.circleMarker([best[2],best[3]],
+      {radius:5,weight:2,color:'#fff',fillColor:colour[ev.type]||'#888',fillOpacity:1})
+      .bindPopup(ev.type+' · '+ev.g+' g').addTo(reviewMapObj);
+  });
+  setTimeout(function(){try{reviewMapObj.invalidateSize()}catch(e){}},250);
+}
+
+function fillThresh(id,lo,hi,cur){
+  var el=document.getElementById(id);if(!el)return;
+  var vals=[];
+  for(var v=lo;v<=hi+1e-9;v+=0.05)vals.push(+v.toFixed(2));
+  cur=+(cur||lo).toFixed(2);
+  if(vals.indexOf(cur)<0){vals.push(cur);vals.sort(function(a,b){return a-b})}
+  var mv=+((M()[{thBrake:'brake',thAccel:'accel',thCorner:'corner'}[id]])||0).toFixed(2);
+  el.innerHTML=vals.map(function(v){
+    var tag=v===mv?' — '+M().name:'';
+    return '<option value="'+v.toFixed(2)+'"'+(v===cur?' selected':'')+'>'+v.toFixed(2)+' g'+tag+'</option>';
+  }).join('');
+  el.value=cur.toFixed(2);
+}
+
+/* ---- setup ---- */
+function paintSetup(){
+  var sel=document.getElementById('vehSel');
+  if(!sel.options.length)VEHICLES.forEach(function(v,i){var o=document.createElement('option');o.value=i;o.textContent=v;sel.appendChild(o)});
+  sel.value=cfg.veh;
+  var cal=cals[cfg.veh];
+  var cs=document.getElementById('calState'),fs=document.getElementById('fwdState');
+  cs.textContent=cal?'Set':'Not set';cs.style.color=cal?cssVar('--accent-text'):cssVar('--ink-2');
+  fs.textContent=cal&&cal.fwd?'Locked':cal?'Learning…':'—';
+  fs.style.color=cal&&cal.fwd?cssVar('--accent-text'):cssVar('--ink-2');
+  document.getElementById('cs2').classList.toggle('done',!!cal);
+  document.getElementById('cs3').classList.toggle('done',!!(cal&&cal.fwd));
+  document.getElementById('unitSel').value=cfg.units;
+  document.getElementById('thBrake').value=cfg.thBrake;
+  document.getElementById('thAccel').value=cfg.thAccel;
+  document.getElementById('thCorner').value=cfg.thCorner;
+  /* Build these from a range and always inject the active value, so a mode
+     preset can never fall outside the list and render blank. */
+  fillThresh('thBrake',0.25,0.60,cfg.thBrake);
+  fillThresh('thAccel',0.25,0.70,cfg.thAccel);
+  fillThresh('thCorner',0.30,0.80,cfg.thCorner);
+  var dc=document.getElementById('driveCount');
+  if(dc)dc.textContent=drives.length;
+  var lb=document.getElementById('lastBackup'),lbv=load('lastBackup',0);
+  if(lb){
+    var days=lbv?Math.floor((Date.now()-lbv)/86400000):null;
+    lb.textContent=lbv?(days===0?'today':days+' day'+(days===1?'':'s')+' ago'):'never';
+    lb.style.color=(!lbv||days>14)?cssVar('--bad'):cssVar('--ink-2');
+  }
+  var fs=document.getElementById('fuelScaleTxt');
+  if(fs){var k=(cfg.fuelScale||{})[cfg.veh];fs.textContent=k?k.toFixed(2)+'×':'none — uncalibrated'}
+  var cc=document.getElementById('camCount');
+  if(cc)cc.textContent=camSet.length+(camSet.length?'':' — drive to load some');
+  var ms=document.getElementById('modeSel');
+  ms.value=cfg.mode||'road';
+  var mb=document.getElementById('modeBlurb');
+  var x=M();
+  mb.innerHTML=x.blurb+'<br><b style="color:var(--ink)">Event cost — braking '+x.wBrake+
+    ' · cornering '+x.wCorner+' · acceleration '+x.wAccel+'</b>';
+  document.getElementById('coachRate').value=String(cfg.coachRate===undefined?1:cfg.coachRate);
+  document.getElementById('rateSel').value=String(cfg.voiceRate||0.98);
+  loadVoices();
+  document.getElementById('cNavy').value=cfg.navy;
+  document.getElementById('cLime').value=cfg.lime;
+  document.querySelectorAll('#viewSeg button').forEach(function(b){
+  b.onclick=function(){setView(b.dataset.v)};
+});
+document.querySelectorAll('#segTheme button').forEach(function(b){b.classList.toggle('on',b.dataset.t===cfg.theme)});
+  [['swVoice','voice'],['swBreak','brk'],['swWake','wake'],['swLimits','limits'],['swMapUp','mapUp'],['swCams','cameras'],['swCoach','coach']].forEach(function(p){
+    var e=document.getElementById(p[0]);
+    e.classList.toggle('on',!!cfg[p[1]]);
+    e.setAttribute('aria-checked',cfg[p[1]]?'true':'false');
+  });
+  paintSwatches();
+  paintDiag();
+}
+
+function paintDiag(){
+  var el=document.getElementById('diag');if(!el)return;
+  var cal=cals[cfg.veh];
+  var hm=Math.hypot(hAcc[0],hAcc[1])/G;
+  var refState=!cal?'—':relevelling?'re-levelling…':gravOff>0.6?'stale ('+gravOff.toFixed(2)+' off)':'steady';
+  var learnState=!cal?'needs calibration':cal.fwd?'locked':!gpsOK?'waiting for GPS':learnN+' / '+LEARN_TARGET+' samples';
+  var rows=[
+    ['Motion rate',motionOK?Math.round(motionHz)+' Hz':'no data'],
+    ['GPS',gpsOK?(gpsAcc?'±'+Math.round(gpsAcc)+' m':'locked'):'no fix'],
+    ['Speed',gpsOK?Math.round(fmtSpeed(window.__v||0))+' '+uSpeed():'—'],
+    ['Gravity reference',grav?Math.hypot(grav[0],grav[1],grav[2]).toFixed(2)+' m/s²':'—'],
+    ['Reference state',refState],
+    ['Horizontal now',cal?hm.toFixed(3)+' g':'needs calibration'],
+    ['Axis learning',learnState]
+  ];
+  if(cal&&cal.fwd)rows.push(['Longitudinal / lateral',(lon/G).toFixed(2)+' / '+(lat/G).toFixed(2)+' g']);
+  el.innerHTML=rows.map(function(r){return '<span>'+r[0]+'</span><b>'+r[1]+'</b>'}).join('');
+
+  var lr=document.getElementById('limRoad');
+  if(lr)lr.textContent=limMatch?
+    ((limMatch.name||'unnamed')+' · '+limMatch.limit.v+' '+(limMatch.limit.u==='mph'?'mph':'km/h')):
+    limStatus();
+
+  var h=document.getElementById('diagHelp');
+  if(h){
+    var msg;
+    if(!motionOK)msg='Motion rate is zero — iOS has not granted sensor access. Tap Calibrate and accept the prompt.';
+    else if(!cal)msg='Calibrate the mount to start reading acceleration.';
+    else if(gravOff>0.6)msg='Horizontal g is high because the phone has moved since calibration. Put it back in the mount and leave it still — the reference re-levels after about three seconds. If it stays high, recalibrate.';
+    else if(!gpsOK)msg='No GPS fix, so the forward axis cannot learn — it needs speed changes to correlate against. Go outside. Or skip it and use manual capture above.';
+    else if(!cal.fwd)msg='Learning. Needs about ten firm accelerations or stops with a clear GPS fix. Manual capture is faster.';
+    else msg='All good. Longitudinal is braking and acceleration, lateral is cornering.';
+    h.textContent=msg;
+  }
+}
+setInterval(function(){if(cur==='setup')paintDiag()},400);
+
+/* ================= navigation ================= */
+var cur='drive';
+function go(s){
+  cur=s;
+  document.querySelectorAll('.screen').forEach(function(e){e.classList.toggle('on',e.id===s)});
+  document.querySelectorAll('#tabs button').forEach(function(b){b.classList.toggle('on',b.dataset.s===s)});
+  document.getElementById(s).scrollTop=0;
+  if(s==='history')paintHistory();
+  if(s==='setup')paintSetup();
+}
+document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){go(b.dataset.s)}});
+document.getElementById('backBtn').onclick=function(){go('history')};
+
+/* ================= wiring ================= */
+document.getElementById('startBtn').onclick=async function(){
+  var b=this;b.textContent='Starting…';
+  await requestAll();
+  b.textContent='Start drive';
+  if(!motionOK&&!confirm('No motion sensors, so smoothness and cornering will not be scored. Speed and route will still be recorded.\n\nStart anyway?'))return;
+  if(!cals[cfg.veh]){
+    if(confirm('This vehicle has no mount calibration. Smoothness scoring needs it.\n\nCalibrate now? (You must be parked.)')){
+      go('setup');setTimeout(runCal,400);return}
+  }
+  startDrive();
+};
+
+var holdT=null,holdP=0;
+var endBtn=document.getElementById('endBtn'),endFill=document.getElementById('endFill');
+function holdStart(e){e.preventDefault();holdP=0;clearInterval(holdT);
+  holdT=setInterval(function(){holdP+=0.05/1.4;endFill.style.width=(holdP*100)+'%';
+    if(holdP>=1){clearInterval(holdT);endFill.style.width='0';endDrive()}},50)}
+function holdEnd(){clearInterval(holdT);holdP=0;endFill.style.width='0'}
+endBtn.addEventListener('touchstart',holdStart,{passive:false});
+['touchend','touchcancel','mouseup','mouseleave'].forEach(function(ev){endBtn.addEventListener(ev,holdEnd)});
+endBtn.addEventListener('mousedown',holdStart);
+
+document.querySelectorAll('#segTheme button').forEach(function(b){
+  b.onclick=function(){cfg.theme=b.dataset.t;save('cfg',cfg);applyTheme();paintSetup()};
+});
+document.getElementById('cNavy').oninput=function(){cfg.navy=this.value.toUpperCase();save('cfg',cfg);applyTheme()};
+document.getElementById('cLime').oninput=function(){cfg.lime=this.value.toUpperCase();save('cfg',cfg);applyTheme()};
+document.getElementById('resetCol').onclick=function(){
+  cfg.navy=CANON.navy;cfg.lime=CANON.lime;save('cfg',cfg);applyTheme();paintSetup();
+};
+document.getElementById('vehSel').onchange=function(){
+  cfg.veh=+this.value;
+  var m=(cfg.vehMode||{})[cfg.veh];
+  if(m)applyMode(m); else save('cfg',cfg);
+  paintSetup();render();
+};
+document.getElementById('modeSel').onchange=function(){applyMode(this.value);paintSetup();render()};
+document.getElementById('unitSel').onchange=function(){cfg.units=this.value;save('cfg',cfg);render();paintHistory()};
+['thBrake','thAccel','thCorner'].forEach(function(k){
+  document.getElementById(k).onchange=function(){cfg[k]=parseFloat(this.value);save('cfg',cfg);paintSetup()};
+});
+[['swVoice','voice'],['swBreak','brk'],['swWake','wake'],['swLimits','limits'],['swMapUp','mapUp'],['swCams','cameras'],['swCoach','coach']].forEach(function(p){
+  document.getElementById(p[0]).onclick=function(){
+    cfg[p[1]]=cfg[p[1]]?0:1;save('cfg',cfg);
+    this.classList.toggle('on',!!cfg[p[1]]);
+    this.setAttribute('aria-checked',cfg[p[1]]?'true':'false');
+    if(p[1]==='wake'&&!cfg.wake)releaseWake();
+  };
+});
+document.getElementById('voiceSel').onchange=function(){
+  cfg.voiceName=this.value;save('cfg',cfg);loadVoices();
+  lastVoice=0;speak('Braking late. Look further ahead.',true);
+};
+document.getElementById('limTestBtn').onclick=testLimits;
+document.getElementById('testVoice').onclick=function(){
+  lastVoice=0;speak('Braking late. Look further ahead. Speed limit thirty.',true);
+};
+document.getElementById('coachRate').onchange=function(){
+  cfg.coachRate=+this.value;save('cfg',cfg);
+  lastVoice=0;speak('Late on the brakes there. Look further ahead.',true);
+};
+document.getElementById('rateSel').onchange=function(){
+  cfg.voiceRate=parseFloat(this.value);save('cfg',cfg);
+  lastVoice=0;speak('Braking late. Look further ahead.',true);
+};
+document.getElementById('calBtn').onclick=function(){
+  runCal();                       // must be first: it needs the tap's gesture token
+  if(!watchId)startGPS();
+};
+document.getElementById('capBtn').onclick=captureForward;
+document.getElementById('motionBtn').onclick=async function(){
+  var b=this;b.textContent='Requesting…';
+  var ok=await enableMotion();
+  b.textContent=ok?'Motion sensors on':'Enable motion sensors';
+  paintDiag();
+};
+document.getElementById('gpsBtn').onclick=function(){
+  if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null}
+  startGPS();this.textContent='Starting GPS…';
+  var b=this;setTimeout(function(){b.textContent=gpsOK?'GPS running':'Restart GPS'},4000);
+};
+document.getElementById('clearCalBtn').onclick=function(){
+  if(!confirm('Clear calibration for '+VEHICLES[cfg.veh]+'?'))return;
+  delete cals[cfg.veh];save('cals',cals);paintSetup();
+};
+document.getElementById('exportBtn').onclick=function(){
+  var payload={app:'Roadcraft',version:2,exported:new Date().toISOString(),
+               drives:drives,cals:cals,cfg:cfg};
+  var blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='roadcraft-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  save('lastBackup',Date.now());paintSetup();
+};
+document.getElementById('importBtn').onclick=function(){document.getElementById('importFile').click()};
+document.getElementById('importFile').onchange=function(e){
+  var f=e.target.files&&e.target.files[0];if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var j=JSON.parse(rd.result);
+      if(!j||!Array.isArray(j.drives))throw new Error('not a Roadcraft backup');
+      /* Merge on id so restoring never destroys drives recorded since. */
+      var byId={};
+      drives.forEach(function(d){byId[d.id]=d});
+      var added=0;
+      j.drives.forEach(function(d){if(d&&d.id&&!byId[d.id]){byId[d.id]=d;added++}});
+      drives=Object.keys(byId).map(function(k){return byId[k]})
+             .sort(function(a,b){return b.start-a.start}).slice(0,200);
+      save('drives',drives);
+      if(j.cals&&confirm('Also restore mount calibration for each vehicle?\n\nOnly do this if the phone is mounted the same way as when the backup was made.')){
+        cals=j.cals;save('cals',cals);
+      }
+      if(j.cfg&&confirm('Also restore settings — modes, thresholds, colours?')){
+        for(var k in DEFAULTS)if(j.cfg[k]!==undefined)cfg[k]=j.cfg[k];
+        save('cfg',cfg);applyTheme();
+      }
+      alert('Restored. '+added+' new drives added, '+(j.drives.length-added)+' already present.');
+      paintSetup();paintHistory();
+    }catch(err){alert('Could not read that file: '+(err.message||'unknown format'))}
+  };
+  rd.readAsText(f);
+  e.target.value='';
+};
+document.getElementById('calFuelBtn').onclick=function(){
+  var mi=parseFloat(document.getElementById('calMiles').value);
+  var li=parseFloat(document.getElementById('calLitres').value);
+  if(!(mi>0)||!(li>0)){alert('Enter both the miles covered and the litres it took to fill.');return}
+  /* Compare the real consumption against what the model predicted per mile
+     across recent drives in this vehicle. */
+  var mine=drives.filter(function(d){return d.veh===cfg.veh&&d.eFuel&&d.dist>800});
+  if(mine.length<3){alert('Not enough recorded drives in this vehicle yet — three or more needed before calibrating.');return}
+  var modelL=0,modelMi=0;
+  mine.forEach(function(d){
+    modelL+=d.eFuel/PETROL_MJ;
+    modelMi+=d.dist/1609.34;
+  });
+  var modelPerMile=modelL/modelMi, realPerMile=li/mi;
+  var k=realPerMile/modelPerMile;
+  if(!(k>0.2&&k<5)){alert('That gives an implausible correction ('+k.toFixed(2)+'×). Check the figures.');return}
+  cfg.fuelScale=cfg.fuelScale||{};cfg.fuelScale[cfg.veh]=+k.toFixed(3);
+  save('cfg',cfg);paintSetup();paintHistory();
+  alert('Calibrated. Model corrected by '+k.toFixed(2)+'× for '+VEHICLES[cfg.veh]+
+        '.\n\nReal: '+(mi/(li*0.219969)).toFixed(1)+' mpg over '+mi+' miles.');
+};
+document.getElementById('wipeBtn').onclick=function(){
+  if(!confirm('Delete all '+drives.length+' drives? This cannot be undone.'))return;
+  drives=[];save('drives',drives);paintHistory();
+};
+
+/* ================= PWA glue ================= */
+function installIcon(){
+  var cv=document.createElement('canvas');cv.width=cv.height=180;
+  var x=cv.getContext('2d');
+  x.fillStyle=cfg.navy;x.fillRect(0,0,180,180);
+  x.strokeStyle=cfg.lime;x.lineWidth=19;x.lineJoin='round';x.lineCap='round';
+  x.beginPath();x.moveTo(34,142);x.lineTo(90,32);x.lineTo(146,142);x.stroke();
+  x.fillStyle=cfg.lime;x.beginPath();x.arc(90,118,15,0,7);x.fill();
+  var url=cv.toDataURL('image/png');
+  var man={name:'Roadcraft',short_name:'Roadcraft',display:'standalone',orientation:'portrait',
+    background_color:cfg.navy,theme_color:cfg.navy,start_url:'.',scope:'.',
+    icons:[{src:url,sizes:'180x180',type:'image/png',purpose:'any'}]};
+  var l=document.createElement('link');l.rel='apple-touch-icon';l.href=url;document.head.appendChild(l);
+  var m=document.createElement('link');m.rel='manifest';
+  m.href=URL.createObjectURL(new Blob([JSON.stringify(man)],{type:'application/manifest+json'}));
+  document.head.appendChild(m);
+}
+
+/* ================= boot ================= */
+applyTheme();paintSetup();paintHistory();render();installIcon();loadVoices();setView(cfg.view||'gg');setTimeout(loadVoices,700);
+if(typeof DeviceMotionEvent!=='undefined'&&!DeviceMotionEvent.requestPermission)
+  window.addEventListener('devicemotion',onMotion);
+
+/* If access was granted on a previous visit, re-arm without asking. iOS only
+   requires a user gesture for the first grant; afterwards requestPermission
+   resolves straight to 'granted'. Wrapped in try/catch because an OS-level
+   revocation makes it reject, and that must not break the page. */
+if(load('granted',0)){
+  /* Once an origin has been granted motion access, simply attaching the
+     listener is usually enough — calling requestPermission outside a user
+     gesture can reject outright. Attach first, and only fall back to asking
+     if no samples arrive. A failure here must NOT clear the stored grant,
+     or one bad load disables self-arming forever. */
+  try{window.addEventListener('devicemotion',onMotion)}catch(e){}
+  try{startGPS()}catch(e){}
+  setTimeout(function(){
+    if(motionOK)return;
+    if(typeof DeviceMotionEvent!=='undefined'&&DeviceMotionEvent.requestPermission){
+      DeviceMotionEvent.requestPermission().then(function(r){
+        if(r==='granted')window.addEventListener('devicemotion',onMotion);
+      }).catch(function(){});   // needs a tap on this iOS version; Start drive covers it
+    }
+    paintDiag();
+  },1200);
+}
+</script>
+</body>
+</html>

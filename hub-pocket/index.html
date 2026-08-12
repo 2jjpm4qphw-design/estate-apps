@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hub Pocket">
+<meta name="theme-color" content="#0D1B3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Hub Pocket</title>
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAET0lEQVR4nO3dzW0UURBF4WvElggIgRy8J2L25EA8sIABY2MzM/3zqk6dbwlCeuM+XarGsvvhw8fH75Eg3q0+gLQngxaKQQvFoIVi0EIxaKEYtFAMWigGLRSDFopBC8WghWLQQjFooRi0UAxaKAYtFIMWikELxaCFYtBCMWihGLRQDFooBi0UgxaKQQvFoIVi0EIxaKEYtFAMWigGLZT3qw+gmr58+/rizz5/elxwkts8+EoKPfWvkJ+rHLZBK8l1IT9XMWx3aN0V85Z/dySDHq5ilFsY9GB7xFzthjBooRj0UHtO1kpT2qAHqhTg3gx6GHLMiUELxqAHoU/nxKDHODLmSt8xNOgBJkzmC4PWJpWmc2LQeJOmc2LQaEfHXG06JwaNNTHmxKCRpq0ZTxm0blZ1OicGjTN11bgwaJDpMScGjTF5b37KoHWVDtM5MWgEV40/DLo5Y/6bQTfm3vySQTd1RszdpnNi0HpFx5gTg27Jvfl1Bt2MMb/NoBvxIfD/DFq/dZ/OiUG34apxHYNuwJivZ9DFuTffxqCHI03nxKBLc9W4nUEXZcz3Kflat66vFNuLMd+vVNBvXcjL35EvRuJD4FYlgr7lIk4J+yj0r9vyHZr0SrGtXDW2Wx70FqSojXkfS4MmvlbsHoTPUEXrCX1hEG+bMp2ThUHvHWHXqF019oWY0F0Z8/5QQXea0p3O2gkq6KRHKP7E9nFwQSc9oj7S1JiThUEf/UWvGrV787GQE/qiWtTGfLylQZ9xAapEXeUcdOgJfTEhJqfzT8uDPutCrIzaVeM8y4NO2FEb87lKBJ0wL8yEVaeaMkEnsx4S90AcAluVCjrhRO2qsUa5oM9yZHDGvE7JoDs/JBrzWiWDTnpGTdrPuyobdNIz6iM5nf+vdNBJn6hdNWooH3RSP2pjrqNF0EndqLusK1O0CTqZOakmfuYtWgWd1PrGi6tGPe2CTmpEbcw1tQz6LK9F695cV9ugVz0k+hPbtbUNOqn7Px9bGPM2Dx8+Pn5ffYitKCuAMW/XekJfEEIgfIYKEEEnBqGfMEEnfaPueu6KUEEn/eLodt7qcEEnfSLpcs5OkEEnxjIVNujqvOGOgQ66ajRVz0WADjqpF0+189Dgg07qRFTlHGQjgk6MaYoxQSdro/aGOseooJM1YRnzecYFnZwbmDGfa2TQiaFRjQ06OT5qb5rzjQ76SMa8xvigjwjPmNcZH3RigCQG/cteUXtzrGXQT2yN0ZjXM+hn7o3SmGtA/BqDo1zz6xEMuRaDvsK/wjbkmgxaKO7QQjFooRi0UAxaKAYtFIMWikELxaCFYtBCMWihGLRQDFooBi0UgxaKQQvFoIVi0EIxaKEYtFAMWigGLRSDFopBC8WghWLQQjFooRi0UAxaKAYtFIMWikELxaCFYtBCMWihGLRQDFooBi0UgxaKQQvFoIVi0EIxaKEYtFAMWigGLRSDFopBC+UH+fQ74q5bdawAAAAASUVORK5CYII=">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{--navy:#0D1B3E;--pink:#C4F000;--cream:#FBF7EF;--ink:#1d1d28;--muted:#7a7a88;--hair:#e6e6ee;--card:#ffffff;--green:#1f9d63;--blue:#1d4ed8;}
+  html,body{margin:0;padding:0}
+  body{font-family:'Montserrat',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f3f3f7;color:var(--ink);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%;padding-bottom:env(safe-area-inset-bottom)}
+  header{position:sticky;top:0;z-index:10;background:var(--navy);color:var(--cream);padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  header .ttl{font-weight:800;font-size:18px;letter-spacing:-.01em;color:var(--pink)}
+  header .sub{font-size:11px;opacity:.7;font-weight:500}
+  .statuswrap{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+  .savedat{font-size:10px;opacity:.6;color:var(--cream);font-weight:500}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:5px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:var(--cream);cursor:pointer}
+  .pill .dot{width:8px;height:8px;border-radius:50%;background:#bbb}
+  .pill[data-s="synced"] .dot{background:#5ed39a}
+  .pill[data-s="saving"] .dot,.pill[data-s="loading"] .dot{background:#f4c97a}
+  .pill[data-s="error"] .dot{background:#f17b7b}
+  main{padding:14px 14px 90px;max-width:680px;margin:0 auto}
+  .view{display:none}
+  .view.on{display:block}
+  .card{background:var(--card);border:1px solid var(--hair);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .h{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--navy);margin:0 0 10px}
+  .h .ct{background:#f0eef6;color:var(--muted);border-radius:999px;padding:1px 8px;font-size:11px;margin-left:6px}
+  /* capture */
+  form.cap{display:flex;gap:8px;margin-bottom:14px}
+  form.cap input{flex:1;min-width:0;border:1px solid var(--hair);border-radius:12px;padding:13px 14px;font:inherit;font-size:16px}
+  form.cap input:focus{outline:none;border-color:var(--pink)}
+  form.cap button{border:0;background:var(--pink);color:var(--navy);border-radius:12px;padding:0 18px;font:inherit;font-size:16px;font-weight:700}
+  form.cap button:active{background:#8FB400}
+  /* todo rows */
+  .todo{display:flex;align-items:flex-start;gap:12px;padding:13px 4px;border-bottom:1px solid var(--hair)}
+  .todo:last-child{border-bottom:0}
+  .box{flex:none;width:26px;height:26px;border:2px solid #c7c7d2;border-radius:8px;background:#fff;cursor:pointer;position:relative;margin-top:1px}
+  .box:active{transform:scale(.94)}
+  .todo .tx{flex:1;font-size:16px;line-height:1.4}
+  .tag{flex:none;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 7px;border-radius:6px;background:#eef0f3;color:var(--muted);align-self:center}
+  .tag.work{background:#e7eefc;color:var(--blue)}
+  .tag.over{background:#fdecec;color:#c0392b}
+  .empty{color:var(--muted);font-style:italic;font-size:14px;padding:6px 2px}
+  .sechead{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:14px 2px 4px;border-top:1px solid var(--hair);padding-top:12px}
+  /* diary */
+  .day{margin-bottom:6px}
+  .dayhd{display:flex;align-items:baseline;gap:8px;font-size:13px;font-weight:700;color:var(--navy);margin:14px 2px 6px;padding-bottom:5px;border-bottom:2px solid var(--navy)}
+  .day.today .dayhd{color:var(--navy);border-bottom-color:var(--pink)}
+  .dayhd .dlabel{font-weight:500;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  .ev{display:flex;gap:10px;padding:7px 2px;border-bottom:1px solid #f0f0f5;font-size:15px}
+  .ev:last-child{border-bottom:0}
+  .ev .t{flex:none;width:62px;color:var(--muted);font-variant-numeric:tabular-nums;font-size:13px;padding-top:1px}
+  .ev .ti{flex:1}
+  .ev.work .ti{color:var(--blue)}
+  .ev.kd .ti{color:var(--navy)}
+  .ev.past{opacity:.45}
+  .dayempty{color:#b6b6c2;font-size:13px;font-style:italic;padding:4px 2px}
+  .moreweek{width:100%;border:1px solid var(--hair);background:#fff;color:var(--muted);border-radius:12px;padding:11px;font:inherit;font-size:14px;font-weight:600;margin-top:6px}
+  .weekdiv{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--navy);margin:24px 2px 8px;padding-top:16px;border-top:2px solid var(--hair)}
+  /* bottom nav */
+  nav{position:fixed;bottom:0;left:0;right:0;z-index:10;background:#fff;border-top:1px solid var(--hair);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+  nav button{flex:1;border:0;background:none;padding:11px 0 13px;font:inherit;font-size:11px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
+  nav button .ic{font-size:21px;line-height:1}
+  nav button.on{color:var(--navy)}
+  /* setup / settings */
+  .setup{max-width:460px;margin:30px auto;padding:0 18px}
+  .setup h1{font-size:20px;color:var(--navy);margin:0 0 4px}
+  .setup p{color:var(--muted);font-size:14px;margin:0 0 18px}
+  .setup label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 6px}
+  .setup input{width:100%;border:1px solid var(--hair);border-radius:12px;padding:13px 14px;font:inherit;font-size:15px}
+  .setup input:focus{outline:none;border-color:var(--pink)}
+  .setup .go{width:100%;border:0;background:var(--pink);color:var(--navy);border-radius:12px;padding:15px;font:inherit;font-size:16px;font-weight:700;margin-top:20px}
+  .setup .err{color:#c0392b;font-size:13px;margin-top:12px}
+  .setup .signout{width:100%;border:1px solid var(--hair);background:#fff;color:#c0392b;border-radius:12px;padding:13px;font:inherit;font-size:15px;font-weight:600;margin-top:10px}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4}
+  .rightnow{background:linear-gradient(135deg,#0D1B3E,#1A3A6B);color:#fff;border-radius:16px;padding:16px;margin-bottom:14px}
+  .rn-label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--pink);font-weight:700;margin-bottom:8px}
+  .rn-text{font-size:20px;font-weight:600;line-height:1.3;margin-bottom:14px}
+  .rn-done{background:var(--pink);color:var(--navy);border:0;border-radius:10px;padding:10px 22px;font:inherit;font-size:15px;font-weight:700}
+  .rn-done:active{background:#8FB400}
+  .wxflag{background:#fff4f2;border:1px solid #f3c9c2;color:#a23a2a;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;margin-bottom:12px}
+  .wxflag.wxflag-heat{background:#fff7e6;border-color:#e6c56a;color:#7a5a12}
+  .muted{color:#8a93a6;font-size:13px;padding:8px 2px}
+  .wx-cards{display:flex;flex-direction:column;gap:10px}
+  .wx-card{background:#fff;border:1px solid #e6e9f0;border-radius:14px;padding:12px 14px}
+  .wx-top{display:flex;justify-content:space-between;align-items:center}
+  .wx-city{font-weight:700;color:var(--navy);font-size:15px}
+  .wx-now{font-size:16px;font-weight:700;color:var(--navy)}
+  .wx-clear{border:0;background:none;color:#b0b6c3;font-size:14px;cursor:pointer;padding:0 4px}
+  .wx-days{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+  .wx-d{font-size:12px;color:#5a6273}
+  .wx-d b{color:#1a1a1a}
+  .wx-d i{color:#9aa1b0;font-style:normal;margin-left:2px}
+  .wx-elsewhere{margin-top:10px}
+  .wx-else-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .wx-else-btn{border:1px solid #cdd3df;background:#fff;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--navy);cursor:pointer}
+  .wx-else-row form{display:flex;gap:6px;flex:1;min-width:150px}
+  .wx-else-row input{flex:1;border:1px solid #cdd3df;border-radius:20px;padding:7px 12px;font-size:13px}
+  .wx-else-row form button{border:0;background:var(--navy);color:#fff;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer}
+  .news-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .news-tab{border:1px solid #cdd3df;background:#fff;border-radius:20px;padding:6px 12px;font-size:12.5px;font-weight:600;color:#5a6273;cursor:pointer}
+  .news-tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .news-item{padding:10px 0;border-bottom:1px solid #eef0f4}
+  .news-item:last-child{border-bottom:none}
+  .news-item a{color:#0A1530;text-decoration:none;font-weight:600;font-size:14px;line-height:1.35;display:block}
+  .news-item a:active{opacity:.6}
+  .news-when{color:#9aa1b0;font-size:11px;margin-top:3px;display:block}
+  .nextbanner{background:#eef0ff;border:1px solid #d6d9f5;color:var(--navy);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;margin-bottom:12px}
+  .meds-card .medrow{display:flex;flex-wrap:wrap;gap:7px}
+  .medchip{border:1.5px solid var(--hair);background:#fff;color:var(--muted);border-radius:999px;padding:8px 13px;font:inherit;font-size:13px;font-weight:600}
+  .medchip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+  .note{font-size:12px;color:var(--muted);margin:-4px 0 10px;line-height:1.4}
+  .dump{width:100%;min-height:170px;border:1px solid var(--hair);border-radius:12px;padding:12px;font:inherit;font-size:16px;line-height:1.5;resize:vertical;box-sizing:border-box}
+  .dump:focus{outline:none;border-color:var(--pink)}
+  .todo .del{flex:none;border:0;background:none;color:#c7c7d2;font-size:16px;padding:0 4px;cursor:pointer}
+  .todo.done .tx{text-decoration:line-through;color:var(--muted)}
+  .box.on{background:var(--navy);border-color:var(--navy)}
+  .box.on::after{content:'\2713';color:#fff;font-size:15px;line-height:1;position:absolute;left:4px;top:1px}
+  .sechead{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 2px 6px;border-top:1px solid var(--hair);padding-top:10px}
+  .lnk{color:var(--navy);font-weight:600;cursor:pointer;text-decoration:underline}
+  /* swipe-to-pin */
+  .todo.swipeable{transition:transform .18s ease;touch-action:pan-y}
+  .todo.swipeable.willpin{background:linear-gradient(90deg,#ffffff,#F2FBC8)}
+  .pinflag{flex:none;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 7px;border-radius:6px;background:var(--pink);color:var(--navy);align-self:center}
+  .swipehint{font-size:11px;color:var(--muted);margin:2px 2px 8px;font-style:italic}
+  .totoday{flex:none;border:1px solid var(--navy);background:#fff;color:var(--navy);border-radius:8px;padding:6px 11px;font:inherit;font-size:12px;font-weight:700}
+  .totoday:active{background:#F2FBC8}
+  .donetoday{margin-top:10px;font-size:13px;font-weight:600;color:var(--green);text-align:center}
+  .nudge{background:#fff7e6;border:1px solid #f0d9a8;color:#7a5a12;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;margin-bottom:12px}
+  .realmtag{flex:none;border:1px solid var(--hair);background:#f3f3f7;color:var(--muted);border-radius:6px;padding:3px 8px;font:inherit;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;align-self:center}
+  .realmtag.work{background:#e7eefc;color:var(--blue);border-color:#cfe0fb}
+  .realmtag.personal{background:#e6f6ee;color:var(--green);border-color:#c5e9d4}
+  .hwtoggle{width:100%;border:1px solid var(--hair);background:#fff;color:var(--muted);border-radius:12px;padding:9px;font:inherit;font-size:13px;font-weight:600;margin-bottom:14px}
+  .hwtoggle[data-on="1"]{background:#fff4f2;border-color:#f3c9c2;color:#a23a2a}
+  /* right-now actions + focus mode */
+  .rn-actions{display:flex;gap:10px;align-items:center}
+  .rn-focus{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.32);border-radius:10px;padding:10px 18px;font:inherit;font-size:15px;font-weight:700}
+  .rn-focus:active{background:rgba(255,255,255,.26)}
+  .focusmode{position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,#0D1B3E,#1A3A6B);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:calc(env(safe-area-inset-top) + 28px) 26px calc(env(safe-area-inset-bottom) + 28px)}
+  .focusmode[hidden]{display:none}
+  .fm-label{font-size:12px;text-transform:uppercase;letter-spacing:.16em;color:var(--pink);font-weight:700;margin-bottom:22px}
+  .fm-text{font-size:30px;font-weight:600;line-height:1.32;max-width:600px;margin-bottom:44px}
+  .fm-done{background:var(--pink);color:var(--navy);border:0;border-radius:14px;padding:17px 46px;font:inherit;font-size:18px;font-weight:700}
+  .fm-done:active{background:#8FB400}
+  .fm-exit{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:16px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:8px 16px;font:inherit;font-size:13px;font-weight:600}
+</style>
+</head>
+<body>
+
+<div id="app" hidden>
+  <header>
+    <div>
+      <div class="ttl">Hub Pocket</div>
+      <div class="sub" data-datesub></div>
+    </div>
+    <div class="statuswrap">
+      <button class="pill" data-status data-s="idle"><span class="dot"></span><span data-status-label>idle</span></button>
+      <div class="savedat" data-savedat></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="view on" data-view="today">
+      <div data-weatherflag></div>
+      <div data-evening-nudge></div>
+      <div class="rightnow" data-rightnow hidden></div>
+      <form class="cap" data-cap autocomplete="off">
+        <input type="text" data-cap-input placeholder="Capture a to-do — sort later…" enterkeyhint="done">
+        <button type="submit">Add</button>
+      </form>
+      <button class="hwtoggle" data-hidework hidden></button>
+      <div class="card">
+        <div class="h">To do today <span class="ct" data-today-ct>0</span></div>
+        <div data-today-list></div>
+      </div>
+      <div class="card" data-holding-card hidden>
+        <div class="h">To sort <span class="ct" data-holding-ct></span></div>
+        <div class="note">Captured here — prioritise on the Hub, or send one straight to today.</div>
+        <div data-holding-list></div>
+      </div>
+    </section>
+
+    <section class="view" data-view="diary">
+      <div data-diary></div>
+    </section>
+
+    <section class="view" data-view="notes">
+      <div class="card">
+        <div class="h">Brain dump</div>
+        <div class="note">Scratch space — synced across devices. Scribble; clear when done.</div>
+        <textarea class="dump" data-bd placeholder="- anything on your mind…"></textarea>
+      </div>
+      <div class="card">
+        <div class="h">Change ideas <span class="ct" data-ci-ct></span></div>
+        <div class="note">Code / site change ideas — synced, to action on the home Mac. Tick when done.</div>
+        <form class="cap" data-ci-form autocomplete="off"><input type="text" data-ci-input placeholder="A change idea…" enterkeyhint="done"><button type="submit">Add</button></form>
+        <div data-ci-list></div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav>
+    <button data-nav="today" class="on"><span class="ic">✓</span>To do</button>
+    <button data-nav="diary"><span class="ic">▤</span>Diary</button>
+    <button data-nav="notes"><span class="ic">✎</span>Notes</button>
+    <button data-nav="settings"><span class="ic">⚙</span>Setup</button>
+  </nav>
+
+  <div id="focusmode" class="focusmode" hidden>
+    <button class="fm-exit" data-fm-exit>Exit</button>
+    <div class="fm-label">Right now</div>
+    <div class="fm-text" data-fm-text></div>
+    <button class="fm-done" data-fm-done>Done</button>
+  </div>
+</div>
+
+<div id="setup" class="setup" hidden>
+  <h1>Connect Hub Pocket</h1>
+  <p>This reads and updates the same data as The Hub. Open The Hub, tap the <b>⚙</b> in the header, and copy the Gist ID and token here. Stored only on this device.</p>
+  <label>Gist ID</label>
+  <input type="text" data-cfg-id autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="32-character hex ID">
+  <label>Token</label>
+  <input type="password" data-cfg-token autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="ghp_… or github_pat_…">
+  <div class="hint">Needs the <code>gist</code> scope — the same token The Hub uses.</div>
+  <button class="go" data-cfg-save>Connect</button>
+  <div class="err" data-cfg-err hidden></div>
+  <button class="signout" data-reset-tags hidden style="color:#a23a2a">Reset all work/personal tags</button>
+  <div class="hint" data-reset-tags-hint hidden>Clears the work/personal tag on every task so you can re-tag from scratch. Recurring work items keep their tags.</div>
+  <button class="signout" data-cfg-signout hidden>Disconnect this device</button>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var GIST_FILE='life-twoweek.json';
+  var ID_KEY='connolly-sync:gist-id', TOK_KEY='connolly-sync:token', CID_KEY='connolly-pocket:client-id';
+  var $=function(s,r){return (r||document).querySelector(s);};
+  var creds=null, cached=null, remoteUpdatedAt=null, weekExpanded=false, pollTimer=null, busy=false;
+
+  // Safe storage: some contexts (sandboxed preview, file:// on iOS Safari with
+  // storage disabled) throw on any localStorage access. Fall back to in-memory
+  // so the app still loads — creds just won't persist between launches there.
+  var _mem={};
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(_){ return (k in _mem)?_mem[k]:null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(_){ _mem[k]=v; } }
+  function lsDel(k){ try{ localStorage.removeItem(k); }catch(_){ delete _mem[k]; } }
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function isoOf(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function today(){ return isoOf(new Date()); }
+  function addDays(iso,n){ var p=String(iso).split('-'); var d=new Date(+p[0],+p[1]-1,+p[2]); d.setDate(d.getDate()+n); return isoOf(d); }
+  function uid(p){ return p+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8); }
+  function clientId(){ var v=lsGet(CID_KEY); if(!v){ v='pocket_'+Math.random().toString(36).slice(2,9); lsSet(CID_KEY,v); } return v; }
+  function writer(){ return { id:clientId(), label:'iPhone · Pocket', tab:'pocket', at:new Date().toISOString() }; }
+
+  // ===== offline-safe op queue: optimistic + replay against fresh state on flush =====
+  var PEND_KEY='connolly-pocket:pending', CACHE_KEY='connolly-pocket:cache', WX_KEY='connolly-pocket:wx';
+  var pending=[], flushing=false, bdTimer=null;
+  function loadPending(){ try{ pending=JSON.parse(lsGet(PEND_KEY)||'[]'); }catch(_){ pending=[]; } if(!Array.isArray(pending)) pending=[]; }
+  function savePending(){ lsSet(PEND_KEY, JSON.stringify(pending)); }
+  function loadCache(){ try{ var c=JSON.parse(lsGet(CACHE_KEY)||'null'); if(c&&typeof c==='object') cached=c; }catch(_){ } }
+  function saveCache(){ try{ lsSet(CACHE_KEY, JSON.stringify(cached)); }catch(_){ } }
+  function ensureShape(st){ if(!st||typeof st!=='object') return st; if(!st.focus||typeof st.focus!=='object') st.focus={items:[]}; if(!Array.isArray(st.focus.items)) st.focus.items=[]; if(!Array.isArray(st.todos)) st.todos=[]; if(!Array.isArray(st.events)) st.events=[]; if(st.scratchDump===undefined) st.scratchDump=(typeof st.brainDump==='string'?st.brainDump:''); if(typeof st.scratchDump!=='string') st.scratchDump=''; if(!Array.isArray(st.changeIdeas)) st.changeIdeas=[]; if(!st.dailyChecks||typeof st.dailyChecks!=='object') st.dailyChecks={}; if(!st.deletions||typeof st.deletions!=='object') st.deletions={};
+    var _del=st.deletions; if(_del){ st.focus.items=st.focus.items.filter(function(x){return !(x&&_del[x.id]);}); st.changeIdeas=st.changeIdeas.filter(function(x){return !(x&&_del[x.id]);}); st.todos=st.todos.filter(function(x){return !(x&&_del[x.id]);}); }
+    return st; }
+  function applyOp(st, op){ ensureShape(st); var t=today();
+    if(op.t==='cap'){ if(!st.focus.items.some(function(x){return x.id===op.id;})) st.focus.items.push({id:op.id,text:op.text,bucket:'unsorted',created:op.at}); }
+    else if(op.t==='tf'){ var it=st.focus.items.find(function(x){return x.id===op.id;}); if(it){ it.done=true; it.doneAt=op.at; if(it.dueKey){ var _t=today(); (st.todos||[]).forEach(function(td){ if(!td.checked && td.day && td.day<=_t && ((td.realm||'')+'|'+String(td.text||'').toLowerCase().trim())===it.dueKey) td.checked=true; }); } } }
+    else if(op.t==='td'){ (st.todos||[]).forEach(function(td){ if(!td.checked && td.day && td.day<=t && ((td.realm||'')+'|'+String(td.text||'').toLowerCase().trim())===op.key) td.checked=true; }); }
+    else if(op.t==='med'){ if(!st.dailyChecks[op.date]) st.dailyChecks[op.date]={}; st.dailyChecks[op.date][op.key]=op.val; }
+    else if(op.t==='ia'){ if(!st.changeIdeas.some(function(x){return x.id===op.id;})) st.changeIdeas.push({id:op.id,text:op.text,done:false,created:op.at}); }
+    else if(op.t==='it'){ var ci=st.changeIdeas.find(function(x){return x.id===op.id;}); if(ci){ ci.done=op.val; ci.doneAt=op.val?op.at:null; } }
+    else if(op.t==='idl'){ st.deletions=st.deletions||{}; st.deletions[op.id]=op.at||Date.now(); st.changeIdeas=st.changeIdeas.filter(function(x){return x.id!==op.id;}); }
+    else if(op.t==='icd'){ (st.changeIdeas||[]).forEach(function(x){ if(x&&x.done){ st.deletions=st.deletions||{}; st.deletions[x.id]=op.at||Date.now(); } }); st.changeIdeas=st.changeIdeas.filter(function(x){return !x.done;}); }
+    else if(op.t==='bd'){ st.scratchDump=op.text; }
+    else if(op.t==='pin'){ var pf=st.focus.items.find(function(x){return x.id===op.id;}); if(pf){ pf.pinnedAt=op.ms; } }
+    else if(op.t==='bk'){ var bi=st.focus.items.find(function(x){return x.id===op.id;}); if(bi){ bi.bucket=op.bucket; } }
+    else if(op.t==='fdl'){ st.deletions=st.deletions||{}; st.deletions[op.id]=op.at||Date.now(); st.focus.items=st.focus.items.filter(function(x){return x.id!==op.id;}); }
+    else if(op.t==='pind'){ var _ex=st.focus.items.find(function(x){return x&&x.dueKey===op.key&&!x.done;}); if(_ex){ _ex.pinnedAt=op.ms; } else if(!st.focus.items.some(function(x){return x.id===op.id;})){ st.focus.items.push({id:op.id,text:op.text,bucket:'today',pinnedAt:op.ms,created:op.at,dueKey:op.key,realm:op.realm||''}); } }
+    else if(op.t==='rl'){ var _ri=st.focus.items.find(function(x){return x.id===op.id;}); if(_ri){ _ri.realm=op.realm; } }
+    else if(op.t==='rlreset'){ (st.focus.items||[]).forEach(function(x){ if(x) x.realm=''; }); }
+    return st;
+  }
+  function enqueue(op, opts){ opts=opts||{};
+    if(op.t==='bd'){ pending=pending.filter(function(p){return p.t!=='bd';}); }
+    pending.push(op); ensureShape(cached); applyOp(cached, op); saveCache(); savePending();
+    if(!opts.skipRender) renderAll();
+    if(opts.haptic) buzz();
+    setStatus('saving','saving'); scheduleFlush();
+  }
+  function flush(){
+    if(!creds || !pending.length || flushing) return;
+    if(typeof navigator!=='undefined' && navigator.onLine===false){ setStatus('error','offline'); return; }
+    flushing=true; setStatus('saving','saving');
+    var tries=0;
+    function attempt(){
+      return fetchState().then(function(state){ ensureShape(state);
+        var base=remoteUpdatedAt;            // gist version we just read
+        pending.forEach(function(op){ applyOp(state, op); });
+        // Optimistic-concurrency guard: if the gist moved between our read and
+        // our write (e.g. the Mac pushed in that window), rebuild on the newer
+        // state instead of clobbering it. Ops are idempotent, so replay is safe.
+        return api('GET').then(function(g){
+          if(g && g.updated_at && base && g.updated_at!==base && tries<3){ tries++; return attempt(); }
+          return writeState(state).then(function(){ cached=state; saveCache(); pending=[]; savePending(); renderAll(); setStatus('synced','synced'); markSaved(); });
+        });
+      });
+    }
+    attempt().catch(function(e){ setStatus('error', (typeof navigator!=='undefined'&&navigator.onLine===false)?'offline':'error'); console.error(e, e&&e.detail||''); })
+      .then(function(){ flushing=false; });
+  }
+  // Batch writes: apply optimistically + render instantly, but coalesce the network
+  // save so rapid taps become ONE write. The pending queue persists, so nothing's lost.
+  var flushTimer=null, FLUSH_DELAY=(typeof window!=='undefined' && +window.__flushDelay)||1200;
+  function scheduleFlush(){ if(flushTimer) clearTimeout(flushTimer); flushTimer=setTimeout(function(){ flushTimer=null; flush(); }, FLUSH_DELAY); }
+  function flushNow(){ if(flushTimer){ clearTimeout(flushTimer); flushTimer=null; } flush(); }
+  function buzz(){ try{ if(navigator.vibrate) navigator.vibrate(8); }catch(_){ } }
+  // "saved · just now" reassurance — last successful write time, persisted across launches.
+  var SAVED_KEY='connolly-pocket:savedat', lastSavedAt=+(lsGet(SAVED_KEY))||0;
+  function markSaved(){ lastSavedAt=Date.now(); lsSet(SAVED_KEY,String(lastSavedAt)); renderSavedAt(); }
+  function renderSavedAt(){ var el=$('[data-savedat]'); if(!el) return; if(!lastSavedAt){ el.textContent=''; return; } var s=Math.max(0,Math.floor((Date.now()-lastSavedAt)/1000)); el.textContent='saved '+(s<60?'just now':(s<3600?(Math.floor(s/60)+'m ago'):(Math.floor(s/3600)+'h ago'))); }
+
+  // ===== extra renders =====
+  // Today focus order: most-recently-pinned first (= Right Now), then by creation.
+  // pinnedAt is a NUMBER so the Hub's union-merge resolves clashes by taking the
+  // later one — i.e. whatever was pinned most recently on either device wins.
+  function focusOrder(a,b){ var pa=+(a&&a.pinnedAt)||0, pb=+(b&&b.pinnedAt)||0; if(pa!==pb) return pb-pa; return String((a&&a.created)||'').localeCompare(String((b&&b.created)||'')); }
+  // Weekend work-hiding: auto-on Sat/Sun; a one-tap override that lasts the day. Per-device (view pref, not synced).
+  var HW_KEY='connolly-pocket:hidework';
+  function isWeekend(){ var d=new Date().getDay(); return d===0||d===6; }
+  function hideWorkActive(){ try{ var o=JSON.parse(lsGet(HW_KEY)||'null'); if(o&&o.date===today()) return !!o.value; }catch(_){ } return isWeekend(); }
+  function hwSet(v){ lsSet(HW_KEY, JSON.stringify({date:today(), value:!!v})); }
+  function showByRealm(realm){ return !(hideWorkActive() && realm==='work'); }
+  // realm pill: untagged ('tag') -> work -> personal -> untagged. Untagged is neutral & always shown.
+  function realmPill(it){ var w=it.realm==='work', p=it.realm==='personal'; return '<button class="realmtag'+(w?' work':(p?' personal':''))+'" data-realm-toggle="'+esc(it.id)+'">'+(w?'work':(p?'personal':'tag'))+'</button>'; }
+  function renderRightNow(){ var el=$('[data-rightnow]'); if(!el||!cached){ return; } ensureShape(cached);
+    var f=cached.focus.items.filter(function(it){return it&&it.bucket==='today'&&!it.done&&showByRealm(it.realm);}).sort(focusOrder);
+    if(!f.length){ el.hidden=true; el.innerHTML=''; return; }
+    el.hidden=false; el.innerHTML='<div class="rn-label">Right now</div><div class="rn-text">'+esc(f[0].text)+'</div><div class="rn-actions"><button class="rn-done" data-tick-focus="'+esc(f[0].id)+'">Done</button><button class="rn-focus" data-focus-enter>Focus</button></div>';
+  }
+  var MEDS=[{key:'sertraline',label:'Sertraline'},{key:'atorvastatin',label:'Atorva'},{key:'cpap',label:'CPAP'},{key:'trelegy',label:'Trelegy'},{key:'avamys',label:'Avamys'},{key:'fexofenadine',label:'Fexo'},{key:'exercise',label:'Exercise'},{key:'weight',label:'Weight'},{key:'linkedin',label:'LinkedIn'},{key:'emma',label:'Emma'}];
+  // Daily tracker list: prefer the Hub-published shared list (so new habits auto-sync),
+  // fall back to the built-in MEDS list for first-load / offline / older data.
+  function trackers(){ var t=cached&&cached.trackerDefs; if(Array.isArray(t)&&t.length&&t.every(function(x){return x&&x.key;})) return t; return MEDS; }
+  var STREAK_MIN=6; // a 'good day' = at least this many ticked (tweak to taste)
+  function medDoneOn(key,iso){ var d=(cached&&cached.dailyChecks&&cached.dailyChecks[iso])||{}; if(d[key]===true) return true; if(d.meds===true && ['sertraline','atorvastatin','trelegy','fexofenadine'].indexOf(key)!==-1) return true; if(d.sprays===true && key==='avamys') return true; return false; }
+  function medDone(key){ return medDoneOn(key, today()); }
+  function medsCountFor(iso){ var T=trackers(), n=0; for(var i=0;i<T.length;i++){ if(medDoneOn(T[i].key,iso)) n++; } return n; }
+  function medsStreak(){ var n=0, iso=today(); if(medsCountFor(iso)<STREAK_MIN) iso=addDays(iso,-1); var guard=0; while(medsCountFor(iso)>=STREAK_MIN && guard<400){ n++; iso=addDays(iso,-1); guard++; } return n; }
+  function renderMeds(){ var T=trackers(); var el=$('[data-meds]'); if(el&&cached) el.innerHTML=T.map(function(m){ return '<button class="medchip'+(medDone(m.key)?' on':'')+'" data-med="'+esc(m.key)+'">'+esc(m.label||m.key)+'</button>'; }).join('');
+    var stat=$('[data-meds-stat]'); if(stat&&cached){ var c=medsCountFor(today()), s=medsStreak(); stat.textContent=c+'/'+T.length+(s>=1?(' · 🔥 '+s):''); }
+  }
+  function renderNotes(){
+    var bd=$('[data-bd]'); if(bd && cached && document.activeElement!==bd){ var v=(cached.scratchDump||''); if(bd.value!==v) bd.value=v; }
+    var list=$('[data-ci-list]'); if(list && cached){ ensureShape(cached);
+      var open=cached.changeIdeas.filter(function(x){return x&&!x.done;}), done=cached.changeIdeas.filter(function(x){return x&&x.done;});
+      var ct=$('[data-ci-ct]'); if(ct) ct.textContent=open.length?(open.length+' open'):'';
+      function row(it,dn){ return '<div class="todo'+(dn?' done':'')+'"><span class="box'+(dn?' on':'')+'" data-ci-tick="'+esc(it.id)+'"></span><span class="tx">'+esc(it.text)+'</span><button class="del" data-ci-del="'+esc(it.id)+'">✕</button></div>'; }
+      var html=open.map(function(it){return row(it,false);}).join('');
+      if(done.length) html+='<div class="sechead">Done ('+done.length+') · <span class="lnk" data-ci-clear-done>clear</span></div>'+done.map(function(it){return row(it,true);}).join('');
+      if(!open.length && !done.length) html='<div class="dayempty">No change ideas yet.</div>';
+      list.innerHTML=html;
+    }
+  }
+  function renderWeatherFlag(){ var el=$('[data-weatherflag]'); if(!el) return; var c=null; try{ c=JSON.parse(lsGet(WX_KEY)||'null'); }catch(_){ } var h=''; if(c&&c.flag) h+='<div class="wxflag">🌧 Cover the car '+esc(c.flag.when)+' — rain likely ('+c.flag.mm+'mm)</div>'; if(c&&c.heat) h+='<div class="wxflag wxflag-heat">☀️ Cover the car '+esc(c.heat.when)+' — hot ('+c.heat.hi+'°): shade the soft top &amp; keep the cockpit cool</div>'; el.innerHTML=h; }
+  function fetchWeather(){ try{ var c=JSON.parse(lsGet(WX_KEY)||'null'); if(c&&(Date.now()-c.ts)<3*3600*1000){ renderWeatherFlag(); return; } }catch(_){ }
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=51.817&longitude=-0.357&daily=precipitation_sum,precipitation_probability_max,temperature_2m_max&forecast_days=2&timezone=Europe%2FLondon').then(function(r){return r.json();}).then(function(j){
+      var flag=null, heat=null; if(j&&j.daily){ for(var i=0;i<2;i++){ var mm=(j.daily.precipitation_sum&&j.daily.precipitation_sum[i])||0, pp=(j.daily.precipitation_probability_max&&j.daily.precipitation_probability_max[i])||0, hi=(j.daily.temperature_2m_max&&j.daily.temperature_2m_max[i]); if(!flag&&(mm>=4||pp>=70)){ flag={when:i===0?'today':'tomorrow',mm:Math.round(mm)}; } if(!heat&&hi!=null&&hi>=26){ heat={when:i===0?'today':'tomorrow',hi:Math.round(hi)}; } } }
+      lsSet(WX_KEY, JSON.stringify({ts:Date.now(),flag:flag,heat:heat})); renderWeatherFlag();
+    }).catch(function(){});
+  }
+
+  // ===== handlers (replace the old pushChange-based ones) =====
+  document.addEventListener('submit',function(e){
+    var f=e.target.closest && e.target.closest('[data-cap]');
+    if(f){ e.preventDefault(); var inp=$('[data-cap-input]'); var txt=(inp&&inp.value||'').trim(); if(!txt) return; inp.value=''; enqueue({t:'cap',id:uid('f'),text:txt,at:new Date().toISOString()},{haptic:true}); return; }
+    var cf=e.target.closest && e.target.closest('[data-ci-form]');
+    if(cf){ e.preventDefault(); var ci=$('[data-ci-input]'); var ctx=(ci&&ci.value||'').trim(); if(!ctx) return; ci.value=''; enqueue({t:'ia',id:uid('ci'),text:ctx,at:new Date().toISOString()},{haptic:true}); return; }
+  });
+  document.addEventListener('click',function(e){
+    var tf=e.target.closest && e.target.closest('[data-tick-focus]'); if(tf){ tf.classList.add('on'); enqueue({t:'tf',id:tf.getAttribute('data-tick-focus'),at:new Date().toISOString()},{haptic:true}); return; }
+    var tdb=e.target.closest && e.target.closest('[data-tick-due]'); if(tdb){ tdb.classList.add('on'); enqueue({t:'td',key:tdb.getAttribute('data-tick-due'),at:new Date().toISOString()},{haptic:true}); return; }
+    var ptd=e.target.closest && e.target.closest('[data-promote-today]'); if(ptd){ enqueue({t:'bk',id:ptd.getAttribute('data-promote-today'),bucket:'today',at:new Date().toISOString()},{haptic:true}); return; }
+    var ffd=e.target.closest && e.target.closest('[data-focus-del]'); if(ffd){ enqueue({t:'fdl',id:ffd.getAttribute('data-focus-del'),at:new Date().toISOString()}); return; }
+    var rtg=e.target.closest && e.target.closest('[data-realm-toggle]'); if(rtg){ var _rid=rtg.getAttribute('data-realm-toggle'); var _rcur=(cached&&cached.focus&&cached.focus.items||[]).find(function(x){return x.id===_rid;}); var _cr=_rcur&&_rcur.realm; var _nr=_cr==='work'?'personal':(_cr==='personal'?'':'work'); enqueue({t:'rl',id:_rid,realm:_nr,at:new Date().toISOString()},{haptic:true}); return; }
+    var hwb=e.target.closest && e.target.closest('[data-hidework]'); if(hwb){ hwSet(!hideWorkActive()); renderAll(); return; }
+    var itk=e.target.closest && e.target.closest('[data-ci-tick]'); if(itk){ var id=itk.getAttribute('data-ci-tick'); var cur=(cached&&cached.changeIdeas||[]).find(function(x){return x.id===id;}); enqueue({t:'it',id:id,val:!(cur&&cur.done),at:new Date().toISOString()},{haptic:true}); return; }
+    var idl=e.target.closest && e.target.closest('[data-ci-del]'); if(idl){ enqueue({t:'idl',id:idl.getAttribute('data-ci-del'),at:new Date().toISOString()}); return; }
+    var icd=e.target.closest && e.target.closest('[data-ci-clear-done]'); if(icd){ enqueue({t:'icd',at:new Date().toISOString()}); return; }
+    var st=e.target.closest && e.target.closest('[data-status]'); if(st){ refresh(); return; }
+    var nv=e.target.closest && e.target.closest('[data-nav]'); if(nv){ navTo(nv.getAttribute('data-nav')); return; }
+  });
+  document.addEventListener('input',function(e){ var t=e.target.closest && e.target.closest('[data-bd]'); if(!t||!cached) return; ensureShape(cached); cached.scratchDump=t.value; saveCache(); if(bdTimer) clearTimeout(bdTimer); bdTimer=setTimeout(function(){ enqueue({t:'bd',text:t.value,at:new Date().toISOString()},{skipRender:true}); }, 700); });
+
+
+  // ---- credentials ----
+  function loadCreds(){ var id=lsGet(ID_KEY), tk=lsGet(TOK_KEY); creds=(id&&tk)?{id:id,token:tk}:null; return creds; }
+  function saveCreds(id,tk){ lsSet(ID_KEY,id); lsSet(TOK_KEY,tk); creds={id:id,token:tk}; }
+  function clearCreds(){ lsDel(ID_KEY); lsDel(TOK_KEY); creds=null; }
+
+  // ---- GitHub ----
+  function headers(){ return { 'Authorization':'Bearer '+creds.token, 'Accept':'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' }; }
+  function api(method,body){
+    var init={method:method,headers:headers()};
+    if(body){ init.body=body; init.headers['Content-Type']='application/json'; }
+    return fetch('https://api.github.com/gists/'+creds.id,init).then(function(res){
+      if(!res.ok){ return res.text().catch(function(){return '';}).then(function(t){ var e=new Error('GitHub '+res.status); e.detail=t.slice(0,200); throw e; }); }
+      return res.json();
+    });
+  }
+  function pickFile(g){
+    if(!g||!g.files) return null;
+    var f=g.files[GIST_FILE];
+    if(f) return f;
+    for(var k in g.files){ try{ var p=JSON.parse(g.files[k].content||''); if(p&&p.state&&p.app==='life-twoweek'){ return g.files[k]; } }catch(_){ } }
+    return null;
+  }
+  function fetchState(){
+    return api('GET').then(function(g){
+      remoteUpdatedAt=g.updated_at;
+      var f=pickFile(g);
+      if(!f) throw new Error('No Hub data found in this gist');
+      if(f.truncated && f.raw_url){
+        return fetch(f.raw_url,{headers:{'Authorization':'Bearer '+creds.token,'Accept':'application/json'}})
+          .then(function(r){return r.text();}).then(function(raw){ return JSON.parse(raw); });
+      }
+      return JSON.parse(f.content||'{}');
+    }).then(function(payload){
+      if(!payload || !payload.state) throw new Error('Hub data is empty or unreadable');
+      return payload.state;
+    });
+  }
+  function writeState(state){
+    var payload={ schema:1, app:'life-twoweek', savedAt:new Date().toISOString(), writer:writer(), state:state };
+    var body={files:{}}; body.files[GIST_FILE]={content:JSON.stringify(payload)};
+    return api('PATCH',JSON.stringify(body));
+  }
+
+  function setStatus(s,label){ var p=$('[data-status]'); if(!p) return; p.setAttribute('data-s',s); $('[data-status-label]').textContent=label||s; }
+
+  // Pull latest and render. If we have unsynced ops, flush (which pulls+replays+writes) instead.
+  function refresh(){
+    if(!creds) return Promise.resolve();
+    if(pending.length){ flush(); return Promise.resolve(); }
+    setStatus('loading','syncing');
+    return fetchState().then(function(state){ ensureShape(state); cached=state; saveCache(); renderAll(); setStatus('synced','synced'); })
+      .catch(function(e){ setStatus('error',(typeof navigator!=='undefined'&&navigator.onLine===false)?'offline':'error'); console.error(e, e&&e.detail||''); if(cached) renderAll(); });
+  }
+
+  // ---- diary ----
+  function keyDateEvents(iso,state){
+    var out=[]; var kds=Array.isArray(state.keyDates)?state.keyDates:[];
+    for(var i=0;i<kds.length;i++){ var kd=kds[i]; if(!kd||!kd.date) continue;
+      if(kd.date===iso) out.push({realm:'keydate',start:'all-day',title:kd.title});
+      var lead=(typeof kd.leadDays==='number'&&kd.leadDays>0)?kd.leadDays:30;
+      if(lead>0){ var rem=addDays(kd.date,-lead); if(rem===iso && rem!==kd.date) out.push({realm:'keydate',start:'all-day',title:kd.title+' — in '+lead+'d'}); }
+    }
+    return out;
+  }
+  function eventsForDay(iso,state){
+    var ev=[];
+    (state.events||[]).forEach(function(e){ if(e.day===iso) ev.push(e); });
+    (state.upcoming||[]).forEach(function(e){ if(e.day===iso) ev.push(e); });
+    ev=ev.concat(keyDateEvents(iso,state));
+    function toMin(v){ return (v&&/^\d\d:\d\d$/.test(v))?(+v.slice(0,2)*60+ +v.slice(3)):(v==='all-day'?-1:9999); }
+    ev.sort(function(a,b){ return toMin(a.start)-toMin(b.start); });
+    return ev;
+  }
+  var DOW=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function dayLabel(iso){ var p=iso.split('-'); var d=new Date(+p[0],+p[1]-1,+p[2]); return DOW[d.getDay()]+' '+(+p[2])+' '+MON[+p[1]-1]; }
+  function evTime(e){ return e.start==='all-day'?'All day':((e.start&&/^\d\d:\d\d$/.test(e.start))?e.start:(e.start||'—')); }
+
+  function dayBlock(iso,state,isToday){
+    var ev=eventsForDay(iso,state);
+    var nowMin = isToday ? (new Date().getHours()*60+new Date().getMinutes()) : -1;
+    var rows = ev.length ? ev.map(function(e){
+      var cls=(e.realm==='work'?' work':(e.realm==='keydate'?' kd':''));
+      var past=''; if(isToday && /^\d\d:\d\d$/.test(e.start||'')){ var em=(e.end&&/^\d\d:\d\d$/.test(e.end))?(+e.end.slice(0,2)*60+ +e.end.slice(3)):(+e.start.slice(0,2)*60+ +e.start.slice(3)); if(em<=nowMin) past=' past'; }
+      return '<div class="ev'+cls+past+'"><span class="t">'+esc(evTime(e))+'</span><span class="ti">'+esc(e.title||'')+'</span></div>';
+    }).join('') : '<div class="dayempty">Clear day.</div>';
+    return '<div class="day'+(isToday?' today':'')+'"><div class="dayhd">'+esc(dayLabel(iso))+(isToday?'<span class="dlabel">today</span>':'')+'</div>'+rows+'</div>';
+  }
+  function renderDiary(){
+    var el=$('[data-diary]'); if(!el||!cached) return;
+    var t=today();
+    var mon=(cached.meta&&cached.meta.thisWeekMonday)||addDays(t,-(((new Date().getDay())+6)%7));
+    var days=[]; for(var i=0;i<7;i++){ var d=addDays(mon,i); if(d>=t) days.push(d); }
+    if(days.indexOf(t)===-1) days.unshift(t);
+    var html='';
+    var tev=eventsForDay(t,cached), nowMin=new Date().getHours()*60+new Date().getMinutes(), nx=null;
+    for(var ni=0;ni<tev.length;ni++){ var sm=(tev[ni].start&&/^\d\d:\d\d$/.test(tev[ni].start))?(+tev[ni].start.slice(0,2)*60+ +tev[ni].start.slice(3)):-1; if(sm>nowMin){ nx=tev[ni]; break; } }
+    if(nx) html+='<div class="nextbanner">Next \u00b7 '+esc(nx.start)+' \u2014 '+esc(nx.title||'')+'</div>';
+    html+=days.map(function(d){ return dayBlock(d,cached,d===t); }).join('');
+    // next week — always shown; page/scroll down to reach it. Read-only: the Hub stays the only place to input calendars.
+    var nextMon=addDays(mon,7);
+    html+='<div class="weekdiv">Next week</div>';
+    for(var j=0;j<7;j++){ var nd=addDays(nextMon,j); html+=dayBlock(nd,cached,false); }
+    el.innerHTML=html;
+  }
+
+  // ---- today todos ----
+  function todayItems(state){
+    var t=today();
+    var focus=(state.focus&&Array.isArray(state.focus.items))?state.focus.items:[];
+    var chosen=focus.filter(function(it){ return it && it.bucket==='today' && !it.done && showByRealm(it.realm); }).sort(focusOrder);
+    var promoted={}; focus.forEach(function(it){ if(it&&it.dueKey&&!it.done) promoted[it.dueKey]=1; });
+    var seen={}, due=[];
+    (state.todos||[]).forEach(function(td){
+      if(td.checked||!td.day||td.day>t) return;
+      if(!showByRealm(td.realm)) return;
+      var k=(td.realm||'')+'|'+String(td.text||'').toLowerCase().trim();
+      if(promoted[k]) return;
+      if(seen[k]){ if(td.day<seen[k].day) seen[k].day=td.day; return; }
+      seen[k]={text:td.text,realm:td.realm,day:td.day,key:k}; due.push(seen[k]);
+    });
+    due.sort(function(a,b){ return (a.day||'').localeCompare(b.day||''); });
+    return { chosen:chosen, due:due };
+  }
+  function renderToday(){
+    var el=$('[data-today-list]'); if(!el||!cached) return;
+    var t=today(); var d=todayItems(cached);
+    var html='';
+    if((d.chosen.length+d.due.length)>1) html+='<div class="swipehint">Swipe any task left to make it your Right Now.</div>';
+    if(d.chosen.length){
+      html+=d.chosen.map(function(it,i){
+        var flag=(i===0 && (+it.pinnedAt||0)>0)?'<span class="pinflag">now</span>':'';
+        var rp=realmPill(it);
+        return '<div class="todo swipeable" data-todo-id="'+esc(it.id)+'"><span class="box" data-tick-focus="'+esc(it.id)+'"></span><span class="tx">'+esc(it.text)+'</span>'+rp+flag+'</div>';
+      }).join('');
+    }
+    if(d.due.length){
+      html+='<div class="sechead">Due today</div>'+d.due.map(function(td){
+        var over=(td.day<t);
+        var tag=(td.realm==='work')?'<span class="tag work">work</span>':'<span class="tag">diary</span>';
+        if(over) tag='<span class="tag over">overdue</span>'+tag;
+        return '<div class="todo swipeable" data-due-key="'+esc(td.key)+'" data-due-text="'+esc(td.text)+'" data-due-realm="'+esc(td.realm||'')+'"><span class="box" data-tick-due="'+esc(td.key)+'"></span><span class="tx">'+esc(td.text)+'</span>'+tag+'</div>';
+      }).join('');
+    }
+    if(!html) html='<div class="empty">Nothing for today. Add one above, or pick your focus items on The Hub.</div>';
+    var dn=doneTodayCount(); if(dn>0) html+='<div class="donetoday">✓ '+dn+' done today — nice work</div>';
+    el.innerHTML=html;
+    var ct=$('[data-today-ct]'); if(ct) ct.textContent=(d.chosen.length+d.due.length);
+  }
+
+  function renderHolding(){
+    var card=$('[data-holding-card]'), list=$('[data-holding-list]'); if(!card||!list||!cached) return; ensureShape(cached);
+    var items=cached.focus.items.filter(function(it){return it&&it.bucket==='unsorted'&&!it.done;});
+    var ct=$('[data-holding-ct]'); if(ct) ct.textContent=items.length?(items.length+''):'';
+    if(!items.length){ card.hidden=true; list.innerHTML=''; return; }
+    card.hidden=false;
+    list.innerHTML=items.map(function(it){
+      return '<div class="todo"><span class="tx">'+esc(it.text)+'</span>'+realmPill(it)+'<button class="totoday" data-promote-today="'+esc(it.id)+'">→ Today</button><button class="del" data-focus-del="'+esc(it.id)+'">✕</button></div>';
+    }).join('');
+  }
+  function doneTodayCount(){ if(!cached||!cached.focus||!Array.isArray(cached.focus.items)) return 0; var t=today(); return cached.focus.items.filter(function(it){ return it&&it.done&&it.doneAt&&isoOf(new Date(it.doneAt))===t; }).length; }
+  function renderEveningNudge(){ var el=$('[data-evening-nudge]'); if(!el) return; if(!cached){ el.innerHTML=''; return; } var c=medsCountFor(today()); if(new Date().getHours()>=18 && c<MEDS.length){ el.innerHTML='<div class="nudge">🌙 Evening check — '+c+'/'+MEDS.length+' meds &amp; habits done</div>'; } else el.innerHTML=''; }
+  function renderHideWork(){ var b=$('[data-hidework]'); if(!b) return; var on=hideWorkActive(); b.hidden=false; b.setAttribute('data-on', on?'1':'0'); b.textContent = on ? '🚫 Hiding work — tap to show' : 'Showing all — tap to hide work'; }
+  function renderAll(){
+    if(!cached) return;
+    ensureShape(cached);
+    var sub=$('[data-datesub]'); if(sub) sub.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+    renderRightNow(); renderToday(); renderHolding(); renderHideWork(); renderDiary(); renderNotes(); renderWeatherFlag(); renderSavedAt();
+  }
+
+  // (Removed: dead duplicate submit/click handlers that called an undefined
+  //  pushChange() — superseded by the enqueue-based handlers higher up.)
+
+  function navTo(v){
+    if(v==='settings'){ openSetup(true); return; }
+    document.querySelectorAll('[data-view]').forEach(function(s){ s.classList.toggle('on', s.getAttribute('data-view')===v); });
+    document.querySelectorAll('[data-nav]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-nav')===v); });
+    try{ window.scrollTo(0,0); }catch(_){ }   // start each tab at the top (e.g. Diary opens on today, not next week)
+    if(v==='today') refresh();
+  }
+
+  // ---- setup screen ----
+  function openSetup(fromApp){
+    $('#app').hidden=true; $('#setup').hidden=false;
+    $('[data-cfg-id]').value = creds?creds.id:'';
+    $('[data-cfg-token]').value = creds?creds.token:'';
+    $('[data-cfg-signout]').hidden = !creds;
+    $('[data-reset-tags]').hidden = !creds; $('[data-reset-tags-hint]').hidden = !creds;
+    $('[data-cfg-err]').hidden=true;
+  }
+  function openApp(){
+    $('#setup').hidden=true; $('#app').hidden=false;
+    document.querySelectorAll('[data-view]').forEach(function(s){ s.classList.toggle('on', s.getAttribute('data-view')==='today'); });
+    document.querySelectorAll('[data-nav]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-nav')==='today'); });
+    if(cached) renderAll();
+    startPoll(); refresh(); fetchWeather();
+  }
+  $('[data-cfg-save]').addEventListener('click',function(){
+    var id=$('[data-cfg-id]').value.trim().replace(/^.*\/(?=[0-9a-f]{8,})/i,''); var tk=$('[data-cfg-token]').value.trim();
+    var err=$('[data-cfg-err]');
+    if(!id||!tk){ err.textContent='Enter both the Gist ID and a token.'; err.hidden=false; return; }
+    saveCreds(id,tk);
+    err.hidden=true; err.textContent='';
+    setStatus('loading','checking');
+    fetchState().then(function(state){ cached=state; renderAll(); openApp(); })
+      .catch(function(e){ err.textContent='Could not connect: '+(e.message||'error')+(e.detail?(' — '+e.detail):''); err.hidden=false; });
+  });
+  $('[data-cfg-signout]').addEventListener('click',function(){ if(confirm('Disconnect this device? Your Hub data is untouched.')){ clearCreds(); cached=null; openSetup(); } });
+  $('[data-reset-tags]').addEventListener('click',function(){ if(confirm('Clear the work/personal tag on every task? You can re-tag them. Recurring work items keep their tags.')){ enqueue({t:'rlreset',at:new Date().toISOString()},{haptic:true}); alert('Done — task tags cleared. Re-tag from the To-do screen.'); } });
+
+  function startPoll(){ if(pollTimer) clearInterval(pollTimer); pollTimer=setInterval(function(){ if(!busy && document.visibilityState==='visible') refresh(); }, 45000); }
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible' && creds && !$('#app').hidden) refresh(); });
+
+  // ---- swipe-to-pin: drag a today task left to make it the Right Now ----
+  function pinFocus(id){ if(!id) return; enqueue({t:'pin',id:id,ms:Date.now(),at:new Date().toISOString()},{haptic:true}); }
+  function promoteDue(key,text,realm){ if(!key) return; enqueue({t:'pind',id:uid('f'),key:key,text:text||'',realm:realm||'',ms:Date.now(),at:new Date().toISOString()},{haptic:true}); }
+  function setupSwipe(){
+    var startX=0,startY=0,dragging=false,horiz=false,row=null,rid=null,rdk=null,rdt=null,rdr=null;
+    function pt(e){ return (e.touches&&e.touches[0])?e.touches[0]:e; }
+    document.addEventListener('touchstart',function(e){
+      var t=e.target.closest && e.target.closest('.todo.swipeable'); if(!t) return;
+      var p=pt(e); startX=p.clientX; startY=p.clientY; dragging=true; horiz=false; row=t; rid=t.getAttribute('data-todo-id'); rdk=t.getAttribute('data-due-key'); rdt=t.getAttribute('data-due-text'); rdr=t.getAttribute('data-due-realm');
+    },{passive:true});
+    document.addEventListener('touchmove',function(e){
+      if(!dragging||!row) return; var p=pt(e); var dx=p.clientX-startX, dy=p.clientY-startY;
+      if(!horiz){ if(Math.abs(dx)>10 && Math.abs(dx)>Math.abs(dy)) horiz=true; else if(Math.abs(dy)>10){ dragging=false; return; } else return; }
+      if(e.cancelable) e.preventDefault();
+      var tx=Math.min(0,dx); row.style.transform='translateX('+tx+'px)'; row.classList.toggle('willpin', dx<=-70);
+    },{passive:false});
+    function end(){ if(!dragging) return; var commit=!!(row&&row.classList.contains('willpin')); if(row){ row.style.transform=''; row.classList.remove('willpin'); } var id=rid, dk=rdk, dt=rdt, dr=rdr; dragging=false; horiz=false; row=null; rid=null; rdk=null; rdt=null; rdr=null; if(commit){ if(id) pinFocus(id); else if(dk) promoteDue(dk,dt,dr); } }
+    document.addEventListener('touchend',end,{passive:true});
+    document.addEventListener('touchcancel',end,{passive:true});
+  }
+
+  // ---- focus mode: full-screen single task, no distractions (phone-only view) ----
+  var _focusId=null;
+  function currentFocus(){ if(!cached) return null; ensureShape(cached); var f=cached.focus.items.filter(function(it){return it&&it.bucket==='today'&&!it.done&&showByRealm(it.realm);}).sort(focusOrder); return f[0]||null; }
+  function exitFocus(){ _focusId=null; var fm=$('#focusmode'); if(fm) fm.hidden=true; }
+  function setupFocusMode(){
+    document.addEventListener('click',function(e){
+      if(e.target.closest && e.target.closest('[data-focus-enter]')){ var it=currentFocus(); if(!it) return; _focusId=it.id; var tx=$('[data-fm-text]'); if(tx) tx.textContent=it.text; var fm=$('#focusmode'); if(fm) fm.hidden=false; buzz(); return; }
+      if(e.target.closest && e.target.closest('[data-fm-done]')){ if(_focusId) enqueue({t:'tf',id:_focusId,at:new Date().toISOString()},{haptic:true}); exitFocus(); return; }
+      if(e.target.closest && e.target.closest('[data-fm-exit]')){ exitFocus(); return; }
+    });
+  }
+
+  // ---- pull-to-refresh: drag down at the top of the screen to sync ----
+  function setupPullRefresh(){
+    var startY=0, pulling=false, armed=false;
+    function pt(e){ return (e.touches&&e.touches[0])?e.touches[0]:e; }
+    document.addEventListener('touchstart',function(e){ if(($('#app')&&$('#app').hidden)||(window.scrollY||document.documentElement.scrollTop||0)>0){ pulling=false; return; } startY=pt(e).clientY; pulling=true; armed=false; },{passive:true});
+    document.addEventListener('touchmove',function(e){ if(!pulling) return; if((pt(e).clientY-startY)>70 && (window.scrollY||0)<=0) armed=true; },{passive:true});
+    document.addEventListener('touchend',function(){ if(pulling && armed && creds) refresh(); pulling=false; armed=false; },{passive:true});
+  }
+
+  // ---- boot ----
+  loadPending(); loadCache(); setupSwipe(); setupFocusMode(); setupPullRefresh(); renderSavedAt(); setInterval(renderSavedAt,30000);
+  window.addEventListener('online', function(){ if(creds && pending.length){ setStatus('saving','reconnecting'); flushNow(); } });
+  document.addEventListener('visibilitychange', function(){ if(creds && pending.length) flushNow(); });
+  window.addEventListener('pagehide', function(){ if(creds && pending.length) flushNow(); });
+  if(loadCreds()){ openApp(); } else { openSetup(); }
+})();
+</script>
+<script>
+/* PWA: register the service worker so the app shell launches with no signal.
+   Only on https (GitHub Pages); skipped on file:// and inside the Hub, where
+   there is no sw.js sibling. Failures are swallowed so they never break boot. */
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function (e) {
+      console.warn('SW registration failed', e);
+    });
+  });
+}
+</script>
+</body>
+</html>
