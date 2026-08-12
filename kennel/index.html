@@ -1,2826 +1,323 @@
-<!DOCTYPE html>
-<html lang="en-GB">
+<!doctype html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>KENNEL</title>
+<title>Kennel</title>
+<meta name="theme-color" content="#0D1B3E">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Kennel">
-<meta name="theme-color" content="#0D1B3E">
-<meta name="color-scheme" content="dark">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230D1B3E'/%3E%3Ccircle cx='90' cy='72' r='25' fill='%23C4F000'/%3E%3Cpath d='M80 90 L100 90 L108 130 L72 130 Z' fill='%23C4F000'/%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiS2VubmVsIiwic2hvcnRfbmFtZSI6Iktlbm5lbCIsInN0YXJ0X3VybCI6Ii4vIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBEMUIzRSIsInRoZW1lX2NvbG9yIjoiIzBEMUIzRSIsIm9yaWVudGF0aW9uIjoicG9ydHJhaXQifQ==">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --navy:#0D1B3E;
-  --mid:#1A3A6B;
-  --lime:#C4F000;
-  --mist:#C4CCDD;
-  --white:#FFFFFF;
-  --panel:#16305E;
-  --deep:#08122B;
-  --line:#2E5490;
-  --dim:#93A6C6;
-  --red:#FF6B6B;
-  --nav-h:62px;
-  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{color-scheme:dark;background-color:#0D1B3E!important}
-html,body{margin:0;padding:0;background-color:#0D1B3E!important}
-body::before{content:'';position:fixed;inset:0;background:#0D1B3E;z-index:-1}
-body{
-  font-family:'Montserrat',-apple-system,system-ui,sans-serif;
-  color:var(--mist);font-size:15px;line-height:1.5;
-  -webkit-font-smoothing:antialiased;overscroll-behavior-y:none;
-}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-
-#app{min-height:100dvh;background-color:#0D1B3E;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
-
-/* ---- top bar ---- */
-.topbar{
-  position:sticky;top:0;z-index:40;background-color:#0D1B3E;
-  padding:calc(10px + env(safe-area-inset-top)) 16px 9px;
-  border-bottom:1px solid var(--line);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.brand{font-weight:800;font-size:13px;letter-spacing:.34em;color:var(--white)}
-.brand em{font-style:normal;color:var(--lime)}
-.tbmeta{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--lime)}
-
-.view{display:none;padding:20px 16px 30px;background-color:#0D1B3E;min-height:100dvh}
-.view.on{display:block;animation:fade .2s ease}
-@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-
-h1{font-weight:800;font-size:27px;letter-spacing:-.01em;color:var(--white);margin:0 0 3px;line-height:1.1}
-.sub{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);margin:0 0 20px}
-h2.sec{font-weight:700;font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--lime);margin:28px 0 11px;padding-bottom:7px;border-bottom:1px solid var(--line)}
-
-/* ---- panels w/ corner brackets (signature) ---- */
-.panel{position:relative;background:var(--panel);border:1px solid var(--line);padding:16px;margin-bottom:12px}
-.panel::before,.panel::after{
-  content:'';position:absolute;width:11px;height:11px;border:2px solid var(--lime);pointer-events:none
-}
-.panel::before{top:-1px;left:-1px;border-right:none;border-bottom:none}
-.panel::after{bottom:-1px;right:-1px;border-left:none;border-top:none}
-.panel.mute::before,.panel.mute::after{border-color:var(--mid)}
-
-.k{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:6px}
-.big{font-family:var(--mono);font-size:29px;font-weight:600;color:var(--lime);line-height:1;letter-spacing:-.02em}
-.big.sm{font-size:19px}
-.big.white{color:var(--white)}
-.unit{font-size:12px;color:var(--dim);letter-spacing:.1em}
-
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.grid2 .panel{margin-bottom:0}
-
-/* ---- buttons ---- */
-button{font-family:'Montserrat',sans-serif}
-.btn{
-  display:block;width:100%;background:var(--lime);color:var(--navy);border:none;
-  font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
-  padding:14px 10px;cursor:pointer;margin-top:12px;
-}
-.btn.ghost{background:transparent;color:var(--lime);border:1px solid var(--lime)}
-.btn.danger{background:var(--red);color:var(--white)}
-.btn.flat{background:var(--mid);color:var(--white)}
-.btn:active{opacity:.72}
-.btnrow{display:flex;gap:10px}
-.btnrow .btn{flex:1}
-
-/* ---- gadget tiles ---- */
-.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.tile{
-  position:relative;background:var(--panel);border:1px solid var(--line);
-  padding:16px 13px 14px;cursor:pointer;text-align:left;color:var(--mist);
-  transition:border-color .15s ease,background .15s ease;
-}
-.tile:active{background:var(--mid)}
-.tile .ic{font-size:22px;color:var(--lime);line-height:1;margin-bottom:9px;display:block}
-.tile .nm{font-weight:700;font-size:14px;color:var(--white);margin-bottom:3px}
-.tile .ds{font-size:11.5px;line-height:1.4;color:var(--dim)}
-.tile::after{content:'';position:absolute;bottom:-1px;right:-1px;width:9px;height:9px;border:2px solid var(--lime);border-left:none;border-top:none}
-
-/* ---- gadget detail ---- */
-.back{
-  background:none;border:none;color:var(--lime);font-weight:700;font-size:11px;
-  letter-spacing:.16em;text-transform:uppercase;padding:0;margin-bottom:16px;cursor:pointer;
-}
-canvas{display:block;width:100%;background:var(--deep);border:1px solid var(--line)}
-video{display:block;width:100%;background:var(--deep);border:1px solid var(--line)}
-.status{
-  font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mist);
-  padding:10px 12px;border-left:3px solid var(--mid);background:#16305E;margin-top:12px;
-}
-.status.good{border-left-color:var(--lime);color:var(--lime)}
-.status.bad{border-left-color:var(--red);color:var(--red)}
-.note{font-size:12.5px;line-height:1.6;color:var(--dim);margin-top:14px}
-
-/* compass rose */
-.rose{position:relative;width:100%;aspect-ratio:1;max-width:280px;margin:6px auto 0}
-.rose svg{width:100%;height:100%;display:block}
-.rosereadout{text-align:center;margin-top:10px}
-
-/* ---- inputs ---- */
-input[type=text],textarea,select{
-  width:100%;background:var(--deep);border:1px solid var(--line);color:var(--white);
-  font-family:var(--mono);font-size:15px;padding:11px;border-radius:0;-webkit-appearance:none;
-}
-textarea{min-height:82px;resize:vertical;line-height:1.5}
-select{font-family:'Montserrat',sans-serif}
-.out{background:var(--deep);border:1px solid var(--lime);color:var(--lime);font-family:var(--mono);
-  font-size:14px;padding:12px;margin-top:12px;white-space:pre-wrap;word-break:break-word;min-height:44px}
-
-/* ---- registry ---- */
-.file{position:relative;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--lime);
-  padding:13px 14px;margin-bottom:10px;cursor:pointer}
-.file:active{background:var(--mid)}
-.file .ref{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--dim)}
-.file .cn{font-weight:800;font-size:18px;color:var(--white);letter-spacing:.04em;margin:2px 0 1px}
-.file .rl{font-size:12px;color:var(--dim)}
-.file.retired{border-left-color:var(--mid)}
-.file.asset{border-left-color:var(--mist)}
-.fld{border-bottom:1px solid var(--line);padding:12px 0}
-.fld:last-child{border-bottom:none}
-.rd{background:var(--mist);color:transparent;padding:0 4px;cursor:pointer;border-radius:1px;
-  box-decoration-break:clone;-webkit-box-decoration-break:clone;transition:background .3s,color .3s}
-.rd.open{background:rgba(196,240,0,.14);color:var(--lime)}
-
-/* ---- webcams ---- */
-.camgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.cam{position:relative;background:var(--deep);border:1px solid var(--line);overflow:hidden;cursor:pointer}
-.cam img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
-.cam .lbl{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(13,27,62,.95));
-  padding:16px 8px 6px;font-size:10.5px;font-weight:600;color:var(--white);line-height:1.25}
-.cam .live{position:absolute;top:6px;left:6px;background:var(--lime);color:var(--navy);
-  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.14em;padding:2px 5px}
-.ytwrap{position:relative;width:100%;aspect-ratio:16/9;background:var(--deep);border:1px solid var(--line);margin-bottom:12px}
-.ytwrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
-
-/* ---- morse overlay ---- */
-#lamp{position:fixed;inset:0;background:#000;z-index:200;display:none}
-#lamp.on{display:block}
-#lampx{position:absolute;bottom:calc(28px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
-  background:none;border:1px solid var(--mist);color:var(--mist);font-size:11px;letter-spacing:.18em;
-  text-transform:uppercase;padding:9px 20px;font-weight:700;z-index:2}
-
-.capgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-.capcell{position:relative;background:var(--deep);border:1px solid var(--line);cursor:pointer}
-.capcell img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
-.capcell .cn2{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(8,18,43,.95));
-  padding:14px 5px 4px;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:var(--lime);text-align:center}
-#capPreview{width:100%;max-height:260px;object-fit:contain;background:var(--deep);border:1px solid var(--line);display:block}
-.scanbar{height:3px;background:var(--mid);margin-top:10px;overflow:hidden}
-.scanbar i{display:block;height:100%;width:0;background:var(--lime);transition:width .1s linear}
-#trkCanvas{width:100%;background:var(--deep);border:1px solid var(--line);display:block}
-
-#skyCanvas{width:100%;background:var(--deep);border:1px solid var(--line);display:block}
-.lock{background:var(--panel);border:1px solid var(--lime);border-left:4px solid var(--lime);padding:15px;margin-top:12px}
-.lock .lc{font-family:var(--mono);font-size:26px;color:var(--lime);font-weight:600;letter-spacing:.05em}
-.lock .lo{font-size:13px;color:var(--white);margin-top:2px}
-.lock .lg{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);margin-top:13px;border:1px solid var(--line)}
-.lock .lg div{background:var(--panel);padding:9px 4px;text-align:center}
-.lock .lg .v{font-family:var(--mono);font-size:14px;color:var(--white)}
-.lock .lg .l{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--dim);margin-top:2px}
-.aclist .ac.locked{border-left-color:var(--lime);background:var(--mid)}
-
-.ac{display:flex;justify-content:space-between;align-items:center;background:var(--panel);
-  border:1px solid var(--line);border-left:3px solid var(--white);padding:11px 13px;margin-bottom:8px}
-.ac .cs{font-family:var(--mono);font-size:15px;color:var(--white);font-weight:600;letter-spacing:.06em}
-.ac .meta{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:3px}
-.ac .rng{font-family:var(--mono);font-size:15px;color:var(--lime);text-align:right}
-.kp{display:flex;gap:3px;margin-top:10px}
-.kp span{flex:1;height:24px;background:var(--mid)}
-.kp span.lit{background:var(--lime)}
-.kp span.hot{background:var(--red)}
-#duress{position:fixed;inset:0;z-index:300;background:#F2F4F7;color:#111;display:none;
-  font-family:-apple-system,system-ui,sans-serif;padding:calc(60px + env(safe-area-inset-top)) 26px 30px}
-#duress.on{display:block}
-#duress .dt{font-size:78px;font-weight:200;letter-spacing:-3px;margin:0}
-#duress .dp{font-size:19px;color:#555;margin:2px 0 30px}
-#duress .drow{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #DDE1E6;font-size:16px}
-#duress .drow span:last-child{color:#666}
-.step{display:none}.step.on{display:block}
-
-/* ---- the wall ---- */
-#v-wall{padding:12px 10px 30px}
-.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.wcell{position:relative;background:var(--panel);border:1px solid var(--line);padding:11px 12px;overflow:hidden}
-.wcell.span{grid-column:span 2}
-.wcell .wl{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase}
-.wcell .wv{font-family:var(--mono);font-size:23px;color:var(--lime);font-weight:600;line-height:1.1;margin-top:3px}
-.wcell .wv.sm{font-size:15px}
-.wcell .ws{font-family:var(--mono);font-size:9.5px;color:var(--dim);margin-top:3px;line-height:1.4}
-.wcell canvas{display:block;width:100%;margin-top:7px}
-.threat{border-color:var(--lime);border-width:2px;text-align:center;padding:16px 12px}
-.threat .tv{font-weight:800;font-size:34px;letter-spacing:.1em;color:var(--lime);line-height:1}
-.threat.hot{border-color:var(--red)} .threat.hot .tv{color:var(--red)}
-.tbars{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
-.tbars div{text-align:center}
-.tbars .bar{height:40px;background:var(--deep);position:relative;border:1px solid var(--line)}
-.tbars .bar i{position:absolute;left:0;right:0;bottom:0;background:var(--lime);display:block}
-.tbars .bn{font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;color:var(--dim);margin-top:4px}
-.wlog{background:var(--deep);border:1px solid var(--line);height:168px;overflow:hidden;position:relative}
-.wlog .ln{font-family:var(--mono);font-size:10px;padding:4px 9px;border-bottom:1px solid rgba(46,84,144,.4);
-  color:var(--mist);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wlog .ln b{color:var(--lime);font-weight:600}
-.wlog .ln.new{animation:slidein .4s ease}
-@keyframes slidein{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
-.ticker{background:var(--lime);color:var(--navy);overflow:hidden;white-space:nowrap;padding:6px 0;margin-top:8px}
-.ticker span{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:600;
-  letter-spacing:.1em;padding-left:100%;animation:crawl 40s linear infinite}
-@keyframes crawl{to{transform:translateX(-100%)}}
-.daybar{height:12px;background:var(--deep);border:1px solid var(--line);margin-top:8px;position:relative}
-.daybar i{position:absolute;top:0;bottom:0;left:0;background:linear-gradient(90deg,#1A3A6B,#C4F000)}
-.daybar b{position:absolute;top:-1px;bottom:-1px;width:2px;background:#FFF}
-
-.intel{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--lime);padding:13px 14px;margin-bottom:10px}
-.intel .when{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--lime);margin-bottom:4px}
-.intel .what{font-size:13.5px;line-height:1.5;color:var(--mist)}
-.astro{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
-.astro div{background:var(--panel);padding:11px 8px;text-align:center}
-.astro .av{font-family:var(--mono);font-size:16px;color:var(--lime);font-weight:600}
-.astro .al{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:var(--dim);margin-top:3px}
-.lockwrap{text-align:center;padding:38px 10px}
-.lockwrap .lk{font-size:52px;color:var(--lime);line-height:1;margin-bottom:16px}
-.moon{width:56px;height:56px;border-radius:50%;margin:0 auto 8px;background:#08122B;
-  border:1px solid var(--line);position:relative;overflow:hidden}
-.moon i{position:absolute;inset:0;background:var(--mist);border-radius:50%}
-.plan{width:100%;background:var(--deep);border:1px solid var(--line)}
-.legendrow{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
-.legendrow:last-child{border-bottom:none}
-.legendrow .lk2{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--dim);flex:0 0 40%}
-.legendrow .lv{font-size:14px;color:var(--white);text-align:right;flex:1}
-
-/* ---- globe ---- */
-.globewrap{position:relative;width:100%;max-width:390px;margin:0 auto 18px;aspect-ratio:1}
-.globewrap canvas{width:100%;height:100%;background:transparent;border:none}
-.globetag{position:absolute;left:0;bottom:0;font-family:var(--mono);font-size:10px;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--lime)}
-.globehint{position:absolute;right:0;bottom:0;font-family:var(--mono);font-size:10px;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
-
-/* ---- ID card ---- */
-#cardCanvas{width:100%;max-width:420px;margin:0 auto;display:block;background:var(--deep)}
-.cardctl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.cardctl label{grid-column:span 2}
-
-/* ---- numbers station ---- */
-.groups{font-family:var(--mono);font-size:19px;letter-spacing:.22em;color:var(--lime);
-  line-height:2;word-spacing:.5em;background:var(--deep);border:1px solid var(--line);padding:16px;margin-top:12px}
-.nowgrp{color:var(--white);background:var(--mid);padding:2px 4px}
-
-/* ---- nav ---- */
-nav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;background:var(--deep);
-  border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;background:none;border:none;color:var(--dim);padding:10px 1px 9px;cursor:pointer;
-  font-weight:700;font-size:8px;letter-spacing:.08em;text-transform:uppercase}
-nav button .ic{display:block;font-size:16px;margin-bottom:4px;line-height:1}
-nav button.on{color:var(--lime)}
+  :root{--navy:#0D1B3E;--deep:#0A1530;--mid:#1A3A6B;--panel:#14244C;--lime:#C4F000;--mist:#C4CCDD;--line:#24467E;--red:#FF5A6E;--amber:#F0CF8A;--white:#FFFFFF}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--mist);-webkit-font-smoothing:antialiased;padding:0 0 92px;line-height:1.5}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+  .wrap{max-width:520px;margin:0 auto;padding:16px 16px 0}
+  header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 4px 12px}
+  .brand{display:flex;flex-direction:column;gap:2px}
+  .brand .eyebrow{font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--lime)}
+  .brand h1{font-size:22px;font-weight:800;letter-spacing:.04em;color:var(--white);margin:0}
+  .clearance{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mist);opacity:.8}
+  .clearance b{display:block;color:var(--lime);font-size:13px}
+  .view{display:none}.view.on{display:block}
+  .sec{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);opacity:.65;margin:20px 2px 10px}
+  .sec:first-child{margin-top:6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin-bottom:11px}
+  .card.hot{border-left:3px solid var(--red)}
+  .card.warm{border-left:3px solid var(--amber)}
+  .card.cool{border-left:3px solid var(--lime)}
+  .c-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .c-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);opacity:.7}
+  .c-badge{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--line)}
+  .c-badge.live{color:var(--lime);border-color:var(--lime)}
+  .c-badge.lost{color:var(--red);border-color:var(--red)}
+  .c-big{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:var(--white);line-height:1.1}
+  .c-big .u{font-size:12px;color:var(--mist);opacity:.7;margin-left:4px}
+  .c-sub{font-size:12px;color:var(--mist);opacity:.85;margin-top:4px}
+  .c-row{display:flex;justify-content:space-between;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;padding:3px 0;border-top:1px solid var(--line)}
+  .c-row:first-of-type{border-top:none}
+  .c-row .k{opacity:.65}
+  .redact{background:var(--mist);color:var(--mist);border-radius:2px;padding:0 6px;user-select:none}
+  .btn{display:inline-block;font:inherit;font-size:14px;font-weight:700;padding:11px 16px;border-radius:10px;border:0;background:var(--lime);color:var(--navy);cursor:pointer;text-align:center}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--white);font-weight:600}
+  .btn.wide{width:100%}
+  .btn.danger{background:transparent;border:1px solid var(--red);color:var(--red)}
+  .btn:active{transform:scale(.98)}
+  .field{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--deep);color:var(--white);font:inherit;font-size:14px}
+  textarea.field{min-height:80px;resize:vertical;font-family:'IBM Plex Mono',monospace;font-size:13px}
+  label.fl{display:block;font-size:11px;font-weight:600;color:var(--mist);opacity:.8;margin:12px 0 5px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  /* mission */
+  .brief-stamp{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.14em;color:var(--red);border:1.5px solid var(--red);border-radius:4px;padding:2px 8px;transform:rotate(-3deg);margin-bottom:12px}
+  .brief-code{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:var(--lime);letter-spacing:.06em}
+  .brief-line{font-size:14px;color:var(--white);margin:10px 0;line-height:1.55}
+  .brief-line .k{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mist);opacity:.6;display:block;margin-bottom:2px}
+  .selfd{font-family:'IBM Plex Mono',monospace;text-align:center;font-size:13px;color:var(--amber);margin:14px 0;letter-spacing:.06em}
+  .selfd b{display:block;font-size:30px;color:var(--red);letter-spacing:.1em}
+  /* cipher */
+  .seg{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:70px;font:inherit;font-size:12px;font-weight:600;padding:9px 6px;border-radius:9px;border:1px solid var(--line);background:var(--deep);color:var(--mist);cursor:pointer}
+  .seg button.on{background:var(--lime);color:var(--navy);border-color:var(--lime)}
+  .out{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--lime);background:var(--deep);border:1px solid var(--line);border-radius:10px;padding:12px;min-height:52px;word-break:break-word;white-space:pre-wrap;margin-top:6px}
+  .slider-row{display:flex;align-items:center;gap:12px;margin:10px 0}
+  .slider-row input{flex:1}
+  /* dossiers */
+  .doss{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:9px}
+  .doss .code{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--white)}
+  .doss .meta{font-size:12px;color:var(--mist);opacity:.8;margin-top:2px}
+  .doss .note{font-size:12px;color:var(--mist);opacity:.75;margin-top:5px;line-height:1.45}
+  .threat{display:inline-flex;gap:3px;margin-top:5px}
+  .threat i{width:8px;height:8px;border-radius:50%;background:var(--line);display:inline-block}
+  .threat i.on{background:var(--red)}
+  .doss-acts{display:flex;flex-direction:column;gap:6px;flex-shrink:0;text-align:right}
+  .link{font-size:12px;color:var(--lime);cursor:pointer;font-weight:600}
+  .empty{font-size:13px;color:var(--mist);opacity:.7;line-height:1.6;padding:8px 2px}
+  /* q-branch */
+  .gadget{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+  .gadget:first-child{border-top:none}
+  .gadget .g-n{font-size:14px;color:var(--white)}
+  .gadget .g-d{font-size:11.5px;color:var(--mist);opacity:.7}
+  .chk{flex:0 0 46px;height:28px;border-radius:16px;background:var(--deep);border:1px solid var(--line);position:relative;cursor:pointer}
+  .chk::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--mist);transition:.15s}
+  .chk.on{background:var(--lime);border-color:var(--lime)}
+  .chk.on::after{left:21px;background:var(--navy)}
+  /* nav */
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#081127;border-top:1px solid #1c3055;padding:7px 6px calc(7px + env(safe-area-inset-bottom));z-index:20}
+  nav.tabs button{flex:1;background:none;border:0;color:var(--mist);opacity:.6;font:inherit;font-size:9.5px;font-weight:600;padding:5px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;letter-spacing:.02em}
+  nav.tabs button .ic{font-size:18px;line-height:1}
+  nav.tabs button.on{opacity:1;color:var(--lime)}
+  .scan{height:2px;background:linear-gradient(90deg,transparent,var(--lime),transparent);opacity:.5;margin:2px 0 0;animation:sc 3.5s linear infinite;background-size:50% 100%;background-repeat:no-repeat}
+  @keyframes sc{0%{background-position:-50% 0}100%{background-position:150% 0}}
+  .flash{animation:fl .5s}@keyframes fl{0%,100%{opacity:1}50%{opacity:.25}}
 </style>
 </head>
 <body>
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="eyebrow">Station K · classified</span><h1>KENNEL</h1></div>
+    <div class="clearance">Agent<b data-agent>—</b><span data-clearance>CLEARANCE ·</span></div>
+  </header>
+  <div class="scan"></div>
 
-<div id="app">
-  <div class="topbar">
-    <div class="brand">KEN<em>NEL</em></div>
-    <div class="tbmeta" id="tbclock">——</div>
-  </div>
-
-  <!-- ================= HQ ================= -->
-  <section class="view on" id="v-hq">
-    <h1>Duty Room</h1>
-    <p class="sub">Station Harpenden · Control</p>
-
-    <div class="globewrap">
-      <canvas id="globe"></canvas>
-      <div class="globetag" id="issTag">ISS · acquiring</div>
-      <div class="globehint">Drag to spin</div>
+  <!-- SITUATION ROOM -->
+  <section class="view on" data-view="sit">
+    <div class="sec">Global surveillance · live intel</div>
+    <div class="card cool" data-iss>
+      <div class="c-top"><span class="c-label">Asset tracking · orbital</span><span class="c-badge" data-iss-b>···</span></div>
+      <div class="c-big" data-iss-v>——<span class="u">reading</span></div>
+      <div class="c-sub" data-iss-sub>Locating overhead assets…</div>
     </div>
-
-    <div class="grid2">
-      <div class="panel"><span class="k">Local time</span><div class="big" id="hqTime">——</div></div>
-      <div class="panel"><span class="k">Heading</span><div class="big" id="hqHead">—<span class="unit">°</span></div></div>
+    <div class="card" data-kp>
+      <div class="c-top"><span class="c-label">Atmospheric interference</span><span class="c-badge" data-kp-b>···</span></div>
+      <div class="c-big" data-kp-v>—<span class="u">Kp</span></div>
+      <div class="c-sub" data-kp-sub>Measuring signal conditions…</div>
     </div>
-
-    <div class="panel" style="margin-top:12px">
-      <span class="k">Position</span>
-      <div class="big sm white" id="hqPos">Not fixed</div>
-      <div class="note" id="hqAcc" style="margin-top:6px">Location not acquired.</div>
-      <button class="btn ghost" onclick="fixPosition()">Acquire fix</button>
+    <div class="card" data-quake>
+      <div class="c-top"><span class="c-label">Ground activity · seismic</span><span class="c-badge" data-quake-b>···</span></div>
+      <div data-quake-list><div class="c-sub">Scanning for disturbances…</div></div>
     </div>
-
-    <h2 class="sec">Ground intelligence</h2>
-    <div class="panel">
-      <div class="astro" id="astroGrid"></div>
-      <div style="display:flex;align-items:center;gap:14px;margin-top:14px">
-        <div style="text-align:center"><div class="moon"><i id="moonDisc"></i></div>
-          <div class="k" style="margin:0" id="moonLbl">—</div></div>
-        <div style="flex:1"><span class="k">Conditions</span><div class="big sm white" id="wxNow">—</div>
-          <div class="note" style="margin-top:4px" id="wxSub">Acquire a position fix to load.</div></div>
-      </div>
+    <div class="card" data-launch>
+      <div class="c-top"><span class="c-label">Launch window</span><span class="c-badge" data-launch-b>···</span></div>
+      <div data-launch-list><div class="c-sub">Checking the pads…</div></div>
     </div>
-
-    <h2 class="sec">Orbital</h2>
-    <div class="panel mute">
-      <span class="k">Next ISS pass over your position</span>
-      <div class="big sm" id="passOut">Not computed</div>
-      <button class="btn ghost" onclick="predictPass()">Compute next pass</button>
-    </div>
-
-    <h2 class="sec">Overhead now</h2>
-    <div id="acList"><div class="status">Acquire a position fix, then refresh.</div></div>
-    <button class="btn ghost" onclick="loadAircraft()">Scan airspace</button>
-
-    <h2 class="sec">Space weather</h2>
-    <div class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:flex-end">
-        <div><span class="k">Planetary K-index</span><div class="big" id="kpVal">—</div></div>
-        <div style="text-align:right"><div class="note" style="margin:0" id="kpNote">Loading…</div></div>
-      </div>
-      <div class="kp" id="kpBars"></div>
-    </div>
-
-    <h2 class="sec">Next off the pad</h2>
-    <div id="launchList"><div class="status">Loading…</div></div>
-
-    <h2 class="sec">Seismic · last 7 days</h2>
-    <div id="quakeList"><div class="status">Loading…</div></div>
-
-    <h2 class="sec">On this day</h2>
-    <div id="otdList"><div class="status">Loading…</div></div>
-
-    <h2 class="sec">Sensor availability</h2>
-    <div id="hqCaps"></div>
+    <button class="btn ghost wide" data-refresh style="margin:4px 0 8px">↻ Refresh the board</button>
+    <p class="empty">Feeds are open intelligence — orbital assets, space weather, seismic activity and launch schedules — repurposed as your situation wall. If a feed reads <b style="color:var(--red)">SIGNAL LOST</b>, the source is down; refresh to retry.</p>
   </section>
 
-  <!-- ================= GADGETS ================= -->
-  <section class="view" id="v-gadgets">
-    <h1>Q Branch</h1>
-    <p class="sub">Field equipment · signed out to Control</p>
-    <div class="tiles">
-      <button class="tile" onclick="openGadget('sweep')"><span class="ic">◉</span><span class="nm">Bug Sweep</span><span class="ds">Live audio spectrum and level. Finds what is humming in the room.</span></button>
-      <button class="tile" onclick="openGadget('trap')"><span class="ic">▣</span><span class="nm">Motion Trap</span><span class="ds">Arms the camera. Logs anything that moves in frame.</span></button>
-      <button class="tile" onclick="openGadget('compass')"><span class="ic">✛</span><span class="nm">Bearing Finder</span><span class="ds">Compass, range and bearing to a chosen target.</span></button>
-      <button class="tile" onclick="openGadget('lamp')"><span class="ic">✷</span><span class="nm">Signal Lamp</span><span class="ds">Flashes your message in morse, full screen.</span></button>
-      <button class="tile" onclick="openGadget('voice')"><span class="ic">◑</span><span class="nm">Voice Briefing</span><span class="ds">Reads a briefing aloud. Choose the voice.</span></button>
-      <button class="tile" onclick="openGadget('diag')"><span class="ic">⚕</span><span class="nm">Diagnostics</span><span class="ds">Tests every live feed and says exactly what is failing.</span></button>
-      <button class="tile" onclick="openGadget('capture')"><span class="ic">◎</span><span class="nm">Field Capture</span><span class="ds">Photograph a subject and pull their file.</span></button>
-      <button class="tile" onclick="openGadget('track')"><span class="ic">⤳</span><span class="nm">Movement</span><span class="ds">Your own track, logged and drawn.</span></button>
-      <button class="tile" onclick="openGadget('sky')"><span class="ic">✈</span><span class="nm">Skywatch</span><span class="ds">Point the phone at an aircraft and it names the one you are looking at.</span></button>
-      <button class="tile" onclick="openGadget('steg')"><span class="ic">◧</span><span class="nm">Concealment</span><span class="ds">Hides a message inside a photograph. Undetectable by eye.</span></button>
-      <button class="tile" onclick="openGadget('vetting')"><span class="ic">✦</span><span class="nm">Vetting</span><span class="ds">Brings a new officer onto the books and issues their card.</span></button>
-      <button class="tile" onclick="openGadget('meet')"><span class="ic">⧗</span><span class="nm">Meeting Protocol</span><span class="ds">RV, recognition phrase, abort signal, fallback.</span></button>
-      <button class="tile" onclick="openGadget('legend')"><span class="ic">◐</span><span class="nm">Legend</span><span class="ds">Builds a cover identity and its backstops.</span></button>
-      <button class="tile" onclick="openGadget('plan')"><span class="ic">▦</span><span class="nm">Station Plan</span><span class="ds">Floor plan of the station with room notes.</span></button>
-      <button class="tile" onclick="openGadget('idcard')"><span class="ic">▥</span><span class="nm">Credentials</span><span class="ds">Issues a Kennel identity card from the camera.</span></button>
-      <button class="tile" onclick="openGadget('numbers')"><span class="ic">◍</span><span class="nm">Numbers Station</span><span class="ds">Broadcasts coded five-figure groups aloud.</span></button>
-      <button class="tile" onclick="openGadget('tremor')"><span class="ic">≋</span><span class="nm">Tremor</span><span class="ds">Accelerometer trace. Detects handling of the device.</span></button>
+  <!-- MISSIONS -->
+  <section class="view" data-view="mission">
+    <div class="sec">Today's briefing</div>
+    <div class="card">
+      <span class="brief-stamp">TOP SECRET · EYES ONLY</span>
+      <div class="brief-code" data-m-code>OPERATION —</div>
+      <div class="brief-line"><span class="k">Objective</span><span data-m-obj>—</span></div>
+      <div class="brief-line"><span class="k">Location</span><span data-m-loc>—</span></div>
+      <div class="brief-line"><span class="k">Kit issued</span><span data-m-kit>—</span></div>
+      <div class="selfd">This briefing self-destructs in<b data-m-timer>--:--:--</b></div>
+      <button class="btn wide" data-m-accept>Accept the mission</button>
+      <div class="empty" data-m-status style="text-align:center"></div>
+    </div>
+    <div class="sec">Service record</div>
+    <div class="card"><div class="c-row"><span class="k">Missions accepted</span><span class="mono" data-m-count>0</span></div><div class="c-row"><span class="k">Standing</span><span class="mono" data-m-standing>Recruit</span></div></div>
+  </section>
+
+  <!-- CIPHER -->
+  <section class="view" data-view="cipher">
+    <div class="sec">Cipher desk</div>
+    <div class="card">
+      <div class="seg" data-cipher-seg>
+        <button data-ciph="caesar" class="on">Caesar</button>
+        <button data-ciph="morse">Morse</button>
+        <button data-ciph="drop">Dead drop</button>
+      </div>
+      <label class="fl">Message</label>
+      <textarea class="field" data-ciph-in placeholder="Type the message to conceal or reveal…"></textarea>
+      <div class="slider-row" data-shift-row><span class="mono" style="font-size:11px">SHIFT</span><input type="range" min="1" max="25" value="3" data-shift><span class="mono" data-shift-n style="font-size:13px;color:var(--lime);min-width:20px">3</span></div>
+      <div class="row2">
+        <button class="btn" data-ciph-enc>Encode &#9660;</button>
+        <button class="btn ghost" data-ciph-dec>Decode &#9650;</button>
+      </div>
+      <label class="fl">Output</label>
+      <div class="out mono" data-ciph-out>—</div>
+      <button class="btn ghost wide" data-ciph-copy style="margin-top:8px">Copy to clipboard</button>
     </div>
   </section>
 
-  <!-- ================= GADGET DETAIL ================= -->
-  <section class="view" id="v-gadget">
-    <button class="back" onclick="closeGadget()">← Q Branch</button>
-    <div id="gadgetBody"></div>
+  <!-- DOSSIERS -->
+  <section class="view" data-view="doss">
+    <div class="sec" style="display:flex;justify-content:space-between;align-items:center"><span>Dossiers</span><button class="btn" data-doss-add style="padding:6px 12px;font-size:12px">+ New</button></div>
+    <div data-doss-list></div>
   </section>
 
-  <!-- ================= SURVEILLANCE ================= -->
-  <section class="view" id="v-surv">
-    <h1>Surveillance</h1>
-    <p class="sub">Open-source visual feeds</p>
-
-    <h2 class="sec">Standing feeds · live video</h2>
-    <div id="ytList"></div>
-
-    <h2 class="sec">Global grid · Windy</h2>
-    <div class="panel mute" id="windyKeyPanel">
-      <span class="k">API key</span>
-      <input type="text" id="windyKey" placeholder="Paste your free Windy webcams key" autocomplete="off" spellcheck="false">
-      <div class="note">Free key from api.windy.com/keys. Stored on this device only. Free tier returns low-resolution stills, which suits the aesthetic.</div>
-      <button class="btn ghost" onclick="saveKey()">Save key</button>
+  <!-- Q-BRANCH -->
+  <section class="view" data-view="q">
+    <div class="sec">Your licence</div>
+    <div class="card">
+      <label class="fl">Agent codename</label>
+      <input class="field" data-agent-in placeholder="e.g. Nightjar">
+      <button class="btn ghost wide" data-agent-save style="margin-top:10px">Set codename</button>
     </div>
-    <div class="btnrow" style="margin-bottom:12px">
-      <button class="btn flat" onclick="loadCams('near')">Near me</button>
-      <button class="btn flat" onclick="loadCams('world')">Roll the world</button>
-    </div>
-    <div id="camStatus"></div>
-    <div class="camgrid" id="camGrid"></div>
-  </section>
-
-  <!-- ================= REGISTRY ================= -->
-  <section class="view" id="v-wall">
-    <div class="wcell threat span" id="threatCell">
-      <div class="wl">Station condition</div>
-      <div class="tv" id="threatVal">—</div>
-      <div class="ws" id="threatWhy">Compositing…</div>
-      <div class="tbars" id="threatBars"></div>
-    </div>
-
-    <div class="ticker"><span id="tickText">Acquiring feeds…</span></div>
-
-    <div class="wgrid" style="margin-top:8px">
-      <div class="wcell">
-        <div class="wl">Daylight remaining</div>
-        <div class="wv" id="wDay">—</div>
-        <div class="daybar"><i id="wDayBar"></i><b id="wDayNow"></b></div>
-        <div class="ws" id="wDaySub">—</div>
-      </div>
-      <div class="wcell">
-        <div class="wl">Overhead</div>
-        <div class="wv" id="wAc">—</div>
-        <canvas id="wAcSpark" height="34"></canvas>
-        <div class="ws" id="wAcSub">aircraft in the box</div>
-      </div>
-
-      <div class="wcell span">
-        <div class="wl">ISS ground track · live</div>
-        <canvas id="wIssMap" height="150"></canvas>
-        <div class="ws" id="wIssSub">—</div>
-      </div>
-
-      <div class="wcell">
-        <div class="wl">Geomagnetic</div>
-        <div class="wv" id="wKp">—</div>
-        <canvas id="wKpSpark" height="34"></canvas>
-        <div class="ws" id="wKpSub">planetary K, last 3h</div>
-      </div>
-      <div class="wcell">
-        <div class="wl">Seismic energy · 7 days</div>
-        <div class="wv sm" id="wEnergy">—</div>
-        <div class="ws" id="wEnergySub">—</div>
-        <canvas id="wQuakeSpark" height="34"></canvas>
-      </div>
-
-      <div class="wcell span">
-        <div class="wl">Traffic</div>
-        <div class="wlog" id="wLog"></div>
-      </div>
-
-      <div class="wcell">
-        <div class="wl">Your movement</div>
-        <div class="wv sm" id="wTrack">—</div>
-        <div class="ws">logged this device</div>
-      </div>
-      <div class="wcell">
-        <div class="wl">Next off the pad</div>
-        <div class="wv sm" id="wLaunch">—</div>
-        <div class="ws" id="wLaunchSub">—</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="view" id="v-registry">
-    <div id="lockGate">
-      <div class="lockwrap">
-        <div class="lk">⬢</div>
-        <h1 style="font-size:22px">Registry sealed</h1>
-        <p class="note" style="max-width:290px;margin:8px auto 0">Personnel files require verification.</p>
-        <button class="btn" style="max-width:280px;margin:22px auto 0" onclick="unlockRegistry()">Verify identity</button>
-        <button class="btn ghost" style="max-width:280px;margin:10px auto 0" onclick="enrolFace()">Enrol this device</button>
-        <button class="btn flat" style="max-width:280px;margin:10px auto 0" onclick="bypassLock()">Open without verifying</button>
-        <div id="lockStat"></div>
-      </div>
-    </div>
-    <div id="regInner" style="display:none">
-      <h1>Registry</h1>
-      <p class="sub">Personnel &amp; assets · tap redactions to lift</p>
-      <div id="regList"></div>
-      <button class="btn flat" style="margin-top:18px" onclick="reseal()">Reseal registry</button>
-    </div>
-  </section>
-
-  <section class="view" id="v-dossier">
-    <button class="back" onclick="showView('registry')">← Registry</button>
-    <div id="dossierBody"></div>
-  </section>
-
-  <!-- ================= COMMS ================= -->
-  <section class="view" id="v-comms">
-    <h1>Comms</h1>
-    <p class="sub">Hand ciphers · nothing leaves the device</p>
-
-    <div class="panel">
-      <span class="k">Cipher</span>
-      <select id="cipherMode" onchange="cipherSwitch()">
-        <option value="vig">Vigenère</option>
-        <option value="otp">One-time pad</option>
-      </select>
-
-      <div id="otpBlock" style="display:none">
-        <span class="k" style="margin-top:14px">Pad</span>
-        <textarea id="otpPad" placeholder="Generate a pad, or paste the one you were issued" spellcheck="false"></textarea>
-        <button class="btn ghost" onclick="makePad()">Generate pad</button>
-      </div>
-
-      <div id="vigBlock">
-        <span class="k" style="margin-top:14px">Key word</span>
-        <input type="text" id="vigKey" value="WOLFHOUND" autocapitalize="characters" autocomplete="off" spellcheck="false">
-      </div>
-
-      <span class="k" style="margin-top:14px">Message</span>
-      <textarea id="msgIn" spellcheck="false">MEET AT THE HEARTH AT NINE</textarea>
-
-      <div class="btnrow" style="margin-top:12px">
-        <button class="btn" onclick="runCipher(1)">Encipher</button>
-        <button class="btn ghost" onclick="runCipher(-1)">Decipher</button>
-      </div>
-      <div class="out" id="cipherOut">—</div>
-      <div class="btnrow" style="margin-top:12px">
-        <button class="btn flat" onclick="shareOut()">Send</button>
-        <button class="btn flat" onclick="copyOut(this)">Copy</button>
-      </div>
-    </div>
-    <p class="note">Vigenère is a puzzle, not security — breakable in minutes by anyone who cares. The one-time pad is genuinely unbreakable if the pad is random, at least as long as the message, sent by a different route, and used exactly once.</p>
+    <div class="sec">Q-branch · gadget locker</div>
+    <div class="card" data-gadgets></div>
+    <div class="sec">Emergency protocol</div>
+    <button class="btn danger wide" data-selfdestruct>Initiate self-destruct</button>
   </section>
 </div>
 
-<div id="duress">
-  <p class="dt" id="duTemp">—°</p>
-  <p class="dp" id="duPlace">Weather</p>
-  <div class="drow"><span>Feels like</span><span id="duFeel">—</span></div>
-  <div class="drow"><span>Wind</span><span id="duWind">—</span></div>
-  <div class="drow"><span>Sunset</span><span id="duSun">—</span></div>
-  <div class="drow"><span>Updated</span><span id="duUpd">—</span></div>
-</div>
-
-<div id="lamp"><button id="lampx" onclick="stopLamp()">Stop</button></div>
-
-<nav>
-  <button class="on" data-v="hq" onclick="showView('hq')"><span class="ic">◈</span>HQ</button>
-  <button data-v="gadgets" onclick="showView('gadgets')"><span class="ic">✛</span>Q Branch</button>
-  <button data-v="wall" onclick="showView('wall')"><span class="ic">▚</span>Wall</button>
-  <button data-v="surv" onclick="showView('surv')"><span class="ic">◉</span>Watch</button>
-  <button data-v="registry" onclick="showView('registry')"><span class="ic">▤</span>Registry</button>
-  <button data-v="comms" onclick="showView('comms')"><span class="ic">⌘</span>Comms</button>
+<nav class="tabs">
+  <button data-nav="sit" class="on"><span class="ic">🛰</span>Situation</button>
+  <button data-nav="mission"><span class="ic">🎯</span>Missions</button>
+  <button data-nav="cipher"><span class="ic">🔐</span>Cipher</button>
+  <button data-nav="doss"><span class="ic">🗂</span>Dossiers</button>
+  <button data-nav="q"><span class="ic">🛠</span>Q-Branch</button>
 </nav>
 
 <script>
-/* ==================================================================
-   THE KENNEL v2
-   House Ó Conghaile intelligence branch.
-   Single file. Edit REGISTRY / TARGETS / FEEDS below.
-   ================================================================== */
+(function(){
+  var $=function(s){return document.querySelector(s);};
+  var $$=function(s){return document.querySelectorAll(s);};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function lget(k,d){try{var v=localStorage.getItem('kennel:'+k);return v===null?d:JSON.parse(v);}catch(e){return d;}}
+  function lset(k,v){try{localStorage.setItem('kennel:'+k,JSON.stringify(v));}catch(e){}}
 
-/* ---------- storage shim (survives artifact preview + real hosting) ---------- */
-const mem={};
-const store={
-  get(k){try{return localStorage.getItem(k)}catch(e){return mem[k]??null}},
-  set(k,v){try{localStorage.setItem(k,v)}catch(e){mem[k]=v}}
-};
+  /* ---------- nav ---------- */
+  function navTo(v){ $$('[data-view]').forEach(function(s){s.classList.toggle('on',s.getAttribute('data-view')===v);});
+    $$('[data-nav]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-nav')===v);});
+    try{window.scrollTo(0,0);}catch(_){}
+    if(v==='sit') loadBoard(); if(v==='doss') renderDoss(); if(v==='mission') renderMission(); if(v==='q') renderQ();
+  }
+  document.addEventListener('click',function(e){ var n=e.target.closest&&e.target.closest('[data-nav]'); if(n){navTo(n.getAttribute('data-nav'));} });
 
-/* ---------- editable data ---------- */
-const TARGETS=[
-  {n:"Station Harpenden", lat:51.8177, lon:-0.3540},
-  {n:"Vauxhall Cross",    lat:51.4874, lon:-0.1246},
-  {n:"Royal Opera House", lat:51.5129, lon:-0.1224},
-  {n:"Silverstone",       lat:52.0733, lon:-1.0147},
-  {n:"Monte Carlo",       lat:43.7396, lon: 7.4276}
-];
+  /* ================= SITUATION ROOM ================= */
+  function badge(sel,ok){ var el=$(sel); if(!el)return; el.textContent=ok?'LIVE':'SIGNAL LOST'; el.className='c-badge '+(ok?'live':'lost'); }
+  function loadBoard(){ loadISS(); loadKp(); loadQuakes(); loadLaunch(); }
+  function loadISS(){ fetch('https://api.wheretheiss.at/v1/satellites/25544').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){
+      $('[data-iss-v]').innerHTML=Math.round(d.velocity).toLocaleString()+'<span class="u">km/h</span>';
+      $('[data-iss-sub]').innerHTML='ISS · '+d.latitude.toFixed(2)+'°, '+d.longitude.toFixed(2)+'° · alt '+Math.round(d.altitude)+' km · '+(d.visibility||'—');
+      badge('[data-iss-b]',true);
+    }).catch(function(){ $('[data-iss-sub]').textContent='Asset off the grid. Refresh to reacquire.'; badge('[data-iss-b]',false); }); }
+  function loadKp(){ fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(rows){
+      var last=rows[rows.length-1]; var kp=parseFloat(last[1]); var card=$('[data-kp]');
+      $('[data-kp-v]').innerHTML=(isNaN(kp)?'—':kp.toFixed(0))+'<span class="u">Kp</span>';
+      var lvl=kp>=6?'Severe — comms degraded':kp>=4?'Elevated — expect noise':'Quiet — channels clear';
+      $('[data-kp-sub]').textContent=lvl+' · '+(last[0]||'');
+      card.className='card '+(kp>=6?'hot':kp>=4?'warm':'cool'); badge('[data-kp-b]',true);
+    }).catch(function(){ $('[data-kp-sub]').textContent='Interference reading unavailable.'; badge('[data-kp-b]',false); }); }
+  function loadQuakes(){ fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(g){
+      var f=(g.features||[]).slice().sort(function(a,b){return b.properties.mag-a.properties.mag;}).slice(0,4);
+      if(!f.length){ $('[data-quake-list]').innerHTML='<div class="c-sub">No significant ground activity in 24h.</div>'; badge('[data-quake-b]',true); return; }
+      $('[data-quake-list]').innerHTML=f.map(function(q){ var p=q.properties; return '<div class="c-row"><span class="k">M'+p.mag.toFixed(1)+'</span><span style="text-align:right;flex:1">'+esc(p.place||'—')+'</span></div>'; }).join('');
+      badge('[data-quake-b]',true);
+    }).catch(function(){ $('[data-quake-list]').innerHTML='<div class="c-sub">Seismic feed dark.</div>'; badge('[data-quake-b]',false); }); }
+  function loadLaunch(){ fetch('https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=3&mode=list').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){
+      var r=(d.results||[]).slice(0,3);
+      if(!r.length){ $('[data-launch-list]').innerHTML='<div class="c-sub">No launches on the board.</div>'; badge('[data-launch-b]',true); return; }
+      $('[data-launch-list]').innerHTML=r.map(function(l){ var when=l.net?new Date(l.net).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'TBD'; return '<div class="c-row"><span style="flex:1">'+esc((l.name||'').split('|')[0])+'</span><span class="k">'+when+'</span></div>'; }).join('');
+      badge('[data-launch-b]',true);
+    }).catch(function(){ $('[data-launch-list]').innerHTML='<div class="c-sub">Launch schedule classified / unavailable.</div>'; badge('[data-launch-b]',false); }); }
+  document.addEventListener('click',function(e){ if(e.target.closest&&e.target.closest('[data-refresh]')){ e.target.closest('[data-refresh]').classList.add('flash'); loadBoard(); setTimeout(function(){var b=$('[data-refresh]');if(b)b.classList.remove('flash');},500); } });
 
-/* yt = verified live stream. q = opens a YouTube search instead. */
-const FEEDS=[
-  {n:"New York City", d:"Times Square, Midtown, harbour", yt:"VGnFLdQW39A"},
-  {n:"Shibuya Crossing", d:"Tokyo", q:"shibuya crossing live cam"},
-  {n:"Venice", d:"Grand Canal", q:"venice grand canal live cam"},
-  {n:"Iceland", d:"Volcano and aurora cams", q:"iceland volcano live cam"}
-];
+  /* ================= MISSIONS ================= */
+  var VERBS=['Intercept','Extract','Shadow','Neutralise','Recover','Infiltrate','Decrypt','Secure','Trace','Compromise'];
+  var TARGETS=['the courier','a rogue asset','the ledger','the double agent','a stolen prototype','the cipher key','the informant','a defector','the black file','the handler'];
+  var CITIES=['Vienna','Istanbul','Monaco','Marrakech','Reykjavík','Lisbon','Prague','Macau','Valletta','Tangier'];
+  var KIT=['a Walther PPK and a dinner jacket','a wire tap and false papers','a lockpick set and a fast car','a micro-camera and a cover story','a tuxedo and a poker face','a grappling line and nerve','a forged passport and cash','an earpiece and a table for two'];
+  function seedFromDate(){ var d=new Date(); var s=d.getFullYear()*1000+ (d.getMonth()+1)*50 + d.getDate(); var x=s; return function(){ x=(x*1103515245+12345)&0x7fffffff; return x/0x7fffffff; }; }
+  function todaysMission(){ var r=seedFromDate(); var pick=function(a){return a[Math.floor(r()*a.length)];};
+    var v=pick(VERBS),t=pick(TARGETS),c=pick(CITIES),k=pick(KIT);
+    var code=(pick(['NIGHT','IRON','GOLDEN','SILENT','CRIMSON','VELVET','HOLLOW','MIDNIGHT'])+' '+pick(['FALCON','VIPER','LOTUS','EMBER','ORACLE','JACKAL','MIRAGE','SPECTRE']));
+    return {code:code, obj:v+' '+t, loc:c, kit:k}; }
+  function renderMission(){ var m=todaysMission();
+    $('[data-m-code]').textContent='OPERATION '+m.code;
+    $('[data-m-obj]').textContent=m.obj+'.'; $('[data-m-loc]').textContent=m.loc+'.'; $('[data-m-kit]').textContent=m.kit+'.';
+    var key=new Date().toISOString().slice(0,10);
+    var accepted=lget('accepted-day','')===key;
+    var btn=$('[data-m-accept]'), st=$('[data-m-status]');
+    btn.textContent=accepted?'✓ Mission accepted':'Accept the mission'; btn.disabled=false;
+    st.textContent=accepted?'Good luck, Agent. Try not to get killed.':'';
+    $('[data-m-count]').textContent=lget('missions-count',0);
+    var n=lget('missions-count',0); $('[data-m-standing]').textContent = n>=30?'00 · Licence to thrill':n>=15?'Field agent':n>=5?'Operative':'Recruit';
+  }
+  document.addEventListener('click',function(e){ if(e.target.closest&&e.target.closest('[data-m-accept]')){ var key=new Date().toISOString().slice(0,10); if(lget('accepted-day','')!==key){ lset('accepted-day',key); lset('missions-count',lget('missions-count',0)+1); } renderMission(); renderQ(); } });
+  function tickTimer(){ var el=$('[data-m-timer]'); if(!el) return; var now=new Date(); var end=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,0); var s=Math.max(0,Math.floor((end-now)/1000)); var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60; el.textContent=(h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(ss<10?'0':'')+ss; }
+  setInterval(tickTimer,1000);
 
-const REGISTRY=[
-  {ref:"KEN/001",cn:"Wolfhound",name:"Mark Ó Conghaile",role:"Control",sec:"Direction",st:"active",
-   rec:["Established the branch, its charter and its filing system.","Maintains an unusually large estate of apparatus for an organisation of five."],
-   ass:"Operationally sound. [[Has never shipped a project without first building a second project to manage the first.]]",
-   cav:"Prone to founding new departments when the existing ones are working."},
-  {ref:"KEN/002",cn:"Fireside",name:"Kathryn",role:"Head of Station",sec:"Station",st:"active",
-   rec:["Holds the station. All domestic traffic routes through her, officially or otherwise.","Has vetoed more operations than Control has authorised."],
-   ass:"The single point of failure the branch refuses to acknowledge. [[Better intelligence than Control and better judgement about when to use it.]]",
-   cav:"Do not brief her second. She will already know."},
-  {ref:"KEN/003",cn:"Draughtsman",name:"Lucas",role:"Technical Section",sec:"Technical",st:"active",
-   rec:["Architect. Reads buildings the way the branch would like to read people.","Only officer who finishes a drawing before starting the next."],
-   ass:"[[Inherited the obsession and improved the execution.]] Recommend for eventual command.",
-   cav:"Will notice if the plan does not stand up structurally."},
-  {ref:"KEN/004",cn:"Nightingale",name:"Elana",role:"Field Section",sec:"Field",st:"active",
-   rec:["Service record not filed.","Placeholder entry."],
-   ass:"[[Not yet written. Control should be embarrassed by the state of this file.]]",
-   cav:"Edit this entry before anyone reads it."},
-  {ref:"KEN/005",cn:"Magpie",name:"Chloe",role:"Field Section",sec:"Field",st:"active",
-   rec:["Service record not filed.","Placeholder entry."],
-   ass:"[[Not yet written. See remarks on KEN/004.]]",
-   cav:"Edit this entry before anyone reads it."},
-  {ref:"KEN/006",cn:"The Dowager",name:"Joy",role:"Founding generation",sec:"Retired list",st:"retired",
-   rec:["Retired from active service.","Affairs administered by Control under a standing instrument, in accordance with her wishes."],
-   ass:"Long service. The branch exists because she was here first.",
-   cav:"Handle this file properly."},
-  {ref:"KEN/A01",cn:"Spider",name:"Fiat 124 Spider",role:"Transport asset",sec:"Transport",st:"asset",
-   rec:["Primary mobile asset. Open-topped, which is poor tradecraft and excellent for morale.","Telemetry logged separately under Roadcraft."],
-   ass:"[[Unsuited to surveillance in every respect. Retained anyway.]]",
-   cav:"Not to be used in weather, at speed, or sensibly."}
-];
+  /* ================= CIPHER ================= */
+  var cipher='caesar';
+  var MORSE={A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'};
+  var RMORSE={}; for(var k in MORSE) RMORSE[MORSE[k]]=k;
+  function caesar(t,sh){ return t.replace(/[a-z]/gi,function(c){ var b=c<='Z'?65:97; return String.fromCharCode((c.charCodeAt(0)-b+sh+26)%26+b); }); }
+  function toMorse(t){ return t.toUpperCase().split('').map(function(c){ if(c===' ')return '/'; return MORSE[c]||''; }).filter(Boolean).join(' '); }
+  function fromMorse(t){ return t.trim().split(' ').map(function(c){ if(c==='/')return ' '; return RMORSE[c]||''; }).join(''); }
+  function drop(t,dec){ try{ return dec?decodeURIComponent(escape(atob(t.split('').reverse().join('')))):btoa(unescape(encodeURIComponent(t))).split('').reverse().join(''); }catch(e){ return '⚠ not a valid dead-drop packet'; } }
+  function runCipher(dec){ var t=$('[data-ciph-in]').value, sh=parseInt($('[data-shift]').value,10)||3, out='';
+    if(cipher==='caesar') out=caesar(t, dec?-sh:sh);
+    else if(cipher==='morse') out=dec?fromMorse(t):toMorse(t);
+    else out=drop(t,dec);
+    $('[data-ciph-out]').textContent=out||'—'; }
+  document.addEventListener('click',function(e){ var s=e.target.closest&&e.target.closest('[data-ciph]'); if(s){ cipher=s.getAttribute('data-ciph'); $$('[data-ciph]').forEach(function(b){b.classList.toggle('on',b===s);}); $('[data-shift-row]').style.display=cipher==='caesar'?'flex':'none'; runCipher(false); return; }
+    if(e.target.closest&&e.target.closest('[data-ciph-enc]')){ runCipher(false); return; }
+    if(e.target.closest&&e.target.closest('[data-ciph-dec]')){ runCipher(true); return; }
+    if(e.target.closest&&e.target.closest('[data-ciph-copy]')){ var txt=$('[data-ciph-out]').textContent; try{ navigator.clipboard.writeText(txt); e.target.textContent='Copied ✓'; setTimeout(function(){e.target.textContent='Copy to clipboard';},1200);}catch(_){}} });
+  document.addEventListener('input',function(e){ if(e.target.closest&&e.target.closest('[data-shift]')){ $('[data-shift-n]').textContent=$('[data-shift]').value; runCipher(false); } if(e.target.closest&&e.target.closest('[data-ciph-in]')){ runCipher(false); } });
 
-/* ---------- helpers ---------- */
-const $=id=>document.getElementById(id);
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const redact=s=>esc(s).replace(/\[\[(.+?)\]\]/g,(m,t)=>`<span class="rd" onclick="this.classList.toggle('open')">${t}</span>`);
-const pad2=n=>String(n).padStart(2,'0');
-
-/* ---------- view routing ---------- */
-let currentView='hq';
-function showView(v){
-  if(currentView==='gadget' && v!=='gadget') stopAllGadgets();
-  currentView=v;
-  document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
-  $('v-'+v).classList.add('on');
-  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',
-    b.dataset.v===v || (v==='dossier'&&b.dataset.v==='registry') || (v==='gadget'&&b.dataset.v==='gadgets')));
-  if(v==='wall') wallEnter();
-  window.scrollTo(0,0);
-}
-
-/* ================= HQ ================= */
-function clock(){
-  const d=new Date();
-  const tb=$('tbclock');
-  if(tb) tb.textContent=`${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
-  const t=$('hqTime'); if(t) t.textContent=`${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
-}
-setInterval(clock,1000); clock();
-
-let lastFix=null;
-function fixPosition(){
-  $('hqAcc').textContent='Acquiring…';
-  if(!navigator.geolocation){ $('hqAcc').textContent='Geolocation not available in this browser.'; return; }
-  navigator.geolocation.getCurrentPosition(p=>{
-    lastFix=p.coords;
-    $('hqPos').textContent=`${p.coords.latitude.toFixed(4)}, ${p.coords.longitude.toFixed(4)}`;
-    $('hqAcc').textContent=`Accurate to ${Math.round(p.coords.accuracy)} m.`;
-    renderAstro(); loadWeather(); loadAircraft(); trackPush(p.coords.latitude,p.coords.longitude);
-  },e=>{
-    $('hqAcc').textContent='Fix refused: '+e.message;
-  },{enableHighAccuracy:true,timeout:12000,maximumAge:0});
-}
-
-/* heading on HQ */
-let headingDeg=null, skyPitch=0;
-function onOrient(e){
-  const h = (typeof e.webkitCompassHeading==='number') ? e.webkitCompassHeading
-          : (e.alpha!=null ? (360-e.alpha) : null);
-  if(h==null) return;
-  headingDeg=h;
-  if(e.beta!=null) skyPitch=Math.max(0,Math.min(90,e.beta-90));
-  const el=$('hqHead'); if(el) el.innerHTML=Math.round(h)+'<span class="unit">°</span>';
-  const rn=$('roseNeedle'); if(rn) rn.setAttribute('transform',`rotate(${-h} 100 100)`);
-  const rr=$('roseRead'); if(rr) rr.textContent=Math.round(h)+'° '+cardinal(h);
-  updateBearing();
-}
-function cardinal(d){const c=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];return c[Math.round(d/22.5)%16];}
-
-async function requestMotion(){
-  try{
-    if(typeof DeviceOrientationEvent!=='undefined' && DeviceOrientationEvent.requestPermission){
-      const r=await DeviceOrientationEvent.requestPermission();
-      if(r!=='granted') return false;
-    }
-    window.addEventListener('deviceorientation',onOrient,true);
-    return true;
-  }catch(e){ return false; }
-}
-
-/* capability report — honest, no pretending */
-function caps(){
-  const rows=[
-    ['Location', !!navigator.geolocation],
-    ['Compass / motion', typeof DeviceOrientationEvent!=='undefined'],
-    ['Camera', !!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)],
-    ['Microphone', !!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)],
-    ['Speech output', 'speechSynthesis' in window],
-    ['Share sheet', !!navigator.share],
-    ['Screen wake lock', 'wakeLock' in navigator],
-    ['Vibration', 'vibrate' in navigator]
-  ];
-  $('hqCaps').innerHTML=rows.map(([n,ok])=>
-    `<div class="status ${ok?'good':'bad'}">${n} — ${ok?'available':'not available'}</div>`).join('');
-}
-caps();
-
-/* ================= GADGETS ================= */
-let audioCtx=null,micStream=null,camStream=null,rafId=null,trapTimer=null,wakeLock=null,motionListener=false;
-var trkTimer=null, trkWake=null;   // hoisted: stopAllGadgets references these
-
-function stopAllGadgets(){
-  if(rafId) cancelAnimationFrame(rafId), rafId=null;
-  if(trapTimer) clearInterval(trapTimer), trapTimer=null;
-  if(skyTimer) clearInterval(skyTimer), skyTimer=null;
-  if(trkTimer) clearInterval(trkTimer), trkTimer=null;
-  if(trkWake) trkWake.release().catch(()=>{}), trkWake=null;
-  if(skyRaf) cancelAnimationFrame(skyRaf), skyRaf=null;
-  skyLock=null; lockLast='';
-  if(micStream) micStream.getTracks().forEach(t=>t.stop()), micStream=null;
-  if(camStream) camStream.getTracks().forEach(t=>t.stop()), camStream=null;
-  if(audioCtx) audioCtx.close().catch(()=>{}), audioCtx=null;
-  if(wakeLock) wakeLock.release().catch(()=>{}), wakeLock=null;
-  if(window.speechSynthesis) speechSynthesis.cancel();
-  stopNumbers();
-  stopLamp();
-}
-function closeGadget(){ stopAllGadgets(); showView('gadgets'); }
-
-function openGadget(g){
-  stopAllGadgets();
-  const b=$('gadgetBody');
-  if(g==='sweep') b.innerHTML=`
-    <h1>Bug Sweep</h1><p class="sub">Audio spectrum · live</p>
-    <canvas id="swCanvas" height="180"></canvas>
-    <div class="grid2" style="margin-top:12px">
-      <div class="panel"><span class="k">Level</span><div class="big" id="swDb">—<span class="unit">dB</span></div></div>
-      <div class="panel"><span class="k">Peak band</span><div class="big" id="swHz">—<span class="unit">Hz</span></div></div>
-    </div>
-    <div class="status" id="swStat">Microphone not started.</div>
-    <button class="btn" onclick="startSweep()">Start sweep</button>
-    <p class="note">Reads what the microphone actually hears and shows the frequency spectrum. A steady narrow spike that does not move is worth a second look — though it is far more likely to be a router, a fridge compressor or mains hum than anything sinister.</p>`;
-
-  if(g==='trap') b.innerHTML=`
-    <h1>Motion Trap</h1><p class="sub">Camera · frame differencing</p>
-    <video id="trVid" playsinline muted></video>
-    <canvas id="trCanvas" height="90" style="margin-top:10px"></canvas>
-    <div class="grid2" style="margin-top:12px">
-      <div class="panel"><span class="k">Movement</span><div class="big" id="trPct">—<span class="unit">%</span></div></div>
-      <div class="panel"><span class="k">Contacts</span><div class="big" id="trHits">0</div></div>
-    </div>
-    <div class="status" id="trStat">Camera not armed.</div>
-    <button class="btn" onclick="startTrap()">Arm trap</button>
-    <div id="trLog" style="margin-top:14px"></div>
-    <p class="note">Compares each frame against the last and flags the difference. Prop the phone somewhere and it will log every time the frame changes. Screen stays awake while armed. Stops the moment you leave this screen — nothing runs in the background on iOS.</p>`;
-
-  if(g==='compass') b.innerHTML=`
-    <h1>Bearing Finder</h1><p class="sub">Compass · range and bearing</p>
-    <div class="rose">
-      <svg viewBox="0 0 200 200">
-        <circle cx="100" cy="100" r="92" fill="none" stroke="#1A3A6B" stroke-width="1"/>
-        <circle cx="100" cy="100" r="72" fill="none" stroke="#1A3A6B" stroke-width="1"/>
-        <g id="roseNeedle">
-          <line x1="100" y1="18" x2="100" y2="182" stroke="#1A3A6B" stroke-width="1"/>
-          <line x1="18" y1="100" x2="182" y2="100" stroke="#1A3A6B" stroke-width="1"/>
-          <polygon points="100,20 109,104 91,104" fill="#C4F000"/>
-          <polygon points="100,180 109,96 91,96" fill="#1A3A6B"/>
-          <text x="100" y="12" fill="#C4CCDD" font-size="11" text-anchor="middle" font-family="monospace">N</text>
-        </g>
-        <g id="roseTarget" style="display:none">
-          <polygon points="100,34 105,50 95,50" fill="#FFFFFF"/>
-        </g>
-        <circle cx="100" cy="100" r="5" fill="#C4F000"/>
-      </svg>
-    </div>
-    <div class="rosereadout"><div class="big" id="roseRead">—</div></div>
-    <div class="panel" style="margin-top:16px">
-      <span class="k">Target</span>
-      <select id="tgtSel" onchange="updateBearing()">${TARGETS.map((t,i)=>`<option value="${i}">${esc(t.n)}</option>`).join('')}</select>
-      <div class="grid2" style="margin-top:12px">
-        <div><span class="k">Range</span><div class="big sm white" id="tgtRange">—</div></div>
-        <div><span class="k">Bearing</span><div class="big sm white" id="tgtBrg">—</div></div>
-      </div>
-    </div>
-    <div class="status" id="cmStat">Compass not started.</div>
-    <button class="btn" onclick="startCompass()">Start compass</button>
-    <p class="note">iOS requires a tap before it will release compass data, which is why this needs a button. Target coordinates are approximate town-centre or landmark fixes, not survey grade.</p>`;
-
-  if(g==='lamp') b.innerHTML=`
-    <h1>Signal Lamp</h1><p class="sub">Morse · full screen flash</p>
-    <span class="k">Message</span>
-    <textarea id="mrIn" spellcheck="false">SEND THE DOG HOME</textarea>
-    <span class="k" style="margin-top:14px">Speed</span>
-    <select id="mrSpeed"><option value="180">Slow</option><option value="110" selected>Normal</option><option value="70">Fast</option></select>
-    <div class="out" id="mrOut" style="margin-top:12px">—</div>
-    <button class="btn" onclick="startLamp()">Transmit</button>
-    <button class="btn ghost" onclick="previewMorse()">Show morse only</button>
-    <p class="note">There is no torch API on iOS, so this flashes the screen instead. Turn the brightness up and it carries a surprising distance in the dark.</p>`;
-
-  if(g==='voice') b.innerHTML=`
-    <h1>Voice Briefing</h1><p class="sub">Speech output</p>
-    <span class="k">Briefing text</span>
-    <textarea id="vcIn" style="min-height:130px">Good evening, Control. Station Harpenden reports all quiet. The Dowager's affairs are in order. Draughtsman has filed his drawings on time, which the branch continues to find suspicious. Fireside has vetoed tonight's operation. That is all.</textarea>
-    <span class="k" style="margin-top:14px">Voice</span>
-    <select id="vcVoice"></select>
-    <div class="btnrow" style="margin-top:12px">
-      <button class="btn" onclick="speakBrief()">Play</button>
-      <button class="btn ghost" onclick="speechSynthesis.cancel()">Stop</button>
-    </div>
-    <p class="note">Uses the voices installed on the phone. Add more under Settings → Accessibility → Spoken Content → Voices; the British ones are considerably better than the default.</p>`;
-
-  if(g==='diag') b.innerHTML=`
-    <h1>Diagnostics</h1><p class="sub">Environment and feed reachability</p>
-    <div class="panel" id="dgEnv"></div>
-    <h2 class="sec">Live feeds</h2>
-    <div id="dgOut"></div>
-    <button class="btn" style="margin-top:14px" onclick="runDiagnostics()">Run tests again</button>
-    <p class="note">Each feed is called directly and the exact result reported. BLOCKED means the request never completed — almost always because the page is running inside a frame that forbids cross-origin requests, or because that service does not permit browser access. HTTP 429 means you have used your allowance for now.</p>`;
-
-  if(g==='capture') b.innerHTML=`
-    <h1>Field Capture</h1><p class="sub">Subject photograph · match against Registry</p>
-    <img id="capPreview" alt="">
-    <div class="scanbar"><i id="capBar"></i></div>
-    <input type="file" id="capFile" accept="image/*" capture="environment" style="display:none" onchange="capTake(this)">
-    <button class="btn" style="margin-top:14px" onclick="document.getElementById('capFile').click()">Capture subject</button>
-    <div id="capMatch"></div>
-    <div class="status" id="capStat">No capture.</div>
-    <h2 class="sec">Capture log</h2>
-    <div class="capgrid" id="capGrid"></div>
-    <button class="btn flat" style="margin-top:12px" onclick="capClear()">Purge capture log</button>
-    <p class="note">There is no facial recognition here — you identify the subject and the app pulls their file, logs the sighting with time and position, and adds it to their service record. Photographs are compressed to thumbnails and stored on this device only.</p>`;
-
-  if(g==='track') b.innerHTML=`
-    <h1>Movement</h1><p class="sub">Your own track · logged on this device</p>
-    <canvas id="trkCanvas" height="300"></canvas>
-    <div class="grid2" style="margin-top:12px">
-      <div class="panel"><span class="k">Distance</span><div class="big sm" id="trkDist">—</div></div>
-      <div class="panel"><span class="k">Points</span><div class="big sm white" id="trkPts">0</div></div>
-    </div>
-    <div class="btnrow" style="margin-top:12px">
-      <button class="btn" id="trkBtn" onclick="trackToggle()">Start logging</button>
-      <button class="btn ghost" onclick="trackMark()">Mark position</button>
-    </div>
-    <button class="btn flat" style="margin-top:10px" onclick="trackClear()">Purge track</button>
-    <div class="status" id="trkStat">Not logging.</div>
-    <p class="note">Logs a point every 20 seconds while this screen is open and awake. iOS gives web apps no background location, so it stops when you leave — this records journeys you watch, not journeys you forget about. The track also draws on the globe.</p>`;
-
-  if(g==='sky') b.innerHTML=`
-    <h1>Skywatch</h1><p class="sub">Point the phone at an aircraft</p>
-    <canvas id="skyCanvas" height="260"></canvas>
-    <div id="skyLock"></div>
-    <div class="status" id="skyStat">Not started.</div>
-    <button class="btn" onclick="startSky()">Start tracking</button>
-    <h2 class="sec">All aircraft overhead</h2>
-    <div class="aclist" id="skyList"><div class="status">Nothing yet.</div></div>
-    <p class="note">Matches the compass heading and tilt of the phone against live ADS-B positions. Hold the phone up like a window and the aircraft you are looking at is highlighted. Positions refresh every 20 seconds; the feed allows about 400 requests a day, so leave the screen when you are done.</p>`;
-
-  if(g==='steg') b.innerHTML=`
-    <h1>Concealment</h1><p class="sub">Message hidden inside a photograph</p>
-    <span class="k">Carrier image</span>
-    <input type="file" id="stFile" accept="image/*" onchange="stegLoad(this)" style="color:var(--mist);font-size:13px">
-    <canvas id="stCanvas" style="margin-top:12px;max-height:220px;object-fit:contain"></canvas>
-    <span class="k" style="margin-top:14px">Message</span>
-    <textarea id="stMsg" spellcheck="false">The dog is off the lead.</textarea>
-    <span class="k" style="margin-top:14px">Passphrase (optional)</span>
-    <input type="text" id="stKey" placeholder="Scrambles the payload" autocomplete="off" spellcheck="false">
-    <div class="btnrow" style="margin-top:12px">
-      <button class="btn" onclick="stegHide()">Conceal &amp; save</button>
-      <button class="btn ghost" onclick="stegReveal()">Reveal</button>
-    </div>
-    <div class="out" id="stOut">—</div>
-    <div class="status" id="stStat">No carrier image loaded.</div>
-    <p class="note">Writes the message into the least significant bit of each pixel — invisible to the eye and to anyone who is not looking for it. Save the result as PNG. Sending it through anything that re-compresses images will destroy the payload, so use AirDrop or Files rather than WhatsApp.</p>`;
-
-  if(g==='vetting') b.innerHTML=`
-    <h1>Vetting</h1><p class="sub">Bringing an officer onto the books</p>
-    <div class="step on" id="vs1">
-      <div class="panel"><span class="k">Candidate — true name</span>
-        <input type="text" id="vtName" placeholder="Who is being vetted" autocomplete="off">
-        <span class="k" style="margin-top:14px">Proposed section</span>
-        <select id="vtSec"><option>Direction</option><option>Station</option><option>Technical</option><option>Field</option><option>Transport</option><option>Retired list</option></select>
-      </div>
-      <button class="btn" onclick="vetStep2()">Begin vetting</button>
-    </div>
-    <div class="step" id="vs2">
-      <div class="panel"><span class="k">Assessment questions</span><div id="vtQs"></div></div>
-      <button class="btn" onclick="vetStep3()">Submit for approval</button>
-    </div>
-    <div class="step" id="vs3">
-      <div class="panel" id="vtResult"></div>
-      <div class="btnrow" style="margin-top:12px">
-        <button class="btn" onclick="vetCommit()">Enter on the books</button>
-        <button class="btn ghost" onclick="vetStep2()">Reassess</button>
-      </div>
-    </div>
-    <div class="status" id="vtStat">No candidate.</div>
-    <p class="note">Adds the officer to the Registry on this device and pre-fills their codename in Credentials so you can issue the card immediately.</p>`;
-
-  if(g==='meet') b.innerHTML=`
-    <h1>Meeting Protocol</h1><p class="sub">Single-use · destroy after the meeting</p>
-    <div class="panel" id="mpCard"></div>
-    <div class="btnrow" style="margin-top:12px">
-      <button class="btn ghost" onclick="genMeet()">New protocol</button>
-      <button class="btn" onclick="shareMeet()">Send</button>
-    </div>
-    <p class="note">The recognition exchange proves identity without either party naming the other. The abort signal is the important line: if it appears, the meeting is compromised and you walk on without stopping. Fallback runs 24 hours later at the second location.</p>`;
-
-  if(g==='legend') b.innerHTML=`
-    <h1>Legend</h1><p class="sub">Cover identity · rehearse before use</p>
-    <div class="panel" id="lgCard"></div>
-    <div class="btnrow" style="margin-top:12px">
-      <button class="btn ghost" onclick="genLegend()">New legend</button>
-      <button class="btn" onclick="shareLegend()">Send</button>
-    </div>
-    <p class="note">The backstops are the point. A legend fails on the small consistent details — where you went to school, why you are travelling, what you paid for the room — not the name. Learn those three and the rest can be improvised.</p>`;
-
-  if(g==='plan') b.innerHTML=`
-    <h1>Station Plan</h1><p class="sub">Harpenden · ground floor</p>
-    <svg class="plan" id="planSvg" viewBox="0 0 400 300"></svg>
-    <div class="status" id="planStat">Tap a room.</div>
-    <p class="note">I do not know your actual floor plan, so this is a placeholder layout. Edit the ROOMS array near the top of the script — each room is x, y, width, height in a 400×300 grid, plus a note.</p>`;
-
-  if(g==='idcard') b.innerHTML=`
-    <h1>Credentials</h1><p class="sub">Identity card · issued by Control</p>
-    <canvas id="cardCanvas" width="1012" height="638"></canvas>
-    <div class="cardctl">
-      <label class="k" style="margin-top:4px">Codename</label>
-      <input type="text" id="cdName" value="${(store.get('kenLastVet')||'WOLFHOUND|').split('|')[0].toUpperCase()}" autocapitalize="characters" autocomplete="off" oninput="drawCard()">
-      <select id="cdClear" onchange="drawCard()">
-        <option>CONTROL</option><option>OFFICER</option><option>FIELD</option><option>PROBATIONARY</option><option>RETIRED LIST</option>
-      </select>
-      <input type="text" id="cdRef" value="${(store.get('kenLastVet')||'|KEN/001').split('|')[1]||'KEN/001'}" autocapitalize="characters" autocomplete="off" oninput="drawCard()">
-    </div>
-    <input type="file" id="cdFile" accept="image/*" capture="user" style="display:none" onchange="cardPhoto(this)">
-    <div class="btnrow" style="margin-top:12px">
-      <button class="btn" onclick="document.getElementById('cdFile').click()">Take photo</button>
-      <button class="btn ghost" onclick="saveCard()">Save card</button>
-    </div>
-    <div class="status" id="cdStat">No photograph on file.</div>
-    <p class="note">Opens the native camera, so it works whether or not you have granted the app camera access. The card is composited on device and saved to your photos — nothing is uploaded.</p>`;
-
-  if(g==='numbers') b.innerHTML=`
-    <h1>Numbers Station</h1><p class="sub">Coded broadcast · five-figure groups</p>
-    <div class="grid2">
-      <div class="panel"><span class="k">Callsign</span><div class="big sm" id="nsCall">—</div></div>
-      <div class="panel"><span class="k">Groups</span><div class="big sm white" id="nsCount">8</div></div>
-    </div>
-    <div class="groups" id="nsGroups">Press generate.</div>
-    <div class="btnrow" style="margin-top:12px">
-      <button class="btn ghost" onclick="genNumbers()">Generate</button>
-      <button class="btn" onclick="playNumbers()">Transmit</button>
-    </div>
-    <button class="btn flat" onclick="stopNumbers()">Stop</button>
-    <div class="status" id="nsStat">Standing by.</div>
-    <p class="note">Opens with an interval tone and a repeated callsign, reads the groups twice at dictation speed, then closes out. Feed the groups into the one-time pad on Comms and they decode to a real message.</p>`;
-
-  if(g==='tremor') b.innerHTML=`
-    <h1>Tremor</h1><p class="sub">Accelerometer trace</p>
-    <canvas id="tmCanvas" height="150"></canvas>
-    <div class="grid2" style="margin-top:12px">
-      <div class="panel"><span class="k">Magnitude</span><div class="big" id="tmMag">—</div></div>
-      <div class="panel"><span class="k">Disturbed</span><div class="big" id="tmHits">0</div></div>
-    </div>
-    <div class="status" id="tmStat">Motion not started.</div>
-    <button class="btn" onclick="startTremor()">Start</button>
-    <p class="note">Leave the phone on a surface and it will count every time it is picked up or knocked. Same permission gate as the compass.</p>`;
-
-  showView('gadget');
-  if(g==='idcard') drawCard();
-  if(g==='diag') runDiagnostics();
-  if(g==='capture') capRender();
-  if(g==='track') trackInit();
-  if(g==='sky') drawSky();
-  if(g==='meet') genMeet();
-  if(g==='vetting') vetReset();
-  if(g==='legend') genLegend();
-  if(g==='plan') drawPlan();
-  if(g==='numbers') genNumbers();
-  if(g==='voice') fillVoices();
-  if(g==='sweep'||g==='trap'||g==='tremor') sizeCanvases();
-}
-
-function sizeCanvases(){
-  document.querySelectorAll('#gadgetBody canvas').forEach(c=>{
-    c.width = c.clientWidth * (window.devicePixelRatio||1);
-    c.height = c.height * 1;
+  /* ================= DOSSIERS ================= */
+  function dossiers(){ return lget('dossiers',[]); }
+  function renderDoss(){ var host=$('[data-doss-list]'); var d=dossiers();
+    if(!d.length){ host.innerHTML='<div class="empty">No dossiers on file. Tap <b>+ New</b> to open one on anyone worth watching — a rival, a friend, a suspiciously charming acquaintance.</div>'; return; }
+    host.innerHTML=d.map(function(x,i){ var th=''; for(var n=1;n<=5;n++) th+='<i class="'+(n<=x.threat?'on':'')+'"></i>';
+      return '<div class="doss"><div><div class="code">'+esc(x.code||'UNNAMED')+'</div><div class="meta">'+esc(x.real?('a.k.a. '+x.real):'identity unconfirmed')+' · '+esc(x.status||'active')+'</div><div class="threat">'+th+'</div>'+(x.note?'<div class="note">'+esc(x.note)+'</div>':'')+'</div><div class="doss-acts"><span class="link" data-doss-edit="'+i+'">edit</span><span class="link" data-doss-del="'+i+'" style="color:var(--red)">shred</span></div></div>'; }).join('');
+  }
+  function dossPrompt(x){ x=x||{}; var code=prompt('Codename (e.g. The Chairman)',x.code||''); if(code===null)return null; var real=prompt('Real identity (leave blank if unconfirmed)',x.real||'')||''; var threat=prompt('Threat level 1–5',x.threat||'2'); var status=prompt('Status (active / dormant / burned / friendly)',x.status||'active')||'active'; var note=prompt('Field notes',x.note||'')||''; return {code:code.trim(),real:real.trim(),threat:Math.max(1,Math.min(5,parseInt(threat,10)||1)),status:status.trim(),note:note.trim()}; }
+  document.addEventListener('click',function(e){
+    if(e.target.closest&&e.target.closest('[data-doss-add]')){ var r=dossPrompt(); if(r&&r.code){ var d=dossiers(); d.unshift(r); lset('dossiers',d); renderDoss(); } return; }
+    var ed=e.target.closest&&e.target.closest('[data-doss-edit]'); if(ed){ var i=+ed.getAttribute('data-doss-edit'); var d=dossiers(); var r=dossPrompt(d[i]); if(r&&r.code){ d[i]=r; lset('dossiers',d); renderDoss(); } return; }
+    var dl=e.target.closest&&e.target.closest('[data-doss-del]'); if(dl){ var i2=+dl.getAttribute('data-doss-del'); if(confirm('Shred this dossier? It cannot be recovered.')){ var d2=dossiers(); d2.splice(i2,1); lset('dossiers',d2); renderDoss(); } return; }
   });
-}
 
-/* ---- bug sweep ---- */
-async function startSweep(){
-  const st=$('swStat');
-  try{
-    micStream=await navigator.mediaDevices.getUserMedia({audio:true});
-    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-    await audioCtx.resume();
-    const src=audioCtx.createMediaStreamSource(micStream);
-    const an=audioCtx.createAnalyser(); an.fftSize=1024; an.smoothingTimeConstant=.75;
-    src.connect(an);
-    const bins=new Uint8Array(an.frequencyBinCount);
-    const c=$('swCanvas'); const dpr=window.devicePixelRatio||1;
-    c.width=c.clientWidth*dpr; c.height=180*dpr;
-    const ctx=c.getContext('2d');
-    st.className='status good'; st.textContent='Sweeping — microphone live';
-    const draw=()=>{
-      an.getByteFrequencyData(bins);
-      ctx.fillStyle='#08122B'; ctx.fillRect(0,0,c.width,c.height);
-      const n=Math.min(bins.length,128), w=c.width/n;
-      let peak=0,peakI=0,sum=0;
-      for(let i=0;i<n;i++){
-        const v=bins[i]; sum+=v*v;
-        if(v>peak){peak=v;peakI=i;}
-        const h=(v/255)*c.height;
-        ctx.fillStyle = v>200 ? '#C4F000' : (v>110 ? '#7FA8D8' : '#1A3A6B');
-        ctx.fillRect(i*w, c.height-h, Math.max(w-1*dpr,1), h);
-      }
-      const rms=Math.sqrt(sum/n)/255;
-      $('swDb').innerHTML=(rms>0?Math.round(20*Math.log10(rms)):-99)+'<span class="unit">dB</span>';
-      const hz=Math.round(peakI*audioCtx.sampleRate/an.fftSize);
-      $('swHz').innerHTML=hz+'<span class="unit">Hz</span>';
-      rafId=requestAnimationFrame(draw);
-    };
-    draw();
-  }catch(e){
-    st.className='status bad';
-    st.textContent='Microphone refused: '+e.message+'. Needs HTTPS and permission.';
+  /* ================= Q-BRANCH ================= */
+  var GADGETS=[['Aston with the extras','Ejector seat. Obviously.'],['Wristwatch garrotte','Also tells the time.'],['Exploding pen','Click twice. Then run.'],['Jetpack','For a dramatic exit.'],['Laser cufflinks','Cuts glass and egos.'],['Rebreather','Ninety seconds of air.'],['Grappling belt','Rated to your weight. Probably.']];
+  function renderQ(){ $('[data-agent]').textContent=lget('agent','')||'—'; $('[data-agent-in]').value=lget('agent','');
+    var n=lget('missions-count',0); $('[data-clearance]').textContent='CLEARANCE · '+(n>=30?'00':n>=15?'A':n>=5?'B':'C');
+    var checked=lget('gadgets',{}); var host=$('[data-gadgets]');
+    host.innerHTML=GADGETS.map(function(g,i){ var on=checked[i]?' on':''; return '<div class="gadget"><div><div class="g-n">'+esc(g[0])+'</div><div class="g-d">'+esc(g[1])+'</div></div><div class="chk'+on+'" data-gadget="'+i+'"></div></div>'; }).join('');
   }
-}
-
-/* ---- motion trap ---- */
-async function startTrap(){
-  const st=$('trStat');
-  try{
-    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    const v=$('trVid'); v.srcObject=camStream; v.setAttribute('playsinline',''); await v.play();
-    try{ if('wakeLock' in navigator) wakeLock=await navigator.wakeLock.request('screen'); }catch(e){}
-    const W=64,H=48;
-    const work=document.createElement('canvas'); work.width=W; work.height=H;
-    const wctx=work.getContext('2d',{willReadFrequently:true});
-    const c=$('trCanvas'); const dpr=window.devicePixelRatio||1;
-    c.width=c.clientWidth*dpr; c.height=90*dpr;
-    const ctx=c.getContext('2d');
-    let prev=null,hits=0,cooldown=0;
-    const hist=new Array(60).fill(0);
-    st.className='status good'; st.textContent='Armed — watching';
-    trapTimer=setInterval(()=>{
-      wctx.drawImage(v,0,0,W,H);
-      const d=wctx.getImageData(0,0,W,H).data;
-      const g=new Uint8Array(W*H);
-      for(let i=0,p=0;i<d.length;i+=4,p++) g[p]=(d[i]*.299+d[i+1]*.587+d[i+2]*.114)|0;
-      let changed=0;
-      if(prev){ for(let p=0;p<g.length;p++) if(Math.abs(g[p]-prev[p])>26) changed++; }
-      prev=g;
-      const pct=(changed/g.length)*100;
-      $('trPct').innerHTML=pct.toFixed(1)+'<span class="unit">%</span>';
-      hist.push(pct); hist.shift();
-      ctx.fillStyle='#08122B'; ctx.fillRect(0,0,c.width,c.height);
-      const bw=c.width/hist.length;
-      hist.forEach((h,i)=>{
-        const hh=Math.min(h/25,1)*c.height;
-        ctx.fillStyle = h>4 ? '#C4F000':'#1A3A6B';
-        ctx.fillRect(i*bw, c.height-hh, Math.max(bw-1,1), hh);
-      });
-      if(cooldown>0) cooldown--;
-      if(pct>4 && cooldown===0){
-        hits++; cooldown=6;
-        $('trHits').textContent=hits;
-        const t=new Date();
-        $('trLog').insertAdjacentHTML('afterbegin',
-          `<div class="status good">Contact ${pad2(t.getHours())}:${pad2(t.getMinutes())}:${pad2(t.getSeconds())} — ${pct.toFixed(1)}%</div>`);
-      }
-    },350);
-  }catch(e){
-    st.className='status bad';
-    st.textContent='Camera refused: '+e.message+'. Needs HTTPS and permission.';
-  }
-}
-
-/* ---- compass & bearing ---- */
-async function startCompass(){
-  const ok=await requestMotion();
-  const st=$('cmStat');
-  if(ok){ st.className='status good'; st.textContent='Compass live'; $('roseTarget').style.display=''; }
-  else { st.className='status bad'; st.textContent='Motion permission refused or unavailable on this device.'; }
-  if(!lastFix) fixPosition();
-}
-function haversine(a,b,c,d){
-  const R=6371,r=Math.PI/180;
-  const dLat=(c-a)*r,dLon=(d-b)*r;
-  const x=Math.sin(dLat/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dLon/2)**2;
-  return 2*R*Math.asin(Math.sqrt(x));
-}
-function bearingTo(a,b,c,d){
-  const r=Math.PI/180;
-  const y=Math.sin((d-b)*r)*Math.cos(c*r);
-  const x=Math.cos(a*r)*Math.sin(c*r)-Math.sin(a*r)*Math.cos(c*r)*Math.cos((d-b)*r);
-  return (Math.atan2(y,x)/r+360)%360;
-}
-function updateBearing(){
-  const sel=$('tgtSel'); if(!sel||!lastFix) return;
-  const t=TARGETS[+sel.value];
-  const km=haversine(lastFix.latitude,lastFix.longitude,t.lat,t.lon);
-  const br=bearingTo(lastFix.latitude,lastFix.longitude,t.lat,t.lon);
-  $('tgtRange').textContent = km<1 ? Math.round(km*1000)+' m' : km.toFixed(1)+' km';
-  $('tgtBrg').textContent = Math.round(br)+'° '+cardinal(br);
-  const g=$('roseTarget');
-  if(g && headingDeg!=null) g.setAttribute('transform',`rotate(${br-headingDeg} 100 100)`);
-}
-
-/* ---- signal lamp ---- */
-const MORSE={A:".-",B:"-...",C:"-.-.",D:"-..",E:".",F:"..-.",G:"--.",H:"....",I:"..",J:".---",K:"-.-",L:".-..",M:"--",N:"-.",O:"---",P:".--.",Q:"--.-",R:".-.",S:"...",T:"-",U:"..-",V:"...-",W:".--",X:"-..-",Y:"-.--",Z:"--..",
-"0":"-----","1":".----","2":"..---","3":"...--","4":"....-","5":".....","6":"-....","7":"--...","8":"---..","9":"----."};
-function toMorse(s){
-  return s.toUpperCase().split(/\s+/).map(w=>w.split('').map(c=>MORSE[c]||'').filter(Boolean).join(' ')).filter(Boolean).join(' / ');
-}
-function previewMorse(){ $('mrOut').textContent=toMorse($('mrIn').value)||'—'; }
-let lampTimer=null;
-function startLamp(){
-  const unit=+$('mrSpeed').value;
-  const code=toMorse($('mrIn').value);
-  $('mrOut').textContent=code||'—';
-  if(!code) return;
-  const seq=[];
-  for(const ch of code){
-    if(ch==='.') seq.push([1,unit],[0,unit]);
-    else if(ch==='-') seq.push([1,unit*3],[0,unit]);
-    else if(ch===' ') seq.push([0,unit*2]);
-    else if(ch==='/') seq.push([0,unit*4]);
-  }
-  const lamp=$('lamp'); lamp.classList.add('on');
-  let i=0;
-  const step=()=>{
-    if(i>=seq.length){ stopLamp(); return; }
-    const [on,ms]=seq[i++];
-    lamp.style.background = on ? '#C4F000' : '#000';
-    lampTimer=setTimeout(step,ms);
-  };
-  step();
-}
-function stopLamp(){
-  if(lampTimer) clearTimeout(lampTimer), lampTimer=null;
-  const l=$('lamp'); if(l){ l.classList.remove('on'); l.style.background='#000'; }
-}
-
-/* ---- voice ---- */
-function fillVoices(){
-  const sel=$('vcVoice'); if(!sel) return;
-  const load=()=>{
-    const vs=speechSynthesis.getVoices();
-    sel.innerHTML = vs.length
-      ? vs.map((v,i)=>`<option value="${i}">${esc(v.name)} · ${esc(v.lang)}</option>`).join('')
-      : '<option>System default</option>';
-  };
-  load(); speechSynthesis.onvoiceschanged=load;
-}
-function speakBrief(){
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance($('vcIn').value);
-  const vs=speechSynthesis.getVoices(); const i=+$('vcVoice').value;
-  if(vs[i]) u.voice=vs[i];
-  u.rate=.94; u.pitch=.9;
-  speechSynthesis.speak(u);
-}
-
-/* ---- tremor ---- */
-async function startTremor(){
-  const st=$('tmStat');
-  try{
-    if(typeof DeviceMotionEvent!=='undefined' && DeviceMotionEvent.requestPermission){
-      const r=await DeviceMotionEvent.requestPermission();
-      if(r!=='granted'){ st.className='status bad'; st.textContent='Motion permission refused.'; return; }
-    }
-  }catch(e){ st.className='status bad'; st.textContent='Motion not available: '+e.message; return; }
-  const c=$('tmCanvas'); const dpr=window.devicePixelRatio||1;
-  c.width=c.clientWidth*dpr; c.height=150*dpr;
-  const ctx=c.getContext('2d');
-  const hist=new Array(90).fill(0);
-  let hits=0,cool=0;
-  st.className='status good'; st.textContent='Motion live';
-  window.addEventListener('devicemotion',e=>{
-    const a=e.accelerationIncludingGravity||{x:0,y:0,z:0};
-    const m=Math.abs(Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2)-9.81);
-    hist.push(m); hist.shift();
-    $('tmMag').textContent=m.toFixed(2);
-    if(cool>0) cool--;
-    if(m>2.2&&cool===0){ hits++; cool=25; $('tmHits').textContent=hits; }
-    ctx.fillStyle='#08122B'; ctx.fillRect(0,0,c.width,c.height);
-    ctx.strokeStyle='#C4F000'; ctx.lineWidth=2*dpr; ctx.beginPath();
-    hist.forEach((v,i)=>{
-      const x=(i/hist.length)*c.width, y=c.height-Math.min(v/8,1)*c.height;
-      i?ctx.lineTo(x,y):ctx.moveTo(x,y);
-    });
-    ctx.stroke();
+  document.addEventListener('click',function(e){
+    if(e.target.closest&&e.target.closest('[data-agent-save]')){ lset('agent',($('[data-agent-in]').value||'').trim()); renderQ(); return; }
+    var g=e.target.closest&&e.target.closest('[data-gadget]'); if(g){ var i=+g.getAttribute('data-gadget'); var c=lget('gadgets',{}); c[i]=!c[i]; lset('gadgets',c); g.classList.toggle('on'); return; }
+    if(e.target.closest&&e.target.closest('[data-selfdestruct]')){ var b=e.target.closest('[data-selfdestruct]'); var n=5; b.disabled=true; var iv=setInterval(function(){ b.textContent=n>0?('Self-destruct in '+n+'…'):'💥 BOOM. (Relax — nothing was harmed.)'; if(n<=0){ clearInterval(iv); setTimeout(function(){ b.textContent='Initiate self-destruct'; b.disabled=false; },1800); } n--; },700); return; }
   });
-}
 
-/* ================= SURVEILLANCE ================= */
-function renderFeeds(){
-  $('ytList').innerHTML=FEEDS.map(f=>{
-    if(f.yt) return `<div class="ytwrap"><iframe src="https://www.youtube.com/embed/${f.yt}?playsinline=1&mute=1" allow="autoplay; encrypted-media" allowfullscreen loading="lazy"></iframe></div>
-      <div class="note" style="margin:-4px 0 16px"><strong style="color:#fff">${esc(f.n)}</strong> — ${esc(f.d)}</div>`;
-    return `<div class="file" onclick="window.open('https://www.youtube.com/results?search_query=${encodeURIComponent(f.q)}','_blank')">
-      <div class="ref">Search feed</div><div class="cn">${esc(f.n)}</div><div class="rl">${esc(f.d)} — opens YouTube</div></div>`;
-  }).join('');
-}
-renderFeeds();
-
-$('windyKey').value = store.get('windyKey')||'';
-function saveKey(){
-  store.set('windyKey', $('windyKey').value.trim());
-  $('camStatus').innerHTML='<div class="status good">Key saved to this device.</div>';
-}
-async function loadCams(mode){
-  const key=($('windyKey').value||store.get('windyKey')||'').trim();
-  const s=$('camStatus'), grid=$('camGrid');
-  if(!key){ s.innerHTML='<div class="status bad">No API key. Paste a free Windy key above.</div>'; return; }
-  s.innerHTML='<div class="status">Requesting feeds…</div>'; grid.innerHTML='';
-  let url='https://api.windy.com/webcams/api/v3/webcams?limit=24&include=images,location';
-  if(mode==='near'){
-    if(!lastFix){ await new Promise(r=>navigator.geolocation.getCurrentPosition(p=>{lastFix=p.coords;r();},()=>r(),{timeout:9000})); }
-    if(!lastFix){ s.innerHTML='<div class="status bad">No position fix. Acquire one on HQ first.</div>'; return; }
-    url+=`&nearby=${lastFix.latitude.toFixed(3)},${lastFix.longitude.toFixed(3)},120`;
-  }
-  try{
-    const r=await fetch(url,{headers:{'x-windy-api-key':key}});
-    if(!r.ok){ s.innerHTML=`<div class="status bad">Windy returned ${r.status}. ${r.status===401?'Key rejected.':'Check the query parameters.'}</div>`; return; }
-    const d=await r.json();
-    const cams=d.webcams||[];
-    if(!cams.length){ s.innerHTML='<div class="status bad">No feeds returned for that area.</div>'; return; }
-    s.innerHTML=`<div class="status good">${cams.length} feeds acquired</div>`;
-    grid.innerHTML=cams.map(c=>{
-      const img=c.images?.current?.preview||c.images?.daylight?.preview||'';
-      const loc=c.location?.city||c.location?.country||'';
-      return `<div class="cam"><span class="live">LIVE</span>
-        ${img?`<img src="${esc(img)}" alt="" loading="lazy">`:'<div style="aspect-ratio:4/3"></div>'}
-        <div class="lbl">${esc(c.title||'Feed')}<br><span style="color:#93A6C6;font-weight:400">${esc(loc)}</span></div></div>`;
-    }).join('');
-  }catch(e){
-    s.innerHTML='<div class="status bad">Request failed: '+esc(e.message)+'</div>';
-  }
-}
-
-
-/* ================= WORLD BOARD (globe) ================= */
-const LAND=[[[-59.6,-80.0],[-60.2,-81.0],[-66.3,-80.3],[-59.6,-80.0]],[[-159.2,-79.5],[-163.7,-78.6],[-161.2,-78.4],[-159.2,-79.5]],[[-45.2,-78.0],[-43.9,-78.5],[-43.3,-80.0],[-50.5,-81.0],[-54.2,-80.6],[-48.7,-78.0],[-45.2,-78.0]],[[-99.0,-71.9],[-96.2,-72.5],[-100.8,-72.5],[-102.3,-71.9],[-99.0,-71.9]],[[-68.5,-71.0],[-68.8,-72.2],[-71.1,-72.5],[-75.0,-71.7],[-72.1,-71.2],[-71.7,-69.5],[-70.3,-68.9],[-68.5,-71.0]],[[-58.6,-64.2],[-62.0,-64.8],[-62.6,-65.5],[-62.1,-66.2],[-65.7,-68.0],[-61.8,-70.7],[-60.8,-73.7],[-70.6,-76.6],[-77.2,-76.7],[-73.7,-77.9],[-77.9,-78.4],[-78.0,-79.2],[-58.2,-83.2],[-49.8,-81.7],[-42.8,-82.1],[-28.5,-80.3],[-29.7,-79.3],[-35.6,-79.5],[-35.3,-78.1],[-17.5,-75.1],[-15.7,-74.5],[-16.5,-73.9],[-15.4,-73.1],[-10.3,-71.3],[-7.4,-71.7],[-6.9,-70.9],[-0.2,-71.6],[7.7,-69.9],[10.8,-70.8],[13.4,-70.0],[27.1,-70.5],[32.0,-69.7],[33.9,-68.5],[38.6,-69.8],[54.5,-65.8],[61.4,-68.0],[68.9,-67.9],[69.7,-69.2],[67.8,-70.3],[69.1,-70.7],[67.9,-71.9],[69.9,-72.3],[73.9,-69.9],[77.6,-69.5],[82.8,-67.2],[86.8,-67.2],[88.0,-66.2],[89.7,-67.2],[95.8,-67.4],[99.7,-67.2],[102.8,-65.6],[106.2,-66.9],[113.6,-65.9],[119.8,-67.3],[134.8,-66.2],[135.1,-65.3],[137.5,-67.0],[145.5,-66.9],[148.8,-68.4],[154.3,-68.6],[161.6,-70.6],[171.2,-71.7],[169.3,-73.7],[166.1,-74.4],[163.6,-76.2],[164.7,-78.2],[167.0,-78.8],[161.8,-79.2],[159.8,-80.9],[169.4,-83.8],[180,-84.7],[180,-90],[-180,-90],[-180,-84.7],[-179.1,-84.1],[-170.0,-83.9],[-158.1,-85.4],[-143.1,-85.0],[-153.6,-83.7],[-152.9,-82.0],[-156.8,-81.1],[-150.6,-81.3],[-146.4,-80.3],[-155.3,-79.1],[-158.1,-78.0],[-158.4,-76.9],[-151.3,-77.4],[-146.1,-76.5],[-146.2,-75.4],[-144.9,-75.2],[-113.9,-73.7],[-112.3,-74.7],[-100.6,-75.3],[-100.1,-74.9],[-102.5,-74.1],[-103.7,-72.6],[-96.3,-73.6],[-90.1,-73.3],[-89.2,-72.6],[-81.5,-73.9],[-80.3,-73.1],[-74.9,-73.9],[-67.4,-72.5],[-68.5,-69.7],[-67.4,-68.1],[-67.7,-67.3],[-63.0,-64.6],[-57.8,-63.3],[-57.2,-63.5],[-58.6,-64.2]],[[-67.8,-53.9],[-65.0,-54.7],[-69.2,-55.5],[-74.7,-52.8],[-71.1,-54.1],[-69.3,-52.5],[-67.8,-53.9]],[[145.4,-40.8],[148.3,-40.9],[147.9,-43.2],[146.0,-43.5],[144.7,-41.2],[145.4,-40.8]],[[173.0,-40.9],[174.2,-41.3],[173.1,-43.9],[171.5,-44.2],[169.3,-46.6],[166.7,-46.2],[167.0,-45.1],[173.0,-40.9]],[[174.6,-36.2],[176.8,-37.9],[178.5,-37.7],[175.2,-41.7],[174.9,-39.9],[173.8,-39.5],[174.7,-37.4],[172.6,-34.5],[174.6,-36.2]],[[50.1,-13.6],[50.4,-15.7],[49.7,-15.7],[47.1,-24.9],[45.4,-25.6],[44.0,-25.0],[43.3,-22.1],[44.4,-20.1],[44.4,-16.2],[47.7,-14.6],[49.2,-12.0],[50.1,-13.6]],[[143.6,-13.8],[145.4,-15.0],[146.4,-19.0],[148.8,-20.4],[153.1,-26.1],[152.9,-31.6],[150.0,-37.4],[146.3,-39.0],[145.0,-37.9],[143.6,-38.8],[140.6,-38.0],[139.6,-36.1],[138.1,-35.6],[138.2,-34.4],[136.8,-35.3],[137.8,-32.9],[136.0,-34.9],[134.3,-32.6],[131.3,-31.5],[126.1,-32.2],[123.7,-33.9],[119.9,-34.0],[118.0,-35.1],[115.0,-34.2],[115.7,-31.6],[113.3,-26.1],[114.2,-26.3],[113.4,-24.4],[114.1,-21.8],[114.2,-22.5],[116.7,-20.7],[120.9,-19.7],[123.0,-16.4],[123.9,-17.1],[123.5,-16.6],[125.7,-14.2],[127.1,-13.8],[129.6,-15.0],[130.6,-12.5],[132.6,-12.1],[131.8,-11.3],[132.4,-11.1],[135.3,-12.2],[136.5,-11.9],[137.0,-12.4],[135.5,-15.0],[140.2,-17.7],[141.7,-15.0],[142.1,-11.0],[143.6,-13.8]],[[108.6,-6.8],[110.8,-6.5],[115.7,-8.4],[108.3,-7.8],[105.4,-6.9],[106.1,-5.9],[108.6,-6.8]],[[152.0,-5.5],[150.2,-6.3],[148.3,-5.7],[150.8,-5.5],[151.5,-4.2],[152.3,-4.3],[152.0,-5.5]],[[134.1,-1.2],[134.4,-2.8],[135.5,-3.4],[138.3,-1.7],[144.6,-3.9],[147.6,-6.1],[147.2,-7.4],[150.7,-10.6],[147.9,-10.1],[144.7,-7.6],[142.6,-9.3],[139.1,-8.1],[137.6,-8.4],[138.7,-7.3],[137.9,-5.4],[133.7,-3.5],[133.0,-4.1],[132.0,-2.8],[133.7,-2.2],[130.5,-0.9],[132.4,-0.4],[134.1,-1.2]],[[125.2,1.4],[123.7,0.2],[120.2,0.2],[120.9,-1.4],[123.3,-0.6],[121.5,-1.9],[123.2,-5.3],[122.2,-5.3],[122.7,-4.5],[121.5,-4.6],[121.0,-2.6],[120.3,-2.9],[120.4,-5.5],[119.4,-5.4],[119.5,-3.5],[118.8,-2.8],[120.0,0.6],[120.9,1.3],[125.2,1.4]],[[105.8,-5.9],[102.6,-4.2],[95.3,5.5],[97.5,5.2],[103.8,0.1],[103.4,-0.7],[106.1,-3.1],[105.8,-5.9]],[[117.9,1.8],[119.0,0.9],[117.8,0.8],[116.1,-4.0],[110.2,-2.9],[109.1,-0.5],[109.7,2.0],[111.2,1.9],[111.4,2.7],[113.0,3.1],[116.7,6.9],[119.2,5.4],[117.3,3.2],[117.9,1.8]],[[126.4,8.4],[126.5,7.2],[126.2,6.3],[125.8,7.3],[125.4,6.8],[125.4,5.6],[124.2,6.2],[123.6,7.8],[121.9,7.2],[123.5,8.7],[125.5,9.0],[125.4,9.8],[126.4,8.4]],[[81.2,6.2],[79.9,6.8],[80.1,9.8],[81.8,7.5],[81.2,6.2]],[[121.3,18.5],[122.2,18.5],[122.5,17.1],[121.7,14.3],[124.0,13.8],[124.1,12.5],[120.6,13.9],[121.0,14.5],[120.1,15.0],[119.9,16.4],[121.3,18.5]],[[-72.6,19.9],[-68.3,18.6],[-70.7,18.4],[-71.4,17.6],[-73.9,18.0],[-74.4,18.7],[-72.3,18.7],[-73.4,19.6],[-72.6,19.9]],[[-79.7,22.8],[-74.2,20.3],[-77.8,19.9],[-77.1,20.4],[-78.7,21.6],[-81.8,22.6],[-85.0,21.9],[-82.3,23.2],[-79.7,22.8]],[[121.2,22.8],[120.7,22.0],[120.1,23.6],[121.5,25.3],[121.2,22.8]],[[141.0,37.1],[140.3,35.1],[137.2,34.6],[135.8,33.5],[135.1,34.6],[131.0,33.9],[132.0,33.1],[131.3,31.5],[130.2,31.4],[130.4,32.3],[129.4,33.3],[132.6,35.4],[135.7,35.5],[136.7,37.3],[137.4,36.8],[139.4,38.2],[140.3,41.2],[141.4,41.4],[141.9,40.0],[141.0,37.1]],[[143.9,44.2],[145.3,44.4],[145.5,43.3],[143.2,42.0],[141.6,42.7],[141.1,41.6],[140.0,41.6],[139.8,42.6],[141.4,43.4],[142.0,45.6],[143.9,44.2]],[[-123.5,48.5],[-125.7,48.8],[-128.4,50.8],[-125.8,50.3],[-123.5,48.5]],[[-56.1,50.7],[-56.8,49.8],[-53.5,49.2],[-53.8,48.5],[-53.1,48.7],[-52.6,47.5],[-53.1,46.7],[-54.2,46.8],[-54.2,47.8],[-55.4,46.9],[-56.3,47.6],[-59.3,47.6],[-57.4,50.7],[-55.9,51.6],[-56.1,50.7]],[[143.6,50.7],[144.7,49.0],[143.2,49.3],[142.6,47.9],[143.5,46.1],[142.7,46.7],[142.1,46.0],[141.7,53.3],[142.7,54.4],[143.6,50.7]],[[-6.8,52.3],[-10.0,51.8],[-9.2,52.9],[-9.7,53.9],[-6.7,55.2],[-5.7,54.6],[-6.8,52.3]],[[-3.0,58.6],[-4.1,57.6],[-2.0,57.7],[-3.1,56.0],[1.7,52.7],[1.4,51.3],[-5.2,50.0],[-3.4,51.4],[-5.3,52.0],[-4.2,52.3],[-4.6,53.5],[-2.9,54.0],[-4.8,54.8],[-5.0,55.8],[-5.6,55.3],[-6.1,56.8],[-5.0,58.6],[-3.0,58.6]],[[-85.2,65.7],[-80.1,63.7],[-87.2,63.5],[-85.9,65.7],[-85.2,65.7]],[[-14.5,66.5],[-14.7,65.8],[-13.6,65.1],[-18.7,63.5],[-22.8,64.0],[-21.8,64.4],[-24.0,64.9],[-22.2,65.4],[-24.3,65.6],[-22.1,66.4],[-20.6,65.7],[-14.5,66.5]],[[-175.0,66.6],[-171.9,66.9],[-169.9,66.0],[-172.5,65.4],[-173.0,64.3],[-178.4,65.4],[-178.7,66.1],[-179.9,65.9],[-180,65.0],[-180,69.0],[-174.9,67.2],[-175.0,66.6]],[[-90.5,69.5],[-90.6,68.5],[-89.2,69.3],[-87.4,67.2],[-85.6,68.8],[-85.5,69.9],[-82.6,69.7],[-81.3,69.2],[-82.0,68.1],[-81.3,67.6],[-83.3,66.4],[-85.8,66.6],[-87.3,64.8],[-93.2,62.0],[-94.7,58.9],[-93.2,58.8],[-92.3,57.1],[-82.3,55.1],[-82.1,53.3],[-79.9,51.2],[-78.6,52.6],[-79.8,54.7],[-76.5,56.5],[-78.5,58.8],[-77.3,59.9],[-78.1,62.3],[-73.8,62.4],[-69.6,61.1],[-69.3,59.0],[-67.6,58.2],[-64.6,60.3],[-61.4,57.0],[-61.8,56.3],[-57.3,54.6],[-55.8,53.3],[-55.7,52.1],[-60.0,50.2],[-66.4,50.2],[-71.1,46.8],[-65.1,49.2],[-64.2,48.7],[-65.1,48.1],[-64.5,46.2],[-61.5,45.9],[-60.5,47.0],[-59.8,45.9],[-65.4,43.5],[-66.2,44.5],[-64.4,45.3],[-67.1,45.1],[-70.7,43.0],[-70.0,41.6],[-73.7,40.9],[-71.9,40.9],[-74.0,40.8],[-74.9,38.9],[-75.5,39.5],[-75.1,38.4],[-75.9,37.2],[-76.3,39.2],[-76.3,38.1],[-77.0,38.2],[-75.7,35.6],[-81.3,31.4],[-80.1,26.9],[-80.4,25.2],[-81.7,25.9],[-84.1,30.1],[-89.2,30.3],[-89.2,29.3],[-90.2,29.1],[-93.8,29.7],[-96.6,28.3],[-97.4,27.4],[-97.9,22.4],[-96.3,19.3],[-94.4,18.1],[-92.0,18.7],[-90.8,19.3],[-90.3,21.0],[-87.1,21.5],[-88.9,15.9],[-83.4,15.3],[-83.8,11.1],[-81.4,8.8],[-79.6,9.6],[-76.8,8.6],[-74.9,11.1],[-71.8,12.4],[-71.1,12.1],[-71.9,11.4],[-71.7,9.1],[-71.4,11.0],[-69.9,12.2],[-68.2,10.6],[-64.9,10.1],[-61.9,10.7],[-62.4,9.9],[-57.1,6.0],[-54.0,5.8],[-51.3,4.2],[-50.0,1.7],[-50.4,-0.1],[-48.6,-0.2],[-48.6,-1.2],[-47.8,-0.6],[-44.9,-1.6],[-44.6,-2.7],[-40.0,-2.9],[-35.6,-5.1],[-34.7,-7.3],[-35.1,-9.0],[-38.7,-13.1],[-39.3,-17.9],[-40.9,-21.9],[-47.6,-24.9],[-48.9,-28.7],[-53.8,-34.4],[-56.2,-34.9],[-58.4,-33.9],[-56.8,-36.9],[-59.2,-38.7],[-62.3,-38.8],[-62.7,-41.0],[-65.1,-41.1],[-65.0,-42.1],[-63.5,-42.6],[-65.2,-43.5],[-65.6,-45.0],[-67.3,-45.6],[-67.6,-46.3],[-65.6,-47.2],[-66.0,-48.1],[-69.1,-50.7],[-68.2,-52.3],[-70.8,-52.9],[-71.0,-53.8],[-74.9,-52.3],[-75.6,-48.7],[-74.1,-46.9],[-75.6,-46.6],[-74.4,-44.1],[-73.2,-44.5],[-72.7,-42.4],[-74.3,-43.2],[-73.2,-39.3],[-73.6,-37.2],[-71.4,-32.4],[-70.2,-19.8],[-71.5,-17.4],[-76.0,-14.6],[-79.8,-7.2],[-81.2,-6.1],[-81.4,-4.7],[-79.8,-2.7],[-81.0,-2.2],[-80.9,-1.1],[-77.1,3.8],[-78.2,8.3],[-79.6,8.9],[-80.9,7.2],[-85.7,9.9],[-87.5,13.3],[-91.2,13.9],[-94.7,16.2],[-96.6,15.7],[-103.5,18.3],[-105.5,19.9],[-106.0,22.8],[-113.9,31.6],[-114.8,31.8],[-114.7,30.2],[-109.4,23.4],[-110.0,22.8],[-112.2,24.7],[-112.3,26.0],[-115.1,27.7],[-114.2,28.6],[-117.3,33.0],[-120.6,34.6],[-124.4,40.3],[-123.9,45.5],[-124.7,48.2],[-123.1,48.0],[-122.6,47.1],[-122.8,49.0],[-127.4,50.8],[-127.9,52.3],[-129.1,52.8],[-134.1,58.1],[-147.1,60.9],[-151.7,59.2],[-150.6,61.3],[-154.0,59.4],[-153.3,58.9],[-154.2,58.1],[-158.4,56.0],[-164.8,54.4],[-157.7,57.6],[-157.0,58.9],[-162.0,58.7],[-161.9,59.6],[-163.8,59.8],[-166.1,61.5],[-164.6,63.1],[-160.8,63.8],[-161.5,64.4],[-160.8,64.8],[-165.0,64.4],[-168.1,65.7],[-164.5,66.6],[-161.7,66.1],[-166.8,68.4],[-156.6,71.4],[-136.5,68.9],[-128.1,70.5],[-125.8,69.5],[-124.4,70.2],[-124.3,69.4],[-121.5,69.8],[-115.2,68.9],[-113.9,68.4],[-115.3,67.9],[-108.9,67.4],[-107.8,67.9],[-108.8,68.3],[-108.2,68.7],[-106.2,68.8],[-101.5,67.6],[-98.4,67.8],[-97.7,68.6],[-96.1,68.2],[-96.1,67.3],[-94.2,69.1],[-96.5,70.1],[-96.4,71.2],[-95.2,71.9],[-92.9,71.3],[-91.5,70.2],[-92.4,69.7],[-90.5,69.5]],[[-114.2,73.1],[-114.7,72.7],[-111.1,72.5],[-109.9,73.0],[-108.2,71.7],[-107.7,72.1],[-108.4,73.1],[-106.5,73.1],[-104.5,71.0],[-101.1,69.6],[-102.7,69.5],[-102.4,68.8],[-116.1,69.2],[-117.3,70.0],[-112.4,70.4],[-117.9,70.5],[-116.1,71.3],[-119.4,71.6],[-117.9,72.7],[-114.2,73.1]],[[-86.6,73.2],[-85.8,72.5],[-82.3,73.8],[-80.6,72.7],[-80.7,72.1],[-77.8,72.7],[-74.1,71.3],[-72.2,71.6],[-67.9,70.1],[-67.0,69.2],[-68.8,68.7],[-61.9,66.9],[-63.9,65.0],[-68.0,66.3],[-64.7,63.4],[-65.0,62.7],[-68.8,63.7],[-66.2,61.9],[-74.8,64.7],[-77.7,64.2],[-78.6,64.6],[-77.9,65.3],[-74.0,65.5],[-72.9,67.7],[-79.0,70.2],[-88.7,70.4],[-89.5,70.8],[-88.5,71.2],[-89.9,71.2],[-90.2,72.2],[-88.4,73.5],[-85.8,73.8],[-86.6,73.2]],[[-100.4,73.8],[-97.4,73.8],[-98.1,73.0],[-96.5,72.6],[-96.7,71.7],[-99.3,71.4],[-102.5,72.5],[-100.4,72.7],[-101.5,73.4],[-100.4,73.8]],[[-93.2,72.8],[-95.4,72.1],[-96.0,73.4],[-94.5,74.1],[-90.5,73.9],[-93.2,72.8]],[[-120.5,71.4],[-123.1,70.9],[-125.9,71.9],[-123.9,73.7],[-124.9,74.3],[-117.6,74.2],[-115.5,73.5],[-119.2,72.5],[-120.5,71.4]],[[145.1,75.6],[144.3,74.8],[139.0,74.6],[137.0,75.3],[138.8,76.1],[145.1,75.6]],[[-98.5,76.7],[-97.7,76.3],[-98.2,75],[-102.5,75.6],[-102.6,76.3],[-98.5,76.7]],[[-108.2,76.2],[-105.9,76.0],[-106.3,75.0],[-113.7,74.4],[-111.8,75.2],[-117.7,75.2],[-115.4,76.5],[-109.1,75.5],[-110.5,76.4],[-108.2,76.2]],[[57.5,70.7],[51.6,71.5],[55.6,75.1],[61.2,76.3],[68.9,76.5],[58.5,74.3],[55.4,72.4],[57.5,70.7]],[[-94.7,77.1],[-89.2,75.6],[-81.1,75.7],[-79.8,74.9],[-92.4,74.8],[-93.9,76.3],[-97.1,76.8],[-94.7,77.1]],[[-116.2,77.6],[-117.1,76.5],[-122.9,76.1],[-116.2,77.6]],[[107.0,77.0],[114.1,75.8],[109.4,74.2],[123.2,73.0],[123.3,73.7],[127.0,73.6],[131.3,70.8],[132.3,71.8],[139.9,71.5],[139.1,72.4],[140.5,72.8],[149.5,72.2],[153.0,70.8],[159.0,70.9],[160.9,69.4],[167.8,69.6],[169.6,68.7],[170.8,69.0],[170.0,69.7],[170.5,70.1],[178.6,69.4],[180,69.0],[180,65.0],[177.4,64.6],[179.5,62.6],[173.7,61.7],[170.3,59.9],[168.9,60.6],[163.5,59.9],[162.0,58.2],[163.2,57.6],[162.1,54.9],[160.4,54.3],[160.0,53.2],[158.5,53.0],[156.8,51.0],[155.4,55.4],[155.9,56.8],[163.7,61.1],[164.5,62.6],[160.1,60.5],[159.3,61.8],[156.7,61.4],[154.2,59.8],[155.0,59.1],[151.3,58.8],[151.3,59.5],[149.8,59.7],[142.2,59.0],[135.1,54.7],[138.2,53.8],[139.9,54.2],[141.4,52.2],[140.1,48.4],[138.2,46.3],[134.9,43.4],[132.3,43.3],[127.5,39.8],[129.5,36.8],[129.1,35.1],[126.5,34.4],[126.1,36.7],[126.9,36.9],[124.7,38.1],[125.3,39.6],[121.1,38.9],[122.2,40.4],[121.6,40.9],[118.0,39.2],[117.5,38.7],[118.9,37.4],[122.4,37.5],[119.2,34.9],[121.9,31.7],[121.3,30.7],[122.1,29.8],[121.7,28.2],[118.7,24.5],[115.9,22.8],[110.8,21.4],[110.4,20.3],[108.5,21.7],[105.9,19.8],[109.3,13.4],[109.2,11.7],[105.2,8.6],[105.1,9.9],[100.1,13.4],[99.2,9.2],[103.0,5.5],[104.2,1.3],[101.4,2.8],[100.1,6.5],[98.5,8.4],[98.3,7.8],[98.8,11.4],[97.2,16.9],[95.4,15.7],[94.2,16.0],[94.3,18.2],[91.4,22.8],[90.5,22.8],[90.3,21.8],[87.0,21.5],[86.5,20.2],[80.3,15.9],[79.9,10.4],[77.5,8.0],[73.5,16.0],[72.6,21.4],[70.5,20.9],[66.4,25.4],[57.4,25.7],[56.5,27.1],[54.7,26.5],[51.5,27.9],[50.1,30.1],[48.0,30.0],[50.8,24.8],[51.0,26.0],[51.6,25.8],[51.8,24.0],[54.0,24.1],[56.4,26.4],[56.8,24.2],[59.8,22.3],[57.8,20.2],[57.7,18.9],[55.3,17.2],[48.7,14.0],[43.5,12.6],[42.6,16.8],[39.1,21.3],[38.5,23.7],[34.6,28.1],[34.9,29.5],[33.9,27.6],[32.4,29.9],[35.5,23.1],[36.9,22.0],[37.5,18.6],[43.3,12.4],[42.7,11.7],[44.6,10.4],[51.1,12.0],[51.0,10.6],[47.7,4.2],[40.3,-2.6],[39.2,-4.7],[38.8,-6.5],[40.5,-10.8],[40.8,-14.7],[39.5,-16.7],[34.8,-19.8],[35.6,-23.7],[32.6,-25.7],[32.2,-28.8],[28.2,-32.8],[25.8,-33.9],[19.6,-34.8],[18.4,-34.1],[18.2,-31.7],[15.2,-27.1],[14.3,-22.1],[11.8,-18.1],[11.8,-15.8],[13.7,-10.7],[11.9,-5.0],[8.8,-1.1],[9.4,3.7],[8.5,4.8],[5.9,4.3],[4.3,6.3],[-2.0,4.7],[-9.0,4.8],[-12.4,7.3],[-16.6,12.2],[-17.6,14.7],[-16.1,18.1],[-17.0,21.9],[-14.4,26.3],[-9.6,29.9],[-9.3,32.6],[-5.9,35.8],[-2.2,35.2],[1.5,36.6],[9.5,37.4],[11.1,36.9],[10.3,33.8],[19.1,30.3],[20.1,32.2],[21.5,32.8],[28.9,30.9],[31.0,31.6],[33.8,31.0],[36.0,34.6],[36.2,36.7],[27.6,36.7],[26.2,39.5],[29.2,41.2],[33.5,42.0],[38.3,40.9],[41.7,42.0],[36.7,45.2],[39.1,47.3],[35.0,46.3],[36.3,45.1],[33.9,44.4],[32.5,45.3],[33.3,46.1],[30.7,46.6],[27.7,42.6],[28.8,41.1],[26.4,40.2],[24.9,40.9],[23.7,40.7],[23.9,40.0],[22.6,40.3],[24.0,37.7],[23.1,37.9],[23.2,36.4],[22.5,36.4],[19.4,40.3],[19.5,41.7],[13.1,45.7],[12.3,45.4],[12.6,44.1],[18.5,40.2],[16.9,40.4],[17.1,38.9],[16.1,38.0],[15.4,40.0],[8.9,44.4],[6.5,43.1],[3.1,43.1],[3.0,41.9],[0.8,41.0],[0.1,38.7],[-2.1,36.7],[-5.4,35.9],[-6.5,36.9],[-8.9,36.9],[-9.4,43.0],[-1.4,44.0],[-1.2,46.0],[-4.6,48.7],[-1.6,48.6],[-1.9,49.8],[1.3,50.1],[4.7,53.1],[8.1,53.5],[8.8,54.0],[8.1,55.5],[8.5,57.1],[10.6,57.7],[10.9,56.5],[9.7,55.5],[10.9,54.0],[19.7,54.4],[21.3,55.2],[21.6,57.4],[24.1,57.0],[24.4,58.4],[23.3,59.2],[29.1,60.0],[22.9,59.8],[21.3,60.7],[21.5,63.2],[25.4,65.1],[23.9,66.0],[22.2,65.7],[21.4,64.4],[17.8,62.7],[17.1,61.3],[18.8,60.1],[16.8,58.7],[15.9,56.1],[12.9,55.4],[10.4,59.5],[8.4,58.3],[5.7,58.6],[5.0,62.0],[10.5,64.5],[14.8,67.8],[24.5,71.0],[28.2,71.2],[31.3,70.5],[30.0,70.2],[31.1,69.6],[40.3,67.9],[41.1,66.8],[40.0,66.3],[33.2,66.6],[34.8,65.9],[34.9,64.4],[37.0,63.8],[36.5,64.8],[37.2,65.1],[39.6,64.5],[40.4,64.8],[39.8,65.5],[42.1,66.5],[43.9,66.1],[44.5,66.8],[43.5,68.6],[46.3,68.3],[46.8,67.7],[45.6,67.0],[46.3,66.7],[53.7,68.9],[54.5,68.8],[53.5,68.2],[58.8,68.9],[59.9,68.3],[61.1,68.9],[60.0,69.5],[60.6,69.9],[68.5,68.1],[69.2,68.6],[66.9,69.5],[66.7,71.0],[69.2,72.8],[72.6,72.8],[71.8,71.4],[72.8,70.4],[72.6,69.0],[73.7,68.4],[71.3,66.3],[72.4,66.2],[75.1,67.8],[74.9,69.0],[73.6,69.6],[74.4,70.6],[73.1,71.4],[74.9,72.1],[74.7,72.8],[75.7,72.3],[75.3,71.3],[76.4,71.2],[75.9,71.9],[77.6,72.3],[81.5,71.8],[80.5,73.6],[86.8,73.9],[86.0,74.5],[87.2,75.1],[100.8,76.4],[104.4,77.7],[107.0,77.0]],[[-100.1,78.3],[-105.2,78.4],[-104.2,78.7],[-105.5,79.3],[-100.1,78.3]],[[105.1,78.3],[99.4,77.9],[102.1,79.3],[105.1,78.3]],[[18.3,79.7],[21.5,79.0],[15.9,76.8],[10.4,79.7],[18.3,79.7]],[[25.4,80.4],[27.4,80.1],[23.0,79.4],[17.4,80.3],[25.4,80.4]],[[99.9,78.9],[95.0,79.0],[91.2,80.3],[95.9,81.3],[100.2,79.8],[99.9,78.9]],[[-87.0,79.7],[-85.8,79.3],[-90.8,78.2],[-96.7,80.2],[-92.4,81.3],[-87.0,79.7]],[[-68.5,83.1],[-61.9,82.4],[-67.7,81.5],[-65.5,81.5],[-71.2,79.8],[-76.9,79.3],[-75.4,78.5],[-79.8,77.2],[-77.9,76.8],[-80.6,76.2],[-89.5,76.5],[-87.8,77.2],[-88.3,77.9],[-85.0,77.5],[-88.0,78.4],[-85.1,79.3],[-86.9,80.3],[-81.8,80.5],[-87.6,80.5],[-91.6,81.9],[-79.3,83.1],[-68.5,83.1]],[[-27.1,83.5],[-20.8,82.7],[-31.4,82.0],[-22.9,82.1],[-22.1,81.7],[-23.2,81.2],[-15.8,81.9],[-12.2,81.3],[-20.0,80.2],[-17.7,80.1],[-19.7,78.8],[-19.7,77.6],[-18.5,77.0],[-21.7,76.6],[-19.8,76.1],[-19.6,75.2],[-20.7,75.2],[-19.4,74.3],[-23.6,73.3],[-22.3,72.2],[-24.8,72.3],[-21.8,70.7],[-25.5,71.4],[-25.2,70.8],[-26.4,70.2],[-22.3,70.1],[-39.8,65.5],[-42.8,62.7],[-42.4,61.9],[-43.4,60.1],[-48.3,60.9],[-51.6,63.6],[-54.0,67.2],[-50.9,69.9],[-54.7,69.6],[-54.4,70.8],[-51.4,70.6],[-55.8,71.7],[-54.7,72.6],[-58.6,75.5],[-68.5,76.1],[-71.4,77.0],[-66.8,77.4],[-73.3,78.0],[-65.7,79.4],[-68.0,80.1],[-62.2,81.3],[-62.7,81.8],[-50.4,82.4],[-44.5,81.7],[-46.8,82.6],[-43.4,83.2],[-27.1,83.5]]];
-let gLon=0,gLat=18,gDrag=false,gLastX=0,gLastY=0,gSpin=0.13,globeRaf=null,gSweep=0;
-var quakes=[], aircraft=[], TRACK=[], issTrail=[], acSource='—';   // declared here: drawGlobe reads all three on the first frame
-let issPos=null,issFail=false;
-
-function projPt(lon,lat,cx,cy,R){
-  const l=(lon-gLon)*Math.PI/180, ph=lat*Math.PI/180, p1=gLat*Math.PI/180;
-  const c=Math.sin(p1)*Math.sin(ph)+Math.cos(p1)*Math.cos(ph)*Math.cos(l);
-  if(c<0) return null;
-  const x=Math.cos(ph)*Math.sin(l);
-  const y=Math.cos(p1)*Math.sin(ph)-Math.sin(p1)*Math.cos(ph)*Math.cos(l);
-  return [cx+x*R, cy-y*R];
-}
-
-function drawGlobe(){
-  const c=document.getElementById('globe');
-  if(!c){ globeRaf=null; return; }
-  if(currentView!=='hq'){ globeRaf=requestAnimationFrame(drawGlobe); return; }
-  const dpr=Math.min(window.devicePixelRatio||1,2);
-  const size=c.clientWidth;
-  if(c.width!==size*dpr){ c.width=size*dpr; c.height=size*dpr; }
-  const ctx=c.getContext('2d');
-  const W=c.width, cx=W/2, cy=W/2, R=W*0.44;
-
-  ctx.clearRect(0,0,W,W);
-
-  // ocean disc
-  ctx.beginPath(); ctx.arc(cx,cy,R,0,7); 
-  ctx.fillStyle='#08122B'; ctx.fill();
-
-  // graticule
-  ctx.strokeStyle='#1A3A6B'; ctx.lineWidth=1*dpr;
-  for(let lat=-60;lat<=60;lat+=30){
-    ctx.beginPath(); let started=false;
-    for(let lon=-180;lon<=180;lon+=4){
-      const p=projPt(lon,lat,cx,cy,R);
-      if(!p){started=false;continue;}
-      started?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]); started=true;
-    }
-    ctx.stroke();
-  }
-  for(let lon=-180;lon<180;lon+=30){
-    ctx.beginPath(); let started=false;
-    for(let lat=-90;lat<=90;lat+=4){
-      const p=projPt(lon,lat,cx,cy,R);
-      if(!p){started=false;continue;}
-      started?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]); started=true;
-    }
-    ctx.stroke();
-  }
-
-  // land
-  ctx.lineWidth=1.4*dpr;
-  for(const ring of LAND){
-    ctx.beginPath(); let started=false, any=false;
-    for(const [lon,lat] of ring){
-      const pt=projPt(lon,lat,cx,cy,R);
-      if(!pt){ if(started){ctx.stroke();} started=false; continue; }
-      if(!started){ ctx.beginPath(); ctx.moveTo(pt[0],pt[1]); started=true; }
-      else ctx.lineTo(pt[0],pt[1]);
-      any=true;
-    }
-    if(started){ ctx.strokeStyle='#C4F000'; ctx.stroke(); }
-  }
-
-  // radar sweep
-  gSweep=(gSweep+0.9)%360;
-  const sw=gSweep*Math.PI/180;
-  const grad=ctx.createLinearGradient(cx,cy,cx+Math.cos(sw)*R,cy+Math.sin(sw)*R);
-  grad.addColorStop(0,'rgba(196,240,0,0.20)');
-  grad.addColorStop(1,'rgba(196,240,0,0)');
-  ctx.beginPath(); ctx.moveTo(cx,cy);
-  ctx.arc(cx,cy,R,sw-0.42,sw); ctx.closePath();
-  ctx.fillStyle=grad; ctx.fill();
-
-  // limb
-  ctx.beginPath(); ctx.arc(cx,cy,R,0,7);
-  ctx.strokeStyle='#C4F000'; ctx.lineWidth=2*dpr; ctx.stroke();
-
-  // pins
-  const pin=(lon,lat,col,label,r)=>{
-    const pt=projPt(lon,lat,cx,cy,R); if(!pt) return;
-    ctx.beginPath(); ctx.arc(pt[0],pt[1],r*dpr,0,7); ctx.fillStyle=col; ctx.fill();
-    if(label){
-      ctx.font=`${9*dpr}px ui-monospace,monospace`; ctx.fillStyle=col;
-      ctx.fillText(label, pt[0]+7*dpr, pt[1]-6*dpr);
-    }
-  };
-  TARGETS.forEach(t=>pin(t.lon,t.lat,'#93A6C6','',2.5));
-  quakes.forEach(q=>pin(q.lon,q.lat,'#FF6B6B','',1.2+q.mag*0.45));
-  aircraft.slice(0,12).forEach(a=>pin(a.lon,a.lat,'#FFFFFF','',1.6));
-  if(TRACK.length>1){
-    ctx.beginPath(); let on=false;
-    for(const t of TRACK){
-      const pt=projPt(t[1],t[0],cx,cy,R);
-      if(!pt){ on=false; continue; }
-      on?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1]); on=true;
-    }
-    ctx.strokeStyle='#C4F000'; ctx.lineWidth=2*dpr; ctx.stroke();
-  }
-  if(lastFix) pin(lastFix.longitude,lastFix.latitude,'#FFFFFF','YOU',4);
-  if(issPos){
-    const pt=projPt(issPos.longitude,issPos.latitude,cx,cy,R);
-    if(pt){
-      const pulse=3+Math.sin(Date.now()/220)*1.6;
-      ctx.beginPath(); ctx.arc(pt[0],pt[1],(pulse+5)*dpr,0,7);
-      ctx.strokeStyle='rgba(196,240,0,.45)'; ctx.lineWidth=1.5*dpr; ctx.stroke();
-      pin(issPos.longitude,issPos.latitude,'#C4F000','ISS',pulse);
-    }
-  }
-
-  if(!gDrag) gLon=(gLon+gSpin)%360;
-  globeRaf=requestAnimationFrame(drawGlobe);
-}
-
-function initGlobe(){
-  const c=document.getElementById('globe'); if(!c) return;
-  const pos=e=>{const t=e.touches?e.touches[0]:e;return[t.clientX,t.clientY];};
-  const down=e=>{gDrag=true;[gLastX,gLastY]=pos(e);};
-  const move=e=>{
-    if(!gDrag) return;
-    const [x,y]=pos(e);
-    gLon=(gLon-(x-gLastX)*0.45)%360;
-    gLat=Math.max(-85,Math.min(85,gLat+(y-gLastY)*0.35));
-    gLastX=x; gLastY=y;
-    e.preventDefault();
-  };
-  const up=()=>{gDrag=false;};
-  c.addEventListener('touchstart',down,{passive:true});
-  c.addEventListener('touchmove',move,{passive:false});
-  c.addEventListener('touchend',up);
-  c.addEventListener('mousedown',down);
-  window.addEventListener('mousemove',move);
-  window.addEventListener('mouseup',up);
-  if(!globeRaf) drawGlobe();
-}
-
-async function pollISS(){
-  const tag=document.getElementById('issTag');
-  try{
-    const r=await fetch('https://api.wheretheiss.at/v1/satellites/25544');
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const d=await r.json();
-    issPos=d; issFail=false;
-    issTrail.push([d.longitude,d.latitude]); issTrail=issTrail.slice(-140);
-    if(tag) tag.textContent=`ISS · ${d.latitude.toFixed(1)}°, ${d.longitude.toFixed(1)}° · ${Math.round(d.altitude)} km · ${Math.round(d.velocity).toLocaleString()} km/h`;
-  }catch(e){
-    issFail=true;
-    if(tag) tag.textContent='ISS · feed unavailable';
-  }
-}
-initGlobe(); pollISS(); setInterval(pollISS,8000);
-setTimeout(renderAstro,60); setInterval(renderAstro,60000);
-
-/* ================= ID CARD ================= */
-let cardImg=null;
-function cardPhoto(input){
-  const f=input.files&&input.files[0]; if(!f) return;
-  const img=new Image();
-  img.onload=()=>{ cardImg=img; const st=document.getElementById('cdStat');
-    if(st){st.className='status good';st.textContent='Photograph on file.';} drawCard(); };
-  img.onerror=()=>{ const st=document.getElementById('cdStat');
-    if(st){st.className='status bad';st.textContent='Could not read that image.';} };
-  img.src=URL.createObjectURL(f);
-}
-function drawCard(){
-  const c=document.getElementById('cardCanvas'); if(!c) return;
-  const ctx=c.getContext('2d'), W=c.width, H=c.height;
-  ctx.fillStyle='#0D1B3E'; ctx.fillRect(0,0,W,H);
-
-  // diagonal watermark field
-  ctx.save(); ctx.globalAlpha=.06; ctx.strokeStyle='#C4F000'; ctx.lineWidth=2;
-  for(let i=-H;i<W;i+=22){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+H,H); ctx.stroke(); }
-  ctx.restore();
-
-  // header bar
-  ctx.fillStyle='#08122B'; ctx.fillRect(0,0,W,92);
-  ctx.fillStyle='#FFFFFF'; ctx.font='800 34px Montserrat,sans-serif';
-  ctx.fillText('KEN',44,60); const kw=ctx.measureText('KEN').width;
-  ctx.fillStyle='#C4F000'; ctx.fillText('NEL',44+kw,60);
-  ctx.fillStyle='#93A6C6'; ctx.font='600 15px ui-monospace,monospace';
-  ctx.fillText('HOUSE Ó CONGHAILE · INTELLIGENCE BRANCH', 44, 82);
-
-  // photo frame
-  const px=44,py=132,pw=248,ph=310;
-  ctx.fillStyle='#16305E'; ctx.fillRect(px,py,pw,ph);
-  if(cardImg){
-    const r=Math.max(pw/cardImg.width, ph/cardImg.height);
-    const dw=cardImg.width*r, dh=cardImg.height*r;
-    ctx.save(); ctx.beginPath(); ctx.rect(px,py,pw,ph); ctx.clip();
-    ctx.drawImage(cardImg, px+(pw-dw)/2, py+(ph-dh)/2, dw, dh);
-    ctx.restore();
-  }else{
-    ctx.fillStyle='#93A6C6'; ctx.font='600 14px ui-monospace,monospace';
-    ctx.textAlign='center';
-    ctx.fillText('NO PHOTOGRAPH', px+pw/2, py+ph/2-8);
-    ctx.fillText('ON FILE', px+pw/2, py+ph/2+14);
-    ctx.textAlign='left';
-  }
-  ctx.strokeStyle='#C4F000'; ctx.lineWidth=3; ctx.strokeRect(px,py,pw,ph);
-
-  // detail block
-  const tx=330;
-  const val=id=>{const e=document.getElementById(id);return e?e.value.toUpperCase():'';};
-  const row=(k,v,y,big)=>{
-    ctx.fillStyle='#93A6C6'; ctx.font='600 13px ui-monospace,monospace';
-    ctx.fillText(k, tx, y);
-    ctx.fillStyle= big?'#C4F000':'#FFFFFF';
-    ctx.font= big?'800 46px Montserrat,sans-serif':'600 26px Montserrat,sans-serif';
-    ctx.fillText(v, tx, y+ (big?48:32));
-  };
-  row('CODENAME', val('cdName')||'—', 150, true);
-  row('CLEARANCE', val('cdClear')||'—', 250, false);
-  row('FILE REFERENCE', val('cdRef')||'—', 330, false);
-  row('ISSUED', new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase(), 410, false);
-
-  // chip
-  ctx.fillStyle='#C4F000'; ctx.fillRect(W-138,150,86,64);
-  ctx.strokeStyle='#0D1B3E'; ctx.lineWidth=3;
-  for(let i=1;i<4;i++){ ctx.beginPath(); ctx.moveTo(W-138,150+i*16); ctx.lineTo(W-52,150+i*16); ctx.stroke(); }
-  ctx.beginPath(); ctx.moveTo(W-95,150); ctx.lineTo(W-95,214); ctx.stroke();
-
-  // machine readable strip
-  ctx.fillStyle='#08122B'; ctx.fillRect(0,H-88,W,88);
-  const seed=(val('cdName')+val('cdRef'))||'K';
-  let mrz='';
-  for(let i=0;i<44;i++){
-    const ch=seed.charCodeAt(i%seed.length)+i*7;
-    mrz += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<<'[ch%38];
-  }
-  ctx.fillStyle='#C4F000'; ctx.font='600 21px ui-monospace,monospace';
-  ctx.fillText('K<GBR'+mrz.slice(0,36), 44, H-52);
-  ctx.fillStyle='#93A6C6';
-  ctx.fillText(mrz.slice(4)+'<<<<', 44, H-20);
-
-  // corner brackets
-  ctx.strokeStyle='#C4F000'; ctx.lineWidth=5;
-  const br=34;
-  ctx.beginPath();
-  ctx.moveTo(14,14+br); ctx.lineTo(14,14); ctx.lineTo(14+br,14);
-  ctx.moveTo(W-14-br,14); ctx.lineTo(W-14,14); ctx.lineTo(W-14,14+br);
-  ctx.stroke();
-}
-function saveCard(){
-  const c=document.getElementById('cardCanvas'); if(!c) return;
-  c.toBlob(b=>{
-    const f=new File([b],'kennel-credential.png',{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[f]})){
-      navigator.share({files:[f]}).catch(()=>{});
-    }else{
-      const a=document.createElement('a');
-      a.href=URL.createObjectURL(b); a.download='kennel-credential.png'; a.click();
-    }
-  },'image/png');
-}
-
-/* ================= NUMBERS STATION ================= */
-const CALLSIGNS=['LINCOLNSHIRE POACHER','CHERRY RIPE','SWEDISH RHAPSODY','THE GONG STATION','ATENCION'];
-let nsGroups=[],nsRunning=false,nsOsc=null,nsCtx=null,nsIdx=0;
-function genNumbers(){
-  const n=8;
-  nsGroups=[];
-  const b=new Uint32Array(n); crypto.getRandomValues(b);
-  for(let i=0;i<n;i++) nsGroups.push(String(b[i]%100000).padStart(5,'0'));
-  const cs=CALLSIGNS[Math.floor(Math.random()*CALLSIGNS.length)];
-  const el=document.getElementById('nsGroups'); if(el) el.textContent=nsGroups.join('  ');
-  const c=document.getElementById('nsCall'); if(c) c.textContent=cs;
-  const ct=document.getElementById('nsCount'); if(ct) ct.textContent=n;
-  const st=document.getElementById('nsStat'); if(st){st.className='status';st.textContent='Message ready.';}
-}
-function nsTone(freq,dur){
-  try{
-    nsCtx=nsCtx||new (window.AudioContext||window.webkitAudioContext)();
-    nsCtx.resume();
-    const o=nsCtx.createOscillator(), g=nsCtx.createGain();
-    o.type='sine'; o.frequency.value=freq;
-    g.gain.setValueAtTime(0.0001,nsCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.16,nsCtx.currentTime+0.04);
-    g.gain.exponentialRampToValueAtTime(0.0001,nsCtx.currentTime+dur);
-    o.connect(g); g.connect(nsCtx.destination);
-    o.start(); o.stop(nsCtx.currentTime+dur+0.05);
-  }catch(e){}
-}
-function nsSay(text,rate){
-  return new Promise(res=>{
-    if(!('speechSynthesis' in window)) return res();
-    const u=new SpeechSynthesisUtterance(text);
-    u.rate=rate||0.72; u.pitch=0.85;
-    const vs=speechSynthesis.getVoices();
-    const gb=vs.find(v=>/en-GB/.test(v.lang));
-    if(gb) u.voice=gb;
-    u.onend=res; u.onerror=res;
-    speechSynthesis.speak(u);
-  });
-}
-const nsWait=ms=>new Promise(r=>setTimeout(r,ms));
-async function playNumbers(){
-  if(!nsGroups.length) genNumbers();
-  stopNumbers(); nsRunning=true;
-  const st=document.getElementById('nsStat');
-  if(st){st.className='status good';st.textContent='Transmitting.';}
-  const call=(document.getElementById('nsCall')||{}).textContent||'STATION';
-  for(let i=0;i<3&&nsRunning;i++){ nsTone(880,0.45); await nsWait(650); }
-  if(nsRunning) await nsSay('Attention. Attention. '+call+'. Message follows.');
-  for(let pass=0;pass<2&&nsRunning;pass++){
-    if(nsRunning){ nsTone(660,0.3); await nsWait(500); }
-    for(const g of nsGroups){
-      if(!nsRunning) break;
-      const el=document.getElementById('nsGroups');
-      if(el) el.innerHTML=nsGroups.map(x=>x===g?`<span class="nowgrp">${x}</span>`:x).join('  ');
-      await nsSay(g.split('').join(' , '), 0.62);
-      await nsWait(320);
-    }
-    if(nsRunning) await nsSay('Repeat.');
-  }
-  if(nsRunning){
-    await nsSay('End of message. End of transmission.');
-    nsTone(440,1.1);
-    if(st){st.className='status';st.textContent='Transmission complete.';}
-    const el=document.getElementById('nsGroups');
-    if(el) el.textContent=nsGroups.join('  ');
-  }
-  nsRunning=false;
-}
-function stopNumbers(){
-  nsRunning=false;
-  if(window.speechSynthesis) speechSynthesis.cancel();
-  const st=document.getElementById('nsStat');
-  if(st&&st.textContent==='Transmitting.'){st.className='status';st.textContent='Stopped.';}
-}
-
-
-/* ================= ASTRONOMY (offline, no API) ================= */
-const _rad=Math.PI/180,_dayMs=86400000,_J1970=2440588,_J2000=2451545,_e=_rad*23.4397,_J0=0.0009;
-const _toJul=d=>d.valueOf()/_dayMs-0.5+_J1970;
-const _fromJul=j=>new Date((j+0.5-_J1970)*_dayMs);
-const _toDays=d=>_toJul(d)-_J2000;
-function sunTimes(date,lat,lon){
-  const lw=_rad*-lon, phi=_rad*lat, d=_toDays(date);
-  const n=Math.round(d-_J0-lw/(2*Math.PI));
-  const ds=_J0+lw/(2*Math.PI)+n;
-  const M=_rad*(357.5291+0.98560028*ds);
-  const L=M+_rad*(1.9148*Math.sin(M)+0.02*Math.sin(2*M)+0.0003*Math.sin(3*M))+_rad*102.9372+Math.PI;
-  const dec=Math.asin(Math.sin(_e)*Math.sin(L));
-  const Jnoon=_J2000+ds+0.0053*Math.sin(M)-0.0069*Math.sin(2*L);
-  const out={noon:_fromJul(Jnoon)};
-  const at=(ang,key)=>{
-    const w=Math.acos((Math.sin(_rad*ang)-Math.sin(phi)*Math.sin(dec))/(Math.cos(phi)*Math.cos(dec)));
-    if(isNaN(w)){ out[key+'Rise']=null; out[key+'Set']=null; return; }
-    const a=_J0+(w+lw)/(2*Math.PI)+n;
-    const Jset=_J2000+a+0.0053*Math.sin(M)-0.0069*Math.sin(2*L);
-    out[key+'Set']=_fromJul(Jset);
-    out[key+'Rise']=_fromJul(Jnoon-(Jset-Jnoon));
-  };
-  at(-0.833,'sun'); at(-6,'civil'); at(-12,'naut');
-  return out;
-}
-function moonPhase(date){
-  const LUN=29.530588853, KNOWN=Date.UTC(2000,0,6,18,14);
-  let p=(((date.getTime()-KNOWN)/_dayMs)%LUN)/LUN; if(p<0)p+=1;
-  const names=['New','Waxing crescent','First quarter','Waxing gibbous','Full','Waning gibbous','Last quarter','Waning crescent'];
-  const idx=Math.round(p*8)%8;
-  return {phase:p, illum:(1-Math.cos(2*Math.PI*p))/2, name:names[idx]};
-}
-const hhmm=d=>d?`${pad2(d.getHours())}:${pad2(d.getMinutes())}`:'—';
-
-function renderAstro(){
-  const lat=lastFix?lastFix.latitude:51.8177, lon=lastFix?lastFix.longitude:-0.3540;
-  const t=sunTimes(new Date(),lat,lon);
-  const g=$('astroGrid'); if(!g) return;
-  g.innerHTML=[
-    ['First light',hhmm(t.civilRise)],['Sunrise',hhmm(t.sunRise)],['Solar noon',hhmm(t.noon)],
-    ['Sunset',hhmm(t.sunSet)],['Last light',hhmm(t.civilSet)],['Full dark',hhmm(t.nautSet)]
-  ].map(([l,v])=>`<div><div class="av">${v}</div><div class="al">${l.toUpperCase()}</div></div>`).join('');
-  const m=moonPhase(new Date());
-  const disc=$('moonDisc');
-  if(disc){
-    const pct=Math.round(m.illum*100);
-    disc.style.background = m.phase<0.5
-      ? `linear-gradient(90deg,#08122B ${100-pct}%,#C4CCDD ${100-pct}%)`
-      : `linear-gradient(90deg,#C4CCDD ${pct}%,#08122B ${pct}%)`;
-  }
-  const ml=$('moonLbl'); if(ml) ml.textContent=`${m.name} · ${Math.round(m.illum*100)}%`;
-}
-
-const WX={0:'Clear',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Rime fog',51:'Light drizzle',
-53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',
-75:'Heavy snow',80:'Showers',81:'Showers',82:'Violent showers',95:'Thunderstorm',96:'Thunderstorm, hail'};
-async function loadWeather(){
-  if(!lastFix) return;
-  try{
-    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lastFix.latitude.toFixed(3)}&longitude=${lastFix.longitude.toFixed(3)}&current=temperature_2m,wind_speed_10m,weather_code&timezone=auto`);
-    const d=await r.json();
-    const c=d.current;
-    $('wxNow').textContent=`${Math.round(c.temperature_2m)}°C · ${WX[c.weather_code]||'—'}`;
-    $('wxSub').textContent=`Wind ${Math.round(c.wind_speed_10m)} km/h. Visibility conditions as reported.`;
-  }catch(e){ $('wxSub').textContent='Weather feed unavailable.'; }
-}
-
-/* ================= ISS PASS PREDICTION ================= */
-async function predictPass(){
-  const out=$('passOut');
-  if(!lastFix){ out.textContent='Acquire a position fix first'; return; }
-  out.textContent='Computing…';
-  const now=Math.floor(Date.now()/1000);
-  const stamps=[]; for(let i=0;i<60;i++) stamps.push(now+i*150);   // 2.5 hours, 2.5 min steps
-  const samples=[];
-  try{
-    for(let i=0;i<stamps.length;i+=10){
-      const chunk=stamps.slice(i,i+10).join(',');
-      const r=await fetch(`https://api.wheretheiss.at/v1/satellites/25544/positions?timestamps=${chunk}`);
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      samples.push(...await r.json());
-      await new Promise(z=>setTimeout(z,1100));
-    }
-  }catch(e){ out.textContent='Feed unavailable'; return; }
-  // elevation from ground station
-  const R=6371;
-  let best=null;
-  for(const s of samples){
-    const d=haversine(lastFix.latitude,lastFix.longitude,s.latitude,s.longitude);
-    const h=s.altitude;
-    // central angle
-    const g=d/R;
-    const el=Math.atan2(Math.cos(g)-R/(R+h), Math.sin(g))*180/Math.PI;
-    if(el>10 && (!best || el>best.el)) best={el, t:s.timestamp, d};
-  }
-  if(!best){ out.textContent='No pass above 10° in the next 2½ hours'; return; }
-  const when=new Date(best.t*1000);
-  const mins=Math.round((best.t*1000-Date.now())/60000);
-  out.innerHTML=`${hhmm(when)} · ${Math.round(best.el)}° max<br><span class="unit">in ${mins} min · ${Math.round(best.d)} km ground range</span>`;
-}
-
-/* ================= LIVE INTEL FEEDS ================= */
-async function loadQuakes(){
-  const el=$('quakeList');
-  try{
-    const r=await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson');
-    const d=await r.json();
-    quakes=d.features.slice(0,40).map(f=>({
-      mag:f.properties.mag, place:f.properties.place, time:f.properties.time,
-      lon:f.geometry.coordinates[0], lat:f.geometry.coordinates[1]
-    }));
-    el.innerHTML=quakes.slice(0,4).map(q=>{
-      const ago=Math.round((Date.now()-q.time)/3600000);
-      return `<div class="intel"><div class="when">M${q.mag.toFixed(1)} · ${ago}h ago</div><div class="what">${esc(q.place)}</div></div>`;
-    }).join('');
-  }catch(e){ el.innerHTML='<div class="status bad">Seismic feed unavailable.</div>'; }
-}
-async function loadOTD(){
-  const el=$('otdList');
-  const d=new Date();
-  const mm=pad2(d.getMonth()+1), dd=pad2(d.getDate());
-  try{
-    const r=await fetch(`https://en.wikipedia.org/api/rest_v1/feed/onthisday/selected/${mm}/${dd}`);
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const j=await r.json();
-    const items=(j.selected||[]).slice(0,4);
-    if(!items.length) throw new Error('empty');
-    el.innerHTML=items.map(i=>
-      `<div class="intel"><div class="when">${i.year}</div><div class="what">${esc(i.text)}</div></div>`).join('');
-  }catch(e){ el.innerHTML='<div class="status bad">Wikipedia feed unavailable ('+esc(e.message)+').</div>'; }
-}
-loadQuakes(); loadOTD();
-
-
-/* ================= SKYWATCH ================= */
-const AIRLINES={BAW:'British Airways',SHT:'BA Shuttle',CFE:'BA Cityflyer',EZY:'easyJet',EJU:'easyJet Europe',
-EZS:'easyJet Switzerland',RYR:'Ryanair',RUK:'Ryanair UK',VIR:'Virgin Atlantic',TOM:'TUI Airways',EXS:'Jet2',
-LOG:'Loganair',EIN:'Aer Lingus',DLH:'Lufthansa',GEC:'Lufthansa Cargo',AFR:'Air France',KLM:'KLM',
-KLC:'KLM Cityhopper',IBE:'Iberia',VLG:'Vueling',SWR:'Swiss',AUA:'Austrian',SAS:'SAS',FIN:'Finnair',
-TAP:'TAP Portugal',AEE:'Aegean',THY:'Turkish',UAE:'Emirates',QTR:'Qatar Airways',ETD:'Etihad',
-SIA:'Singapore Airlines',CPA:'Cathay Pacific',UAL:'United',AAL:'American',DAL:'Delta',ACA:'Air Canada',
-JBU:'JetBlue',ELY:'El Al',ETH:'Ethiopian',MSR:'EgyptAir',LOT:'LOT Polish',CSA:'Czech Airlines',
-WZZ:'Wizz Air',WUK:'Wizz Air UK',NAX:'Norwegian',ICE:'Icelandair',ITY:'ITA Airways',BEL:'Brussels Airlines',
-ROT:'TAROM',FDX:'FedEx',UPS:'UPS',BCS:'DHL Air',ABW:'AirBridgeCargo',NPT:'West Atlantic',
-QFA:'Qantas',ANZ:'Air New Zealand',JAL:'Japan Airlines',ANA:'All Nippon',KAL:'Korean Air',AIC:'Air India',
-SAA:'South African',RJA:'Royal Jordanian',MEA:'Middle East Airlines',TAR:'Tunisair',RAM:'Royal Air Maroc'};
-function airlineOf(cs){
-  const m=(cs||'').match(/^([A-Z]{3})\d/);
-  return m&&AIRLINES[m[1]] ? AIRLINES[m[1]] : null;
-}
-let skyTimer=null,skyRaf=null,skyReqs=0,skyLock=null;
-
-function elevationOf(dKm,altM){
-  const h=altM/1000-(dKm*dKm)/(2*6371);
-  return Math.atan2(h,Math.max(dKm,0.05))*180/Math.PI;
-}
-function angSep(az1,el1,az2,el2){
-  const r=Math.PI/180;
-  const c=Math.sin(el1*r)*Math.sin(el2*r)+Math.cos(el1*r)*Math.cos(el2*r)*Math.cos((az1-az2)*r);
-  return Math.acos(Math.max(-1,Math.min(1,c)))*180/Math.PI;
-}
-
-async function startSky(){
-  const st=$('skyStat');
-  if(!lastFix){
-    st.className='status'; st.textContent='Acquiring position…';
-    await new Promise(r=>navigator.geolocation.getCurrentPosition(p=>{lastFix=p.coords;r();},()=>r(),{enableHighAccuracy:true,timeout:12000}));
-  }
-  if(!lastFix){ st.className='status bad'; st.textContent='No position fix — cannot compute bearings.'; return; }
-  const ok=await requestMotion();
-  if(!ok){ st.className='status bad'; st.textContent='Compass permission refused. The list still works; pointing will not.'; }
-  else { st.className='status good'; st.textContent='Tracking. Hold the phone up towards the aircraft.'; }
-  await scanSky();
-  if(skyTimer) clearInterval(skyTimer);
-  skyTimer=setInterval(scanSky,20000);
-  if(!skyRaf) drawSky();
-}
-
-async function scanSky(){
-  if(!lastFix) return;
-  const st=$('skyStat');
-  try{
-    skyReqs++;
-    aircraft=await fetchAircraft(80);
-    aircraft.sort((a,b)=>b.el-a.el);
-    renderSkyList();
-    if(st&&!st.textContent.startsWith('Compass')){
-      st.className='status good';
-      st.textContent=`${aircraft.length} aircraft in view · via ${acSource} · ${skyReqs} scan${skyReqs>1?'s':''}`;
-    }
-  }catch(e){
-    if(st){ st.className='status bad'; st.textContent='Feed unavailable: '+e.message+'. Run Diagnostics in Q Branch.'; }
-  }
-}
-
-function renderSkyList(){
-  const el=$('skyList'); if(!el) return;
-  if(!aircraft.length){ el.innerHTML='<div class="status">Airspace clear.</div>'; return; }
-  el.innerHTML=aircraft.map(a=>`
-    <div class="ac${skyLock&&skyLock.cs===a.cs?' locked':''}"><div>
-      <div class="cs">${esc(a.cs)}</div>
-      <div class="meta">${esc(a.airline||a.country)}${a.type?' · '+esc(a.type):''}${a.reg?' · '+esc(a.reg):''} · ${Math.round(a.alt*3.28/100)*100} ft · ${a.vel?Math.round(a.vel*1.94)+' kt':'—'}${a.vr>1?' · climbing':a.vr<-1?' · descending':''}</div>
-    </div><div class="rng">${Math.round(a.el)}°<br><span class="unit">${a.rng.toFixed(0)} km · ${Math.round(a.brg)}°</span></div></div>`).join('');
-}
-
-function drawSky(){
-  const c=$('skyCanvas');
-  if(!c){ skyRaf=null; return; }
-  if(currentView!=='gadget'){ skyRaf=null; return; }
-  const dpr=Math.min(window.devicePixelRatio||1,2);
-  if(c.width!==c.clientWidth*dpr){ c.width=c.clientWidth*dpr; c.height=260*dpr; }
-  const ctx=c.getContext('2d'), W=c.width, H=c.height;
-  const FOV=50;                       // ±50° horizontal
-  const hd = headingDeg==null?0:headingDeg;
-
-  ctx.fillStyle='#08122B'; ctx.fillRect(0,0,W,H);
-
-  // elevation gridlines
-  ctx.strokeStyle='#1A3A6B'; ctx.lineWidth=1*dpr;
-  ctx.font=`${9*dpr}px ui-monospace,monospace`; ctx.fillStyle='#93A6C6';
-  [0,30,60,90].forEach(e=>{
-    const y=H-(e/90)*H*0.94-H*0.03;
-    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
-    ctx.fillText(e+'°',4*dpr,y-4*dpr);
-  });
-  // azimuth ticks
-  for(let off=-40;off<=40;off+=20){
-    const x=W/2+(off/FOV)*(W/2);
-    ctx.beginPath(); ctx.moveTo(x,H*0.03); ctx.lineTo(x,H); ctx.stroke();
-    const az=Math.round((hd+off+360)%360);
-    ctx.fillText(az+'°',x+3*dpr,H-5*dpr);
-  }
-  // centre crosshair = where the phone points
-  ctx.strokeStyle='#C4F000'; ctx.lineWidth=1.5*dpr;
-  const cyP=H-(Math.max(0,Math.min(90,skyPitch))/90)*H*0.94-H*0.03;
-  ctx.beginPath();
-  ctx.moveTo(W/2-16*dpr,cyP); ctx.lineTo(W/2-5*dpr,cyP);
-  ctx.moveTo(W/2+5*dpr,cyP); ctx.lineTo(W/2+16*dpr,cyP);
-  ctx.moveTo(W/2,cyP-16*dpr); ctx.lineTo(W/2,cyP-5*dpr);
-  ctx.moveTo(W/2,cyP+5*dpr); ctx.lineTo(W/2,cyP+16*dpr);
-  ctx.stroke();
-
-  // aircraft
-  let best=null,bestSep=999;
-  for(const a of aircraft){
-    let rel=((a.brg-hd+540)%360)-180;
-    if(Math.abs(rel)>FOV||a.el<0) continue;
-    const x=W/2+(rel/FOV)*(W/2);
-    const y=H-(Math.max(0,Math.min(90,a.el))/90)*H*0.94-H*0.03;
-    const sp=angSep(hd,skyPitch,a.brg,a.el);
-    if(sp<bestSep){ bestSep=sp; best=a; }
-    ctx.save(); ctx.translate(x,y);
-    ctx.rotate(((a.trk||0)-hd)*Math.PI/180);
-    ctx.beginPath();
-    ctx.moveTo(0,-8*dpr); ctx.lineTo(6*dpr,7*dpr); ctx.lineTo(0,4*dpr); ctx.lineTo(-6*dpr,7*dpr);
-    ctx.closePath();
-    ctx.fillStyle = sp<14 ? '#C4F000':'#C4CCDD'; ctx.fill();
-    ctx.restore();
-    ctx.font=`${9.5*dpr}px ui-monospace,monospace`;
-    ctx.fillStyle = sp<14 ? '#C4F000':'#93A6C6';
-    ctx.fillText(a.cs, x+11*dpr, y+3*dpr);
-    if(sp<14){
-      ctx.beginPath(); ctx.arc(x,y,17*dpr,0,7);
-      ctx.strokeStyle='#C4F000'; ctx.lineWidth=1.5*dpr; ctx.stroke();
-    }
-  }
-  skyLock = (best&&bestSep<14)?best:null;
-  renderLock(bestSep);
-  skyRaf=requestAnimationFrame(drawSky);
-}
-
-let lockLast='';
-function renderLock(sep){
-  const el=$('skyLock'); if(!el) return;
-  if(!skyLock){
-    if(lockLast!==''){ lockLast=''; el.innerHTML=''; }
-    if(!el.innerHTML) el.innerHTML='<div class="status">Nothing in the crosshair. Sweep the phone across the sky.</div>';
-    return;
-  }
-  const a=skyLock;
-  const sig=a.cs+Math.round(a.el)+Math.round(a.rng);
-  if(sig===lockLast) return;
-  lockLast=sig;
-  el.innerHTML=`<div class="lock">
-    <div class="lc">${esc(a.cs)}</div>
-    <div class="lo">${esc(a.airline||a.country)}${a.type?' · '+esc(a.type):''}${a.reg?' · '+esc(a.reg):''}${a.vr>1?' · climbing':a.vr<-1?' · descending':''}</div>
-    <div class="lg">
-      <div><div class="v">${(Math.round(a.alt*3.28/100)*100).toLocaleString()}</div><div class="l">FEET</div></div>
-      <div><div class="v">${a.vel?Math.round(a.vel*1.94):'—'}</div><div class="l">KNOTS</div></div>
-      <div><div class="v">${a.rng.toFixed(1)}</div><div class="l">KM AWAY</div></div>
-      <div><div class="v">${Math.round(a.el)}°</div><div class="l">ELEVATION</div></div>
-    </div></div>`;
-}
-
-
-/* ================= FIELD CAPTURE ================= */
-var CAPS=[];
-try{ CAPS=JSON.parse(store.get('kenCaps')||'[]'); }catch(e){ CAPS=[]; }
-let capPending=null;
-
-function capTake(input){
-  const f=input.files&&input.files[0]; if(!f) return;
-  const st=$('capStat'); st.className='status'; st.textContent='Processing capture…';
-  const img=new Image();
-  img.onload=()=>{
-    // full preview
-    $('capPreview').src=img.src;
-    // thumbnail for storage
-    const c=document.createElement('canvas');
-    const side=200, r=Math.min(img.width,img.height);
-    c.width=side; c.height=side;
-    c.getContext('2d').drawImage(img,(img.width-r)/2,(img.height-r)/2,r,r,0,0,side,side);
-    capPending={thumb:c.toDataURL('image/jpeg',0.55), t:Date.now(),
-      lat:lastFix?lastFix.latitude:null, lon:lastFix?lastFix.longitude:null};
-    runMatch();
-  };
-  img.onerror=()=>{ st.className='status bad'; st.textContent='Could not read that image.'; };
-  img.src=URL.createObjectURL(f);
-}
-
-function runMatch(){
-  const bar=$('capBar'), st=$('capStat');
-  let pct=0;
-  const stages=['Isolating subject','Querying Registry','Cross-referencing sightings','Compiling file'];
-  const iv=setInterval(()=>{
-    pct+=Math.random()*13+5;
-    if(bar) bar.style.width=Math.min(pct,100)+'%';
-    if(st) st.textContent=stages[Math.min(Math.floor(pct/26),3)]+'…';
-    if(pct>=100){
-      clearInterval(iv);
-      if(st){ st.className='status good'; st.textContent='Capture ready. Identify the subject.'; }
-      showMatchPicker();
-    }
-  },130);
-}
-
-function showMatchPicker(){
-  const el=$('capMatch'); if(!el) return;
-  el.innerHTML=`<div class="panel" style="margin-top:14px">
-    <span class="k">Identify subject</span>
-    <select id="capWho">
-      ${REGISTRY.map((p,i)=>`<option value="${i}">${esc(p.cn)} — ${esc(p.name)}</option>`).join('')}
-      <option value="-1">Unknown subject — open a new file</option>
-    </select>
-    <span class="k" style="margin-top:14px">Observation</span>
-    <input type="text" id="capNote" placeholder="What was the subject doing" autocomplete="off">
-    <button class="btn" style="margin-top:12px" onclick="capCommit()">File capture</button>
-  </div>`;
-}
-
-function capCommit(){
-  if(!capPending) return;
-  const idx=+$('capWho').value;
-  const note=($('capNote').value||'').trim()||'No observation recorded.';
-  let subject, ref;
-  if(idx===-1){
-    const cn=pick(CODEWORDS);
-    ref='KEN/'+String(100+Math.floor(Math.random()*800));
-    REGISTRY.push({ref, cn, name:'Unidentified', role:'Subject of interest', sec:'Watch list', st:'asset',
-      rec:['File opened on first sighting, '+new Date().toLocaleDateString('en-GB')+'.'],
-      ass:'[[No identification. Subject photographed but not named.]]',
-      cav:'Update this file when the subject is identified.'});
-    subject=cn;
-    try{ store.set('kenVetted', JSON.stringify(REGISTRY.slice(7))); }catch(e){}
-    renderRegistry();
-  }else{
-    subject=REGISTRY[idx].cn; ref=REGISTRY[idx].ref;
-    REGISTRY[idx].rec.push(`Sighted ${new Date().toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}${capPending.lat?` at ${capPending.lat.toFixed(3)}, ${capPending.lon.toFixed(3)}`:''}. ${note}`);
-  }
-  CAPS.unshift({...capPending, subject, ref, note});
-  CAPS=CAPS.slice(0,24);
-  try{ store.set('kenCaps', JSON.stringify(CAPS)); }
-  catch(e){ CAPS=CAPS.slice(0,12); try{store.set('kenCaps',JSON.stringify(CAPS));}catch(e2){} }
-  capPending=null;
-  $('capMatch').innerHTML=`<div class="lock" style="margin-top:14px">
-    <div class="lc">${esc(subject)}</div>
-    <div class="lo">${esc(ref)} · sighting filed to service record</div>
-  </div>`;
-  const st=$('capStat'); st.className='status good'; st.textContent='Filed. Sighting added to '+subject+'.';
-  const bar=$('capBar'); if(bar) bar.style.width='0%';
-  capRender();
-}
-
-function capRender(){
-  const g=$('capGrid'); if(!g) return;
-  g.innerHTML=CAPS.length
-    ? CAPS.map(c=>`<div class="capcell" onclick="capOpen('${esc(c.subject)}')">
-        <img src="${c.thumb}" alt=""><div class="cn2">${esc(c.subject.toUpperCase())}</div></div>`).join('')
-    : '<div class="status" style="grid-column:span 3">No captures logged.</div>';
-}
-function capOpen(cn){
-  const i=REGISTRY.findIndex(p=>p.cn===cn);
-  if(i>-1){ openRegistry(); openDossier(i); }
-}
-function capClear(){
-  CAPS=[]; store.set('kenCaps','[]'); capRender();
-  const st=$('capStat'); st.className='status'; st.textContent='Capture log purged.';
-}
-
-/* ================= MOVEMENT TRACK ================= */
-try{ TRACK=JSON.parse(store.get('kenTrack')||'[]'); }catch(e){ TRACK=[]; }
-
-function trackSave(){
-  TRACK=TRACK.slice(-600);
-  try{ store.set('kenTrack', JSON.stringify(TRACK)); }catch(e){}
-}
-function trackPush(lat,lon){
-  const last=TRACK[TRACK.length-1];
-  if(last && haversine(last[0],last[1],lat,lon)<0.015) return false;  // ignore <15 m jitter
-  TRACK.push([+lat.toFixed(5),+lon.toFixed(5),Date.now()]);
-  trackSave(); return true;
-}
-function trackDist(){
-  let d=0;
-  for(let i=1;i<TRACK.length;i++) d+=haversine(TRACK[i-1][0],TRACK[i-1][1],TRACK[i][0],TRACK[i][1]);
-  return d;
-}
-function trackStats(){
-  const d=trackDist();
-  const de=$('trkDist'), pe=$('trkPts');
-  if(de) de.innerHTML = d<1 ? Math.round(d*1000)+'<span class="unit">m</span>' : d.toFixed(2)+'<span class="unit">km</span>';
-  if(pe) pe.textContent=TRACK.length;
-}
-function trackInit(){ drawTrack(); trackStats(); }
-
-function drawTrack(){
-  const c=$('trkCanvas'); if(!c) return;
-  const dpr=Math.min(window.devicePixelRatio||1,2);
-  c.width=c.clientWidth*dpr; c.height=300*dpr;
-  const ctx=c.getContext('2d'), W=c.width, H=c.height;
-  ctx.fillStyle='#08122B'; ctx.fillRect(0,0,W,H);
-  if(TRACK.length<1){
-    ctx.fillStyle='#93A6C6'; ctx.font=`${12*dpr}px ui-monospace,monospace`; ctx.textAlign='center';
-    ctx.fillText('No track logged', W/2, H/2); ctx.textAlign='left'; return;
-  }
-  const lats=TRACK.map(p=>p[0]), lons=TRACK.map(p=>p[1]);
-  let laMin=Math.min(...lats), laMax=Math.max(...lats);
-  let loMin=Math.min(...lons), loMax=Math.max(...lons);
-  const midLat=(laMin+laMax)/2;
-  const padLa=Math.max((laMax-laMin)*0.18, 0.0012);
-  const padLo=Math.max((loMax-loMin)*0.18, 0.0012/Math.cos(midLat*Math.PI/180));
-  laMin-=padLa; laMax+=padLa; loMin-=padLo; loMax+=padLo;
-  const kx=Math.cos(midLat*Math.PI/180);
-  const spanLa=laMax-laMin, spanLo=(loMax-loMin)*kx;
-  const sc=Math.min(W/spanLo, H/spanLa)*0.9;
-  const X=lon=>W/2+((lon-(loMin+loMax)/2)*kx)*sc;
-  const Y=lat=>H/2-(lat-(laMin+laMax)/2)*sc;
-
-  // grid
-  ctx.strokeStyle='#1A3A6B'; ctx.lineWidth=1*dpr;
-  for(let i=1;i<5;i++){
-    ctx.beginPath(); ctx.moveTo(W*i/5,0); ctx.lineTo(W*i/5,H); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0,H*i/5); ctx.lineTo(W,H*i/5); ctx.stroke();
-  }
-  // track line
-  if(TRACK.length>1){
-    ctx.beginPath();
-    TRACK.forEach((p,i)=> i?ctx.lineTo(X(p[1]),Y(p[0])):ctx.moveTo(X(p[1]),Y(p[0])));
-    ctx.strokeStyle='#C4F000'; ctx.lineWidth=2.4*dpr; ctx.lineJoin='round'; ctx.stroke();
-  }
-  // points
-  TRACK.forEach((p,i)=>{
-    const last=i===TRACK.length-1;
-    ctx.beginPath(); ctx.arc(X(p[1]),Y(p[0]), (last?5:2)*dpr, 0, 7);
-    ctx.fillStyle = last?'#FFFFFF' : (i===0?'#93A6C6':'#C4F000'); ctx.fill();
-  });
-  // scale bar
-  const kmPerPx=1/( sc/111.32 );
-  let bar=W*0.28*kmPerPx/dpr*dpr;
-  const nice=[0.05,0.1,0.25,0.5,1,2,5,10,25,50,100].reduce((a,b)=>Math.abs(b-bar)<Math.abs(a-bar)?b:a);
-  const px=nice/kmPerPx;
-  ctx.strokeStyle='#C4CCDD'; ctx.lineWidth=2*dpr;
-  ctx.beginPath(); ctx.moveTo(14*dpr,H-18*dpr); ctx.lineTo(14*dpr+px,H-18*dpr);
-  ctx.moveTo(14*dpr,H-23*dpr); ctx.lineTo(14*dpr,H-13*dpr);
-  ctx.moveTo(14*dpr+px,H-23*dpr); ctx.lineTo(14*dpr+px,H-13*dpr); ctx.stroke();
-  ctx.fillStyle='#C4CCDD'; ctx.font=`${10*dpr}px ui-monospace,monospace`;
-  ctx.fillText(nice<1?(nice*1000)+' m':nice+' km', 16*dpr+px, H-14*dpr);
-}
-
-async function trackToggle(){
-  const btn=$('trkBtn'), st=$('trkStat');
-  if(trkTimer){
-    clearInterval(trkTimer); trkTimer=null;
-    if(trkWake){ trkWake.release().catch(()=>{}); trkWake=null; }
-    btn.textContent='Start logging'; st.className='status'; st.textContent='Stopped.';
-    return;
-  }
-  if(!navigator.geolocation){ st.className='status bad'; st.textContent='No geolocation available.'; return; }
-  try{ if('wakeLock' in navigator) trkWake=await navigator.wakeLock.request('screen'); }catch(e){}
-  btn.textContent='Stop logging';
-  st.className='status good'; st.textContent='Logging every 20 seconds.';
-  const log=()=>navigator.geolocation.getCurrentPosition(p=>{
-    lastFix=p.coords;
-    if(trackPush(p.coords.latitude,p.coords.longitude)){ drawTrack(); trackStats(); }
-  },()=>{},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
-  log(); trkTimer=setInterval(log,20000);
-}
-function trackMark(){
-  const st=$('trkStat');
-  navigator.geolocation.getCurrentPosition(p=>{
-    lastFix=p.coords;
-    trackPush(p.coords.latitude,p.coords.longitude);
-    drawTrack(); trackStats();
-    st.className='status good'; st.textContent='Position marked.';
-  },e=>{ st.className='status bad'; st.textContent='Fix refused: '+e.message; },{enableHighAccuracy:true,timeout:12000});
-}
-function trackClear(){
-  TRACK=[]; store.set('kenTrack','[]'); drawTrack(); trackStats();
-  const st=$('trkStat'); st.className='status'; st.textContent='Track purged.';
-}
-
-
-/* ================= THE WALL ================= */
-var kpSeries=[], acSeries=[], wallRaf=null, wallLog=[];
-
-function spark(id,data,col,fill){
-  const c=$(id); if(!c||!data.length) return;
-  const dpr=Math.min(window.devicePixelRatio||1,2);
-  if(c.width!==c.clientWidth*dpr){ c.width=c.clientWidth*dpr; c.height=34*dpr; }
-  const ctx=c.getContext('2d'), W=c.width, H=c.height;
-  ctx.clearRect(0,0,W,H);
-  const mx=Math.max(...data), mn=Math.min(...data);
-  const X=i=>(i/((data.length-1)||1))*W;
-  const Y=v=>H-2*dpr-((v-mn)/((mx-mn)||1))*(H-5*dpr);
-  if(fill){
-    ctx.beginPath(); ctx.moveTo(0,H);
-    data.forEach((v,i)=>ctx.lineTo(X(i),Y(v)));
-    ctx.lineTo(W,H); ctx.closePath();
-    ctx.fillStyle='rgba(196,240,0,.14)'; ctx.fill();
-  }
-  ctx.beginPath();
-  data.forEach((v,i)=> i?ctx.lineTo(X(i),Y(v)):ctx.moveTo(X(i),Y(v)));
-  ctx.strokeStyle=col; ctx.lineWidth=1.6*dpr; ctx.stroke();
-  ctx.beginPath(); ctx.arc(X(data.length-1),Y(data[data.length-1]),2.4*dpr,0,7);
-  ctx.fillStyle=col; ctx.fill();
-}
-
-function pushLog(kind,text){
-  wallLog.unshift({kind,text,t:Date.now()});
-  wallLog=wallLog.slice(0,40);
-  const el=$('wLog'); if(!el) return;
-  el.innerHTML=wallLog.slice(0,8).map((l,i)=>{
-    const d=new Date(l.t);
-    return '<div class="ln'+(i===0?' new':'')+'"><b>'+pad2(d.getHours())+pad2(d.getMinutes())+'</b> '+esc(l.kind)+' &middot; '+esc(l.text)+'</div>';
-  }).join('');
-}
-
-/* threat state: real inputs, derivation shown on screen */
-function computeThreat(){
-  const lat=lastFix?lastFix.latitude:51.8177, lon=lastFix?lastFix.longitude:-0.3540;
-  const t=sunTimes(new Date(),lat,lon);
-  const now=Date.now();
-  let dark=0;
-  if(t.civilSet&&t.civilRise){
-    dark=(now>t.civilSet.getTime()||now<t.civilRise.getTime()) ? 1
-       : Math.max(0,1-(t.civilSet.getTime()-now)/(3*3600000));
-  }
-  const kp=kpSeries.length?kpSeries[kpSeries.length-1]/9:0;
-  const recent=quakes.filter(q=>now-q.time<86400000);
-  const seis=Math.min(1,recent.length/12);
-  const traf=Math.min(1,aircraft.length/25);
-  const score=dark*0.2+kp*0.35+seis*0.25+traf*0.2;
-  const bands=[[0.18,'QUIET'],[0.34,'ELEVATED'],[0.5,'UNSETTLED'],[0.68,'HIGH'],[9,'SEVERE']];
-  const label=bands.find(b=>score<b[0])[1];
-  const cell=$('threatCell'), val=$('threatVal'), why=$('threatWhy'), bars=$('threatBars');
-  if(!val) return;
-  val.textContent=label;
-  if(cell) cell.className='wcell threat span'+(score>=0.5?' hot':'');
-  if(why) why.textContent='Composited from geomagnetic '+(kp*9).toFixed(1)+', '+recent.length+
-    ' seismic events in 24h, '+aircraft.length+' aircraft overhead, '+(dark>0.9?'after last light':'daylight')+'.';
-  if(bars) bars.innerHTML=[['GEOMAG',kp],['SEISMIC',seis],['TRAFFIC',traf],['DARK',dark]]
-    .map(x=>'<div><div class="bar"><i style="height:'+Math.round(Math.max(x[1],0.03)*100)+'%"></i></div><div class="bn">'+x[0]+'</div></div>').join('');
-}
-
-function wallDaylight(){
-  const lat=lastFix?lastFix.latitude:51.8177, lon=lastFix?lastFix.longitude:-0.3540;
-  const t=sunTimes(new Date(),lat,lon);
-  const e=$('wDay'); if(!e||!t.sunRise||!t.sunSet) return;
-  const now=Date.now(), r=t.sunRise.getTime(), st=t.sunSet.getTime();
-  const left=st-now;
-  if(left>0){
-    e.textContent=Math.floor(left/3600000)+'h '+pad2(Math.round((left%3600000)/60000))+'m';
-    $('wDaySub').textContent='Sunset '+hhmm(t.sunSet)+' \u00b7 last light '+hhmm(t.civilSet);
-  }else{
-    e.textContent='Dark';
-    $('wDaySub').textContent='Sunrise '+hhmm(t.sunRise)+' tomorrow';
-  }
-  const pct=Math.max(0,Math.min(100,((now-r)/(st-r))*100));
-  const bar=$('wDayBar'), mark=$('wDayNow');
-  if(bar) bar.style.width=pct+'%';
-  if(mark) mark.style.left=pct+'%';
-}
-
-function wallSeismic(){
-  const e=$('wEnergy'); if(!e||!quakes.length) return;
-  const J=quakes.reduce((a,q)=>a+Math.pow(10,1.5*q.mag+4.8),0);
-  const hiro=J/6.3e13;
-  e.textContent = hiro>=1 ? hiro.toFixed(1)+' HIROSHIMA' : (J/1e12).toFixed(1)+' TJ';
-  const big=quakes.reduce((a,q)=>q.mag>a.mag?q:a,quakes[0]);
-  $('wEnergySub').textContent=quakes.length+' events M4.5+ \u00b7 largest M'+big.mag.toFixed(1)+' '+big.place.split(',').pop().trim();
-  spark('wQuakeSpark',quakes.slice(0,24).map(q=>q.mag).reverse(),'#FF6B6B',false);
-}
-
-function drawIssMap(){
-  const c=$('wIssMap'); if(!c) return;
-  const dpr=Math.min(window.devicePixelRatio||1,2);
-  if(c.width!==c.clientWidth*dpr){ c.width=c.clientWidth*dpr; c.height=150*dpr; }
-  const ctx=c.getContext('2d'), W=c.width, H=c.height;
-  const X=lon=>((lon+180)/360)*W, Y=lat=>((90-lat)/180)*H;
-  ctx.fillStyle='#08122B'; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle='#1A3A6B'; ctx.lineWidth=1*dpr;
-  for(let la=-60;la<=60;la+=30){ ctx.beginPath(); ctx.moveTo(0,Y(la)); ctx.lineTo(W,Y(la)); ctx.stroke(); }
-  for(let lo=-120;lo<=120;lo+=60){ ctx.beginPath(); ctx.moveTo(X(lo),0); ctx.lineTo(X(lo),H); ctx.stroke(); }
-  ctx.strokeStyle='#2E5490'; ctx.lineWidth=1.1*dpr;
-  for(const ring of LAND){
-    ctx.beginPath();
-    ring.forEach((p,i)=> i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])));
-    ctx.stroke();
-  }
-  if(lastFix){
-    ctx.beginPath(); ctx.arc(X(lastFix.longitude),Y(lastFix.latitude),3*dpr,0,7);
-    ctx.fillStyle='#FFFFFF'; ctx.fill();
-  }
-  if(issTrail.length>1){
-    ctx.beginPath();
-    let prevX=null;
-    for(const p of issTrail){
-      const x=X(p[0]), y=Y(p[1]);
-      if(prevX!==null&&Math.abs(x-prevX)>W/2) ctx.moveTo(x,y);
-      else if(prevX===null) ctx.moveTo(x,y);
-      else ctx.lineTo(x,y);
-      prevX=x;
-    }
-    ctx.strokeStyle='rgba(196,240,0,.55)'; ctx.lineWidth=1.6*dpr; ctx.stroke();
-  }
-  if(issPos){
-    const x=X(issPos.longitude), y=Y(issPos.latitude);
-    const pulse=3+Math.sin(Date.now()/260)*1.5;
-    ctx.beginPath(); ctx.arc(x,y,(pulse+6)*dpr,0,7);
-    ctx.strokeStyle='rgba(196,240,0,.4)'; ctx.lineWidth=1.4*dpr; ctx.stroke();
-    ctx.beginPath(); ctx.arc(x,y,pulse*dpr,0,7); ctx.fillStyle='#C4F000'; ctx.fill();
-    const sub=$('wIssSub');
-    if(sub){
-      sub.textContent = lastFix
-        ? Math.round(issPos.altitude)+' km up \u00b7 '+Math.round(issPos.velocity).toLocaleString()+' km/h \u00b7 '+Math.round(haversine(lastFix.latitude,lastFix.longitude,issPos.latitude,issPos.longitude)).toLocaleString()+' km from you'
-        : issPos.latitude.toFixed(1)+'\u00b0, '+issPos.longitude.toFixed(1)+'\u00b0 \u00b7 '+Math.round(issPos.altitude)+' km \u00b7 '+Math.round(issPos.velocity).toLocaleString()+' km/h';
-    }
-  }
-}
-
-async function wallKp(){
-  try{
-    const r=await fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json');
-    const j=await r.json();
-    kpSeries=j.slice(-180).filter((_,i)=>i%6===0).map(x=>parseFloat(x.kp_index)).filter(n=>!isNaN(n));
-    if(!kpSeries.length) return;
-    const last=kpSeries[kpSeries.length-1];
-    const e=$('wKp'); if(e) e.textContent=last.toFixed(1);
-    spark('wKpSpark',kpSeries,'#C4F000',true);
-    pushLog('GEOMAG','planetary K '+last.toFixed(1)+' \u2014 '+(last>=5?'storm conditions':'quiet'));
-  }catch(e){}
-}
-
-async function wallRefresh(){
-  if(currentView!=='wall') return;
-  await loadAircraft();
-  acSeries.push(aircraft.length); acSeries=acSeries.slice(-40);
-  const e=$('wAc'); if(e) e.textContent=aircraft.length;
-  spark('wAcSpark',acSeries,'#C4CCDD',true);
-  if(aircraft.length){
-    const hi=aircraft.reduce((a,b)=>b.alt>a.alt?b:a);
-    const near=aircraft.slice().sort((a,b)=>a.rng-b.rng)[0];
-    const sub=$('wAcSub');
-    if(sub) sub.textContent='highest '+Math.round(hi.alt*3.28/100)*100+' ft \u00b7 nearest '+near.rng.toFixed(1)+' km';
-    pushLog('AIR',near.cs+' '+Math.round(near.alt*3.28/100)*100+' ft bearing '+Math.round(near.brg)+'\u00b0 at '+near.rng.toFixed(1)+' km');
-  }
-  computeThreat();
-}
-
-function wallTick(){
-  if(currentView!=='wall'){ wallRaf=null; return; }
-  drawIssMap();
-  wallDaylight();
-  const tr=$('wTrack');
-  if(tr){ const d=trackDist(); tr.textContent = d<1 ? Math.round(d*1000)+' m' : d.toFixed(1)+' km'; }
-  wallRaf=requestAnimationFrame(wallTick);
-}
-
-function wallTicker(){
-  const bits=[];
-  if(issPos) bits.push('ISS '+issPos.latitude.toFixed(1)+'\u00b0 '+issPos.longitude.toFixed(1)+'\u00b0 AT '+Math.round(issPos.altitude)+' KM');
-  if(quakes.length) bits.push('LARGEST SEISMIC EVENT THIS WEEK M'+Math.max.apply(null,quakes.map(q=>q.mag)).toFixed(1));
-  if(kpSeries.length) bits.push('PLANETARY K '+kpSeries[kpSeries.length-1].toFixed(1));
-  if(aircraft.length) bits.push(aircraft.length+' AIRCRAFT IN THE BOX');
-  const lat=lastFix?lastFix.latitude:51.8177, lon=lastFix?lastFix.longitude:-0.3540;
-  const t=sunTimes(new Date(),lat,lon);
-  const m=moonPhase(new Date());
-  bits.push('LAST LIGHT '+hhmm(t.civilSet));
-  bits.push('MOON '+m.name.toUpperCase()+' '+Math.round(m.illum*100)+'%');
-  bits.push('STATION HARPENDEN \u2014 CONTROL');
-  const el=$('tickText'); if(el) el.textContent=bits.join('   \u00b7   ')+'   \u00b7   ';
-}
-
-async function wallLaunch(){
-  try{
-    const r=await fetch('https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=1&mode=list');
-    const j=await r.json();
-    const l=(j.results||[])[0]; if(!l) return;
-    const hrs=Math.round((new Date(l.net)-Date.now())/3600000);
-    const e=$('wLaunch'); if(e) e.textContent='T-'+hrs+'h';
-    const sub=$('wLaunchSub'); if(sub) sub.textContent=l.name.split('|').pop().trim();
-  }catch(e){}
-}
-
-function wallEnter(){
-  wallKp(); wallSeismic(); wallRefresh(); wallTicker(); wallLaunch();
-  quakes.slice(0,3).forEach(q=>pushLog('SEISMIC','M'+q.mag.toFixed(1)+' '+q.place));
-  if(!wallRaf) wallTick();
-  if(!window._wallIv) window._wallIv=setInterval(function(){
-    if(currentView==='wall'){ wallRefresh(); wallSeismic(); wallTicker(); }
-  },30000);
-  if(!window._wallKpIv) window._wallKpIv=setInterval(function(){
-    if(currentView==='wall') wallKp();
-  },300000);
-}
-
-
-/* ================= FEED DIAGNOSTICS ================= */
-const FEED_TESTS=[
-  {n:'Aircraft — adsb.lol',   u:()=>`https://api.adsb.lol/v2/lat/${(lastFix?lastFix.latitude:51.8177).toFixed(3)}/lon/${(lastFix?lastFix.longitude:-0.354).toFixed(3)}/dist/60`, k:'ac'},
-  {n:'Aircraft — OpenSky',    u:()=>'https://opensky-network.org/api/states/all?lamin=51.5&lomin=-1.0&lamax=52.1&lomax=0.3', k:'states'},
-  {n:'ISS position',          u:()=>'https://api.wheretheiss.at/v1/satellites/25544', k:'latitude'},
-  {n:'Earthquakes — USGS',    u:()=>'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson', k:'features'},
-  {n:'Space weather — NOAA',  u:()=>'https://services.swpc.noaa.gov/json/planetary_k_index_1m.json', k:null},
-  {n:'Weather — Open-Meteo',  u:()=>'https://api.open-meteo.com/v1/forecast?latitude=51.82&longitude=-0.35&current=temperature_2m', k:'current'},
-  {n:'On this day — Wikipedia',u:()=>{const d=new Date();return `https://en.wikipedia.org/api/rest_v1/feed/onthisday/selected/${pad2(d.getMonth()+1)}/${pad2(d.getDate())}`;}, k:'selected'},
-  {n:'Launches — TheSpaceDevs',u:()=>'https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=1&mode=list', k:'results'}
-];
-
-function diagEnv(){
-  const inFrame = window.self !== window.top;
-  return [
-    ['Origin', location.origin || 'file://'],
-    ['Secure context', window.isSecureContext ? 'yes' : 'NO — camera, mic and passkeys will fail'],
-    ['Running in a frame', inFrame ? 'YES — cross-origin feeds are usually blocked here' : 'no'],
-    ['Standalone (installed)', window.navigator.standalone ? 'yes' : 'no — running in a browser tab'],
-    ['Online', navigator.onLine ? 'yes' : 'NO']
-  ];
-}
-
-async function runDiagnostics(){
-  const env=$('dgEnv'), out=$('dgOut');
-  env.innerHTML=diagEnv().map(r=>
-    `<div class="legendrow"><div class="lk2">${esc(r[0]).toUpperCase()}</div><div class="lv">${esc(r[1])}</div></div>`).join('');
-  out.innerHTML='';
-  for(const f of FEED_TESTS){
-    const row=document.createElement('div');
-    row.className='status';
-    row.textContent=f.n+' — testing…';
-    out.appendChild(row);
-    const t0=performance.now();
-    try{
-      const r=await fetch(f.u());
-      const ms=Math.round(performance.now()-t0);
-      if(!r.ok){
-        row.className='status bad';
-        row.textContent=`${f.n} — HTTP ${r.status}${r.status===429?' (rate limited)':r.status===401?' (needs a key)':''} · ${ms}ms`;
-        continue;
-      }
-      const j=await r.json();
-      let n='ok';
-      if(f.k){ const v=j[f.k]; n = Array.isArray(v) ? v.length+' records' : (v!=null?'ok':'no "'+f.k+'" field'); }
-      else if(Array.isArray(j)) n=j.length+' records';
-      row.className='status good';
-      row.textContent=`${f.n} — ${n} · ${ms}ms`;
-    }catch(e){
-      const ms=Math.round(performance.now()-t0);
-      const msg=String(e.message||e);
-      const cors=/load failed|failed to fetch|networkerror|cors/i.test(msg);
-      row.className='status bad';
-      row.textContent=`${f.n} — ${cors?'BLOCKED (CORS or network)':msg} · ${ms}ms`;
-    }
-  }
-}
-
-/* ================= AIRCRAFT — adsb.lol primary, OpenSky fallback ================= */
-async function fetchAircraft(radiusNm){
-  if(!lastFix) throw new Error('no position fix');
-  const la=lastFix.latitude, lo=lastFix.longitude;
-  // 1. adsb.lol — free, no key, gives range and bearing directly
-  try{
-    const r=await fetch(`https://api.adsb.lol/v2/lat/${la.toFixed(3)}/lon/${lo.toFixed(3)}/dist/${radiusNm}`);
-    if(r.ok){
-      const j=await r.json();
-      const list=(j.ac||[]).filter(a=>a.lat!=null&&a.lon!=null&&a.alt_baro!=='ground'&&a.alt_baro!=null);
-      acSource='adsb.lol';
-      return list.map(a=>{
-        const altFt=typeof a.alt_baro==='number'?a.alt_baro:0;
-        const altM=altFt*0.3048;
-        const rng = a.dst!=null ? a.dst*1.852 : haversine(la,lo,a.lat,a.lon);
-        const cs=(a.flight||'').trim()||(a.r||'').trim()||(a.hex||'').toUpperCase();
-        return {cs, airline:airlineOf(cs), reg:(a.r||'').trim(), type:(a.t||'').trim(),
-          country:(a.r||'').trim()||'unknown', lat:a.lat, lon:a.lon, alt:altM,
-          vel:a.gs!=null?a.gs*0.5144:null, trk:a.track, vr:a.baro_rate?a.baro_rate/60:0,
-          squawk:a.squawk||'', rng, brg: a.dir!=null?a.dir:bearingTo(la,lo,a.lat,a.lon),
-          el: elevationOf(rng,altM)};
-      });
-    }
-  }catch(e){ /* fall through */ }
-  // 2. OpenSky fallback
-  const d=radiusNm*1.852/111;
-  const r2=await fetch(`https://opensky-network.org/api/states/all?lamin=${(la-d).toFixed(3)}&lomin=${(lo-d*1.6).toFixed(3)}&lamax=${(la+d).toFixed(3)}&lomax=${(lo+d*1.6).toFixed(3)}`);
-  if(!r2.ok) throw new Error('both sources failed (OpenSky HTTP '+r2.status+')');
-  const j2=await r2.json();
-  acSource='OpenSky';
-  return (j2.states||[]).filter(v=>v[5]!=null&&v[6]!=null&&!v[8]&&v[7]!=null).map(v=>{
-    const cs=(v[1]||'').trim()||v[0].toUpperCase();
-    const rng=haversine(la,lo,v[6],v[5]);
-    return {cs, airline:airlineOf(cs), reg:'', type:'', country:v[2], lon:v[5], lat:v[6],
-      alt:v[7], vel:v[9], trk:v[10], vr:v[11], squawk:'', rng,
-      brg:bearingTo(la,lo,v[6],v[5]), el:elevationOf(rng,v[7])};
-  });
-}
-
-/* ================= REGISTRY LOCK (WebAuthn / Face ID) ================= */
-const b64=buf=>btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-const unb64=str=>{const s2=str.replace(/-/g,'+').replace(/_/g,'/');const b=atob(s2);return Uint8Array.from(b,c=>c.charCodeAt(0));};
-let registryOpen=false;
-function lockStat(msg,cls){ const e=$('lockStat'); if(e) e.innerHTML=`<div class="status ${cls||''}" style="text-align:left;margin-top:18px">${esc(msg)}</div>`; }
-async function enrolFace(){
-  if(!window.PublicKeyCredential){ lockStat('This browser has no passkey support.','bad'); return; }
-  try{
-    const cred=await navigator.credentials.create({publicKey:{
-      challenge:crypto.getRandomValues(new Uint8Array(32)),
-      rp:{name:'The Kennel'},
-      user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'control@kennel',displayName:'Control'},
-      pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
-      authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'preferred'},
-      timeout:60000
-    }});
-    store.set('kenCred', b64(cred.rawId));
-    lockStat('Device enrolled. Verify to open.','good');
-  }catch(e){ lockStat('Enrolment failed: '+e.message,'bad'); }
-}
-async function unlockRegistry(){
-  if(!window.PublicKeyCredential){ lockStat('No passkey support here — use open without verifying.','bad'); return; }
-  try{
-    const id=store.get('kenCred');
-    const opts={challenge:crypto.getRandomValues(new Uint8Array(32)),userVerification:'required',timeout:60000};
-    if(id) opts.allowCredentials=[{type:'public-key',id:unb64(id),transports:['internal']}];
-    await navigator.credentials.get({publicKey:opts});
-    openRegistry();
-  }catch(e){ lockStat('Verification failed: '+e.message+(store.get('kenCred')?'':' — enrol this device first.'),'bad'); }
-}
-function openRegistry(){ registryOpen=true; $('lockGate').style.display='none'; $('regInner').style.display='block'; }
-function bypassLock(){ openRegistry(); }
-function reseal(){ registryOpen=false; $('lockGate').style.display='block'; $('regInner').style.display='none'; lockStat('Registry resealed.'); window.scrollTo(0,0); }
-
-/* ================= MEETING PROTOCOL ================= */
-const RVS=['the second bench, Rothamsted Park','the bar of the Harpenden Arms','platform 2, Harpenden station, north end',
-  'the tea room, Luton Hoo','the churchyard, St Nicholas','the car park, Batford Springs','the reading room, Harpenden Library'];
-const CHAL=[['Do you know if the 8:14 is running?','It was cancelled on Tuesday.'],
-  ['Is this seat taken?','Only until four.'],['Terrible weather for August.','It was worse in Galway.'],
-  ['Do you have a light?','I gave up in the spring.'],['Are you waiting for the Northern line?','I always take the long way.']];
-const ABORT=['a folded newspaper under the left arm','an umbrella carried open in dry weather','shoelaces untied on the right shoe',
-  'a coat carried rather than worn','a takeaway cup left on the bench'];
-function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
-let lastMeet=null;
-function genMeet(){
-  const d=new Date(Date.now()+ (18+Math.floor(Math.random()*30))*3600000);
-  d.setMinutes(Math.random()<.5?15:45,0,0);
-  const fb=new Date(d.getTime()+86400000);
-  const ch=pick(CHAL);
-  let rv1=pick(RVS), rv2=pick(RVS.filter(r=>r!==rv1));
-  lastMeet={d,fb,ch,rv1,rv2,ab:pick(ABORT)};
-  const fmt=x=>x.toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short'})+' · '+hhmm(x);
-  $('mpCard').innerHTML=[
-    ['Rendezvous',esc(rv1)],['Time',fmt(d)],['Challenge','“'+esc(ch[0])+'”'],['Response','“'+esc(ch[1])+'”'],
-    ['Abort signal',esc(lastMeet.ab)],['Fallback',esc(rv2)],['Fallback time',fmt(fb)],
-    ['Dwell','no more than 6 minutes']
-  ].map(([k,v])=>`<div class="legendrow"><div class="lk2">${k.toUpperCase()}</div><div class="lv">${v}</div></div>`).join('');
-}
-function shareMeet(){
-  if(!lastMeet) return;
-  const fmt=x=>x.toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short'})+' '+hhmm(x);
-  const t=`MEETING PROTOCOL\nRV: ${lastMeet.rv1}\nTime: ${fmt(lastMeet.d)}\nChallenge: "${lastMeet.ch[0]}"\nResponse: "${lastMeet.ch[1]}"\nAbort: ${lastMeet.ab}\nFallback: ${lastMeet.rv2}, ${fmt(lastMeet.fb)}\nDestroy after reading.`;
-  navigator.share ? navigator.share({text:t}).catch(()=>{}) : navigator.clipboard?.writeText(t);
-}
-
-/* ================= LEGEND ================= */
-const FIRST=['Alan','Desmond','Roger','Colm','Niall','Peter','Gerald','Brendan','Hugh','Frank','Terence','Malachy'];
-const LAST=['Vaughan','Merrick','Doyle','Ashcroft','Kearney','Stanhope','Redmond','Fairlie','Corrigan','Lasky','Wexford'];
-const JOBS=['agricultural insurance assessor','freight forwarding, dry goods','regional sales, industrial fasteners',
-  'quantity surveyor','archival cataloguing, private collections','marine loss adjuster','plant hire, midlands region'];
-const TOWNS=['Sligo','Carlisle','Wexford','Shrewsbury','Dundee','Lincoln','Bangor','Kendal'];
-const SCHOOLS=['the technical college at Sligo','a Christian Brothers school he will not name','a comprehensive in Carlisle','a grammar school, since closed'];
-const REASONS=['a claim to settle that should have been settled in June','a supplier who has stopped answering the telephone',
-  'a funeral, distant relation','a valuation nobody wants to pay for','a conference he has no intention of attending'];
-const TELLS=['drinks half pints and leaves them unfinished','carries a paper diary and refers to it',
-  'never orders first','always sits facing the door and apologises for it','complains about the trains with real feeling'];
-let lastLegend=null;
-function genLegend(){
-  const yr=1958+Math.floor(Math.random()*22);
-  const L={
-    name:pick(FIRST)+' '+pick(LAST),
-    born:`${1+Math.floor(Math.random()*28)} ${pick(['Jan','Mar','Apr','Jun','Sep','Nov'])} ${yr}, ${pick(TOWNS)}`,
-    job:pick(JOBS), school:pick(SCHOOLS), reason:pick(REASONS), tell:pick(TELLS),
-    status:pick(['married, one daughter at university','divorced, does not discuss it','widowed, four years'])
-  };
-  lastLegend=L;
-  $('lgCard').innerHTML=[
-    ['Name',L.name],['Born',L.born],['Occupation',L.job],['Circumstances',L.status],
-    ['Educated',L.school],['Reason for travel',L.reason],['Habit to maintain',L.tell]
-  ].map(([k,v])=>`<div class="legendrow"><div class="lk2">${k.toUpperCase()}</div><div class="lv">${esc(v)}</div></div>`).join('');
-}
-function shareLegend(){
-  if(!lastLegend) return;
-  const L=lastLegend;
-  const t=`LEGEND\n${L.name}\nBorn ${L.born}\n${L.job}\n${L.status}\nEducated: ${L.school}\nTravelling because: ${L.reason}\nHabit: ${L.tell}`;
-  navigator.share ? navigator.share({text:t}).catch(()=>{}) : navigator.clipboard?.writeText(t);
-}
-
-/* ================= STATION PLAN ================= */
-const ROOMS=[
-  {n:'Study',x:10,y:10,w:130,h:110,note:'Control. Books, whisky, the Connolly Code applies here.'},
-  {n:'Hall',x:150,y:10,w:80,h:110,note:'Primary entry. Sightline to the front door from the study.'},
-  {n:'Kitchen',x:240,y:10,w:150,h:110,note:'Fireside holds this room. All traffic passes through it.'},
-  {n:'Sitting room',x:10,y:130,w:200,h:160,note:'Opera plays here. Poor acoustics for anything confidential.'},
-  {n:'Garden',x:220,y:130,w:170,h:160,note:'Only unobserved approach. Rear gate is the fallback exit.'}
-];
-function drawPlan(){
-  const svg=$('planSvg'); if(!svg) return;
-  svg.innerHTML=ROOMS.map((r,i)=>`
-    <g onclick="planTap(${i})" style="cursor:pointer">
-      <rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="#16305E" stroke="#C4F000" stroke-width="1.5"/>
-      <text x="${r.x+8}" y="${r.y+20}" fill="#C4CCDD" font-size="12" font-family="monospace">${esc(r.n.toUpperCase())}</text>
-    </g>`).join('');
-}
-function planTap(i){
-  const st=$('planStat'); if(!st) return;
-  st.className='status good'; st.textContent=ROOMS[i].n+' — '+ROOMS[i].note;
-}
-
-
-/* ================= AIRCRAFT OVERHEAD (OpenSky, anonymous) ================= */
-async function loadAircraft(){
-  const el=$('acList');
-  if(!lastFix){ if(el) el.innerHTML='<div class="status bad">No position fix. Acquire one above.</div>'; return; }
-  if(el) el.innerHTML='<div class="status">Scanning…</div>';
-  try{
-    aircraft=await fetchAircraft(60);
-    aircraft.sort((a,b)=>a.rng-b.rng);
-    if(!el) return;
-    if(!aircraft.length){ el.innerHTML='<div class="status">Airspace clear.</div>'; return; }
-    el.innerHTML=aircraft.slice(0,5).map(a=>`
-      <div class="ac"><div>
-        <div class="cs">${esc(a.cs)}</div>
-        <div class="meta">${esc(a.airline||a.type||a.country)}${a.reg?' · '+esc(a.reg):''} · ${a.alt?Math.round(a.alt*3.28/100)*100+' ft':'—'} · ${a.vel?Math.round(a.vel*1.94)+' kt':'—'}${a.vr>1?' · climbing':a.vr<-1?' · descending':''}</div>
-      </div><div class="rng">${a.rng.toFixed(1)}<br><span class="unit">km</span></div></div>`).join('')
-      +`<div class="note">Source: ${esc(acSource)}</div>`;
-  }catch(e){
-    if(el) el.innerHTML='<div class="status bad">Airspace feed unavailable: '+esc(e.message)+'. Run Diagnostics in Q Branch.</div>';
-  }
-}
-
-/* ================= SPACE WEATHER ================= */
-async function loadKp(){
-  const v=$('kpVal'), n=$('kpNote'), bars=$('kpBars');
-  try{
-    const r=await fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json');
-    const j=await r.json();
-    const last=j[j.length-1];
-    const kp=Math.round(parseFloat(last.kp_index)*10)/10;
-    v.textContent=kp.toFixed(1);
-    bars.innerHTML=Array.from({length:9},(_,i)=>
-      `<span class="${i<kp?(kp>=6?'hot':'lit'):''}"></span>`).join('');
-    n.textContent = kp>=7 ? 'Severe storm. Aurora possible over southern England.'
-      : kp>=6 ? 'Storm conditions. Aurora possible as far south as the Midlands.'
-      : kp>=5 ? 'Minor storm. Aurora over Scotland and northern England.'
-      : kp>=4 ? 'Unsettled. Aurora over northern Scotland only.'
-      : 'Quiet. Nothing to see from Harpenden.';
-  }catch(e){ n.textContent='Space weather feed unavailable.'; }
-}
-loadKp();
-
-/* ================= LAUNCHES ================= */
-async function loadLaunches(){
-  const el=$('launchList');
-  try{
-    const r=await fetch('https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=3&mode=list');
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const j=await r.json();
-    const res=j.results||[];
-    if(!res.length) throw new Error('empty');
-    el.innerHTML=res.map(l=>{
-      const t=new Date(l.net);
-      const hrs=Math.round((t-Date.now())/3600000);
-      return `<div class="intel"><div class="when">${t.toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · T-${hrs}h</div>
-        <div class="what">${esc(l.name)}<br><span style="color:#93A6C6;font-size:12px">${esc((l.pad&&l.pad.location&&l.pad.location.name)||'')}</span></div></div>`;
-    }).join('');
-  }catch(e){ el.innerHTML='<div class="status bad">Launch feed unavailable ('+esc(e.message)+').</div>'; }
-}
-loadLaunches();
-
-/* ================= STEGANOGRAPHY ================= */
-let stegImg=null;
-function stegLoad(input){
-  const f=input.files&&input.files[0]; if(!f) return;
-  const img=new Image();
-  img.onload=()=>{
-    stegImg=img;
-    const c=$('stCanvas');
-    const max=1400, sc=Math.min(1,max/Math.max(img.width,img.height));
-    c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
-    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-    const cap=Math.floor((c.width*c.height*3)/8)-8;
-    const st=$('stStat'); st.className='status good';
-    st.textContent=`Carrier loaded. Capacity ${cap.toLocaleString()} characters.`;
-  };
-  img.src=URL.createObjectURL(f);
-}
-function stegKey(pass,len){
-  const out=new Uint8Array(len);
-  if(!pass) return out;
-  let h=2166136261;
-  for(let i=0;i<pass.length;i++){ h^=pass.charCodeAt(i); h=Math.imul(h,16777619); }
-  for(let i=0;i<len;i++){ h^=h<<13; h^=h>>>17; h^=h<<5; h|=0; out[i]=h&255; }
-  return out;
-}
-function stegHide(){
-  const c=$('stCanvas'), st=$('stStat');
-  if(!stegImg){ st.className='status bad'; st.textContent='Load a carrier image first.'; return; }
-  const ctx=c.getContext('2d');
-  const msg=new TextEncoder().encode($('stMsg').value);
-  const key=stegKey($('stKey').value,msg.length);
-  const pay=msg.map((b,i)=>b^key[i]);
-  const id=ctx.getImageData(0,0,c.width,c.height), px=id.data;
-  const capacity=Math.floor((c.width*c.height*3)/8)-8;
-  if(pay.length>capacity){ st.className='status bad'; st.textContent=`Message too long. Capacity is ${capacity} bytes.`; return; }
-  const bits=[];
-  for(let i=31;i>=0;i--) bits.push((pay.length>>i)&1);
-  for(const b of pay) for(let i=7;i>=0;i--) bits.push((b>>i)&1);
-  let bi=0;
-  for(let p=0;p<px.length&&bi<bits.length;p+=4){
-    for(let ch=0;ch<3&&bi<bits.length;ch++){
-      px[p+ch]=(px[p+ch]&0xFE)|bits[bi++];
-    }
-  }
-  ctx.putImageData(id,0,0);
-  c.toBlob(bl=>{
-    const f=new File([bl],'carrier.png',{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[f]})) navigator.share({files:[f]}).catch(()=>{});
-    else { const a=document.createElement('a'); a.href=URL.createObjectURL(bl); a.download='carrier.png'; a.click(); }
-  },'image/png');
-  st.className='status good'; st.textContent=`${pay.length} bytes concealed. Save as PNG — do not re-compress.`;
-}
-function stegReveal(){
-  const c=$('stCanvas'), st=$('stStat'), out=$('stOut');
-  if(!stegImg){ st.className='status bad'; st.textContent='Load the carrier image first.'; return; }
-  const px=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
-  const bits=[];
-  for(let p=0;p<px.length;p+=4) for(let ch=0;ch<3;ch++) bits.push(px[p+ch]&1);
-  let len=0; for(let i=0;i<32;i++) len=(len<<1)|bits[i];
-  if(len<=0||len>bits.length/8){ out.textContent='No concealed payload found.'; st.className='status bad'; st.textContent='Nothing hidden here, or the image was re-compressed.'; return; }
-  const bytes=new Uint8Array(len);
-  for(let b=0;b<len;b++){ let v=0; for(let i=0;i<8;i++) v=(v<<1)|bits[32+b*8+i]; bytes[b]=v; }
-  const key=stegKey($('stKey').value,len);
-  try{
-    out.textContent=new TextDecoder().decode(bytes.map((b,i)=>b^key[i]));
-    st.className='status good'; st.textContent='Payload recovered.';
-  }catch(e){ out.textContent='Payload corrupt or wrong passphrase.'; }
-}
-
-/* ================= VETTING ================= */
-const CODEWORDS=['Kestrel','Bittern','Corncrake','Merlin','Curlew','Redshank','Gannet','Chough','Peregrine',
-  'Staghound','Deerhound','Lurcher','Terrier','Saluki','Foxhound','Whippet','Harrier'];
-const VQ=[
-  {q:'Under pressure, does the candidate talk more or less?',a:['Less','More']},
-  {q:'Can the candidate keep a secret from family?',a:['Yes','No']},
-  {q:'Would the candidate notice being followed?',a:['Probably','Certainly not']},
-  {q:'Does the candidate improve or worsen a room?',a:['Improves','Depends on the room']},
-  {q:'Is the candidate reliable when bored?',a:['Yes','Notably not']}
-];
-let vetState=null;
-function vetReset(){
-  vetState=null;
-  ['vs1','vs2','vs3'].forEach((id,i)=>{const e=$(id); if(e) e.className='step'+(i===0?' on':'');});
-  const st=$('vtStat'); if(st){st.className='status';st.textContent='No candidate.';}
-}
-function vetShow(n){ ['vs1','vs2','vs3'].forEach((id,i)=>{const e=$(id); if(e) e.className='step'+(i===n-1?' on':'');}); }
-function vetStep2(){
-  const nm=($('vtName').value||'').trim();
-  if(!nm){ const st=$('vtStat'); st.className='status bad'; st.textContent='Name the candidate first.'; return; }
-  vetState={name:nm, sec:$('vtSec').value, ans:{}};
-  $('vtQs').innerHTML=VQ.map((v,i)=>`
-    <div style="margin-top:${i?16:8}px">
-      <div style="font-size:13.5px;color:var(--mist);margin-bottom:7px">${esc(v.q)}</div>
-      <select id="vq${i}">${v.a.map(a=>`<option>${esc(a)}</option>`).join('')}</select>
-    </div>`).join('');
-  const st=$('vtStat'); st.className='status'; st.textContent='Assessing '+nm+'.';
-  vetShow(2);
-}
-function vetStep3(){
-  VQ.forEach((v,i)=>{ const e=$('vq'+i); if(e) vetState.ans[i]=e.value; });
-  const flags=Object.values(vetState.ans).filter((a,i)=>a===VQ[i].a[1]).length;
-  const cn=pick(CODEWORDS);
-  const clearance = flags===0?'FULL' : flags<=2?'CONDITIONAL' : 'PROBATIONARY';
-  const verdict = flags===0
-    ? 'No adverse findings. Recommended without reservation.'
-    : flags<=2
-      ? 'Two minor concerns noted, neither disqualifying. Recommended with supervision for six months.'
-      : 'Several concerns. Recommended for probationary service only, away from anything that matters.';
-  vetState.cn=cn; vetState.clearance=clearance; vetState.verdict=verdict;
-  vetState.ref='KEN/'+String(100+Math.floor(Math.random()*800));
-  $('vtResult').innerHTML=[
-    ['Codename',cn],['File reference',vetState.ref],['Section',vetState.sec],
-    ['Clearance',clearance],['Findings',flags+' of '+VQ.length+' flagged'],['Verdict',verdict]
-  ].map(([k,v])=>`<div class="legendrow"><div class="lk2">${k.toUpperCase()}</div><div class="lv">${esc(v)}</div></div>`).join('');
-  const st=$('vtStat'); st.className='status good'; st.textContent='Assessment complete.';
-  vetShow(3);
-}
-function vetCommit(){
-  if(!vetState) return;
-  const rec={ref:vetState.ref,cn:vetState.cn,name:vetState.name,role:vetState.clearance+' clearance',
-    sec:vetState.sec,st:vetState.sec==='Retired list'?'retired':'active',
-    rec:['Vetted '+new Date().toLocaleDateString('en-GB')+' by Control.','Section: '+vetState.sec+'.'],
-    ass:vetState.verdict, cav:'[[Vetting is only as good as the questions. Control wrote these himself.]]'};
-  REGISTRY.push(rec);
-  try{ store.set('kenVetted', JSON.stringify(REGISTRY.slice(7))); }catch(e){}
-  renderRegistry();
-  const st=$('vtStat'); st.className='status good';
-  st.textContent=vetState.cn+' entered on the books. Open Credentials to issue the card.';
-  store.set('kenLastVet', vetState.cn+'|'+vetState.ref);
-}
-// restore previously vetted officers
-try{
-  const saved=JSON.parse(store.get('kenVetted')||'[]');
-  if(Array.isArray(saved)&&saved.length){ REGISTRY.push(...saved); }
-}catch(e){}
-
-/* ================= DURESS SCREEN ================= */
-let duTaps=0,duTimer=null;
-function duressOn(){
-  const d=$('duress'); if(!d) return;
-  const lat=lastFix?lastFix.latitude:51.8177, lon=lastFix?lastFix.longitude:-0.3540;
-  const t=sunTimes(new Date(),lat,lon);
-  $('duSun').textContent=hhmm(t.sunSet);
-  $('duUpd').textContent=hhmm(new Date());
-  d.classList.add('on');
-  if(window.speechSynthesis) speechSynthesis.cancel();
-  fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(2)}&longitude=${lon.toFixed(2)}&current=temperature_2m,apparent_temperature,wind_speed_10m,weather_code&timezone=auto`)
-    .then(r=>r.json()).then(j=>{
-      const c=j.current;
-      $('duTemp').textContent=Math.round(c.temperature_2m)+'°';
-      $('duPlace').textContent=WX[c.weather_code]||'Weather';
-      $('duFeel').textContent=Math.round(c.apparent_temperature)+'°';
-      $('duWind').textContent=Math.round(c.wind_speed_10m)+' km/h';
-    }).catch(()=>{ $('duTemp').textContent='—°'; });
-}
-function duressInit(){
-  const d=$('duress'); if(!d) return;
-  d.addEventListener('click',()=>{
-    duTaps++;
-    clearTimeout(duTimer);
-    duTimer=setTimeout(()=>duTaps=0,1600);
-    if(duTaps>=3){ duTaps=0; d.classList.remove('on'); }
-  });
-  const brand=document.querySelector('.brand');
-  if(brand){
-    let hold=null;
-    const start=()=>{ hold=setTimeout(duressOn,800); };
-    const end=()=>{ clearTimeout(hold); };
-    brand.addEventListener('touchstart',start,{passive:true});
-    brand.addEventListener('touchend',end);
-    brand.addEventListener('touchcancel',end);
-    brand.addEventListener('mousedown',start);
-    brand.addEventListener('mouseup',end);
-    brand.addEventListener('mouseleave',end);
-  }
-}
-duressInit();
-
-/* ================= REGISTRY ================= */
-function renderRegistry(){
-  $('regList').innerHTML=REGISTRY.map((p,i)=>`
-    <div class="file ${p.st}" onclick="openDossier(${i})">
-      <div class="ref">${esc(p.ref)} · ${esc(p.sec)}</div>
-      <div class="cn">${esc(p.cn)}</div>
-      <div class="rl">${esc(p.role)}</div>
-    </div>`).join('');
-}
-function openDossier(i){
-  const p=REGISTRY[i];
-  $('dossierBody').innerHTML=`
-    <h1>${esc(p.cn)}</h1><p class="sub">${esc(p.ref)} · ${esc(p.sec)}</p>
-    <div class="panel">
-      <div class="fld"><span class="k">True name</span>${esc(p.name)}</div>
-      <div class="fld"><span class="k">Appointment</span>${esc(p.role)}</div>
-      <div class="fld"><span class="k">Service record</span>${p.rec.map(r=>`<div style="margin-top:4px">${redact(r)}</div>`).join('')}</div>
-      <div class="fld"><span class="k">Assessment</span>${redact(p.ass)}</div>
-      <div class="fld"><span class="k">Caveat</span>${redact(p.cav)}</div>
-    </div>`;
-  showView('dossier');
-}
-renderRegistry();
-
-/* ================= COMMS ================= */
-const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const clean=s=>(s||'').toUpperCase().replace(/[^A-Z]/g,'');
-const g5=s=>s.replace(/(.{5})/g,'$1 ').trim();
-function cipherSwitch(){
-  const m=$('cipherMode').value;
-  $('vigBlock').style.display = m==='vig'?'block':'none';
-  $('otpBlock').style.display = m==='otp'?'block':'none';
-}
-function makePad(){
-  const need=Math.max(clean($('msgIn').value).length,40);
-  const b=new Uint8Array(need); crypto.getRandomValues(b);
-  let p=''; for(let i=0;i<need;i++) p+=A[b[i]%26];
-  $('otpPad').value=g5(p);
-}
-function runCipher(dir){
-  const out=$('cipherOut'), txt=clean($('msgIn').value);
-  if(!txt){ out.textContent='Nothing to work with. Enter a message.'; return; }
-  const m=$('cipherMode').value;
-  const keyStr = m==='vig' ? clean($('vigKey').value) : clean($('otpPad').value);
-  if(!keyStr){ out.textContent = m==='vig' ? 'Key word required.' : 'No pad loaded. Generate one.'; return; }
-  if(m==='otp' && keyStr.length<txt.length){ out.textContent='Pad shorter than the message. Generate a longer pad — reusing pad letters breaks it entirely.'; return; }
-  let r='';
-  for(let i=0;i<txt.length;i++){
-    const k = m==='vig' ? keyStr[i%keyStr.length] : keyStr[i];
-    r += A[((A.indexOf(txt[i]) + A.indexOf(k)*dir)%26+26)%26];
-  }
-  out.textContent=g5(r);
-}
-function copyOut(btn){
-  const t=$('cipherOut').textContent; if(!t||t==='—') return;
-  navigator.clipboard?.writeText(t);
-  const o=btn.textContent; btn.textContent='Copied'; setTimeout(()=>btn.textContent=o,1200);
-}
-function shareOut(){
-  const t=$('cipherOut').textContent; if(!t||t==='—') return;
-  if(navigator.share) navigator.share({text:t}).catch(()=>{});
-  else { navigator.clipboard?.writeText(t); alert('Share sheet unavailable — copied instead.'); }
-}
+  /* ---------- boot ---------- */
+  $('[data-shift-row]').style.display='flex';
+  renderQ(); renderMission(); tickTimer(); loadBoard();
+})();
 </script>
 </body>
 </html>
