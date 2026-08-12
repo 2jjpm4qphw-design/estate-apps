@@ -48,8 +48,8 @@
   .inspo .i-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
   .inspo .i-occ{font-size:14.5px;font-weight:700;color:var(--white)}
   .inspo .i-meta{font-size:11px;color:var(--mist);opacity:.75}
-  .inspo .i-thumbs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
-  .inspo .i-thumbs .ph{width:52px;height:52px;border-radius:8px;background:#fff center/cover no-repeat;flex:0 0 auto}
+  .inspo .i-thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+  .inspo .i-thumbs .ph{width:100%;aspect-ratio:1/1;border-radius:10px;background:#fff center/cover no-repeat}
   .inspo .i-wear{width:100%;border:1px solid var(--line);background:transparent;color:var(--white);border-radius:10px;padding:9px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
   .inspo-cat-h{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);margin:16px 2px 8px}
   /* today */
@@ -225,6 +225,7 @@
   }
   function renderHistory(){ var host=$('[data-history]'); if(!host) return; var days=Object.keys(WORN).filter(function(d){return (WORN[d]||[]).length;}).sort().reverse().slice(0,30); if(!days.length){ host.innerHTML='<div class="muted">No wear history yet. What you log builds up here.</div>'; return; }
     host.innerHTML=days.map(function(d){ var ids=WORN[d]; var lbl=new Date(d+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}); var thumbs=ids.map(function(id){ var it=byId(id); return it?'<span class="ph" data-thumb="'+esc(it.id)+'" title="'+esc(it.name||'')+'"></span>':''; }).join(''); return '<div class="hist-day"><div class="hd-d">'+esc(lbl)+' · '+ids.length+' item'+(ids.length>1?'s':'')+wxChip(d)+'</div><div class="hist-thumbs">'+thumbs+'</div></div>'; }).join('');
+    paintThumbs(host);
   }
   // ---- Inspiration (pre-agreed outfits from the rulebook library) ----
   var OUTFITS=[]; var inspoFilt={cat:'all'};

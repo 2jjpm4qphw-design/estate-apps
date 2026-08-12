@@ -298,6 +298,17 @@ header{margin-bottom:34px}
   <button class="clear" id="clearBtn">Clear history</button>
 </div>
 
+<details id="whub" style="margin:16px 4px 0">
+  <summary style="cursor:pointer;font-size:13px;font-weight:600;color:#C4F000">Link to the Hub — count walks in your health plan</summary>
+  <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">
+    <div style="font-size:12px;opacity:.8;line-height:1.5">Paste your Hub Gist ID + token. Then when you finish a walk, it ticks the <b>walk</b> target in the Still Room. Works fine without this.</div>
+    <input id="wHubId" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Gist ID (32-char hex)" style="padding:9px 10px;border-radius:8px;border:1px solid #24467e;background:rgba(0,0,0,.25);color:inherit;font:inherit;font-size:13px">
+    <input id="wHubToken" type="password" autocomplete="off" spellcheck="false" placeholder="Token (ghp_… / github_pat_…)" style="padding:9px 10px;border-radius:8px;border:1px solid #24467e;background:rgba(0,0,0,.25);color:inherit;font:inherit;font-size:13px">
+    <button id="wHubConnect" style="padding:10px;border-radius:8px;border:0;background:#C4F000;color:#0D1B3E;font:inherit;font-weight:700;cursor:pointer">Link to the Hub</button>
+    <div id="wHubMsg" style="font-size:12px;opacity:.85"></div>
+  </div>
+</details>
+
 <p class="foot">
   Paths from OpenStreetMap via Overpass. Map tiles by CARTO.
   Routes are generated, not curated — check the map before you set off,
@@ -358,6 +369,16 @@ function setStatus(t, isError){
 }
 function toRad(d){ return d*Math.PI/180; }
 function toDeg(r){ return r*180/Math.PI; }
+
+/* ===== Link to the Hub — a finished walk ticks the Still Room's daily "walk" target
+   (writes state.health.planLog[today].walk in the shared gist, touching only that key). ===== */
+function waysTodayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function waysCreds(){ try{ var id=localStorage.getItem('connolly-sync:gist-id'),tk=localStorage.getItem('connolly-sync:token'); return (id&&tk)?{id:id,token:tk}:null; }catch(e){ return null; } }
+function _wGH(c){ return {'Authorization':'Bearer '+c.token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}; }
+function waysMarkWalk(){ var c=waysCreds(); if(!c) return; setStatus('logging walk…');
+  fetch('https://api.github.com/gists/'+c.id,{headers:_wGH(c)}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(g){ var f=g.files&&g.files['life-twoweek.json']; if(!f) throw 0; if(f.truncated&&f.raw_url) return fetch(f.raw_url,{headers:{'Authorization':'Bearer '+c.token}}).then(function(r){return r.text();}); return f.content; }).then(function(text){ var p; try{ p=JSON.parse(text||'{}'); }catch(e){ p={}; } var st=p.state||p; if(!st.health||typeof st.health!=='object') st.health={}; if(!st.health.planLog||typeof st.health.planLog!=='object') st.health.planLog={}; var iso=waysTodayISO(); if(!st.health.planLog[iso]) st.health.planLog[iso]={}; st.health.planLog[iso].walk=true; p.state=st; p.savedAt=new Date().toISOString(); p.writer={id:'ways',label:'Ways',at:p.savedAt}; var body={files:{}}; body.files['life-twoweek.json']={content:JSON.stringify(p)}; return fetch('https://api.github.com/gists/'+c.id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json'},_wGH(c)),body:JSON.stringify(body)}); }).then(function(){ setStatus('Walk logged to your Still Room plan ✓'); }).catch(function(){ setStatus('Could not log the walk — check the Hub link.', true); });
+}
+function waysConnect(){ var id=$('wHubId').value.trim().replace(/^.*\/(?=[0-9a-f]{8,})/i,''); var tk=$('wHubToken').value.trim(); var m=$('wHubMsg'); if(!id||!tk){ m.textContent='Enter both the Gist ID and a token.'; return; } try{ localStorage.setItem('connolly-sync:gist-id',id); localStorage.setItem('connolly-sync:token',tk); }catch(e){} m.textContent='Linked — finishing a walk now counts toward your Still Room walk target.'; }
 
 function haversine(a1,o1,a2,o2){
   var R=6371000, dLat=toRad(a2-a1), dLon=toRad(o2-o1);
@@ -1028,7 +1049,9 @@ $('go').addEventListener('click', function(){ generate(false); });
 $('again').addEventListener('click', function(){ generate(true); });
 
 $('walk').addEventListener('click', enterFollow);
-$('fclose').addEventListener('click', exitFollow);
+$('fclose').addEventListener('click', function(){ exitFollow(); waysMarkWalk(); });
+$('wHubConnect').addEventListener('click', waysConnect);
+(function(){ var c=waysCreds(); if(c){ $('wHubId').value=c.id; $('wHubToken').value=c.token; } })();
 
 $('gmapBtn').addEventListener('click', function(){
   if(!current) return;
