@@ -557,6 +557,18 @@ canvas.gg2{width:100%;max-width:250px;aspect-ratio:1;margin:8px auto 0;display:b
       <input type="file" id="importFile" accept="application/json,.json" style="display:none">
       <div class="note">Safari clears storage for sites you have not opened in about a week. <b>Everything here lives in this browser only</b> — drives, calibration, settings. Back up now and then, and keep the file somewhere real. Restoring merges rather than overwrites, so nothing already recorded is lost.</div>
 
+      <h2>Back up to the Hub</h2>
+      <div class="card">
+        <div class="row" style="flex-direction:column;align-items:stretch;gap:6px">
+          <label style="font-size:11px">Gist ID</label>
+          <input id="hubId" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="32-character hex ID" style="width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--rule);background:var(--bg-deep);color:var(--ink);font:inherit;font-size:13px">
+          <label style="font-size:11px;margin-top:4px">Token</label>
+          <input id="hubToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ghp_… / github_pat_…" style="width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--rule);background:var(--bg-deep);color:var(--ink);font:inherit;font-size:13px">
+        </div>
+      </div>
+      <button class="btn" id="hubConnect">Connect &amp; back up</button>
+      <div class="note" id="hubMsg">Optional. Paste your Hub Gist ID + token to back up your drives and scores to the estate, so they survive a phone wipe and show across devices. Raw telemetry stays on the phone; the summaries, scores and calibration are saved. Works offline without this.</div>
+
       <button class="btn ghost" id="wipeBtn">Delete all drives</button>
 
       <h2>What this is not</h2>
@@ -586,7 +598,22 @@ var LS=(function(){
   catch(e){var m={};return{getItem:function(k){return k in m?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]}}}
 })();
 function load(k,d){try{var v=LS.getItem('rc_'+k);return v===null?d:JSON.parse(v)}catch(e){return d}}
-function save(k,v){try{LS.setItem('rc_'+k,JSON.stringify(v))}catch(e){}}
+function save(k,v){try{LS.setItem('rc_'+k,JSON.stringify(v))}catch(e){} try{_rcAfterSave(k);}catch(_){}}
+
+/* ===== Hub backup — Roadcraft writes its OWN file (roadcraft.json) in the shared gist.
+   Records only: drive SUMMARIES + events + calibration + settings. The big raw arrays
+   (trace, cloud) stay on the phone, so the file stays small and never threatens the
+   Hub's own state. Its own file, so last-write-wins is safe (single owner). ===== */
+var _rcPulling=false;
+function rcCreds(){try{var id=localStorage.getItem('connolly-sync:gist-id'),tk=localStorage.getItem('connolly-sync:token');return(id&&tk)?{id:id,token:tk}:null;}catch(e){return null;}}
+function _rcAfterSave(k){ if(_rcPulling)return; if(k==='drives'||k==='cals'||k==='cfg') rcSchedulePush(); }
+function _rcSlim(ds){ return (ds||[]).map(function(d){ var o={}; for(var kk in d){ if(kk==='trace'||kk==='cloud') continue; o[kk]=d[kk]; } return o; }); }
+function _rcGH(c){return{'Authorization':'Bearer '+c.token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};}
+function rcGistGet(c){return fetch('https://api.github.com/gists/'+c.id,{headers:_rcGH(c)}).then(function(r){if(!r.ok)throw new Error('gist '+r.status);return r.json();}).then(function(g){var f=g.files&&g.files['roadcraft.json'];if(!f)return null;if(f.truncated&&f.raw_url)return fetch(f.raw_url,{headers:{'Authorization':'Bearer '+c.token}}).then(function(r){return r.text();});return f.content;});}
+function rcPush(){var c=rcCreds();if(!c)return Promise.resolve();var body={files:{'roadcraft.json':{content:JSON.stringify({app:'Roadcraft',savedAt:Date.now(),drives:_rcSlim(drives),cals:cals,cfg:cfg})}}};return fetch('https://api.github.com/gists/'+c.id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json'},_rcGH(c)),body:JSON.stringify(body)}).then(function(r){var el=document.getElementById('hubMsg');if(el)el.textContent=r&&r.ok?'Backed up to the Hub.':'Backup failed — check the ID/token.';}).catch(function(){var el=document.getElementById('hubMsg');if(el)el.textContent='Backup offline — will retry.';});}
+var _rcTimer=null;function rcSchedulePush(){if(!rcCreds())return;if(_rcTimer)clearTimeout(_rcTimer);_rcTimer=setTimeout(rcPush,1500);}
+function rcPullIfEmpty(){var c=rcCreds();if(!c)return Promise.resolve();return rcGistGet(c).then(function(text){if(!text)return;var p;try{p=JSON.parse(text);}catch(e){return;}if(p&&Array.isArray(p.drives)&&p.drives.length&&(!drives||!drives.length)){_rcPulling=true;drives=p.drives;save('drives',drives);if(p.cals)cals=p.cals;_rcPulling=false;try{paintHistory();paintSetup();}catch(_){}}}).catch(function(){_rcPulling=false;});}
+function rcConnect(){var id=document.getElementById('hubId').value.trim().replace(/^.*\/(?=[0-9a-f]{8,})/i,'');var tk=document.getElementById('hubToken').value.trim();var msg=document.getElementById('hubMsg');if(!id||!tk){msg.textContent='Enter both the Gist ID and a token.';return;}try{localStorage.setItem('connolly-sync:gist-id',id);localStorage.setItem('connolly-sync:token',tk);}catch(e){}msg.textContent='Connecting…';rcPullIfEmpty().then(function(){return rcPush();}).then(function(){msg.textContent='Connected — drives backed up to the Hub.';});}
 
 /* ================= constants ================= */
 var G=9.80665;
@@ -2617,6 +2644,9 @@ function installIcon(){
 
 /* ================= boot ================= */
 applyTheme();paintSetup();paintHistory();render();installIcon();loadVoices();setView(cfg.view||'gg');setTimeout(loadVoices,700);
+/* Hub backup wiring */
+(function(){ var b=document.getElementById('hubConnect'); if(b) b.onclick=rcConnect;
+  var c=rcCreds(); if(c){ var a=document.getElementById('hubId'), t=document.getElementById('hubToken'); if(a)a.value=c.id; if(t)t.value=c.token; rcPullIfEmpty().then(function(){ return rcPush(); }); } })();
 if(typeof DeviceMotionEvent!=='undefined'&&!DeviceMotionEvent.requestPermission)
   window.addEventListener('devicemotion',onMotion);
 

@@ -316,6 +316,16 @@ details.ref .body li{margin-bottom:5px}
   <section class="view" id="v-analysis"></section>
 
   <section class="view" id="v-ref">
+    <details class="ref" open><summary>Back up to the Hub</summary><div class="body">
+      Optional. Paste your Hub Gist ID + token to back up your ledger — deposit and every bet — to the estate, so it survives a phone wipe and shows across devices. Works offline without this.
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">
+        <input id="fbHubId" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Gist ID (32-char hex)" style="padding:9px 10px;border-radius:8px;border:1px solid var(--line,#24467e);background:rgba(0,0,0,.2);color:inherit;font:inherit;font-size:13px">
+        <input id="fbHubToken" type="password" autocomplete="off" spellcheck="false" placeholder="Token (ghp_… / github_pat_…)" style="padding:9px 10px;border-radius:8px;border:1px solid var(--line,#24467e);background:rgba(0,0,0,.2);color:inherit;font:inherit;font-size:13px">
+        <button id="fbHubConnect" style="padding:10px;border-radius:8px;border:0;background:var(--lime,#C4F000);color:#0D1B3E;font:inherit;font-weight:700;cursor:pointer">Connect &amp; back up</button>
+        <div id="fbHubMsg" style="font-size:12px;opacity:.8"></div>
+      </div>
+    </div></details>
+
     <details class="ref"><summary>Form figures</summary><div class="body">
       Read left to right, oldest run first. Each digit is a finishing position; <code>0</code> means it finished outside the top nine. <code>P</code> pulled up, <code>F</code> fell, <code>U</code> unseated, <code>R</code> refused, <code>B</code> brought down.
       <br><br>A <code>-</code> marks a new season. A <code>/</code> marks a longer absence.
@@ -510,7 +520,17 @@ try{
   var raw=localStorage.getItem(KEY);
   if(raw){var p=JSON.parse(raw); if(p&&typeof p==='object'){state.deposit=Number(p.deposit)||20; state.bets=Array.isArray(p.bets)?p.bets:[];}}
 }catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){toast('Could not save — device storage is full or blocked');}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){toast('Could not save — device storage is full or blocked');} try{_fbSchedulePush();}catch(_){}}
+
+/* ===== Hub backup — Form Book writes its OWN file (formbook.json) in the shared gist.
+   The ledger is small (deposit + bets), so the whole thing syncs. Own file = safe last-write-wins. ===== */
+function _fbCreds(){try{var id=localStorage.getItem('connolly-sync:gist-id'),tk=localStorage.getItem('connolly-sync:token');return(id&&tk)?{id:id,token:tk}:null;}catch(e){return null;}}
+function _fbGH(c){return{'Authorization':'Bearer '+c.token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};}
+function _fbGistGet(c){return fetch('https://api.github.com/gists/'+c.id,{headers:_fbGH(c)}).then(function(r){if(!r.ok)throw new Error('gist '+r.status);return r.json();}).then(function(g){var f=g.files&&g.files['formbook.json'];if(!f)return null;if(f.truncated&&f.raw_url)return fetch(f.raw_url,{headers:{'Authorization':'Bearer '+c.token}}).then(function(r){return r.text();});return f.content;});}
+function _fbPush(){var c=_fbCreds();if(!c)return Promise.resolve();var body={files:{'formbook.json':{content:JSON.stringify({app:'FormBook',savedAt:Date.now(),deposit:state.deposit,bets:state.bets})}}};return fetch('https://api.github.com/gists/'+c.id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json'},_fbGH(c)),body:JSON.stringify(body)}).then(function(r){var el=document.getElementById('fbHubMsg');if(el)el.textContent=r&&r.ok?'Backed up to the Hub.':'Backup failed — check ID/token.';}).catch(function(){var el=document.getElementById('fbHubMsg');if(el)el.textContent='Backup offline — will retry.';});}
+var _fbTimer=null,_fbPulling=false;function _fbSchedulePush(){if(_fbPulling||!_fbCreds())return;if(_fbTimer)clearTimeout(_fbTimer);_fbTimer=setTimeout(_fbPush,1500);}
+function _fbPullIfEmpty(){var c=_fbCreds();if(!c)return Promise.resolve();return _fbGistGet(c).then(function(text){if(!text)return;var p;try{p=JSON.parse(text);}catch(e){return;}if(p&&Array.isArray(p.bets)&&p.bets.length&&(!state.bets||!state.bets.length)){_fbPulling=true;state.bets=p.bets;if(typeof p.deposit==='number')state.deposit=p.deposit;save();_fbPulling=false;renderAll();}}).catch(function(){_fbPulling=false;});}
+function _fbConnect(){var id=document.getElementById('fbHubId').value.trim().replace(/^.*\/(?=[0-9a-f]{8,})/i,'');var tk=document.getElementById('fbHubToken').value.trim();var msg=document.getElementById('fbHubMsg');if(!id||!tk){msg.textContent='Enter both the Gist ID and a token.';return;}try{localStorage.setItem('connolly-sync:gist-id',id);localStorage.setItem('connolly-sync:token',tk);}catch(e){}msg.textContent='Connecting…';_fbPullIfEmpty().then(function(){return _fbPush();}).then(function(){msg.textContent='Connected — ledger backed up to the Hub.';});}
 
 /* ---------------- helpers ---------------- */
 function $(id){return document.getElementById(id);}
@@ -941,6 +961,10 @@ $('btnWipe').addEventListener('click',function(){
 
 function renderAll(){renderBank();renderBets();renderAnalysis();}
 renderAll();
+
+/* Hub backup wiring */
+(function(){ var b=document.getElementById('fbHubConnect'); if(b) b.onclick=_fbConnect;
+  var c=_fbCreds(); if(c){ var a=document.getElementById('fbHubId'), t=document.getElementById('fbHubToken'); if(a)a.value=c.id; if(t)t.value=c.token; _fbPullIfEmpty().then(function(){ return _fbPush(); }); } })();
 
 /* ---------------- installable ---------------- */
 var manifest={
