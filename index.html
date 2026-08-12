@@ -1,30 +1,291 @@
-<!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Estate — Apps</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D1B3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dressing Room">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>Dressing Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#0D1B3E;--mid:#1A3A6B;--lime:#C4F000;--mist:#C4CCDD;--line:#24467E}
-*{box-sizing:border-box}body{margin:0;font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--mist);padding:28px 18px 60px}
-h1{color:#fff;font-size:22px;margin:0 0 4px}.sub{font-size:13px;opacity:.75;margin:0 0 22px}
-.fam{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--lime);margin:22px 0 10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-a.app{display:block;background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:14px;color:#fff;text-decoration:none}
-a.app b{display:block;font-size:15px}a.app span{font-size:11.5px;color:var(--mist);opacity:.8}
-</style></head><body>
-<h1>The Estate</h1><p class="sub">Every app, in one place.</p>
-<div class="fam">Built with the Hub</div><div class="grid">
-<a class="app" href="./hub-pocket/"><b>Hub Pocket</b><span>To-dos & diary</span></a>
-<a class="app" href="./still-room/"><b>The Still Room</b><span>Health</span></a>
-<a class="app" href="./library/"><b>Library</b><span>Catalogue</span></a>
-<a class="app" href="./wardrobe/"><b>Wardrobe</b><span>Outfits</span></a>
-<a class="app" href="./diversions/"><b>Diversions</b><span>Films & TV</span></a>
-<a class="app" href="./bulletin/"><b>Bulletin</b><span>News & weather</span></a>
-<a class="app" href="./cellar/"><b>Cellar</b><span>Wine</span></a>
+  :root{ --navy:#0D1B3E; --mid:#1A3A6B; --lime:#C4F000; --mist:#C4CCDD; --white:#FFFFFF; --line:#24467e; }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--mist);-webkit-font-smoothing:antialiased;padding:0 0 90px}
+  .wrap{max-width:680px;margin:0 auto;padding:14px 15px 0}
+  header.top{display:flex;align-items:baseline;justify-content:space-between;padding:6px 2px 10px}
+  header.top h1{font-size:20px;font-weight:800;color:var(--white);margin:0;letter-spacing:.02em}
+  header.top .eyebrow{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--lime)}
+  .status{font-size:11px;color:var(--mist);opacity:.7}
+  .muted{color:var(--mist);opacity:.7;font-size:13px;padding:16px 4px;line-height:1.5}
+  .view{display:none}.view.on{display:block}
+  .ctl{margin-bottom:8px}
+  .ctl input{width:100%;border:1px solid var(--line);background:#0a1530;color:var(--white);border-radius:20px;padding:9px 14px;font:inherit;font-size:13px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px;overflow-x:auto}
+  .chip{border:1px solid #2a4778;background:transparent;color:var(--mist);border-radius:20px;padding:6px 11px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .chip.on{background:var(--lime);border-color:var(--lime);color:var(--navy)}
+  .banner{background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:12px;font-size:12.5px;color:var(--mist)}
+  .banner b{color:var(--lime)}
+  /* grid */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .it{position:relative;background:var(--mid);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer}
+  .it .ph{width:100%;aspect-ratio:1/1;background:#fff center/cover no-repeat;display:block}
+  .it .cap{padding:6px 7px 8px}
+  .it .nm{font-size:11px;font-weight:600;color:var(--white);line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .it .br{font-size:9.5px;color:var(--mist);opacity:.7;margin-top:2px}
+  .it.worn{outline:2px solid var(--lime);outline-offset:-2px}
+  .it .tick{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(13,27,62,.7);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--mist)}
+  .it.worn .tick{background:var(--lime);border-color:var(--lime);color:var(--navy)}
+  .it .info{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;background:rgba(13,27,62,.7);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mist);font-weight:700}
+  .cat-h{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);margin:16px 2px 8px}
+  /* inspiration */
+  .inspo{background:var(--mid);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px}
+  .inspo .i-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .inspo .i-occ{font-size:14.5px;font-weight:700;color:var(--white)}
+  .inspo .i-meta{font-size:11px;color:var(--mist);opacity:.75}
+  .inspo .i-thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+  .inspo .i-thumbs .ph{width:100%;aspect-ratio:1/1;border-radius:10px;background:#fff center/cover no-repeat}
+  .inspo .i-wear{width:100%;border:1px solid var(--line);background:transparent;color:var(--white);border-radius:10px;padding:9px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+  .inspo-cat-h{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);margin:16px 2px 8px}
+  /* today */
+  .today-cat{margin-bottom:14px}
+  .today-cat h3{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mist);opacity:.7;margin:0 0 8px}
+  .today-row{display:flex;align-items:center;gap:12px;background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:8px 12px 8px 8px;margin-bottom:8px}
+  .today-row .ph{width:48px;height:48px;border-radius:8px;background:#fff center/cover no-repeat;flex:0 0 auto}
+  .today-row .tr-main{flex:1;min-width:0}
+  .today-row .tr-nm{font-size:14px;font-weight:600;color:var(--white)}
+  .today-row .tr-br{font-size:11.5px;color:var(--mist);opacity:.75}
+  .today-row .rm{border:1px solid var(--line);background:transparent;color:#e39ab6;border-radius:9px;padding:7px 11px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+  .hist-day{margin-bottom:16px}
+  .hist-day .hd-d{font-size:12px;font-weight:700;color:var(--lime);margin:0 2px 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .hist-day .hd-d .wxchip{font-weight:600;color:var(--mist);opacity:.85;font-size:11.5px;background:#12244a;border:1px solid var(--line);border-radius:20px;padding:2px 9px}
+  .hist-thumbs{display:flex;gap:6px;flex-wrap:wrap}
+  .hist-thumbs .ph{width:44px;height:44px;border-radius:7px;background:#fff center/cover no-repeat}
+  /* sheet */
+  .sheet-bg{position:fixed;inset:0;background:rgba(4,9,22,.72);display:none;z-index:40;align-items:flex-end}
+  .sheet-bg.on{display:flex}
+  .sheet{background:var(--navy);border-top:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:680px;margin:0 auto;max-height:92vh;overflow:auto;padding:14px 16px calc(22px + env(safe-area-inset-bottom))}
+  .sheet-close{float:right;background:none;border:0;color:var(--mist);font-size:22px;line-height:1;cursor:pointer}
+  .sheet .big{width:100%;aspect-ratio:1/1;max-height:56vh;object-fit:contain;background:#fff;border-radius:12px}
+  .sheet h2{font-size:19px;color:var(--white);margin:12px 0 2px}
+  .sheet .sub{font-size:12.5px;color:var(--mist);opacity:.85;margin-bottom:10px}
+  .facts{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+  .facts .f{font-size:10.5px;color:var(--mist);background:var(--mid);border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+  .sheet .note{font-size:13px;color:var(--mist);opacity:.9;line-height:1.5;margin-top:8px}
+  .sheet .wearbtn{margin-top:14px;width:100%;border:0;border-radius:10px;padding:13px;font:inherit;font-size:15px;font-weight:700;cursor:pointer;background:var(--lime);color:var(--navy)}
+  .sheet .wearbtn.on{background:#12351f;color:#7fe0a0;border:1px solid #2c7a48}
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0a1530;border-top:1px solid #22375f;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
+  nav.tabs button{flex:1;background:none;border:0;color:var(--mist);opacity:.65;font:inherit;font-size:10.5px;font-weight:600;padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+  nav.tabs button .ic{font-size:17px;line-height:1}
+  nav.tabs button.on{opacity:1;color:var(--lime)}
+  #setup{padding:22px 18px;max-width:520px;margin:0 auto}
+  #setup h1{color:var(--white);font-size:22px;margin:6px 0 6px}
+  #setup p{font-size:13.5px;line-height:1.5}
+  #setup input{width:100%;border:1px solid var(--line);background:#0a1530;color:var(--white);border-radius:10px;padding:11px 12px;font:inherit;font-size:14px;margin-top:6px}
+  #setup label{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--lime);margin-top:14px}
+  #setup .go{margin-top:16px;width:100%;background:var(--lime);color:var(--navy);border:0;border-radius:10px;padding:13px;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+  #setup .err{margin-top:12px;color:#ff9aa8;font-size:13px}
+  #setup .signout{margin-top:20px;background:none;border:0;color:var(--mist);opacity:.7;font:inherit;font-size:12px;text-decoration:underline;cursor:pointer}
+  .hint{font-size:11.5px;opacity:.7;margin-top:6px;line-height:1.4}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="wrap">
+    <header class="top">
+      <div><span class="eyebrow">The Household</span><h1>Dressing Room</h1></div>
+      <span class="status" data-status></span>
+    </header>
+
+    <section class="view on" data-view="wardrobe">
+      <div class="banner" data-worn-banner></div>
+      <div class="ctl"><input data-search placeholder="Search name, colour, brand…"></div>
+      <div class="chips" data-cat-chips></div>
+      <div data-list></div>
+    </section>
+
+    <section class="view" data-view="inspo">
+      <div class="banner">Pre-agreed outfits from your rulebook. Tap <b>Wear this today</b> to log one as today&rsquo;s look.</div>
+      <div class="chips" data-inspo-chips></div>
+      <div data-inspo-list></div>
+    </section>
+
+    <section class="view" data-view="today">
+      <div class="banner">Tap items in the <b>Wardrobe</b> to add them here as today&rsquo;s outfit. It logs to the Hub too.</div>
+      <div data-today></div>
+    </section>
+
+    <section class="view" data-view="history">
+      <div data-history></div>
+    </section>
+
+    <section class="view" data-view="setup">
+      <div style="padding:4px 2px">
+        <p class="hint" style="margin-top:0">Browsing works offline. Connect to your Hub gist so what you wear logs to the Hub as well as the phone.</p>
+        <label>Gist ID</label>
+        <input type="text" data-cfg-id autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="32-character hex ID">
+        <label>Token</label>
+        <input type="password" data-cfg-token autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ghp_… / github_pat_…">
+        <button class="go" data-cfg-save>Connect</button>
+        <div class="err" data-cfg-err hidden></div>
+        <button class="signout" data-cfg-signout hidden>Disconnect this device</button>
+      </div>
+    </section>
+  </div>
+
+  <nav class="tabs">
+    <button data-nav="wardrobe" class="on"><span class="ic">👔</span>Wardrobe</button>
+    <button data-nav="inspo"><span class="ic">✨</span>Ideas</button>
+    <button data-nav="today"><span class="ic">📍</span>Today</button>
+    <button data-nav="history"><span class="ic">🗓</span>History</button>
+    <button data-nav="setup"><span class="ic">⚙</span>Setup</button>
+  </nav>
 </div>
-<div class="fam">The Nine</div><div class="grid">
-<a class="app" href="./kennel/"><b>Kennel</b><span>Spy-play</span></a>
-<a class="app" href="./parlour/"><b>Parlour</b><span>Puzzles</span></a>
-<a class="app" href="./roadcraft/"><b>Roadcraft</b><span>Driving</span></a>
-<a class="app" href="./form-book/"><b>The Form Book</b><span>Racing</span></a>
-<a class="app" href="./ways/"><b>Ways</b><span>Walk routes</span></a>
-<a class="app" href="./flight-deck/"><b>Flight Deck</b><span>Flights</span></a>
-</div></body></html>
+
+<div class="sheet-bg" data-sheet-bg><div class="sheet" data-sheet></div></div>
+
+<script src="./thumbs.js"></script>
+<script>
+(function(){
+  var _mem={};
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(_){ return (k in _mem)?_mem[k]:null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(_){ _mem[k]=v; } }
+  function lsDel(k){ try{ localStorage.removeItem(k); }catch(_){ delete _mem[k]; } }
+  function $(s){ return document.querySelector(s); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function setStatus(t){ var el=$('[data-status]'); if(el) el.textContent=t||''; }
+
+  var CAT_ORDER=['shirts','t-shirts','knitwear','jackets','trousers','jeans','shorts','shoes','trainers','belts','watches','ties','accessories','aftershaves'];
+  var CAT_LABEL={'shirts':'Shirts','t-shirts':'T-shirts','knitwear':'Knitwear','jackets':'Jackets','trousers':'Trousers','jeans':'Jeans','shorts':'Shorts','shoes':'Shoes','trainers':'Trainers','belts':'Belts','watches':'Watches','ties':'Ties','accessories':'Accessories','aftershaves':'Aftershaves'};
+
+  var ID_KEY='connolly-sync:gist-id', TOK_KEY='connolly-sync:token', WORN_CACHE='connolly-wardrobe:worn', ITEMS_CACHE='connolly-wardrobe:items';
+  var creds=null; (function(){ var id=lsGet(ID_KEY), tk=lsGet(TOK_KEY); if(id&&tk) creds={id:id,token:tk}; })();
+  function saveCreds(id,tk){ lsSet(ID_KEY,id); lsSet(TOK_KEY,tk); creds={id:id,token:tk}; }
+  function clearCreds(){ lsDel(ID_KEY); lsDel(TOK_KEY); creds=null; }
+  function headers(){ return { 'Authorization':'Bearer '+creds.token, 'Accept':'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' }; }
+
+  var ITEMS=[]; var WORN={}; var filt={cat:'all',q:''};
+  try{ WORN=JSON.parse(lsGet(WORN_CACHE)||'{}')||{}; }catch(_){ WORN={}; }
+  try{ var ci=JSON.parse(lsGet(ITEMS_CACHE)||'null'); if(ci&&ci.length) ITEMS=ci; }catch(_){ }
+  function thumbSrc(id){ try{ if(window.WARDROBE_THUMBS && WARDROBE_THUMBS[id]) return WARDROBE_THUMBS[id]; }catch(_){ } var it=byId(id); return it?('./img/'+String(it.filename||'').replace(/\.[a-z]+$/i,'.jpg')):''; }
+  function paintThumbs(root){ var r=root||document;
+    r.querySelectorAll('[data-thumb]').forEach(function(el){ if(el.__p) return; var s=thumbSrc(el.getAttribute('data-thumb')); if(s){ el.style.backgroundImage="url(\""+s+"\")"; el.__p=1; } });
+    r.querySelectorAll('img[data-thumb-img]').forEach(function(el){ if(el.__p) return; var s=thumbSrc(el.getAttribute('data-thumb-img')); if(s){ el.src=s; el.__p=1; } });
+  }
+  function byId(id){ for(var i=0;i<ITEMS.length;i++){ if(ITEMS[i].id===id) return ITEMS[i]; } return null; }
+
+  function loadItems(){ return fetch('./wardrobe.json',{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ var arr=(j&&Array.isArray(j.items))?j.items:(Array.isArray(j)?j:[]); arr=arr.filter(function(x){return x && !x.retired;}); if(arr.length){ ITEMS=arr; try{ lsSet(ITEMS_CACHE, JSON.stringify(arr)); }catch(_){ } } return ITEMS; }).catch(function(){ return ITEMS; }); }
+
+  // ---- gist (worn log only) ----
+  function gistGetRaw(){ return fetch('https://api.github.com/gists/'+creds.id,{headers:headers()}).then(function(r){ if(!r.ok) throw new Error('gist '+r.status); return r.json(); }).then(function(g){ var f=g.files&&g.files['life-twoweek.json']; if(!f) throw new Error('no file'); if(f.truncated&&f.raw_url) return fetch(f.raw_url,{headers:{'Authorization':'Bearer '+creds.token}}).then(function(r){return r.text();}); return f.content; }); }
+  function parseP(t){ var p; try{ p=JSON.parse(t||'{}'); }catch(_){ p={}; } return { payload:p, state:(p.state||p||{}) }; }
+  function pullWorn(){ if(!creds) return Promise.resolve(); setStatus('syncing…'); return gistGetRaw().then(function(t){ var ps=parseP(t); var wd=ps.state&&ps.state.wardrobe; WORN=(wd&&wd.wornLog&&typeof wd.wornLog==='object')?wd.wornLog:{}; try{ lsSet(WORN_CACHE, JSON.stringify(WORN)); }catch(_){ } setStatus(''); }).catch(function(){ setStatus('offline'); }); }
+  var chain=Promise.resolve();
+  function commitWorn(mutator){
+    try{ mutator(WORN); }catch(_){ } try{ lsSet(WORN_CACHE, JSON.stringify(WORN)); }catch(_){ } renderCurrent();
+    if(!creds) return;
+    chain = chain.then(function(){ setStatus('saving…'); return gistGetRaw().then(function(t){ var ps=parseP(t); var st=ps.state; if(!st.wardrobe||typeof st.wardrobe!=='object') st.wardrobe={}; if(!st.wardrobe.wornLog||typeof st.wardrobe.wornLog!=='object') st.wardrobe.wornLog={}; mutator(st.wardrobe.wornLog); var payload=ps.payload; payload.state=st; payload.savedAt=new Date().toISOString(); payload.writer={id:'wardrobe',label:'Dressing Room',at:payload.savedAt}; var body={files:{}}; body.files['life-twoweek.json']={content:JSON.stringify(payload)}; return fetch('https://api.github.com/gists/'+creds.id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json'},headers()),body:JSON.stringify(body)}).then(function(r){ if(r.ok){ WORN=st.wardrobe.wornLog; try{ lsSet(WORN_CACHE, JSON.stringify(WORN)); }catch(_){ } setStatus(''); } else setStatus('save failed'); }); }).catch(function(){ setStatus('offline'); }); });
+  }
+  function wornToday(){ return (WORN[todayISO()]||[]); }
+  function isWorn(id){ return wornToday().indexOf(id)>=0; }
+  function toggleWorn(id){ commitWorn(function(W){ var iso=todayISO(); var arr=W[iso]||[]; var i=arr.indexOf(id); if(i>=0){ arr.splice(i,1); } else { arr=arr.concat([id]); } if(arr.length) W[iso]=arr; else delete W[iso]; }); }
+
+  // ---- render ----
+  function catChips(){ var el=$('[data-cat-chips]'); if(!el) return; var present={}; ITEMS.forEach(function(i){ present[i.category]=1; }); var cats=['all'].concat(CAT_ORDER.filter(function(c){return present[c];})); el.innerHTML=cats.map(function(c){ return '<button class="chip'+(filt.cat===c?' on':'')+'" data-cat="'+esc(c)+'">'+esc(c==='all'?'All':(CAT_LABEL[c]||c))+'</button>'; }).join(''); }
+  function itMatches(i){ if(filt.cat!=='all' && i.category!==filt.cat) return false; if(filt.q){ var hay=[i.name,i.colour_primary,i.colour_secondary,i.brand_visible,i.category,i.subcategory].join(' ').toLowerCase(); if(hay.indexOf(filt.q.toLowerCase())<0) return false; } return true; }
+  function itCard(i){ return '<div class="it'+(isWorn(i.id)?' worn':'')+'" data-wear="'+esc(i.id)+'"><span class="ph" data-thumb="'+esc(i.id)+'"></span><span class="tick">'+(isWorn(i.id)?'✓':'')+'</span><span class="info" data-info="'+esc(i.id)+'">i</span><span class="cap"><span class="nm">'+esc(i.name||'')+'</span><span class="br">'+esc(i.brand_visible||CAT_LABEL[i.category]||'')+'</span></span></div>'; }
+  function renderWardrobe(){ catChips(); var wt=wornToday().length; var bn=$('[data-worn-banner]'); if(bn) bn.innerHTML = wt? ('Today: <b>'+wt+'</b> item'+(wt>1?'s':'')+' logged. Tap to add or remove.') : 'Tap what you&rsquo;re wearing today to log it.';
+    var list=$('[data-list]'); if(!list) return; if(!ITEMS.length){ list.innerHTML='<div class="muted">Loading the wardrobe…</div>'; return; }
+    var items=ITEMS.filter(itMatches);
+    if(!items.length){ list.innerHTML='<div class="muted">Nothing matches.</div>'; return; }
+    if(filt.cat!=='all'){ list.innerHTML='<div class="grid">'+items.map(itCard).join('')+'</div>'; return; }
+    // grouped by category
+    var html=''; CAT_ORDER.forEach(function(c){ var arr=items.filter(function(i){return i.category===c;}); if(!arr.length) return; html+='<div class="cat-h">'+esc(CAT_LABEL[c]||c)+'</div><div class="grid">'+arr.map(itCard).join('')+'</div>'; }); list.innerHTML=html;
+  }
+  function renderToday(){ var host=$('[data-today]'); if(!host) return; var ids=wornToday(); if(!ids.length){ host.innerHTML='<div class="muted">Nothing logged for today yet.</div>'; return; }
+    var byCat={}; ids.forEach(function(id){ var it=byId(id); if(!it) return; (byCat[it.category]=byCat[it.category]||[]).push(it); });
+    var html=''; CAT_ORDER.forEach(function(c){ var arr=byCat[c]; if(!arr) return; html+='<div class="today-cat"><h3>'+esc(CAT_LABEL[c]||c)+'</h3>'+arr.map(function(it){ return '<div class="today-row"><span class="ph" data-thumb="'+esc(it.id)+'"></span><div class="tr-main"><div class="tr-nm">'+esc(it.name||'')+'</div><div class="tr-br">'+esc(it.brand_visible||'')+'</div></div><button class="rm" data-wear="'+esc(it.id)+'">Remove</button></div>'; }).join('')+'</div>'; }); host.innerHTML=html;
+  }
+  // ---- weather for history (Harpenden home; open-meteo, no key) ----
+  var WEATHER={}; try{ WEATHER=JSON.parse(lsGet('connolly-wardrobe:weather')||'{}')||{}; }catch(_){ WEATHER={}; }
+  var _wxAt=0;
+  function wxIconW(w){ if(w.rain) return '🌧️'; if(w.tmax>=24) return '☀️'; if(w.tmax>=16) return '🌤️'; return '☁️'; }
+  function wxChip(d){ var w=WEATHER[d]; if(!w||w.tmax==null) return ''; return '<span class="wxchip">'+wxIconW(w)+' '+Math.round(w.tmax)+'°/'+Math.round(w.tmin)+'°'+(w.rain?' · wet':'')+'</span>'; }
+  function fetchHistoryWeather(force){ if(!force && (Date.now()-_wxAt)<30*60*1000) return; _wxAt=Date.now();
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=51.817&longitude=-0.357&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&past_days=92&forecast_days=1&timezone=Europe%2FLondon')
+      .then(function(r){return r.json();}).then(function(j){ if(!j||!j.daily||!j.daily.time) return; var t=j.daily.time, mx=j.daily.temperature_2m_max||[], mn=j.daily.temperature_2m_min||[], pr=j.daily.precipitation_sum||[]; for(var i=0;i<t.length;i++){ if(mx[i]==null) continue; WEATHER[t[i]]={tmax:mx[i],tmin:mn[i],rain:(pr[i]||0)>=1}; } try{ lsSet('connolly-wardrobe:weather', JSON.stringify(WEATHER)); }catch(_){ } renderHistory(); }).catch(function(){ _wxAt=0; });
+  }
+  function renderHistory(){ var host=$('[data-history]'); if(!host) return; var days=Object.keys(WORN).filter(function(d){return (WORN[d]||[]).length;}).sort().reverse().slice(0,30); if(!days.length){ host.innerHTML='<div class="muted">No wear history yet. What you log builds up here.</div>'; return; }
+    host.innerHTML=days.map(function(d){ var ids=WORN[d]; var lbl=new Date(d+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}); var thumbs=ids.map(function(id){ var it=byId(id); return it?'<span class="ph" data-thumb="'+esc(it.id)+'" title="'+esc(it.name||'')+'"></span>':''; }).join(''); return '<div class="hist-day"><div class="hd-d">'+esc(lbl)+' · '+ids.length+' item'+(ids.length>1?'s':'')+wxChip(d)+'</div><div class="hist-thumbs">'+thumbs+'</div></div>'; }).join('');
+    paintThumbs(host);
+  }
+  // ---- Inspiration (pre-agreed outfits from the rulebook library) ----
+  var OUTFITS=[]; var inspoFilt={cat:'all'};
+  try{ var _co=JSON.parse(lsGet('connolly-wardrobe:outfits')||'null'); if(_co&&_co.length) OUTFITS=_co; }catch(_){ }
+  var INSPO_CATS=[['all','All'],['office','Office'],['wfh','WFH'],['weekend','Weekend'],['evening','Evening'],['formal','Formal'],['outdoor','Outdoor'],['travel','Travel']];
+  function inspoCatLabel(c){ for(var i=0;i<INSPO_CATS.length;i++){ if(INSPO_CATS[i][0]===c) return INSPO_CATS[i][1]; } return c; }
+  function loadOutfits(){ return fetch('./outfits.json',{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ var arr=(j&&Array.isArray(j.outfits))?j.outfits:(Array.isArray(j)?j:[]); if(arr.length){ OUTFITS=arr; try{ lsSet('connolly-wardrobe:outfits', JSON.stringify(arr)); }catch(_){ } } return OUTFITS; }).catch(function(){ return OUTFITS; }); }
+  function outfitById(id){ for(var i=0;i<OUTFITS.length;i++){ if(OUTFITS[i].id===id) return OUTFITS[i]; } return null; }
+  function inspoCard(o){ var thumbs=(o.items||[]).map(function(id){ return '<span class="ph" data-thumb="'+esc(id)+'"></span>'; }).join(''); var meta=[o.weather,(o.formality?('formality '+o.formality):'')].filter(Boolean).join(' · '); return '<div class="inspo"><div class="i-head"><span class="i-occ">'+esc(o.occasion||'Outfit')+'</span><span class="i-meta">'+esc(meta)+'</span></div><div class="i-thumbs">'+thumbs+'</div><button class="i-wear" data-wear-outfit="'+esc(o.id)+'">Wear this today</button></div>'; }
+  function renderInspo(){ var el=$('[data-inspo-chips]'); if(el){ var present={}; OUTFITS.forEach(function(o){present[o.category]=1;}); el.innerHTML=INSPO_CATS.filter(function(c){return c[0]==='all'||present[c[0]];}).map(function(c){ return '<button class="chip'+(inspoFilt.cat===c[0]?' on':'')+'" data-inspo-cat="'+c[0]+'">'+esc(c[1])+'</button>'; }).join(''); }
+    var host=$('[data-inspo-list]'); if(!host) return; if(!OUTFITS.length){ host.innerHTML='<div class="muted">Loading outfits…</div>'; return; }
+    var items=OUTFITS.filter(function(o){ return inspoFilt.cat==='all'||o.category===inspoFilt.cat; });
+    if(!items.length){ host.innerHTML='<div class="muted">No outfits here.</div>'; return; }
+    if(inspoFilt.cat!=='all'){ host.innerHTML=items.map(inspoCard).join(''); paintThumbs(host); return; }
+    var order=INSPO_CATS.map(function(c){return c[0];}).filter(function(c){return c!=='all';}); var html='';
+    order.forEach(function(c){ var arr=items.filter(function(o){return o.category===c;}); if(!arr.length) return; html+='<div class="inspo-cat-h">'+esc(inspoCatLabel(c))+' <span style="opacity:.6">'+arr.length+'</span></div>'+arr.map(inspoCard).join(''); });
+    host.innerHTML=html; paintThumbs(host);
+  }
+  function renderCurrent(){ var v=['wardrobe','inspo','today','history'].filter(function(x){return $('[data-view="'+x+'"]').classList.contains('on');})[0]||'wardrobe'; if(v==='today') renderToday(); else if(v==='history') renderHistory(); else if(v==='inspo') renderInspo(); else renderWardrobe(); }
+
+  function detail(id){ var i=byId(id); if(!i) return; var worn=isWorn(id);
+    var facts=[]; if(i.colour_primary) facts.push(i.colour_primary+(i.colour_secondary&&i.colour_secondary!==i.colour_primary?(' / '+i.colour_secondary):'')); if(i.subcategory) facts.push(i.subcategory); if(i.pattern&&i.pattern!=='plain'&&i.pattern!=='unknown') facts.push(i.pattern); if(i.fabric_guess&&i.fabric_guess!=='unknown') facts.push(i.fabric_guess); if(i.fit_guess&&i.fit_guess!=='unknown') facts.push(i.fit_guess); if(i.formality) facts.push('formality '+i.formality+'/5'); (i.season||[]).forEach(function(s){facts.push(s);}); (i.occasion_tags||[]).forEach(function(o){facts.push(o);});
+    $('[data-sheet]').innerHTML='<button class="sheet-close" data-sheet-close>×</button>'
+      +'<img class="big" data-thumb-img="'+esc(i.id)+'" alt="'+esc(i.name||'')+'">'
+      +'<h2>'+esc(i.name||'')+'</h2><div class="sub">'+esc([i.brand_visible,CAT_LABEL[i.category]||i.category].filter(Boolean).join(' · '))+'</div>'
+      +'<div class="facts">'+facts.map(function(f){return '<span class="f">'+esc(f)+'</span>';}).join('')+'</div>'
+      +(i.notes?'<div class="note">'+esc(i.notes)+'</div>':'')
+      +'<button class="wearbtn'+(worn?' on':'')+'" data-wear="'+esc(id)+'">'+(worn?'✓ Worn today — tap to remove':'Wore this today')+'</button>';
+    $('[data-sheet-bg]').classList.add('on');
+  }
+  function closeSheet(){ $('[data-sheet-bg]').classList.remove('on'); }
+
+  // ---- interactions ----
+  document.addEventListener('click', function(e){
+    var t=e.target;
+    var nav=t.closest && t.closest('[data-nav]'); if(nav){ navTo(nav.getAttribute('data-nav')); return; }
+    if(t.closest && t.closest('[data-sheet-close]')){ closeSheet(); return; }
+    if(t===$('[data-sheet-bg]')){ closeSheet(); return; }
+    var inf=t.closest && t.closest('[data-info]'); if(inf){ detail(inf.getAttribute('data-info')); return; }
+    var cc=t.closest && t.closest('[data-cat]'); if(cc){ filt.cat=cc.getAttribute('data-cat'); renderWardrobe(); return; }
+    var icc=t.closest && t.closest('[data-inspo-cat]'); if(icc){ inspoFilt.cat=icc.getAttribute('data-inspo-cat'); renderInspo(); return; }
+    var wo=t.closest && t.closest('[data-wear-outfit]'); if(wo){ var o=outfitById(wo.getAttribute('data-wear-outfit')); if(o){ commitWorn(function(W){ var iso=todayISO(); var a=(W[iso]||[]).slice(); (o.items||[]).forEach(function(id){ if(a.indexOf(id)<0) a.push(id); }); W[iso]=a; }); navTo('today'); } return; }
+    var w=t.closest && t.closest('[data-wear]'); if(w){ toggleWorn(w.getAttribute('data-wear')); if($('[data-sheet-bg]').classList.contains('on')) detail(w.getAttribute('data-wear')); return; }
+    if(t.closest && t.closest('[data-cfg-save]')){ doConnect(); return; }
+    if(t.closest && t.closest('[data-cfg-signout]')){ if(confirm('Disconnect this device? Your Hub data is untouched.')){ clearCreds(); $('[data-cfg-signout]').hidden=true; setStatus(''); alert('Disconnected. Browsing still works; wear logging is local until you reconnect.'); } return; }
+  });
+  document.addEventListener('input', function(e){ var s=e.target.closest && e.target.closest('[data-search]'); if(s){ filt.q=s.value; renderWardrobe(); } });
+
+  function navTo(v){ document.querySelectorAll('[data-view]').forEach(function(s){ s.classList.toggle('on', s.getAttribute('data-view')===v); }); document.querySelectorAll('[data-nav]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-nav')===v); }); try{ window.scrollTo(0,0); }catch(_){ } if(v==='wardrobe') renderWardrobe(); else if(v==='inspo'){ renderInspo(); loadOutfits(); } else if(v==='today') renderToday(); else if(v==='history'){ renderHistory(); fetchHistoryWeather(); } else if(v==='setup'){ $('[data-cfg-id]').value=creds?creds.id:''; $('[data-cfg-token]').value=creds?creds.token:''; $('[data-cfg-signout]').hidden=!creds; $('[data-cfg-err]').hidden=true; } }
+  function doConnect(){ var id=$('[data-cfg-id]').value.trim().replace(/^.*\/(?=[0-9a-f]{8,})/i,''); var tk=$('[data-cfg-token]').value.trim(); var err=$('[data-cfg-err]'); if(!id||!tk){ err.textContent='Enter both the Gist ID and a token.'; err.hidden=false; return; } saveCreds(id,tk); err.hidden=true; setStatus('connecting…'); pullWorn().then(function(){ $('[data-cfg-signout]').hidden=false; renderCurrent(); setStatus(''); alert('Connected — what you wear will sync to the Hub.'); }).catch(function(){ err.textContent='Could not connect.'; err.hidden=false; }); }
+
+  // boot
+  try{ new MutationObserver(function(){ paintThumbs(); }).observe(document.body,{childList:true,subtree:true}); }catch(_){ }
+  renderWardrobe(); paintThumbs();
+  loadItems().then(function(){ renderCurrent(); paintThumbs(); });
+  loadOutfits();
+  if(creds) pullWorn().then(renderCurrent);
+  setInterval(function(){ if(creds && !document.hidden){ pullWorn().then(renderCurrent).catch(function(){}); } }, 5*60*1000);
+  if('serviceWorker' in navigator){ try{ var _r=navigator.serviceWorker.register('./sw.js'); if(_r&&_r.catch) _r.catch(function(){}); }catch(_){ } }
+})();
+</script>
+</body>
+</html>
