@@ -30,6 +30,10 @@
 
   main{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 16px 12px}
 
+  /* The hidden attribute is only a browser default — an author display rule beats it.
+     Without this, hiding the genre grid did nothing at all. */
+  [hidden]{display:none !important}
+
   /* category grid — two columns, big targets for a car */
   .cats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
   .cat{appearance:none;border:1px solid var(--hair);background:var(--mid);color:var(--on-dark);
@@ -68,7 +72,10 @@
   /* station list — you should always be able to SEE what you can play */
   .backbtn{appearance:none;border:1px solid var(--hair);background:transparent;color:var(--on-dark-muted);
     border-radius:10px;padding:9px 14px;font:inherit;font-size:13px;margin:4px 0 10px;cursor:pointer}
-  .listhead{font-size:13px;color:var(--on-dark-muted);margin:0 0 8px;line-height:1.4}
+  .genre-h{font-size:19px;font-weight:600;margin:2px 0 6px;color:var(--on-dark)}
+  .genre-blurb{font-size:13px;line-height:1.55;color:var(--on-dark-muted);margin:0 0 10px}
+  .listhead{font-size:11.5px;color:var(--on-dark-muted);margin:0 0 12px;line-height:1.45;
+    padding-top:10px;border-top:1px solid var(--hair)}
   .strow{border:1px solid var(--hair);background:var(--mid);border-radius:12px;margin-bottom:10px;
     display:flex;align-items:stretch;overflow:hidden;min-height:64px}
   .strow .sp{appearance:none;flex:1;min-width:0;text-align:left;background:none;border:none;
@@ -112,7 +119,9 @@
 <main>
   <div class="cats" id="cats"></div>
   <div id="list" hidden>
-    <button class="backbtn" id="btnBack">‹ All categories</button>
+    <button class="backbtn" id="btnBack">‹ All genres</button>
+    <h2 class="genre-h" id="genreTitle"></h2>
+    <p class="genre-blurb" id="genreBlurb"></p>
     <p class="listhead" id="listhead"></p>
     <div id="rows"></div>
   </div>
@@ -231,6 +240,22 @@
     focus: /\b(vocal|pop|hits|rap|hip.?hop|r&b|rnb|country|singer|acoustic|karaoke|binaural)\b/i
   };
 
+  // What each genre is, and why these stations and not others.
+  var BLURB = {
+    focus:    'Wordless, modern and keeps a pulse. Chosen to hold your attention without competing for it — no lyrics, because words draw on the same part of your head as the work. Deliberately not ambient, which drifts, and not binaural.',
+    classical:'Orchestral and chamber. Picked for announcement-light output — the Swiss service names the piece and then gets out of the way.',
+    driving:  'Long-haul listening. Broad and melodic, nothing that demands you follow it.',
+    rock:     'Guitars. Chosen from stations that play rather than talk about playing.',
+    eighties: 'The decade itself, without the nostalgia chat that usually comes with it.',
+    lofi:     'Downtempo and instrumental hip-hop — dublab territory. Low and slow.',
+    ballads:  'Big choruses, entirely unapologetic.',
+    standards:'Ella, Nina, Sinatra and the lounge end of jazz. The strongest list here — these stations genuinely never speak.',
+    yacht:    'Smooth West Coast, late seventies into the eighties. The weakest list here, honestly: no dependable talk-free yacht rock station exists, so most of these come from the open database and may need pruning.',
+    balearic: 'Ibiza at sunset. Downtempo, deep house and beach bars rather than the club.',
+    chart:    'Current pop with no presenters. Worth knowing: this is not the Official UK Chart — every UK chart station is built around DJs, ads and phone-ins, so this is chart-shaped music without the talking.'
+  };
+  var CRITERIA = 'Every station here is filtered against talk, news, sport and phone-ins, and must stream securely. Six at a time — press × to drop one for good and another takes its place.';
+
   var CATS = [
     ['focus',    'Focus',          'no words, keeps moving'],
     ['classical','Classical',      'strings, no chatter'],
@@ -299,11 +324,15 @@
     paintCats();
   }
   function refreshHead(){
-    var el=document.getElementById('listhead'); if(!el) return;
-    el.textContent = catLabel(cat) + ' · ' + stations.length
-      + (stations.length===1?' station':' stations')
-      + (pool.length ? ' · ' + pool.length + ' more in reserve' : '')
-      + (cat==='__fav' ? '' : ' · press “Not this” to drop one and pull in another');
+    var t=document.getElementById('genreTitle'), bl=document.getElementById('genreBlurb'),
+        el=document.getElementById('listhead');
+    if(t) t.textContent = catLabel(cat);
+    if(bl) bl.textContent = (cat==='__fav')
+      ? 'Stations you have kept. They follow you between your phone and the Mac.'
+      : (BLURB[cat] || '');
+    if(el) el.textContent = (cat==='__fav')
+      ? (stations.length + (stations.length===1?' station':' stations'))
+      : (CRITERIA + (pool.length ? ' ' + pool.length + ' more waiting.' : ''));
   }
   function showList(){
     view='list';
@@ -461,11 +490,14 @@
   function topUp(key){
     var tags = TAGS[key]||[];
     if(!tags.length) return;
-    var url = 'https://de1.api.radio-browser.info/json/stations/search'
-            + '?tagList=' + encodeURIComponent(tags.join(','))
-            + '&is_https=true&hidebroken=true&order=clickcount&reverse=true&limit=120';
-    fetch(url, {headers:{'User-Agent':'TheWireless/0.1'}})
-      .then(function(r){ return r.json(); })
+    var path = '/json/stations/search?tagList=' + encodeURIComponent(tags.join(','))
+             + '&is_https=true&hidebroken=true&order=clickcount&reverse=true&limit=120';
+    var hosts = ['https://de1.api.radio-browser.info','https://nl1.api.radio-browser.info',
+                 'https://at1.api.radio-browser.info','https://all.api.radio-browser.info'];
+    var url = hosts[0] + path;
+    function go(){
+    fetch(url, {cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); })
       .then(function(list){
         if(!Array.isArray(list) || cat!==key) return;
         var add = list.filter(function(s){
@@ -488,7 +520,14 @@
         if(view==='list'){ refreshHead(); renderRows(); }
         if(add.length) say(stations.length + ' to choose from, ' + pool.length + ' more in reserve');
       })
-      .catch(function(){ /* seeds are enough */ });
+      .catch(function(err){
+        try{ console.warn('[wireless] station lookup failed on ' + url, err); }catch(e){}
+        var i = hosts.indexOf(url.split('/json')[0]);
+        if(i > -1 && i < hosts.length-1 && cat===key){ url = hosts[i+1] + path; go(); }
+        else if(cat===key){ say('Could not reach the station database — showing the curated list', true); }
+      });
+    }
+    go();
   }
 
   function pick(key){
