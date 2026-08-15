@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Wireless">
+<meta name="theme-color" content="#0D1B3E">
+<title>The Wireless</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0D1B3E; --mid:#1A3A6B; --lime:#C4F000; --mist:#C4CCDD;
+    --hair:#24467E; --on-dark:#F4F6FA; --on-dark-muted:#AEB9CF;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--navy);color:var(--on-dark);
+    font-family:Montserrat,-apple-system,Helvetica,Arial,sans-serif;
+    overscroll-behavior:none;-webkit-text-size-adjust:100%}
+  body{min-height:100vh;display:flex;flex-direction:column;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  header{padding:18px 20px 8px;flex:none}
+  h1{margin:0;font-size:20px;font-weight:600;letter-spacing:.01em;color:var(--on-dark)}
+  .sub{margin:2px 0 0;font-size:12.5px;color:var(--on-dark-muted)}
+
+  main{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 16px 12px}
+
+  /* category grid — two columns, big targets for a car */
+  .cats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+  .cat{appearance:none;border:1px solid var(--hair);background:var(--mid);color:var(--on-dark);
+    border-radius:14px;padding:20px 14px;font:inherit;font-size:16px;font-weight:500;
+    text-align:left;line-height:1.25;min-height:86px;display:flex;flex-direction:column;
+    justify-content:flex-end;gap:4px;cursor:pointer}
+  .cat small{font-size:11.5px;color:var(--on-dark-muted);font-weight:400}
+  .cat[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:var(--navy)}
+  .cat[aria-pressed="true"] small{color:#2b3a00}
+
+  /* now playing */
+  .np{position:sticky;bottom:0;flex:none;background:var(--navy);
+    border-top:1px solid var(--hair);padding:12px 16px 16px}
+  .np-station{font-size:17px;font-weight:600;line-height:1.3;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .np-meta{font-size:12.5px;color:var(--on-dark-muted);margin-top:2px;min-height:16px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+  .btn{appearance:none;border:1px solid var(--hair);background:var(--mid);color:var(--on-dark);
+    border-radius:12px;padding:16px 8px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;
+    min-height:56px;display:flex;align-items:center;justify-content:center;gap:6px}
+  .btn.primary{background:var(--lime);border-color:var(--lime);color:var(--navy);font-weight:600}
+  .btn:disabled{opacity:.4}
+  .btn.wide{grid-column:1 / -1}
+
+  .status{font-size:12px;color:var(--on-dark-muted);margin-top:10px;min-height:15px}
+  .status.err{color:#FFB4A8}
+  .empty{color:var(--on-dark-muted);font-size:13.5px;line-height:1.55;padding:12px 2px}
+  .banned{margin-top:14px;font-size:12px;color:var(--on-dark-muted)}
+  .link{color:var(--lime);text-decoration:underline;background:none;border:none;font:inherit;
+    font-size:12px;padding:0;cursor:pointer}
+  .spike{margin:14px 0 0;padding:10px 12px;border:1px dashed var(--hair);border-radius:10px;
+    font-size:12px;color:var(--on-dark-muted);line-height:1.5}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>The Wireless</h1>
+  <p class="sub">Music, not talk. Pick a mood and drive.</p>
+</header>
+
+<main>
+  <div class="cats" id="cats"></div>
+  <div class="spike">
+    <b style="color:var(--on-dark)">Trial version.</b> The point of this build is one question:
+    does the sound keep going when the phone locks and you drive off? Play something,
+    lock the phone, and see. Everything else can be made nicer later.
+  </div>
+  <div class="banned" id="bannedWrap" hidden>
+    <span id="bannedCount"></span> · <button class="link" id="resetBanned">reset</button>
+  </div>
+</main>
+
+<section class="np">
+  <div class="np-station" id="npStation">Nothing playing</div>
+  <div class="np-meta" id="npMeta"></div>
+  <div class="controls">
+    <button class="btn" id="btnPrev">Back</button>
+    <button class="btn primary" id="btnPlay">Play</button>
+    <button class="btn" id="btnNext">Next</button>
+    <button class="btn wide" id="btnBan">Not this — never again</button>
+  </div>
+  <div class="status" id="status"></div>
+</section>
+
+<audio id="audio" preload="none" playsinline crossorigin="anonymous"></audio>
+
+<script>
+(function(){
+  'use strict';
+
+  // ---- curated seeds -------------------------------------------------------
+  // Chosen because they are genuinely announcer-free: SomaFM is listener-funded with no ads
+  // and no DJs; Radio Paradise has no chat; the Swiss public streams announce the track and
+  // nothing else. All https, because a page served over https cannot play http audio.
+  // Some URLs may have moved — anything that fails is skipped automatically.
+  var SEEDS = {
+    classical: [
+      ['Radio Swiss Classic',      'https://stream.srg-ssr.ch/m/rsc_de/mp3_128'],
+      ['Venice Classic Radio',     'https://uk2.streamingpulse.com/ssl/vcr1'],
+      ['SomaFM · Drone Zone',      'https://ice1.somafm.com/dronezone-128-mp3']
+    ],
+    driving: [
+      ['Radio Paradise · Main',    'https://stream.radioparadise.com/mp3-192'],
+      ['SomaFM · Boot Liquor',     'https://ice1.somafm.com/bootliquor-128-mp3'],
+      ['Radio Paradise · Global',  'https://stream.radioparadise.com/global-192']
+    ],
+    rock: [
+      ['Radio Paradise · Rock',    'https://stream.radioparadise.com/rock-192'],
+      ['SomaFM · Left Coast 70s',  'https://ice1.somafm.com/seventies-128-mp3'],
+      ['SomaFM · Metal Detector',  'https://ice1.somafm.com/metal-128-mp3']
+    ],
+    eighties: [
+      ['SomaFM · Underground 80s', 'https://ice1.somafm.com/u80s-128-mp3'],
+      ['Radio Swiss Pop',          'https://stream.srg-ssr.ch/m/rsp/mp3_128']
+    ],
+    lofi: [
+      ['SomaFM · Groove Salad',    'https://ice1.somafm.com/groovesalad-128-mp3'],
+      ['SomaFM · Fluid',           'https://ice1.somafm.com/fluid-128-mp3'],
+      ['SomaFM · Deep Space One',  'https://ice1.somafm.com/deepspaceone-128-mp3'],
+      ['SomaFM · Lush',            'https://ice1.somafm.com/lush-128-mp3']
+    ],
+    ballads: [
+      ['Radio Paradise · Mellow',  'https://stream.radioparadise.com/mellow-192'],
+      ['Radio Swiss Pop',          'https://stream.srg-ssr.ch/m/rsp/mp3_128']
+    ]
+  };
+
+  // Live top-up from the open Radio Browser database, by tag.
+  var TAGS = {
+    classical: ['classical','symphonic'],
+    driving:   ['classic rock','rock','driving'],
+    rock:      ['classic rock','rock'],
+    eighties:  ['80s','1980s'],
+    lofi:      ['lofi','ambient','chillout','downtempo'],
+    ballads:   ['soft rock','love songs','ballads']
+  };
+
+  var CATS = [
+    ['classical','Classical',      'strings, no chatter'],
+    ['driving',  'Driving',        'miles and momentum'],
+    ['rock',     'Classic rock',   'guitars, no phone-ins'],
+    ['eighties', '1980s',          'the good decade'],
+    ['lofi',     'Lo-fi',          'dublab-ish, low and slow'],
+    ['ballads',  'Power ballads',  'unapologetic']
+  ];
+
+  // Anything with these in the name or tags is talk radio in disguise.
+  var TALK = /\b(talk|news|sport|chat|phone|call\s?in|discussion|debate|politic|comedy|podcast|gospel|preach|religio|christian|quran|bible)\b/i;
+
+  var BAN_KEY = 'wireless:banned', CAT_KEY = 'wireless:cat';
+
+  var audio  = document.getElementById('audio');
+  var elCats = document.getElementById('cats');
+  var elSt   = document.getElementById('npStation');
+  var elMeta = document.getElementById('npMeta');
+  var elStat = document.getElementById('status');
+
+  var stations = [], idx = -1, cat = null, loading = false;
+
+  function banned(){ try{ return JSON.parse(localStorage.getItem(BAN_KEY)||'[]'); }catch(e){ return []; } }
+  function isBanned(u){ return banned().indexOf(u) !== -1; }
+  function ban(u){ var b=banned(); if(b.indexOf(u)===-1){ b.push(u); localStorage.setItem(BAN_KEY, JSON.stringify(b)); } paintBanned(); }
+  function paintBanned(){
+    var n = banned().length, w = document.getElementById('bannedWrap');
+    w.hidden = !n;
+    document.getElementById('bannedCount').textContent = n + (n===1?' station muted for good':' stations muted for good');
+  }
+
+  function say(msg, isErr){ elStat.textContent = msg||''; elStat.className = 'status' + (isErr?' err':''); }
+
+  function paintCats(){
+    elCats.innerHTML = '';
+    CATS.forEach(function(c){
+      var b=document.createElement('button');
+      b.className='cat'; b.type='button'; b.setAttribute('aria-pressed', String(cat===c[0]));
+      b.innerHTML = c[1] + '<small>' + c[2] + '</small>';
+      b.addEventListener('click', function(){ pick(c[0]); });
+      elCats.appendChild(b);
+    });
+  }
+
+  function seedList(key){
+    return (SEEDS[key]||[]).map(function(s){ return {name:s[0], url:s[1], seed:true}; })
+      .filter(function(s){ return !isBanned(s.url); });
+  }
+
+  // Top up from Radio Browser. Never blocks playback — seeds play immediately.
+  function topUp(key){
+    var tags = TAGS[key]||[];
+    if(!tags.length) return;
+    var url = 'https://de1.api.radio-browser.info/json/stations/search'
+            + '?tagList=' + encodeURIComponent(tags.join(','))
+            + '&is_https=true&hidebroken=true&order=clickcount&reverse=true&limit=40';
+    fetch(url, {headers:{'User-Agent':'TheWireless/0.1'}})
+      .then(function(r){ return r.json(); })
+      .then(function(list){
+        if(!Array.isArray(list) || cat!==key) return;
+        var add = list.filter(function(s){
+          if(!s || !s.url_resolved) return false;
+          if(s.url_resolved.indexOf('https://')!==0) return false;
+          if(isBanned(s.url_resolved)) return false;
+          var hay = (s.name||'') + ' ' + (s.tags||'');
+          if(TALK.test(hay)) return false;
+          return !stations.some(function(x){ return x.url===s.url_resolved; });
+        }).map(function(s){ return {name:(s.name||'Unknown').trim(), url:s.url_resolved}; });
+        stations = stations.concat(add);
+        if(add.length) say(stations.length + ' stations in this mood');
+      })
+      .catch(function(){ /* seeds are enough */ });
+  }
+
+  function pick(key){
+    cat = key; try{ localStorage.setItem(CAT_KEY, key); }catch(e){}
+    paintCats();
+    stations = seedList(key); idx = -1;
+    if(!stations.length){ say('Everything here is muted — reset below.', true); return; }
+    say('Loading…');
+    topUp(key);
+    next();
+  }
+
+  function play(i){
+    if(!stations.length) return;
+    idx = (i + stations.length) % stations.length;
+    var s = stations[idx];
+    elSt.textContent = s.name;
+    elMeta.textContent = (idx+1) + ' of ' + stations.length + (s.seed ? ' · known talk-free' : '');
+    say('Connecting…');
+    loading = true;
+    audio.src = s.url;
+    audio.play().then(function(){
+      loading = false; say('');
+      document.getElementById('btnPlay').textContent = 'Pause';
+      media(s);
+    }).catch(function(){
+      loading = false;
+      say('That one would not start — trying the next', true);
+      setTimeout(function(){ if(!audio.paused) return; next(); }, 400);
+    });
+  }
+
+  function next(){ play(idx + 1); }
+  function prev(){ play(idx - 1); }
+
+  function media(s){
+    if(!('mediaSession' in navigator)) return;
+    try{
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: s.name, artist: 'The Wireless',
+        album: (CATS.filter(function(c){return c[0]===cat;})[0]||[])[1] || '',
+        artwork: [{src:'./icon-512.png', sizes:'512x512', type:'image/png'}]
+      });
+      navigator.mediaSession.setActionHandler('play',  function(){ audio.play(); });
+      navigator.mediaSession.setActionHandler('pause', function(){ audio.pause(); });
+      navigator.mediaSession.setActionHandler('nexttrack',     function(){ next(); });
+      navigator.mediaSession.setActionHandler('previoustrack', function(){ prev(); });
+    }catch(e){}
+  }
+
+  // A dead stream mid-drive must never leave silence — move on by itself.
+  audio.addEventListener('error', function(){ if(!loading && cat) { say('Stream dropped — moving on', true); next(); } });
+  audio.addEventListener('stalled', function(){ say('Buffering…'); });
+  audio.addEventListener('playing', function(){ say(''); document.getElementById('btnPlay').textContent='Pause'; });
+  audio.addEventListener('pause',   function(){ document.getElementById('btnPlay').textContent='Play'; });
+
+  document.getElementById('btnPlay').addEventListener('click', function(){
+    if(!stations.length){ pick(localStorage.getItem(CAT_KEY) || 'driving'); return; }
+    if(audio.paused){ audio.play().catch(function(){ next(); }); } else { audio.pause(); }
+  });
+  document.getElementById('btnNext').addEventListener('click', next);
+  document.getElementById('btnPrev').addEventListener('click', prev);
+  document.getElementById('btnBan').addEventListener('click', function(){
+    if(idx<0 || !stations[idx]) return;
+    var s = stations[idx];
+    ban(s.url);
+    stations.splice(idx,1); idx--;
+    say('"' + s.name + '" muted for good');
+    if(stations.length) next(); else { audio.pause(); elSt.textContent='Nothing playing'; }
+  });
+  document.getElementById('resetBanned').addEventListener('click', function(){
+    localStorage.removeItem(BAN_KEY); paintBanned(); say('Muted list cleared');
+  });
+
+  paintCats(); paintBanned();
+  var last = null; try{ last = localStorage.getItem(CAT_KEY); }catch(e){}
+  if(last && SEEDS[last]){ cat = last; paintCats(); stations = seedList(last); topUp(last);
+    elSt.textContent='Ready — ' + (CATS.filter(function(c){return c[0]===last;})[0]||[])[1];
+    elMeta.textContent='Press play'; }
+
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(function(){}); }
+})();
+</script>
+</body>
+</html>
