@@ -50,6 +50,9 @@
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .np-meta{font-size:13px;color:var(--on-dark-muted);margin-top:2px;min-height:17px;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* which line is the track and which is the artist — spelled out, not left to convention */
+  .tag{display:inline-block;color:var(--lime);font-weight:700;font-size:11px;
+    margin-right:7px;vertical-align:1px}
   .controls{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}
   .btn{appearance:none;border:1px solid var(--hair);background:var(--mid);color:var(--on-dark);
     border-radius:12px;padding:16px 8px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;
@@ -255,7 +258,7 @@
     f.forEach(function(x,i){ if(x.url===s.url) at=i; });
     if(at>=0){ f.splice(at,1); markDeleted(s.url); say('Removed from favourites'); }
     else { f.push({name:s.name, url:s.url, from: s.from || catLabel(cat), at: Date.now()});
-           unmarkDeleted(s.url); say('Saved to favourites'); }
+           unmarkDeleted(s.url); say('Saved to favourites', false, true); }
     try{ localStorage.setItem(FAV_KEY, JSON.stringify(f)); }catch(e){}
     wgSchedulePush();
     paintFav(); paintCats(); if(view==='list') renderRows();
@@ -274,6 +277,7 @@
   var elStat = document.getElementById('status');
 
   var stations = [], idx = -1, cat = null, loading = false, view = 'cats';
+  var pool = [], MAX_PER_CAT = 10;   // ten on screen; the rest wait in reserve
 
   function catLabel(key){
     if(key==='__fav') return 'Favourites';
@@ -286,12 +290,18 @@
     document.getElementById('list').hidden=true;
     paintCats();
   }
+  function refreshHead(){
+    var el=document.getElementById('listhead'); if(!el) return;
+    el.textContent = catLabel(cat) + ' · ' + stations.length
+      + (stations.length===1?' station':' stations')
+      + (pool.length ? ' · ' + pool.length + ' more in reserve' : '')
+      + (cat==='__fav' ? '' : ' · press “Not this” to drop one and pull in another');
+  }
   function showList(){
     view='list';
     document.getElementById('cats').hidden=true;
     document.getElementById('list').hidden=false;
-    document.getElementById('listhead').textContent =
-      catLabel(cat) + ' · ' + stations.length + (stations.length===1?' station':' stations');
+    refreshHead();
     renderRows();
   }
   // Every station visible and tappable — you should never have to hunt with Next.
@@ -397,7 +407,15 @@
   function wgSchedulePush(){ if(!wgCreds()) return; if(_pushTimer) clearTimeout(_pushTimer);
     _pushTimer=setTimeout(function(){ _pushTimer=null; wgPush(); }, 2000); }
 
-  function say(msg, isErr){ elStat.textContent = msg||''; elStat.className = 'status' + (isErr?' err':''); }
+  function wEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  // Some messages must outlive the next station starting, or they are wiped before you read them.
+  var _stickUntil = 0;
+  function say(msg, isErr, sticky){
+    // A sticky message holds the line for a few seconds — routine chatter must not stamp on it.
+    if(Date.now() < _stickUntil && !sticky && !isErr) return;
+    if(sticky) _stickUntil = Date.now() + 4000;
+    elStat.textContent = msg||''; elStat.className = 'status' + (isErr?' err':'');
+  }
 
   function paintCats(){
     elCats.innerHTML = '';
@@ -433,7 +451,7 @@
     if(!tags.length) return;
     var url = 'https://de1.api.radio-browser.info/json/stations/search'
             + '?tagList=' + encodeURIComponent(tags.join(','))
-            + '&is_https=true&hidebroken=true&order=clickcount&reverse=true&limit=40';
+            + '&is_https=true&hidebroken=true&order=clickcount&reverse=true&limit=120';
     fetch(url, {headers:{'User-Agent':'TheWireless/0.1'}})
       .then(function(r){ return r.json(); })
       .then(function(list){
@@ -447,14 +465,16 @@
           if(EXCLUDE[key] && EXCLUDE[key].test(hay)) return false;
           return !stations.some(function(x){ return x.url===s.url_resolved; });
         }).map(function(s){ return {name:(s.name||'Unknown').trim(), url:s.url_resolved}; });
-        stations = stations.concat(add);
-        if(add.length){
-          say(stations.length + ' stations in this mood');
-          if(view==='list'){
-            document.getElementById('listhead').textContent = catLabel(cat) + ' · ' + stations.length + ' stations';
-            renderRows();
-          }
-        }
+        // Spread across broadcasters rather than ten from whoever is most popular.
+        var seen={}; var spread=[];
+        add.forEach(function(s){ var host=(s.url.split('/')[2]||'').replace(/^www\./,'');
+          seen[host]=(seen[host]||0)+1; if(seen[host]<=2) spread.push(s); });
+        add.forEach(function(s){ if(spread.indexOf(s)===-1) spread.push(s); });
+        var room = Math.max(0, MAX_PER_CAT - stations.length);
+        stations = stations.concat(spread.slice(0, room));
+        pool = spread.slice(room);
+        if(view==='list'){ refreshHead(); renderRows(); }
+        if(add.length) say(stations.length + ' to choose from, ' + pool.length + ' more in reserve');
       })
       .catch(function(){ /* seeds are enough */ });
   }
@@ -462,7 +482,7 @@
   function pick(key){
     cat = key; try{ localStorage.setItem(CAT_KEY, key); }catch(e){}
     paintCats();
-    stations = seedList(key); idx = -1;
+    stations = seedList(key).slice(0, MAX_PER_CAT); pool = []; idx = -1;
     if(!stations.length){ say(key==='__fav' ? 'No favourites yet — press ☆ on one you like.' : 'Everything here is muted — reset below.', true); return; }
     say('Loading…');
     if(key!=='__fav') topUp(key);
@@ -476,6 +496,7 @@
     var s = stations[idx];
     document.getElementById('npStn').textContent = s.name;      // the STATION
     elSt.textContent = s.name;                                   // replaced by the track once known
+    elMeta.textContent = '';
     elMeta.textContent = (idx+1) + ' of ' + stations.length + (s.seed ? ' · known talk-free' : (s.fav ? ' · favourite' : ''));
     paintFav(); if(view==='list') renderRows();
     say('Connecting…');
@@ -522,8 +543,8 @@
         if(src.kind==='soma' && j.songs && j.songs.length){ artist=j.songs[0].artist||''; title=j.songs[0].title||''; }
         if(src.kind==='rp'){ artist=j.artist||''; title=j.title||''; }
         if(!title) return;
-        elSt.textContent = title;                       // the TRACK, large
-        elMeta.textContent = artist || '';               // the ARTIST, beneath it
+        elSt.innerHTML   = '<span class="tag">t</span>' + wEsc(title);          // t = track
+        elMeta.innerHTML = artist ? ('<span class="tag">a</span>' + wEsc(artist)) : '';  // a = artist
         if('mediaSession' in navigator){
           try{
             navigator.mediaSession.metadata = new MediaMetadata({
@@ -583,7 +604,10 @@
     ban(s.url);
     try{ var f=favs().filter(function(x){ return x.url!==s.url; }); localStorage.setItem(FAV_KEY, JSON.stringify(f)); }catch(e){}
     stations.splice(idx,1); idx--;
-    say('"' + s.name + '" muted for good');
+    var filled='';
+    if(pool.length && stations.length<MAX_PER_CAT){ stations.push(pool.shift()); filled=' — replaced'; }
+    say('“' + s.name + '” dropped from ' + catLabel(cat) + filled, false, true);
+    if(view==='list'){ refreshHead(); renderRows(); }
     if(stations.length) next(); else { audio.pause(); elSt.textContent='Nothing playing'; }
   });
   document.getElementById('resetBanned').addEventListener('click', function(){
