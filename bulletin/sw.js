@@ -2,7 +2,7 @@
  * Never caches news (rss2json) or weather (open-meteo) — those are cross-origin
  * and always go to the network. Bump CACHE on shell changes.
  */
-var CACHE = 'bulletin-v4';
+var CACHE = 'bulletin-v5';
 var SHELL = ['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable-512.png'];
 
 self.addEventListener('install', function (e) {

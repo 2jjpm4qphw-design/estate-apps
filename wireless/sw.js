@@ -1,7 +1,7 @@
 // The Wireless — shell cache only. Audio is NEVER cached: it is a live stream and
 // caching it would both break playback and fill the phone. Network-first for the page
 // so a new build is picked up; bump CACHE on every shell change.
-var CACHE = 'wireless-v17';
+var CACHE = 'wireless-v18';
 var SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', function(e){
   self.skipWaiting();
