@@ -253,9 +253,11 @@
     if(idx<0 || !stations[idx]){ say('Play a station first, then press ☆ to keep it.'); return; }
     var s=stations[idx], f=favs(), at=-1;
     f.forEach(function(x,i){ if(x.url===s.url) at=i; });
-    if(at>=0){ f.splice(at,1); say('Removed from favourites'); }
-    else { f.push({name:s.name, url:s.url, from: s.from || catLabel(cat)}); say('Saved to favourites'); }
+    if(at>=0){ f.splice(at,1); markDeleted(s.url); say('Removed from favourites'); }
+    else { f.push({name:s.name, url:s.url, from: s.from || catLabel(cat), at: Date.now()});
+           unmarkDeleted(s.url); say('Saved to favourites'); }
     try{ localStorage.setItem(FAV_KEY, JSON.stringify(f)); }catch(e){}
+    wgSchedulePush();
     paintFav(); paintCats(); if(view==='list') renderRows();
   }
   function paintFav(){
@@ -295,7 +297,11 @@
   // Every station visible and tappable — you should never have to hunt with Next.
   function renderRows(){
     var el=document.getElementById('rows'); if(!el) return;
-    if(!stations.length){ el.innerHTML='<p class="listhead">Nothing here yet.</p>'; return; }
+    if(!stations.length){
+      el.innerHTML='<p class="listhead">'+(cat==='__fav'
+        ? ('No favourites kept yet. Play a station from any category and press \u2606 Favourite to add it here.<br><br>' + (wgCreds() ? 'These sync between your phone and your Mac.' : 'These are stored on this device only \u2014 open a synced estate app once to switch syncing on.'))
+        : 'Nothing here yet.')+'</p>';
+      return; }
     el.innerHTML = stations.map(function(s,i){
       var sub = s.fav ? ('Favourite' + (s.from ? ' · from ' + s.from : ''))
                       : (s.seed ? 'Known talk-free' : 'From the station database');
@@ -308,25 +314,104 @@
 
   function banned(){ try{ return JSON.parse(localStorage.getItem(BAN_KEY)||'[]'); }catch(e){ return []; } }
   function isBanned(u){ return banned().indexOf(u) !== -1; }
-  function ban(u){ var b=banned(); if(b.indexOf(u)===-1){ b.push(u); localStorage.setItem(BAN_KEY, JSON.stringify(b)); } paintBanned(); }
+  function ban(u){ var b=banned(); if(b.indexOf(u)===-1){ b.push(u); localStorage.setItem(BAN_KEY, JSON.stringify(b)); } paintBanned(); wgSchedulePush(); }
   function paintBanned(){
     var n = banned().length, w = document.getElementById('bannedWrap');
     w.hidden = !n;
     document.getElementById('bannedCount').textContent = n + (n===1?' station muted for good':' stations muted for good');
   }
 
+  // ---- syncing favourites between devices ----------------------------------
+  // Every other estate app follows you between the phone and the Mac; this one did not, so
+  // you would build one set of favourites in the car and a different set at the desk.
+  // All the apps are served from the same address, so the Gist credentials you entered in the
+  // Library or the Still Room are already here — nothing to set up.
+  // Own-file pattern (wireless.json), as Roadcraft and the Form Book use, so the Hub's own
+  // state is never touched. Removals carry a tombstone, or a union merge would quietly
+  // resurrect anything you deleted on the other device — the mistake the Hub already made once.
+  var GID='connolly-sync:gist-id', GTOK='connolly-sync:token', GFILE='wireless.json';
+  var DEL_KEY='wireless:del', _pushTimer=null, _syncing=false;
+  function wgCreds(){ try{ var i=localStorage.getItem(GID), t=localStorage.getItem(GTOK);
+    return (i&&t)?{id:i,token:t}:null; }catch(e){ return null; } }
+  function dels(){ try{ return JSON.parse(localStorage.getItem(DEL_KEY)||'{}'); }catch(e){ return {}; } }
+  function setDels(d){ try{ localStorage.setItem(DEL_KEY, JSON.stringify(d)); }catch(e){} }
+  function markDeleted(url){ var d=dels(); d[url]=Date.now(); setDels(d); }
+  function unmarkDeleted(url){ var d=dels(); delete d[url]; setDels(d); }
+
+  function wgLocal(){
+    var f={}, now=Date.now();
+    favs().forEach(function(x){ f[x.url]={name:x.name, from:x.from||'', at:x.at||now}; });
+    return { favs:f, bans:banned(), del:dels(), savedAt:new Date().toISOString() };
+  }
+  // An entry survives only if it was favourited more recently than it was removed.
+  function wgMerge(remote){
+    if(!remote||typeof remote!=='object') return false;
+    var localF={}, changed=false;
+    favs().forEach(function(x){ localF[x.url]=x; });
+    var d=dels(), rd=remote.del||{};
+    Object.keys(rd).forEach(function(u){ if(!d[u]||rd[u]>d[u]){ d[u]=rd[u]; changed=true; } });
+    var rf=remote.favs||{};
+    Object.keys(rf).forEach(function(u){
+      var at=rf[u].at||0;
+      if(d[u] && d[u]>=at) return;                    // deleted here, and more recently
+      if(!localF[u]){ localF[u]={name:rf[u].name, url:u, from:rf[u].from||'', at:at}; changed=true; }
+    });
+    Object.keys(localF).forEach(function(u){ if(d[u] && d[u]>=(localF[u].at||0)){ delete localF[u]; changed=true; } });
+    var merged=Object.keys(localF).map(function(u){ return localF[u]; });
+    var b=banned(), rb=Array.isArray(remote.bans)?remote.bans:[];
+    rb.forEach(function(u){ if(b.indexOf(u)===-1){ b.push(u); changed=true; } });
+    if(changed){
+      try{ localStorage.setItem(FAV_KEY, JSON.stringify(merged));
+           localStorage.setItem(BAN_KEY, JSON.stringify(b)); setDels(d); }catch(e){}
+    }
+    return changed;
+  }
+  function wgPull(){
+    var c=wgCreds(); if(!c) return;
+    fetch('https://api.github.com/gists/'+c.id,{headers:{Authorization:'Bearer '+c.token,
+      Accept:'application/vnd.github+json'},cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw new Error('gist '+r.status); return r.json(); })
+      .then(function(g){
+        var f=g.files&&g.files[GFILE]; if(!f) return null;
+        if(f.truncated&&f.raw_url) return fetch(f.raw_url).then(function(r){return r.text();});
+        return f.content;
+      })
+      .then(function(txt){
+        if(!txt) return;
+        if(wgMerge(JSON.parse(txt))){ paintCats(); paintFav(); if(view==='list'){ stations=seedList(cat); renderRows(); }
+          say('Favourites updated from your other device'); }
+      })
+      .catch(function(e){ try{ console.warn('[wireless] sync pull failed', e); }catch(_){} });
+  }
+  function wgPush(){
+    var c=wgCreds(); if(!c || _syncing) return;
+    _syncing=true;
+    var body={files:{}}; body.files[GFILE]={content:JSON.stringify(wgLocal(),null,1)};
+    fetch('https://api.github.com/gists/'+c.id,{method:'PATCH',
+      headers:{Authorization:'Bearer '+c.token,Accept:'application/vnd.github+json','Content-Type':'application/json'},
+      body:JSON.stringify(body)})
+      .then(function(r){ if(!r.ok) throw new Error('gist '+r.status); })
+      .catch(function(e){ try{ console.warn('[wireless] sync push failed', e); }catch(_){} })
+      .then(function(){ _syncing=false; });
+  }
+  function wgSchedulePush(){ if(!wgCreds()) return; if(_pushTimer) clearTimeout(_pushTimer);
+    _pushTimer=setTimeout(function(){ _pushTimer=null; wgPush(); }, 2000); }
+
   function say(msg, isErr){ elStat.textContent = msg||''; elStat.className = 'status' + (isErr?' err':''); }
 
   function paintCats(){
     elCats.innerHTML = '';
     var fv = favs();
-    if(fv.length){
-      var f=document.createElement('button');
-      f.className='cat favtile'; f.type='button'; f.setAttribute('aria-pressed', String(cat==='__fav'));
-      f.innerHTML = '★ Favourites <small>' + fv.length + (fv.length===1?' station you kept':' stations you kept') + '</small>';
-      f.addEventListener('click', function(){ pick('__fav'); });
-      elCats.appendChild(f);
-    }
+    var f=document.createElement('button');
+    f.className='cat favtile'; f.type='button'; f.setAttribute('aria-pressed', String(cat==='__fav'));
+    f.innerHTML = fv.length
+      ? ('★ Favourites <small>' + fv.length + (fv.length===1?' station you kept':' stations you kept') + '</small>')
+      : ('★ Favourites <small>none yet — press \u2606 while a station is playing</small>');
+    f.addEventListener('click', function(){
+      if(!favs().length){ say('No favourites on this device yet. Play something and press \u2606 to keep it.'); return; }
+      pick('__fav');
+    });
+    elCats.appendChild(f);
     CATS.forEach(function(c){
       var b=document.createElement('button');
       b.className='cat'; b.type='button'; b.setAttribute('aria-pressed', String(cat===c[0]));
@@ -512,6 +597,7 @@
   else if(last && SEEDS[last]){ cat=last; paintCats(); stations=seedList(last); topUp(last); showList();
     elSt.textContent='Ready — ' + catLabel(last); elMeta.textContent='Pick a station'; }
 
+  try{ wgPull(); }catch(e){}
   if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(function(){}); }
 })();
 </script>
