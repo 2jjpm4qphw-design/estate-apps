@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Kennel</title>
+<meta name="theme-color" content="#0D1B3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kennel">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0D1B3E;--deep:#0A1530;--mid:#1A3A6B;--panel:#14244C;--lime:#C4F000;--mist:#C4CCDD;--line:#24467E;--red:#FF5A6E;--amber:#F0CF8A;--white:#FFFFFF}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--mist);-webkit-font-smoothing:antialiased;padding:0 0 92px;line-height:1.5}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+  .wrap{max-width:520px;margin:0 auto;padding:16px 16px 0}
+  header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 4px 12px}
+  .brand{display:flex;flex-direction:column;gap:2px}
+  .brand .eyebrow{font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--lime)}
+  .brand h1{font-size:22px;font-weight:800;letter-spacing:.04em;color:var(--white);margin:0}
+  .clearance{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mist);opacity:.8}
+  .clearance b{display:block;color:var(--lime);font-size:13px}
+  .view{display:none}.view.on{display:block}
+  .sec{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);opacity:.65;margin:20px 2px 10px}
+  .sec:first-child{margin-top:6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin-bottom:11px}
+  .card.hot{border-left:3px solid var(--red)}
+  .card.warm{border-left:3px solid var(--amber)}
+  .card.cool{border-left:3px solid var(--lime)}
+  .c-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .c-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);opacity:.7}
+  .c-badge{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--line)}
+  .c-badge.live{color:var(--lime);border-color:var(--lime)}
+  .c-badge.lost{color:var(--red);border-color:var(--red)}
+  .c-big{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:var(--white);line-height:1.1}
+  .c-big .u{font-size:12px;color:var(--mist);opacity:.7;margin-left:4px}
+  .c-sub{font-size:12px;color:var(--mist);opacity:.85;margin-top:4px}
+  .c-row{display:flex;justify-content:space-between;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;padding:3px 0;border-top:1px solid var(--line)}
+  .c-row:first-of-type{border-top:none}
+  .c-row .k{opacity:.65}
+  .redact{background:var(--mist);color:var(--mist);border-radius:2px;padding:0 6px;user-select:none}
+  .btn{display:inline-block;font:inherit;font-size:14px;font-weight:700;padding:11px 16px;border-radius:10px;border:0;background:var(--lime);color:var(--navy);cursor:pointer;text-align:center}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--white);font-weight:600}
+  .btn.wide{width:100%}
+  .btn.danger{background:transparent;border:1px solid var(--red);color:var(--red)}
+  .btn:active{transform:scale(.98)}
+  .field{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--deep);color:var(--white);font:inherit;font-size:14px}
+  textarea.field{min-height:80px;resize:vertical;font-family:'IBM Plex Mono',monospace;font-size:13px}
+  label.fl{display:block;font-size:11px;font-weight:600;color:var(--mist);opacity:.8;margin:12px 0 5px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  /* mission */
+  .brief-stamp{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.14em;color:var(--red);border:1.5px solid var(--red);border-radius:4px;padding:2px 8px;transform:rotate(-3deg);margin-bottom:12px}
+  .brief-code{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:var(--lime);letter-spacing:.06em}
+  .brief-line{font-size:14px;color:var(--white);margin:10px 0;line-height:1.55}
+  .brief-line .k{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mist);opacity:.6;display:block;margin-bottom:2px}
+  .selfd{font-family:'IBM Plex Mono',monospace;text-align:center;font-size:13px;color:var(--amber);margin:14px 0;letter-spacing:.06em}
+  .selfd b{display:block;font-size:30px;color:var(--red);letter-spacing:.1em}
+  /* cipher */
+  .seg{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:70px;font:inherit;font-size:12px;font-weight:600;padding:9px 6px;border-radius:9px;border:1px solid var(--line);background:var(--deep);color:var(--mist);cursor:pointer}
+  .seg button.on{background:var(--lime);color:var(--navy);border-color:var(--lime)}
+  .out{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--lime);background:var(--deep);border:1px solid var(--line);border-radius:10px;padding:12px;min-height:52px;word-break:break-word;white-space:pre-wrap;margin-top:6px}
+  .slider-row{display:flex;align-items:center;gap:12px;margin:10px 0}
+  .slider-row input{flex:1}
+  /* dossiers */
+  .doss{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:9px}
+  .doss .code{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--white)}
+  .doss .meta{font-size:12px;color:var(--mist);opacity:.8;margin-top:2px}
+  .doss .note{font-size:12px;color:var(--mist);opacity:.75;margin-top:5px;line-height:1.45}
+  .threat{display:inline-flex;gap:3px;margin-top:5px}
+  .threat i{width:8px;height:8px;border-radius:50%;background:var(--line);display:inline-block}
+  .threat i.on{background:var(--red)}
+  .doss-acts{display:flex;flex-direction:column;gap:6px;flex-shrink:0;text-align:right}
+  .link{font-size:12px;color:var(--lime);cursor:pointer;font-weight:600}
+  .empty{font-size:13px;color:var(--mist);opacity:.7;line-height:1.6;padding:8px 2px}
+  /* q-branch */
+  .gadget{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+  .gadget:first-child{border-top:none}
+  .gadget .g-n{font-size:14px;color:var(--white)}
+  .gadget .g-d{font-size:11.5px;color:var(--mist);opacity:.7}
+  .chk{flex:0 0 46px;height:28px;border-radius:16px;background:var(--deep);border:1px solid var(--line);position:relative;cursor:pointer}
+  .chk::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--mist);transition:.15s}
+  .chk.on{background:var(--lime);border-color:var(--lime)}
+  .chk.on::after{left:21px;background:var(--navy)}
+  /* nav */
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#081127;border-top:1px solid #1c3055;padding:7px 6px calc(7px + env(safe-area-inset-bottom));z-index:20}
+  nav.tabs button{flex:1;background:none;border:0;color:var(--mist);opacity:.6;font:inherit;font-size:9.5px;font-weight:600;padding:5px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;letter-spacing:.02em}
+  nav.tabs button .ic{font-size:18px;line-height:1}
+  nav.tabs button.on{opacity:1;color:var(--lime)}
+  .scan{height:2px;background:linear-gradient(90deg,transparent,var(--lime),transparent);opacity:.5;margin:2px 0 0;animation:sc 3.5s linear infinite;background-size:50% 100%;background-repeat:no-repeat}
+  @keyframes sc{0%{background-position:-50% 0}100%{background-position:150% 0}}
+  .flash{animation:fl .5s}@keyframes fl{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* estate strip — the house mark and the department, identical on every app (15 Aug 2026) */
+.estate-strip{display:flex;align-items:center;gap:9px;padding:9px 16px 8px;flex:none;background:#0D1B3E}
+.estate-strip .em-house{height:13px;width:auto;flex:none;opacity:1}
+.estate-strip .em-dept{font-family:Montserrat,-apple-system,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C4F000;line-height:1}
+@media print{.estate-strip{display:none}}
+</style>
+</head>
+<body>
+<div class="estate-strip" aria-hidden="true"><img class="em-house" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAABGCAMAAAAdMRrrAAADAFBMVEUAAAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABnduxjAAAAAXRSTlMAQObYZgAAAmlJREFUeNrtmtt2hCAMRU/+/6fbNZ2qQLgkBARNXuoqKrDnkAsIzDAikPgZ1VPLGn1MA4FeD4EcgkN4FASyMUewNwYyNUewGQYaA+CLYRMYNN4cwpNSh0cbkUvh4xivTowuYD7FZIgqxHZxrVmegPuETZTgEBzCCQGJR0D6j8N3INeSe9smEMAMuzbV9pbdlECIE19kLriW8O9VNG9RAh6nBKBHCdhRCR4d9ofAdSHqdikI/M3VVzwLQmbocyEc5RSCQBeGPYpuOc6e4rdgTwivVsIyeQJ/b+UVJuzt8gT05gkaMRk55GWUoFlTFgsx+9vNV4LGs9i4o3WUoPGvRk45O4/ZEBRhRh+a6NwcpXkhMupVG6pV0T2YOhEyB2WjIRShiLIVVYYTbqvTPRCqU5I/Ixx4LfLMF0LYkBkeci0D8tx7lTCvNh/Q/f27DfQwgwabso9vdfL/iu/lvHkGfV99QQeEwgXFJyh0hMggOKWJTz1ZCvZ6BMnS2eG17z8a3KFPevoTtKHOLz07qEGg1pMVtOSS1AABAQTZKhmrhLbjJU1CXYHQqwTGSyTLbXkI7HcNBfcGVRSyWg40bTmYRgdbx6ht2QCCMLVRV5EO4WkQsAgE0xDZmtgqc/f2EFmaFRcimaBZhaDOepHRoYwhQyYuqJMfksoQZEpgqnXBl44o4Omp/sZBSLTFVKxCIaCmEU3VHFdX8uXQVbOLV4MRBHYg86IDy6B1OZQhyNYBc/o4ZT8BXQxqELopTIHQyUB1MiShcAcE8dae2R5hbURjdyXHfOOFV5pDYFTrEByCQ3gzhMVClUNwCL/2A4cGHxiWr8/FAAAAAElFTkSuQmCC"><span class="em-dept">Of the Estate</span></div>
+
+<div class="wrap">
+  <header>
+    <div class="brand"><h1>KENNEL</h1></div>
+    <div class="clearance">Agent<b data-agent>—</b><span data-clearance>CLEARANCE ·</span></div>
+  </header>
+  <div class="scan"></div>
+
+  <!-- SITUATION ROOM -->
+  <section class="view on" data-view="sit">
+    <div class="sec">Global surveillance · live intel</div>
+    <div class="card cool" data-iss>
+      <div class="c-top"><span class="c-label">Asset tracking · orbital</span><span class="c-badge" data-iss-b>···</span></div>
+      <div class="c-big" data-iss-v>——<span class="u">reading</span></div>
+      <div class="c-sub" data-iss-sub>Locating overhead assets…</div>
+    </div>
+    <div class="card" data-kp>
+      <div class="c-top"><span class="c-label">Atmospheric interference</span><span class="c-badge" data-kp-b>···</span></div>
+      <div class="c-big" data-kp-v>—<span class="u">Kp</span></div>
+      <div class="c-sub" data-kp-sub>Measuring signal conditions…</div>
+    </div>
+    <div class="card" data-quake>
+      <div class="c-top"><span class="c-label">Ground activity · seismic</span><span class="c-badge" data-quake-b>···</span></div>
+      <div data-quake-list><div class="c-sub">Scanning for disturbances…</div></div>
+    </div>
+    <div class="card" data-launch>
+      <div class="c-top"><span class="c-label">Launch window</span><span class="c-badge" data-launch-b>···</span></div>
+      <div data-launch-list><div class="c-sub">Checking the pads…</div></div>
+    </div>
+    <button class="btn ghost wide" data-refresh style="margin:4px 0 8px">↻ Refresh the board</button>
+    <p class="empty">Feeds are open intelligence — orbital assets, space weather, seismic activity and launch schedules — repurposed as your situation wall. If a feed reads <b style="color:var(--red)">SIGNAL LOST</b>, the source is down; refresh to retry.</p>
+  </section>
+
+  <!-- MISSIONS -->
+  <section class="view" data-view="mission">
+    <div class="sec">Today's briefing</div>
+    <div class="card">
+      <span class="brief-stamp">TOP SECRET · EYES ONLY</span>
+      <div class="brief-code" data-m-code>OPERATION —</div>
+      <div class="brief-line"><span class="k">Objective</span><span data-m-obj>—</span></div>
+      <div class="brief-line"><span class="k">Location</span><span data-m-loc>—</span></div>
+      <div class="brief-line"><span class="k">Kit issued</span><span data-m-kit>—</span></div>
+      <div class="selfd">This briefing self-destructs in<b data-m-timer>--:--:--</b></div>
+      <button class="btn wide" data-m-accept>Accept the mission</button>
+      <div class="empty" data-m-status style="text-align:center"></div>
+    </div>
+    <div class="sec">Service record</div>
+    <div class="card"><div class="c-row"><span class="k">Missions accepted</span><span class="mono" data-m-count>0</span></div><div class="c-row"><span class="k">Standing</span><span class="mono" data-m-standing>Recruit</span></div></div>
+  </section>
+
+  <!-- CIPHER -->
+  <section class="view" data-view="cipher">
+    <div class="sec">Cipher desk</div>
+    <div class="card">
+      <div class="seg" data-cipher-seg>
+        <button data-ciph="caesar" class="on">Caesar</button>
+        <button data-ciph="morse">Morse</button>
+        <button data-ciph="drop">Dead drop</button>
+      </div>
+      <label class="fl">Message</label>
+      <textarea class="field" data-ciph-in placeholder="Type the message to conceal or reveal…"></textarea>
+      <div class="slider-row" data-shift-row><span class="mono" style="font-size:11px">SHIFT</span><input type="range" min="1" max="25" value="3" data-shift><span class="mono" data-shift-n style="font-size:13px;color:var(--lime);min-width:20px">3</span></div>
+      <div class="row2">
+        <button class="btn" data-ciph-enc>Encode &#9660;</button>
+        <button class="btn ghost" data-ciph-dec>Decode &#9650;</button>
+      </div>
+      <label class="fl">Output</label>
+      <div class="out mono" data-ciph-out>—</div>
+      <button class="btn ghost wide" data-ciph-copy style="margin-top:8px">Copy to clipboard</button>
+    </div>
+  </section>
+
+  <!-- DOSSIERS -->
+  <section class="view" data-view="doss">
+    <div class="sec" style="display:flex;justify-content:space-between;align-items:center"><span>Dossiers</span><button class="btn" data-doss-add style="padding:6px 12px;font-size:12px">+ New</button></div>
+    <div data-doss-list></div>
+  </section>
+
+  <!-- Q-BRANCH -->
+  <section class="view" data-view="q">
+    <div class="sec">Your licence</div>
+    <div class="card">
+      <label class="fl">Agent codename</label>
+      <input class="field" data-agent-in placeholder="e.g. Nightjar">
+      <button class="btn ghost wide" data-agent-save style="margin-top:10px">Set codename</button>
+    </div>
+    <div class="sec">Q-branch · gadget locker</div>
+    <div class="card" data-gadgets></div>
+    <div class="sec">Emergency protocol</div>
+    <button class="btn danger wide" data-selfdestruct>Initiate self-destruct</button>
+  </section>
+</div>
+
+<nav class="tabs">
+  <button data-nav="sit" class="on"><span class="ic">🛰</span>Situation</button>
+  <button data-nav="mission"><span class="ic">🎯</span>Missions</button>
+  <button data-nav="cipher"><span class="ic">🔐</span>Cipher</button>
+  <button data-nav="doss"><span class="ic">🗂</span>Dossiers</button>
+  <button data-nav="q"><span class="ic">🛠</span>Q-Branch</button>
+</nav>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s);};
+  var $$=function(s){return document.querySelectorAll(s);};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function lget(k,d){try{var v=localStorage.getItem('kennel:'+k);return v===null?d:JSON.parse(v);}catch(e){return d;}}
+  function lset(k,v){try{localStorage.setItem('kennel:'+k,JSON.stringify(v));}catch(e){}}
+
+  /* ---------- nav ---------- */
+  function navTo(v){ $$('[data-view]').forEach(function(s){s.classList.toggle('on',s.getAttribute('data-view')===v);});
+    $$('[data-nav]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-nav')===v);});
+    try{window.scrollTo(0,0);}catch(_){}
+    if(v==='sit') loadBoard(); if(v==='doss') renderDoss(); if(v==='mission') renderMission(); if(v==='q') renderQ();
+  }
+  document.addEventListener('click',function(e){ var n=e.target.closest&&e.target.closest('[data-nav]'); if(n){navTo(n.getAttribute('data-nav'));} });
+
+  /* ================= SITUATION ROOM ================= */
+  function badge(sel,ok){ var el=$(sel); if(!el)return; el.textContent=ok?'LIVE':'SIGNAL LOST'; el.className='c-badge '+(ok?'live':'lost'); }
+  function loadBoard(){ loadISS(); loadKp(); loadQuakes(); loadLaunch(); }
+  function loadISS(){ fetch('https://api.wheretheiss.at/v1/satellites/25544').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){
+      $('[data-iss-v]').innerHTML=Math.round(d.velocity).toLocaleString()+'<span class="u">km/h</span>';
+      $('[data-iss-sub]').innerHTML='ISS · '+d.latitude.toFixed(2)+'°, '+d.longitude.toFixed(2)+'° · alt '+Math.round(d.altitude)+' km · '+(d.visibility||'—');
+      badge('[data-iss-b]',true);
+    }).catch(function(){ $('[data-iss-sub]').textContent='Asset off the grid. Refresh to reacquire.'; badge('[data-iss-b]',false); }); }
+  function loadKp(){ fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(rows){
+      var last=rows[rows.length-1]; var kp=parseFloat(last[1]); var card=$('[data-kp]');
+      $('[data-kp-v]').innerHTML=(isNaN(kp)?'—':kp.toFixed(0))+'<span class="u">Kp</span>';
+      var lvl=kp>=6?'Severe — comms degraded':kp>=4?'Elevated — expect noise':'Quiet — channels clear';
+      $('[data-kp-sub]').textContent=lvl+' · '+(last[0]||'');
+      card.className='card '+(kp>=6?'hot':kp>=4?'warm':'cool'); badge('[data-kp-b]',true);
+    }).catch(function(){ $('[data-kp-sub]').textContent='Interference reading unavailable.'; badge('[data-kp-b]',false); }); }
+  function loadQuakes(){ fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(g){
+      var f=(g.features||[]).slice().sort(function(a,b){return b.properties.mag-a.properties.mag;}).slice(0,4);
+      if(!f.length){ $('[data-quake-list]').innerHTML='<div class="c-sub">No significant ground activity in 24h.</div>'; badge('[data-quake-b]',true); return; }
+      $('[data-quake-list]').innerHTML=f.map(function(q){ var p=q.properties; return '<div class="c-row"><span class="k">M'+p.mag.toFixed(1)+'</span><span style="text-align:right;flex:1">'+esc(p.place||'—')+'</span></div>'; }).join('');
+      badge('[data-quake-b]',true);
+    }).catch(function(){ $('[data-quake-list]').innerHTML='<div class="c-sub">Seismic feed dark.</div>'; badge('[data-quake-b]',false); }); }
+  function loadLaunch(){ fetch('https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=3&mode=list').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){
+      var r=(d.results||[]).slice(0,3);
+      if(!r.length){ $('[data-launch-list]').innerHTML='<div class="c-sub">No launches on the board.</div>'; badge('[data-launch-b]',true); return; }
+      $('[data-launch-list]').innerHTML=r.map(function(l){ var when=l.net?new Date(l.net).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'TBD'; return '<div class="c-row"><span style="flex:1">'+esc((l.name||'').split('|')[0])+'</span><span class="k">'+when+'</span></div>'; }).join('');
+      badge('[data-launch-b]',true);
+    }).catch(function(){ $('[data-launch-list]').innerHTML='<div class="c-sub">Launch schedule classified / unavailable.</div>'; badge('[data-launch-b]',false); }); }
+  document.addEventListener('click',function(e){ if(e.target.closest&&e.target.closest('[data-refresh]')){ e.target.closest('[data-refresh]').classList.add('flash'); loadBoard(); setTimeout(function(){var b=$('[data-refresh]');if(b)b.classList.remove('flash');},500); } });
+
+  /* ================= MISSIONS ================= */
+  var VERBS=['Intercept','Extract','Shadow','Neutralise','Recover','Infiltrate','Decrypt','Secure','Trace','Compromise'];
+  var TARGETS=['the courier','a rogue asset','the ledger','the double agent','a stolen prototype','the cipher key','the informant','a defector','the black file','the handler'];
+  var CITIES=['Vienna','Istanbul','Monaco','Marrakech','Reykjavík','Lisbon','Prague','Macau','Valletta','Tangier'];
+  var KIT=['a Walther PPK and a dinner jacket','a wire tap and false papers','a lockpick set and a fast car','a micro-camera and a cover story','a tuxedo and a poker face','a grappling line and nerve','a forged passport and cash','an earpiece and a table for two'];
+  function seedFromDate(){ var d=new Date(); var s=d.getFullYear()*1000+ (d.getMonth()+1)*50 + d.getDate(); var x=s; return function(){ x=(x*1103515245+12345)&0x7fffffff; return x/0x7fffffff; }; }
+  function todaysMission(){ var r=seedFromDate(); var pick=function(a){return a[Math.floor(r()*a.length)];};
+    var v=pick(VERBS),t=pick(TARGETS),c=pick(CITIES),k=pick(KIT);
+    var code=(pick(['NIGHT','IRON','GOLDEN','SILENT','CRIMSON','VELVET','HOLLOW','MIDNIGHT'])+' '+pick(['FALCON','VIPER','LOTUS','EMBER','ORACLE','JACKAL','MIRAGE','SPECTRE']));
+    return {code:code, obj:v+' '+t, loc:c, kit:k}; }
+  function renderMission(){ var m=todaysMission();
+    $('[data-m-code]').textContent='OPERATION '+m.code;
+    $('[data-m-obj]').textContent=m.obj+'.'; $('[data-m-loc]').textContent=m.loc+'.'; $('[data-m-kit]').textContent=m.kit+'.';
+    var key=new Date().toISOString().slice(0,10);
+    var accepted=lget('accepted-day','')===key;
+    var btn=$('[data-m-accept]'), st=$('[data-m-status]');
+    btn.textContent=accepted?'✓ Mission accepted':'Accept the mission'; btn.disabled=false;
+    st.textContent=accepted?'Good luck, Agent. Try not to get killed.':'';
+    $('[data-m-count]').textContent=lget('missions-count',0);
+    var n=lget('missions-count',0); $('[data-m-standing]').textContent = n>=30?'00 · Licence to thrill':n>=15?'Field agent':n>=5?'Operative':'Recruit';
+  }
+  document.addEventListener('click',function(e){ if(e.target.closest&&e.target.closest('[data-m-accept]')){ var key=new Date().toISOString().slice(0,10); if(lget('accepted-day','')!==key){ lset('accepted-day',key); lset('missions-count',lget('missions-count',0)+1); } renderMission(); renderQ(); } });
+  function tickTimer(){ var el=$('[data-m-timer]'); if(!el) return; var now=new Date(); var end=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,0); var s=Math.max(0,Math.floor((end-now)/1000)); var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60; el.textContent=(h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(ss<10?'0':'')+ss; }
+  setInterval(tickTimer,1000);
+
+  /* ================= CIPHER ================= */
+  var cipher='caesar';
+  var MORSE={A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'};
+  var RMORSE={}; for(var k in MORSE) RMORSE[MORSE[k]]=k;
+  function caesar(t,sh){ return t.replace(/[a-z]/gi,function(c){ var b=c<='Z'?65:97; return String.fromCharCode((c.charCodeAt(0)-b+sh+26)%26+b); }); }
+  function toMorse(t){ return t.toUpperCase().split('').map(function(c){ if(c===' ')return '/'; return MORSE[c]||''; }).filter(Boolean).join(' '); }
+  function fromMorse(t){ return t.trim().split(' ').map(function(c){ if(c==='/')return ' '; return RMORSE[c]||''; }).join(''); }
+  function drop(t,dec){ try{ return dec?decodeURIComponent(escape(atob(t.split('').reverse().join('')))):btoa(unescape(encodeURIComponent(t))).split('').reverse().join(''); }catch(e){ return '⚠ not a valid dead-drop packet'; } }
+  function runCipher(dec){ var t=$('[data-ciph-in]').value, sh=parseInt($('[data-shift]').value,10)||3, out='';
+    if(cipher==='caesar') out=caesar(t, dec?-sh:sh);
+    else if(cipher==='morse') out=dec?fromMorse(t):toMorse(t);
+    else out=drop(t,dec);
+    $('[data-ciph-out]').textContent=out||'—'; }
+  document.addEventListener('click',function(e){ var s=e.target.closest&&e.target.closest('[data-ciph]'); if(s){ cipher=s.getAttribute('data-ciph'); $$('[data-ciph]').forEach(function(b){b.classList.toggle('on',b===s);}); $('[data-shift-row]').style.display=cipher==='caesar'?'flex':'none'; runCipher(false); return; }
+    if(e.target.closest&&e.target.closest('[data-ciph-enc]')){ runCipher(false); return; }
+    if(e.target.closest&&e.target.closest('[data-ciph-dec]')){ runCipher(true); return; }
+    if(e.target.closest&&e.target.closest('[data-ciph-copy]')){ var txt=$('[data-ciph-out]').textContent; try{ navigator.clipboard.writeText(txt); e.target.textContent='Copied ✓'; setTimeout(function(){e.target.textContent='Copy to clipboard';},1200);}catch(_){}} });
+  document.addEventListener('input',function(e){ if(e.target.closest&&e.target.closest('[data-shift]')){ $('[data-shift-n]').textContent=$('[data-shift]').value; runCipher(false); } if(e.target.closest&&e.target.closest('[data-ciph-in]')){ runCipher(false); } });
+
+  /* ================= DOSSIERS ================= */
+  function dossiers(){ return lget('dossiers',[]); }
+  function renderDoss(){ var host=$('[data-doss-list]'); var d=dossiers();
+    if(!d.length){ host.innerHTML='<div class="empty">No dossiers on file. Tap <b>+ New</b> to open one on anyone worth watching — a rival, a friend, a suspiciously charming acquaintance.</div>'; return; }
+    host.innerHTML=d.map(function(x,i){ var th=''; for(var n=1;n<=5;n++) th+='<i class="'+(n<=x.threat?'on':'')+'"></i>';
+      return '<div class="doss"><div><div class="code">'+esc(x.code||'UNNAMED')+'</div><div class="meta">'+esc(x.real?('a.k.a. '+x.real):'identity unconfirmed')+' · '+esc(x.status||'active')+'</div><div class="threat">'+th+'</div>'+(x.note?'<div class="note">'+esc(x.note)+'</div>':'')+'</div><div class="doss-acts"><span class="link" data-doss-edit="'+i+'">edit</span><span class="link" data-doss-del="'+i+'" style="color:var(--red)">shred</span></div></div>'; }).join('');
+  }
+  function dossPrompt(x){ x=x||{}; var code=prompt('Codename (e.g. The Chairman)',x.code||''); if(code===null)return null; var real=prompt('Real identity (leave blank if unconfirmed)',x.real||'')||''; var threat=prompt('Threat level 1–5',x.threat||'2'); var status=prompt('Status (active / dormant / burned / friendly)',x.status||'active')||'active'; var note=prompt('Field notes',x.note||'')||''; return {code:code.trim(),real:real.trim(),threat:Math.max(1,Math.min(5,parseInt(threat,10)||1)),status:status.trim(),note:note.trim()}; }
+  document.addEventListener('click',function(e){
+    if(e.target.closest&&e.target.closest('[data-doss-add]')){ var r=dossPrompt(); if(r&&r.code){ var d=dossiers(); d.unshift(r); lset('dossiers',d); renderDoss(); } return; }
+    var ed=e.target.closest&&e.target.closest('[data-doss-edit]'); if(ed){ var i=+ed.getAttribute('data-doss-edit'); var d=dossiers(); var r=dossPrompt(d[i]); if(r&&r.code){ d[i]=r; lset('dossiers',d); renderDoss(); } return; }
+    var dl=e.target.closest&&e.target.closest('[data-doss-del]'); if(dl){ var i2=+dl.getAttribute('data-doss-del'); if(confirm('Shred this dossier? It cannot be recovered.')){ var d2=dossiers(); d2.splice(i2,1); lset('dossiers',d2); renderDoss(); } return; }
+  });
+
+  /* ================= Q-BRANCH ================= */
+  var GADGETS=[['Aston with the extras','Ejector seat. Obviously.'],['Wristwatch garrotte','Also tells the time.'],['Exploding pen','Click twice. Then run.'],['Jetpack','For a dramatic exit.'],['Laser cufflinks','Cuts glass and egos.'],['Rebreather','Ninety seconds of air.'],['Grappling belt','Rated to your weight. Probably.']];
+  function renderQ(){ $('[data-agent]').textContent=lget('agent','')||'—'; $('[data-agent-in]').value=lget('agent','');
+    var n=lget('missions-count',0); $('[data-clearance]').textContent='CLEARANCE · '+(n>=30?'00':n>=15?'A':n>=5?'B':'C');
+    var checked=lget('gadgets',{}); var host=$('[data-gadgets]');
+    host.innerHTML=GADGETS.map(function(g,i){ var on=checked[i]?' on':''; return '<div class="gadget"><div><div class="g-n">'+esc(g[0])+'</div><div class="g-d">'+esc(g[1])+'</div></div><div class="chk'+on+'" data-gadget="'+i+'"></div></div>'; }).join('');
+  }
+  document.addEventListener('click',function(e){
+    if(e.target.closest&&e.target.closest('[data-agent-save]')){ lset('agent',($('[data-agent-in]').value||'').trim()); renderQ(); return; }
+    var g=e.target.closest&&e.target.closest('[data-gadget]'); if(g){ var i=+g.getAttribute('data-gadget'); var c=lget('gadgets',{}); c[i]=!c[i]; lset('gadgets',c); g.classList.toggle('on'); return; }
+    if(e.target.closest&&e.target.closest('[data-selfdestruct]')){ var b=e.target.closest('[data-selfdestruct]'); var n=5; b.disabled=true; var iv=setInterval(function(){ b.textContent=n>0?('Self-destruct in '+n+'…'):'💥 BOOM. (Relax — nothing was harmed.)'; if(n<=0){ clearInterval(iv); setTimeout(function(){ b.textContent='Initiate self-destruct'; b.disabled=false; },1800); } n--; },700); return; }
+  });
+
+  /* ---------- boot ---------- */
+  $('[data-shift-row]').style.display='flex';
+  renderQ(); renderMission(); tickTimer(); loadBoard();
+})();
+</script>
+</body>
+</html>
