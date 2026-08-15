@@ -219,6 +219,21 @@
     ]
   };
 
+  // British stations you asked for, looked up BY NAME rather than by a stream address I would
+  // be guessing at. `talk` is an honest warning shown on the row, not a filter — you asked for
+  // these specifically, so you get to decide whether the presenters are a price worth paying.
+  var BRITISH = [
+    ['Classic FM Calm',  'No presenters, continuous'],
+    ['Smooth Chill',     'Continuous, little or no presentation'],
+    ['Mellow Magic',     'Mostly continuous'],
+    ['Magic Chilled',    'Mostly continuous'],
+    ['Capital Chill',    'Continuous, little or no presentation'],
+    ['Jazz FM',          'Some presentation'],
+    ['Classic FM',       'Presenters between pieces, and adverts'],
+    ['Smooth Radio',     'Presenters and adverts'],
+    ['Magic Radio',      'Presenters and adverts']
+  ];
+
   // Live top-up from the open Radio Browser database, by tag.
   var TAGS = {
     classical: ['classical','symphonic'],
@@ -252,6 +267,7 @@
     standards:'Ella, Nina, Sinatra and the lounge end of jazz. The strongest list here — these stations genuinely never speak.',
     yacht:    'Smooth West Coast, late seventies into the eighties. The weakest list here, honestly: no dependable talk-free yacht rock station exists, so most of these come from the open database and may need pruning.',
     balearic: 'Ibiza at sunset. Downtempo, deep house and beach bars rather than the club.',
+    british:  'The British stations you asked for, looked up by name so the addresses stay current. This is the one place the no-talk rule is relaxed — and each station says plainly whether it has presenters and adverts, so you can choose. Classic FM Calm, Smooth Chill, Capital Chill, Mellow Magic and Magic Chilled are the continuous ones; Classic FM, Smooth and Magic proper are presented and carry advertising.',
     chart:    'Current pop with no presenters. Worth knowing: this is not the Official UK Chart — every UK chart station is built around DJs, ads and phone-ins, so this is chart-shaped music without the talking.'
   };
   var CRITERIA = 'Every station here is filtered against talk, news, sport and phone-ins, and must stream securely. Six at a time — press × to drop one for good and another takes its place.';
@@ -267,7 +283,8 @@
     ['standards','Standards',      'Ella, Nina, the Rat Pack'],
     ['yacht',    'Yacht rock',     'smooth, 1980s, slightly daft'],
     ['balearic', 'Balearic',       'Ibiza sunset, beach, chill'],
-    ['chart',    'Chart',          'current pop, no presenters']
+    ['chart',    'Chart',          'current pop, no presenters'],
+    ['british',  'British radio',  'the ones you asked for']
   ];
 
   // Anything with these in the name or tags is talk radio in disguise.
@@ -351,8 +368,9 @@
         : 'Nothing here yet.')+'</p>';
       return; }
     el.innerHTML = stations.map(function(s,i){
-      var sub = s.fav ? ('Favourite' + (s.from ? ' · from ' + s.from : ''))
-                      : (s.seed ? 'Known talk-free' : 'From the station database');
+      var sub = s.note ? s.note
+              : s.fav ? ('Favourite' + (s.from ? ' · from ' + s.from : ''))
+              : s.seed ? 'Known talk-free' : 'From the station database';
       var on = isFav(s.url);
       return '<div class="strow'+(i===idx?' playing':'')+'">'
            + '<button class="sp" data-play="'+i+'"><b>'+esc(s.name)+'</b><span>'+esc(sub)+'</span></button>'
@@ -530,13 +548,42 @@
     go();
   }
 
+  // One lookup per station name. Eight small requests, done once when you open the page.
+  function topUpBritish(){
+    var got = [];
+    var host = 'https://de1.api.radio-browser.info/json/stations/search?limit=4&is_https=true&hidebroken=true&name=';
+    BRITISH.forEach(function(entry){
+      fetch(host + encodeURIComponent(entry[0]), {cache:'no-store'})
+        .then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); })
+        .then(function(list){
+          if(cat!=='british' || !Array.isArray(list) || !list.length) return;
+          // prefer an exact-ish name match on a secure stream
+          var best=null;
+          list.forEach(function(s){
+            if(!s.url_resolved || s.url_resolved.indexOf('https://')!==0) return;
+            if(isBanned(s.url_resolved)) return;
+            if(!best) best=s;
+            if(String(s.name||'').toLowerCase().indexOf(entry[0].toLowerCase())===0) best=s;
+          });
+          if(!best) return;
+          if(stations.some(function(x){ return x.url===best.url_resolved; })) return;
+          var st={name:entry[0], url:best.url_resolved, note:entry[1]};
+          if(stations.length < MAX_PER_CAT) stations.push(st); else pool.push(st);
+          if(view==='list'){ refreshHead(); renderRows(); }
+          if(idx<0 && stations.length===1) next();
+        })
+        .catch(function(e){ try{ console.warn('[wireless] could not find ' + entry[0], e); }catch(_){} });
+    });
+  }
+
   function pick(key){
     cat = key; try{ localStorage.setItem(CAT_KEY, key); }catch(e){}
     paintCats();
     stations = seedList(key).slice(0, MAX_PER_CAT); pool = []; idx = -1;
-    if(!stations.length){ say(key==='__fav' ? 'No favourites yet — press ☆ on one you like.' : 'Everything here is muted — reset below.', true); return; }
+    if(!stations.length && key!=='british'){ say(key==='__fav' ? 'No favourites yet — press ☆ on one you like.' : 'Everything here is muted — reset below.', true); return; }
+    if(key==='british'){ showList(); say('Looking these up…'); topUpBritish(); return; }
     say('Loading…');
-    if(key!=='__fav') topUp(key);
+    if(key==='british') topUpBritish(); else if(key!=='__fav') topUp(key);
     showList();
     next();
   }
@@ -551,7 +598,7 @@
     elMeta.textContent = (idx+1) + ' of ' + stations.length + (s.seed ? ' · known talk-free' : (s.fav ? ' · favourite' : ''));
     paintFav(); if(view==='list') renderRows();
     say('Connecting…');
-    loading = true;
+    loading = true; wantPlaying = true; everPlayed = false; retryN = 0; clearRetry();
     audio.src = s.url;
     audio.play().then(function(){
       loading = false; say('');
@@ -631,15 +678,70 @@
     }catch(e){}
   }
 
-  // A dead stream mid-drive must never leave silence — move on by itself.
-  audio.addEventListener('error', function(){ if(!loading && cat) { say('Stream dropped — moving on', true); next(); } });
-  audio.addEventListener('stalled', function(){ say('Buffering…'); });
-  audio.addEventListener('playing', function(){ say(''); document.getElementById('btnPlay').textContent='Pause'; });
-  audio.addEventListener('pause',   function(){ document.getElementById('btnPlay').textContent='Play'; stopNowPlaying(); });
+  // ---- staying on air through a dead spot ----------------------------------
+  // Driving means tunnels, cuttings and villages with no signal. A stream does not time out on
+  // its own: the connection simply breaks and the audio element gives up for good, which is why
+  // it went quiet and stayed quiet until you pressed play. Worse, the old handler treated that
+  // as a dead station and skipped to a different one, so a tunnel could change your music.
+  // Now: if it was playing and the sound stops, we keep reconnecting to the SAME station,
+  // backing off 1, 2, 4 … up to 30 seconds, and jump straight back in when the signal returns.
+  // Only a station that never connected in the first place counts as dead and gets skipped.
+  var wantPlaying=false, everPlayed=false, retryN=0, retryTimer=null, watchdog=null;
+
+  function clearRetry(){ if(retryTimer){ clearTimeout(retryTimer); retryTimer=null; }
+                         if(watchdog){ clearTimeout(watchdog); watchdog=null; } }
+  function reconnect(){
+    if(!wantPlaying || idx<0 || !stations[idx]) return;
+    say('Reconnecting…');
+    try{ audio.load(); }catch(e){}
+    audio.play().then(function(){ /* 'playing' resets the counter */ })
+                .catch(function(){ scheduleReconnect(); });
+  }
+  function scheduleReconnect(reason){
+    if(!wantPlaying) return;
+    clearRetry();
+    var delay = Math.min(30000, 1000 * Math.pow(2, Math.min(retryN,5)));
+    retryN++;
+    say((reason||'Lost the signal') + ' — trying again in ' + Math.round(delay/1000) + 's', true);
+    retryTimer = setTimeout(reconnect, delay);
+  }
+  // If it never got going at all, the station itself is the problem — move on.
+  audio.addEventListener('error', function(){
+    if(loading || !cat) return;
+    if(!everPlayed){ say('That one would not start — trying the next', true); next(); return; }
+    scheduleReconnect('Signal dropped');
+  });
+  // A live stream should never "end". If it does, the connection went.
+  audio.addEventListener('ended', function(){ if(everPlayed) scheduleReconnect('Stream ended unexpectedly'); });
+  audio.addEventListener('stalled', function(){
+    if(!wantPlaying) return;
+    say('Buffering…');
+    clearTimeout(watchdog);
+    watchdog = setTimeout(function(){ if(wantPlaying && audio.paused===false && audio.readyState<3) scheduleReconnect('Stalled'); }, 8000);
+  });
+  audio.addEventListener('waiting', function(){
+    if(!wantPlaying) return;
+    clearTimeout(watchdog);
+    watchdog = setTimeout(function(){ if(wantPlaying) scheduleReconnect('No data'); }, 12000);
+  });
+  audio.addEventListener('playing', function(){
+    everPlayed=true; retryN=0; clearRetry(); say('');
+    document.getElementById('btnPlay').textContent='Pause';
+  });
+  audio.addEventListener('pause', function(){
+    document.getElementById('btnPlay').textContent='Play'; stopNowPlaying();
+  });
+  // Back in signal — do not sit out the rest of the backoff.
+  window.addEventListener('online', function(){ if(wantPlaying){ retryN=0; clearRetry(); reconnect(); } });
+  // Coming back to the app after it was backgrounded: check we are actually still playing.
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState==='visible' && wantPlaying && audio.paused) reconnect();
+  });
 
   document.getElementById('btnPlay').addEventListener('click', function(){
     if(!stations.length){ pick(localStorage.getItem(CAT_KEY) || 'driving'); return; }
-    if(audio.paused){ audio.play().catch(function(){ next(); }); } else { audio.pause(); }
+    if(audio.paused){ wantPlaying=true; retryN=0; audio.play().catch(function(){ next(); }); }
+    else { wantPlaying=false; clearRetry(); audio.pause(); }
   });
   document.getElementById('btnBack').addEventListener('click', showCats);
   document.getElementById('rows').addEventListener('click', function(e){
