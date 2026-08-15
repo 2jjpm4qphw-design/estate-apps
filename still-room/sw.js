@@ -1,7 +1,7 @@
 /* Still Room service worker — caches the app shell so it launches offline.
  * Never caches the gist API. Bump CACHE on shell changes.
  */
-var CACHE = 'stillroom-v9';
+var CACHE = 'stillroom-v10';
 var SHELL = ['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable-512.png'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));

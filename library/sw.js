@@ -1,7 +1,7 @@
 /* The Library service worker — caches the app shell + catalogue so it works offline.
  * Never caches the gist API. Bump CACHE on shell or catalogue changes.
  */
-var CACHE = 'library-v1';
+var CACHE = 'library-v2';
 var SHELL = ['./','./index.html','./manifest.webmanifest','./books.json','./icon-192.png','./icon-512.png','./icon-maskable-512.png'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));

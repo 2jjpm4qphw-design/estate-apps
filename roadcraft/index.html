@@ -9,6 +9,8 @@
 <meta name="apple-mobile-web-app-title" content="Roadcraft">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Roadcraft</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -233,9 +235,17 @@ canvas.gg2{width:100%;max-width:250px;aspect-ratio:1;margin:8px auto 0;display:b
 .swatches{display:flex;gap:8px;margin-top:10px}
 .swatches div{flex:1;height:34px;border-radius:8px;border:1px solid var(--rule)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* estate strip — the house mark and the department, identical on every app (15 Aug 2026) */
+.estate-strip{display:flex;align-items:center;gap:9px;padding:9px 16px 0;flex:none}
+.estate-strip .em-house{height:13px;width:auto;flex:none;opacity:.9}
+.estate-strip .em-dept{font-family:Montserrat,-apple-system,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C4F000;line-height:1}
+@media print{.estate-strip{display:none}}
 </style>
 </head>
 <body data-theme="night">
+<div class="estate-strip" aria-hidden="true"><img class="em-house" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAABGCAMAAAAdMRrrAAADAFBMVEUAAADEzN0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABZC//kAAAAAXRSTlMAQObYZgAAAmlJREFUeNrtmtt2hCAMRU/+/6fbNZ2qQLgkBARNXuoqKrDnkAsIzDAikPgZ1VPLGn1MA4FeD4EcgkN4FASyMUewNwYyNUewGQYaA+CLYRMYNN4cwpNSh0cbkUvh4xivTowuYD7FZIgqxHZxrVmegPuETZTgEBzCCQGJR0D6j8N3INeSe9smEMAMuzbV9pbdlECIE19kLriW8O9VNG9RAh6nBKBHCdhRCR4d9ofAdSHqdikI/M3VVzwLQmbocyEc5RSCQBeGPYpuOc6e4rdgTwivVsIyeQJ/b+UVJuzt8gT05gkaMRk55GWUoFlTFgsx+9vNV4LGs9i4o3WUoPGvRk45O4/ZEBRhRh+a6NwcpXkhMupVG6pV0T2YOhEyB2WjIRShiLIVVYYTbqvTPRCqU5I/Ixx4LfLMF0LYkBkeci0D8tx7lTCvNh/Q/f27DfQwgwabso9vdfL/iu/lvHkGfV99QQeEwgXFJyh0hMggOKWJTz1ZCvZ6BMnS2eG17z8a3KFPevoTtKHOLz07qEGg1pMVtOSS1AABAQTZKhmrhLbjJU1CXYHQqwTGSyTLbXkI7HcNBfcGVRSyWg40bTmYRgdbx6ht2QCCMLVRV5EO4WkQsAgE0xDZmtgqc/f2EFmaFRcimaBZhaDOepHRoYwhQyYuqJMfksoQZEpgqnXBl44o4Omp/sZBSLTFVKxCIaCmEU3VHFdX8uXQVbOLV4MRBHYg86IDy6B1OZQhyNYBc/o4ZT8BXQxqELopTIHQyUB1MiShcAcE8dae2R5hbURjdyXHfOOFV5pDYFTrEByCQ3gzhMVClUNwCL/2A4cGHxiWr8/FAAAAAElFTkSuQmCC"><span class="em-dept">Of the Estate</span></div>
+
 
 <svg width="0" height="0" style="position:absolute"><symbol id="mk" viewBox="0 0 32 32"><path d="M4 26 L16 5 L28 26" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="16" cy="21.5" r="2.8"/></symbol></svg>
 
@@ -247,7 +257,7 @@ canvas.gg2{width:100%;max-width:250px;aspect-ratio:1;margin:8px auto 0;display:b
       <div id="driveInner">
         <div class="brand" style="margin-bottom:8px">
           <svg class="mark"><use href="#mk"/></svg>
-          <div><span class="eyebrow">The Reading Room</span><h1 style="font-size:16px;letter-spacing:.16em;text-transform:uppercase">Roadcraft</h1></div>
+          <div><h1 style="font-size:16px;letter-spacing:.16em;text-transform:uppercase">Roadcraft</h1></div>
           <span class="right" id="vehLabel">—</span>
         </div>
 
@@ -297,7 +307,7 @@ canvas.gg2{width:100%;max-width:250px;aspect-ratio:1;margin:8px auto 0;display:b
 
     <!-- ============ HISTORY ============ -->
     <section class="screen" id="history">
-      <div class="brand"><svg class="mark"><use href="#mk"/></svg><div><span class="eyebrow">The Reading Room</span><h1>Drives</h1></div></div>
+      <div class="brand"><svg class="mark"><use href="#mk"/></svg><div><h1>Drives</h1></div></div>
       <div id="spotWrap"></div>
       <div id="trendWrap"></div>
       <div id="histList"></div>
@@ -312,7 +322,7 @@ canvas.gg2{width:100%;max-width:250px;aspect-ratio:1;margin:8px auto 0;display:b
 
     <!-- ============ GUIDE ============ -->
     <section class="screen" id="guide">
-      <div class="brand"><svg class="mark"><use href="#mk"/></svg><div><span class="eyebrow">The Reading Room</span><h1>How this works</h1></div></div>
+      <div class="brand"><svg class="mark"><use href="#mk"/></svg><div><h1>How this works</h1></div></div>
 
       <div class="note" style="border-left-color:var(--accent)">Roadcraft measures <b>how you move the car</b> — nothing else. It cannot see other traffic, the car in front, or the road ahead. Everything here is reviewed when parked.</div>
 
@@ -429,7 +439,7 @@ canvas.gg2{width:100%;max-width:250px;aspect-ratio:1;margin:8px auto 0;display:b
 
     <!-- ============ SETUP ============ -->
     <section class="screen" id="setup">
-      <div class="brand"><svg class="mark"><use href="#mk"/></svg><div><span class="eyebrow">The Reading Room</span><h1>Setup</h1></div></div>
+      <div class="brand"><svg class="mark"><use href="#mk"/></svg><div><h1>Setup</h1></div></div>
 
       <h2>Appearance</h2>
       <div class="card">

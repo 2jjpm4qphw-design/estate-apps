@@ -67,9 +67,17 @@
     font-size:12px;padding:0;cursor:pointer}
   .spike{margin:14px 0 0;padding:10px 12px;border:1px dashed var(--hair);border-radius:10px;
     font-size:12px;color:var(--on-dark-muted);line-height:1.5}
+
+/* estate strip — the house mark and the department, identical on every app (15 Aug 2026) */
+.estate-strip{display:flex;align-items:center;gap:9px;padding:9px 16px 0;flex:none}
+.estate-strip .em-house{height:13px;width:auto;flex:none;opacity:.9}
+.estate-strip .em-dept{font-family:Montserrat,-apple-system,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C4F000;line-height:1}
+@media print{.estate-strip{display:none}}
 </style>
 </head>
 <body>
+<div class="estate-strip" aria-hidden="true"><img class="em-house" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAABGCAMAAAAdMRrrAAADAFBMVEUAAADEzN0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABZC//kAAAAAXRSTlMAQObYZgAAAmlJREFUeNrtmtt2hCAMRU/+/6fbNZ2qQLgkBARNXuoqKrDnkAsIzDAikPgZ1VPLGn1MA4FeD4EcgkN4FASyMUewNwYyNUewGQYaA+CLYRMYNN4cwpNSh0cbkUvh4xivTowuYD7FZIgqxHZxrVmegPuETZTgEBzCCQGJR0D6j8N3INeSe9smEMAMuzbV9pbdlECIE19kLriW8O9VNG9RAh6nBKBHCdhRCR4d9ofAdSHqdikI/M3VVzwLQmbocyEc5RSCQBeGPYpuOc6e4rdgTwivVsIyeQJ/b+UVJuzt8gT05gkaMRk55GWUoFlTFgsx+9vNV4LGs9i4o3WUoPGvRk45O4/ZEBRhRh+a6NwcpXkhMupVG6pV0T2YOhEyB2WjIRShiLIVVYYTbqvTPRCqU5I/Ixx4LfLMF0LYkBkeci0D8tx7lTCvNh/Q/f27DfQwgwabso9vdfL/iu/lvHkGfV99QQeEwgXFJyh0hMggOKWJTz1ZCvZ6BMnS2eG17z8a3KFPevoTtKHOLz07qEGg1pMVtOSS1AABAQTZKhmrhLbjJU1CXYHQqwTGSyTLbXkI7HcNBfcGVRSyWg40bTmYRgdbx6ht2QCCMLVRV5EO4WkQsAgE0xDZmtgqc/f2EFmaFRcimaBZhaDOepHRoYwhQyYuqJMfksoQZEpgqnXBl44o4Omp/sZBSLTFVKxCIaCmEU3VHFdX8uXQVbOLV4MRBHYg86IDy6B1OZQhyNYBc/o4ZT8BXQxqELopTIHQyUB1MiShcAcE8dae2R5hbURjdyXHfOOFV5pDYFTrEByCQ3gzhMVClUNwCL/2A4cGHxiWr8/FAAAAAElFTkSuQmCC"><span class="em-dept">The Household</span></div>
+
 
 <header>
   <h1>The Wireless</h1>
@@ -78,11 +86,6 @@
 
 <main>
   <div class="cats" id="cats"></div>
-  <div class="spike">
-    <b style="color:var(--on-dark)">Trial version.</b> The point of this build is one question:
-    does the sound keep going when the phone locks and you drive off? Play something,
-    lock the phone, and see. Everything else can be made nicer later.
-  </div>
   <div class="banned" id="bannedWrap" hidden>
     <span id="bannedCount"></span> · <button class="link" id="resetBanned">reset</button>
   </div>
@@ -329,7 +332,7 @@
     audio.play().then(function(){
       loading = false; say('');
       document.getElementById('btnPlay').textContent = 'Pause';
-      media(s); paintFav();
+      media(s); paintFav(); startNowPlaying(s);
     }).catch(function(){
       loading = false;
       say('That one would not start — trying the next', true);
@@ -339,6 +342,49 @@
 
   function next(){ play(idx + 1); }
   function prev(){ play(idx - 1); }
+
+  // ---- now playing ---------------------------------------------------------
+  // A browser cannot read the track name embedded in the audio stream — it arrives, but the
+  // page is never given it. So for the stations that publish a public now-playing feed
+  // (SomaFM and Radio Paradise, i.e. most of the curated list) we ask that instead, and put
+  // the result on screen AND on the lock screen. Anything else keeps showing the station name.
+  var _npTimer=null, _npFor=null;
+  function nowPlayingUrl(u){
+    var m=u.match(/ice1\.somafm\.com\/([a-z0-9]+)-/i);
+    if(m) return {kind:'soma', url:'https://somafm.com/songs/'+m[1]+'.json'};
+    var rp={'mp3-192':0,'mellow-192':1,'rock-192':2,'global-192':3};
+    m=u.match(/stream\.radioparadise\.com\/([a-z0-9-]+)/i);
+    if(m && rp[m[1]]!==undefined) return {kind:'rp', url:'https://api.radioparadise.com/api/now_playing?chan='+rp[m[1]]};
+    return null;
+  }
+  function stopNowPlaying(){ if(_npTimer){ clearInterval(_npTimer); _npTimer=null; } _npFor=null; }
+  function startNowPlaying(s){
+    stopNowPlaying();
+    var src=nowPlayingUrl(s.url); if(!src) return;
+    _npFor=s.url;
+    var tick=function(){
+      if(_npFor!==s.url) return;
+      fetch(src.url, {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(j){
+        if(_npFor!==s.url || !j) return;
+        var artist='', title='';
+        if(src.kind==='soma' && j.songs && j.songs.length){ artist=j.songs[0].artist||''; title=j.songs[0].title||''; }
+        if(src.kind==='rp'){ artist=j.artist||''; title=j.title||''; }
+        if(!title) return;
+        var line = artist ? (artist + ' — ' + title) : title;
+        elMeta.textContent = line;
+        if('mediaSession' in navigator){
+          try{
+            navigator.mediaSession.metadata = new MediaMetadata({
+              title: title, artist: artist || s.name, album: s.name,
+              artwork: [{src:'./icon-512.png', sizes:'512x512', type:'image/png'}]
+            });
+          }catch(e){}
+        }
+      }).catch(function(){ /* station has no feed, or blocked it — leave the name showing */ });
+    };
+    tick();
+    _npTimer=setInterval(tick, 25000);   // stations change track every 3-5 min; 25s is ample
+  }
 
   function media(s){
     if(!('mediaSession' in navigator)) return;
@@ -359,7 +405,7 @@
   audio.addEventListener('error', function(){ if(!loading && cat) { say('Stream dropped — moving on', true); next(); } });
   audio.addEventListener('stalled', function(){ say('Buffering…'); });
   audio.addEventListener('playing', function(){ say(''); document.getElementById('btnPlay').textContent='Pause'; });
-  audio.addEventListener('pause',   function(){ document.getElementById('btnPlay').textContent='Play'; });
+  audio.addEventListener('pause',   function(){ document.getElementById('btnPlay').textContent='Play'; stopNowPlaying(); });
 
   document.getElementById('btnPlay').addEventListener('click', function(){
     if(!stations.length){ pick(localStorage.getItem(CAT_KEY) || 'driving'); return; }

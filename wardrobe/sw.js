@@ -2,7 +2,7 @@
  * cache opportunistically as you view them. Never caches the gist API.
  * Bump CACHE on shell or catalogue changes.
  */
-var CACHE = 'wardrobe-v5';
+var CACHE = 'wardrobe-v6';
 var SHELL = ['./','./index.html','./manifest.webmanifest','./wardrobe.json','./thumbs.js','./outfits.json','./icon-192.png','./icon-512.png','./icon-maskable-512.png'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));
