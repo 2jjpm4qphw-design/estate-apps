@@ -69,17 +69,20 @@
   .backbtn{appearance:none;border:1px solid var(--hair);background:transparent;color:var(--on-dark-muted);
     border-radius:10px;padding:9px 14px;font:inherit;font-size:13px;margin:4px 0 10px;cursor:pointer}
   .listhead{font-size:13px;color:var(--on-dark-muted);margin:0 0 8px;line-height:1.4}
-  .strow{appearance:none;width:100%;text-align:left;border:1px solid var(--hair);background:var(--mid);
-    color:var(--on-dark);border-radius:12px;padding:13px 14px;font:inherit;margin-bottom:8px;cursor:pointer;
-    display:flex;align-items:center;gap:10px;min-height:58px}
-  .strow .nm{flex:1;min-width:0}
-  .strow .nm b{display:block;font-size:15px;font-weight:500;line-height:1.25;
+  .strow{border:1px solid var(--hair);background:var(--mid);border-radius:12px;margin-bottom:10px;
+    display:flex;align-items:stretch;overflow:hidden;min-height:64px}
+  .strow .sp{appearance:none;flex:1;min-width:0;text-align:left;background:none;border:none;
+    color:var(--on-dark);font:inherit;padding:12px 14px;cursor:pointer}
+  .strow .sp b{display:block;font-size:15px;font-weight:500;line-height:1.25;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .strow .nm span{display:block;font-size:11.5px;color:var(--on-dark-muted);margin-top:2px;
+  .strow .sp span{display:block;font-size:11.5px;color:var(--on-dark-muted);margin-top:2px;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .strow .st{flex:none;font-size:15px;color:var(--lime);width:18px;text-align:center}
+  .strow .sa{appearance:none;flex:none;width:52px;background:none;border:none;border-left:1px solid var(--hair);
+    color:var(--on-dark-muted);font:inherit;font-size:18px;cursor:pointer}
+  .strow .sa.on{color:var(--lime)}
+  .strow .sa.ban{color:#FFB4A8}
   .strow.playing{border-color:var(--lime)}
-  .strow.playing .nm b{color:var(--lime)}
+  .strow.playing .sp b{color:var(--lime)}
 
   .status{font-size:12px;color:var(--on-dark-muted);margin-top:10px;min-height:15px}
   .status.err{color:#FFB4A8}
@@ -251,10 +254,14 @@
   // favourite still works if the station later drops out of the live database.
   function favs(){ try{ return JSON.parse(localStorage.getItem(FAV_KEY)||'[]'); }catch(e){ return []; } }
   function isFav(u){ return favs().some(function(f){ return f.url===u; }); }
-  function toggleFav(){
-    // Silence here reads as a broken button: if nothing is playing there is nothing to keep.
-    if(idx<0 || !stations[idx]){ say('Play a station first, then press ☆ to keep it.'); return; }
-    var s=stations[idx], f=favs(), at=-1;
+  function toggleFav(i){
+    if(typeof i!=='number'){
+      // Silence here reads as a broken button: if nothing is playing there is nothing to keep.
+      if(idx<0 || !stations[idx]){ say('Play a station first, then press ☆ to keep it.'); return; }
+      i = idx;
+    }
+    if(!stations[i]) return;
+    var s=stations[i], f=favs(), at=-1;
     f.forEach(function(x,i){ if(x.url===s.url) at=i; });
     if(at>=0){ f.splice(at,1); markDeleted(s.url); say('Removed from favourites'); }
     else { f.push({name:s.name, url:s.url, from: s.from || catLabel(cat), at: Date.now()});
@@ -277,7 +284,8 @@
   var elStat = document.getElementById('status');
 
   var stations = [], idx = -1, cat = null, loading = false, view = 'cats';
-  var pool = [], MAX_PER_CAT = 10;   // ten on screen; the rest wait in reserve
+  // Six is a choice you can make at a glance; ten is a list you have to read.
+  var pool = [], MAX_PER_CAT = 6;
 
   function catLabel(key){
     if(key==='__fav') return 'Favourites';
@@ -299,6 +307,7 @@
   }
   function showList(){
     view='list';
+    try{ var m=document.querySelector('main'); if(m) m.scrollTop=0; window.scrollTo(0,0); }catch(e){}
     document.getElementById('cats').hidden=true;
     document.getElementById('list').hidden=false;
     refreshHead();
@@ -315,9 +324,12 @@
     el.innerHTML = stations.map(function(s,i){
       var sub = s.fav ? ('Favourite' + (s.from ? ' · from ' + s.from : ''))
                       : (s.seed ? 'Known talk-free' : 'From the station database');
-      return '<button class="strow'+(i===idx?' playing':'')+'" data-i="'+i+'">'
-           + '<span class="nm"><b>'+esc(s.name)+'</b><span>'+esc(sub)+'</span></span>'
-           + '<span class="st">'+(isFav(s.url)?'★':'')+'</span></button>';
+      var on = isFav(s.url);
+      return '<div class="strow'+(i===idx?' playing':'')+'">'
+           + '<button class="sp" data-play="'+i+'"><b>'+esc(s.name)+'</b><span>'+esc(sub)+'</span></button>'
+           + '<button class="sa'+(on?' on':'')+'" data-favi="'+i+'" aria-label="Favourite">'+(on?'★':'☆')+'</button>'
+           + '<button class="sa ban" data-bani="'+i+'" aria-label="Not this">\u00d7</button>'
+           + '</div>';
     }).join('');
   }
   function esc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -592,24 +604,31 @@
   });
   document.getElementById('btnBack').addEventListener('click', showCats);
   document.getElementById('rows').addEventListener('click', function(e){
-    var r=e.target.closest && e.target.closest('.strow'); if(!r) return;
-    play(parseInt(r.getAttribute('data-i'),10));
+    var t=e.target.closest && e.target.closest('[data-play],[data-favi],[data-bani]'); if(!t) return;
+    if(t.hasAttribute('data-play')){ play(parseInt(t.getAttribute('data-play'),10)); return; }
+    if(t.hasAttribute('data-favi')){ toggleFav(parseInt(t.getAttribute('data-favi'),10)); return; }
+    if(t.hasAttribute('data-bani')){ dropStation(parseInt(t.getAttribute('data-bani'),10)); return; }
   });
   document.getElementById('btnFav').addEventListener('click', toggleFav);
   document.getElementById('btnNext').addEventListener('click', next);
   document.getElementById('btnPrev').addEventListener('click', prev);
-  document.getElementById('btnBan').addEventListener('click', function(){
-    if(idx<0 || !stations[idx]) return;
-    var s = stations[idx];
+  // Dropping a station: from its own row, or from the bar for whatever is playing.
+  function dropStation(i){
+    if(typeof i!=='number') i = idx;
+    if(i<0 || !stations[i]){ say('Play a station first, or press \u00d7 on one in the list.'); return; }
+    var s = stations[i], wasPlaying = (i===idx);
     ban(s.url);
     try{ var f=favs().filter(function(x){ return x.url!==s.url; }); localStorage.setItem(FAV_KEY, JSON.stringify(f)); }catch(e){}
-    stations.splice(idx,1); idx--;
+    stations.splice(i,1);
+    if(i<idx) idx--; else if(i===idx) idx--;
     var filled='';
     if(pool.length && stations.length<MAX_PER_CAT){ stations.push(pool.shift()); filled=' — replaced'; }
     say('“' + s.name + '” dropped from ' + catLabel(cat) + filled, false, true);
     if(view==='list'){ refreshHead(); renderRows(); }
-    if(stations.length) next(); else { audio.pause(); elSt.textContent='Nothing playing'; }
-  });
+    // Only jump to another station if the one you dropped was the one playing.
+    if(wasPlaying){ if(stations.length) next(); else { audio.pause(); elSt.textContent='Nothing playing'; } }
+  }
+  document.getElementById('btnBan').addEventListener('click', function(){ dropStation(); });
   document.getElementById('resetBanned').addEventListener('click', function(){
     localStorage.removeItem(BAN_KEY); paintBanned(); say('Muted list cleared');
   });
