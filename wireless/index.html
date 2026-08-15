@@ -43,9 +43,12 @@
   /* now playing */
   .np{position:sticky;bottom:0;flex:none;background:var(--navy);
     border-top:1px solid var(--hair);padding:12px 16px 16px}
+  .np-stn{font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--on-dark-muted);margin-bottom:3px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .np-station{font-size:17px;font-weight:600;line-height:1.3;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .np-meta{font-size:12.5px;color:var(--on-dark-muted);margin-top:2px;min-height:16px;
+  .np-meta{font-size:13px;color:var(--on-dark-muted);margin-top:2px;min-height:17px;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .controls{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}
   .btn{appearance:none;border:1px solid var(--hair);background:var(--mid);color:var(--on-dark);
@@ -58,6 +61,22 @@
   .btn.wide{grid-column:1 / -1}
   .btn.on{background:var(--lime);border-color:var(--lime);color:var(--navy);font-weight:600}
   .cat.favtile{grid-column:1 / -1;min-height:64px}
+
+  /* station list — you should always be able to SEE what you can play */
+  .backbtn{appearance:none;border:1px solid var(--hair);background:transparent;color:var(--on-dark-muted);
+    border-radius:10px;padding:9px 14px;font:inherit;font-size:13px;margin:4px 0 10px;cursor:pointer}
+  .listhead{font-size:13px;color:var(--on-dark-muted);margin:0 0 8px;line-height:1.4}
+  .strow{appearance:none;width:100%;text-align:left;border:1px solid var(--hair);background:var(--mid);
+    color:var(--on-dark);border-radius:12px;padding:13px 14px;font:inherit;margin-bottom:8px;cursor:pointer;
+    display:flex;align-items:center;gap:10px;min-height:58px}
+  .strow .nm{flex:1;min-width:0}
+  .strow .nm b{display:block;font-size:15px;font-weight:500;line-height:1.25;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .strow .nm span{display:block;font-size:11.5px;color:var(--on-dark-muted);margin-top:2px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .strow .st{flex:none;font-size:15px;color:var(--lime);width:18px;text-align:center}
+  .strow.playing{border-color:var(--lime)}
+  .strow.playing .nm b{color:var(--lime)}
 
   .status{font-size:12px;color:var(--on-dark-muted);margin-top:10px;min-height:15px}
   .status.err{color:#FFB4A8}
@@ -86,12 +105,18 @@
 
 <main>
   <div class="cats" id="cats"></div>
+  <div id="list" hidden>
+    <button class="backbtn" id="btnBack">‹ All categories</button>
+    <p class="listhead" id="listhead"></p>
+    <div id="rows"></div>
+  </div>
   <div class="banned" id="bannedWrap" hidden>
     <span id="bannedCount"></span> · <button class="link" id="resetBanned">reset</button>
   </div>
 </main>
 
 <section class="np">
+  <div class="np-stn" id="npStn"></div>
   <div class="np-station" id="npStation">Nothing playing</div>
   <div class="np-meta" id="npMeta"></div>
   <div class="controls">
@@ -224,13 +249,14 @@
   function favs(){ try{ return JSON.parse(localStorage.getItem(FAV_KEY)||'[]'); }catch(e){ return []; } }
   function isFav(u){ return favs().some(function(f){ return f.url===u; }); }
   function toggleFav(){
-    if(idx<0 || !stations[idx]) return;
+    // Silence here reads as a broken button: if nothing is playing there is nothing to keep.
+    if(idx<0 || !stations[idx]){ say('Play a station first, then press ☆ to keep it.'); return; }
     var s=stations[idx], f=favs(), at=-1;
     f.forEach(function(x,i){ if(x.url===s.url) at=i; });
     if(at>=0){ f.splice(at,1); say('Removed from favourites'); }
-    else { f.push({name:s.name, url:s.url}); say('Saved to favourites'); }
+    else { f.push({name:s.name, url:s.url, from: s.from || catLabel(cat)}); say('Saved to favourites'); }
     try{ localStorage.setItem(FAV_KEY, JSON.stringify(f)); }catch(e){}
-    paintFav(); paintCats();
+    paintFav(); paintCats(); if(view==='list') renderRows();
   }
   function paintFav(){
     var b=document.getElementById('btnFav');
@@ -245,7 +271,40 @@
   var elMeta = document.getElementById('npMeta');
   var elStat = document.getElementById('status');
 
-  var stations = [], idx = -1, cat = null, loading = false;
+  var stations = [], idx = -1, cat = null, loading = false, view = 'cats';
+
+  function catLabel(key){
+    if(key==='__fav') return 'Favourites';
+    for(var i=0;i<CATS.length;i++){ if(CATS[i][0]===key) return CATS[i][1]; }
+    return '';
+  }
+  function showCats(){
+    view='cats'; cat=null;
+    document.getElementById('cats').hidden=false;
+    document.getElementById('list').hidden=true;
+    paintCats();
+  }
+  function showList(){
+    view='list';
+    document.getElementById('cats').hidden=true;
+    document.getElementById('list').hidden=false;
+    document.getElementById('listhead').textContent =
+      catLabel(cat) + ' · ' + stations.length + (stations.length===1?' station':' stations');
+    renderRows();
+  }
+  // Every station visible and tappable — you should never have to hunt with Next.
+  function renderRows(){
+    var el=document.getElementById('rows'); if(!el) return;
+    if(!stations.length){ el.innerHTML='<p class="listhead">Nothing here yet.</p>'; return; }
+    el.innerHTML = stations.map(function(s,i){
+      var sub = s.fav ? ('Favourite' + (s.from ? ' · from ' + s.from : ''))
+                      : (s.seed ? 'Known talk-free' : 'From the station database');
+      return '<button class="strow'+(i===idx?' playing':'')+'" data-i="'+i+'">'
+           + '<span class="nm"><b>'+esc(s.name)+'</b><span>'+esc(sub)+'</span></span>'
+           + '<span class="st">'+(isFav(s.url)?'★':'')+'</span></button>';
+    }).join('');
+  }
+  function esc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   function banned(){ try{ return JSON.parse(localStorage.getItem(BAN_KEY)||'[]'); }catch(e){ return []; } }
   function isBanned(u){ return banned().indexOf(u) !== -1; }
@@ -278,7 +337,7 @@
   }
 
   function seedList(key){
-    if(key==='__fav') return favs().map(function(f){ return {name:f.name, url:f.url, fav:true}; });
+    if(key==='__fav') return favs().map(function(f){ return {name:f.name, url:f.url, fav:true, from:f.from||''}; });
     return (SEEDS[key]||[]).map(function(s){ return {name:s[0], url:s[1], seed:true}; })
       .filter(function(s){ return !isBanned(s.url); });
   }
@@ -304,7 +363,13 @@
           return !stations.some(function(x){ return x.url===s.url_resolved; });
         }).map(function(s){ return {name:(s.name||'Unknown').trim(), url:s.url_resolved}; });
         stations = stations.concat(add);
-        if(add.length) say(stations.length + ' stations in this mood');
+        if(add.length){
+          say(stations.length + ' stations in this mood');
+          if(view==='list'){
+            document.getElementById('listhead').textContent = catLabel(cat) + ' · ' + stations.length + ' stations';
+            renderRows();
+          }
+        }
       })
       .catch(function(){ /* seeds are enough */ });
   }
@@ -316,6 +381,7 @@
     if(!stations.length){ say(key==='__fav' ? 'No favourites yet — press ☆ on one you like.' : 'Everything here is muted — reset below.', true); return; }
     say('Loading…');
     if(key!=='__fav') topUp(key);
+    showList();
     next();
   }
 
@@ -323,9 +389,10 @@
     if(!stations.length) return;
     idx = (i + stations.length) % stations.length;
     var s = stations[idx];
-    elSt.textContent = s.name;
+    document.getElementById('npStn').textContent = s.name;      // the STATION
+    elSt.textContent = s.name;                                   // replaced by the track once known
     elMeta.textContent = (idx+1) + ' of ' + stations.length + (s.seed ? ' · known talk-free' : (s.fav ? ' · favourite' : ''));
-    paintFav();
+    paintFav(); if(view==='list') renderRows();
     say('Connecting…');
     loading = true;
     audio.src = s.url;
@@ -370,8 +437,8 @@
         if(src.kind==='soma' && j.songs && j.songs.length){ artist=j.songs[0].artist||''; title=j.songs[0].title||''; }
         if(src.kind==='rp'){ artist=j.artist||''; title=j.title||''; }
         if(!title) return;
-        var line = artist ? (artist + ' — ' + title) : title;
-        elMeta.textContent = line;
+        elSt.textContent = title;                       // the TRACK, large
+        elMeta.textContent = artist || '';               // the ARTIST, beneath it
         if('mediaSession' in navigator){
           try{
             navigator.mediaSession.metadata = new MediaMetadata({
@@ -380,7 +447,13 @@
             });
           }catch(e){}
         }
-      }).catch(function(){ /* station has no feed, or blocked it — leave the name showing */ });
+      }).catch(function(err){
+        // Most likely the station's now-playing feed refuses cross-site requests (CORS).
+        // Say so once, quietly, rather than leaving a blank line that looks like a bug.
+        try{ console.warn('[wireless] now-playing lookup failed for ' + s.name + ' via ' + src.url, err); }catch(e){}
+        if(_npFor===s.url && !elMeta.textContent){ elMeta.textContent = 'Track details not published by this station'; }
+        stopNowPlaying();
+      });
     };
     tick();
     _npTimer=setInterval(tick, 25000);   // stations change track every 3-5 min; 25s is ample
@@ -411,6 +484,11 @@
     if(!stations.length){ pick(localStorage.getItem(CAT_KEY) || 'driving'); return; }
     if(audio.paused){ audio.play().catch(function(){ next(); }); } else { audio.pause(); }
   });
+  document.getElementById('btnBack').addEventListener('click', showCats);
+  document.getElementById('rows').addEventListener('click', function(e){
+    var r=e.target.closest && e.target.closest('.strow'); if(!r) return;
+    play(parseInt(r.getAttribute('data-i'),10));
+  });
   document.getElementById('btnFav').addEventListener('click', toggleFav);
   document.getElementById('btnNext').addEventListener('click', next);
   document.getElementById('btnPrev').addEventListener('click', prev);
@@ -429,9 +507,10 @@
 
   paintCats(); paintBanned();
   var last = null; try{ last = localStorage.getItem(CAT_KEY); }catch(e){}
-  if(last && SEEDS[last]){ cat = last; paintCats(); stations = seedList(last); topUp(last);
-    elSt.textContent='Ready — ' + (CATS.filter(function(c){return c[0]===last;})[0]||[])[1];
-    elMeta.textContent='Press play'; }
+  if(last === '__fav' && favs().length){ cat='__fav'; paintCats(); stations=seedList('__fav'); showList();
+    elSt.textContent='Ready — Favourites'; elMeta.textContent='Pick a station'; }
+  else if(last && SEEDS[last]){ cat=last; paintCats(); stations=seedList(last); topUp(last); showList();
+    elSt.textContent='Ready — ' + catLabel(last); elMeta.textContent='Pick a station'; }
 
   if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(function(){}); }
 })();
