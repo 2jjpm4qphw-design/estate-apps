@@ -1737,15 +1737,45 @@ var breakWarned=0;
    first-fix timeout) all looked identical and none of them could be diagnosed from the phone.
    Now the reason is captured and shown, and a high-accuracy first fix is not allowed to be
    the only thing tried — indoors it times out forever and the app looks broken. */
-var gpsErr=null, gpsCoarse=false, gpsRetry=null;
+var gpsErr=null, gpsCoarse=false, gpsRetry=null, gpsAsked=0, gpsSilent=false, gpsPerm='';
+/* 16 Aug 2026, second pass. The first fix reported the error — but the case Mark actually had
+   is the one where NEITHER callback ever fires: iOS never answers the request, so there is no
+   position and no error either, and the app sits on "waiting" forever looking broken. Three
+   things now cover that: a check that the page is even allowed to ask, the Permissions API
+   where it exists, and a watchdog that says plainly when the phone has not answered at all. */
+function gpsCanAsk(){
+  if(!navigator.geolocation) return 'This browser has no location support at all.';
+  // Geolocation is refused outright on an insecure origin, silently, with no error.
+  var sec = (typeof isSecureContext!=='undefined') ? isSecureContext
+          : (location.protocol==='https:'||location.hostname==='localhost');
+  if(!sec) return 'This page was opened over an insecure connection ('+location.protocol+
+    '), and phones refuse location there. Open Roadcraft from its https address.';
+  return '';
+}
+function gpsCheckPerm(){
+  try{
+    if(!navigator.permissions||!navigator.permissions.query) return;
+    navigator.permissions.query({name:'geolocation'}).then(function(s){
+      gpsPerm=s.state; render();
+      s.onchange=function(){ gpsPerm=s.state; if(s.state==='granted'){ gpsSilent=false; gpsErr=null; startGPS(); } render(); };
+    }).catch(function(){});
+  }catch(e){}
+}
 function gpsSay(e){
+  if(gpsSilent && !e) return 'Location not answering';
   if(!e) return null;
+  if(e.code===-1) return 'Location blocked';
   if(e.code===1) return 'Location permission refused';
   if(e.code===2) return 'No location signal';
   if(e.code===3) return 'Location timed out';
   return 'Location unavailable';
 }
 function gpsHelp(){
+  if(gpsErr && gpsErr.code===-1) return gpsErr.msg;
+  if(gpsSilent && !gpsErr) return 'Your phone has not answered the location request at all \u2014 no position and no error. '
+    + 'That normally means the permission prompt never appeared. Tap <b>Start GPS</b> below: iOS will only ask when you tap something. '
+    + 'If no prompt appears when you tap, location is already off for this app \u2014 Settings \u203a Privacy & Security \u203a Location Services, find Roadcraft, set it to "While Using the App".'
+    + (gpsPerm?(' <br><span style="opacity:.75">Permission currently reads: '+gpsPerm+'.</span>'):'');
   if(!gpsErr) return '';
   if(gpsErr.code===1) return 'Roadcraft cannot see your location. On the phone: Settings \u203a Privacy & Security \u203a Location Services \u2014 make sure it is on, then find Roadcraft (or Safari) in the list and set it to "While Using the App". Then reopen Roadcraft.';
   if(gpsErr.code===2) return 'Your phone cannot get a fix. This is usually indoors, in a garage or in a tunnel. Step outside and give it a few seconds.';
@@ -1753,10 +1783,17 @@ function gpsHelp(){
   return 'Location is unavailable on this device.';
 }
 function startGPS(){
-  if(!navigator.geolocation){ gpsErr={code:0}; render(); return; }
+  var block=gpsCanAsk();
+  if(block){ gpsErr={code:-1, msg:block}; render(); return; }
   if(watchId)return;
+  gpsAsked=Date.now(); gpsSilent=false;
   watchId=navigator.geolocation.watchPosition(onPos, onPosErr,
     {enableHighAccuracy:!gpsCoarse, maximumAge:900, timeout:gpsCoarse?30000:12000});
+  // If the phone answers with NEITHER a position nor an error, say so. Silence is the one
+  // outcome the previous version could not tell apart from "still trying".
+  setTimeout(function(){
+    if(!gpsOK && !gpsErr && gpsAsked && (Date.now()-gpsAsked)>14000){ gpsSilent=true; render(); }
+  }, 15000);
 }
 function onPosErr(e){
   gpsOK=false; gpsErr=e; render();
@@ -1778,6 +1815,7 @@ function onPosErr(e){
 function onPos(p){
   gpsOK=true;gpsAcc=p.coords.accuracy;gpsErr=null;
   if(gpsRetry){ clearTimeout(gpsRetry); gpsRetry=null; }
+  gpsSilent=false;
   var v=p.coords.speed;if(v===null||isNaN(v)||v<0)v=0;
   var now=p.timestamp;
   if(gpsPrev){
@@ -1823,10 +1861,22 @@ function lockUI(v){
 }
 
 /* ================= permissions ================= */
-async function requestAll(){
-  await enableMotion();          // records the grant so later loads self-arm
-  startGPS();
+/* THE BUG, found 16 Aug 2026. This used to be:
+       await enableMotion();   // then...
+       startGPS();
+   On iOS the location prompt is only shown if the request is made INSIDE the tap. Awaiting
+   DeviceMotionEvent.requestPermission() and its 600ms settle spends that gesture, so by the
+   time startGPS() ran the tap was over and iOS silently never asked — no prompt, no position,
+   no error. It worked for months because once motion had been granted, enableMotion() hit its
+   `if(motionOK) return true` early exit and never really awaited, leaving the gesture intact.
+   The branding pass required deleting and re-adding the app, which cleared that grant — so the
+   slow path started running, and the GPS quietly stopped being asked for. The change that broke
+   it was not in this function at all.
+   GPS is now requested FIRST and synchronously, before anything can await. */
+function requestAll(){
+  startGPS();                    // must be first, and must not be awaited before
   try{speechSynthesis.speak(new SpeechSynthesisUtterance(' '))}catch(e){}
+  return enableMotion();         // records the grant so later loads self-arm
 }
 async function requestWake(){
   if(!cfg.wake||!('wakeLock' in navigator))return;
@@ -1929,8 +1979,18 @@ function render(){
     :(gpsSay(gpsErr)||'Waiting for GPS');
   (function(){
     var hb=document.getElementById('gpsHelp'); if(!hb) return;
-    if(gpsOK||!gpsErr){ hb.hidden=true; return; }
-    hb.hidden=false; hb.textContent=gpsHelp();
+    if(gpsOK||(!gpsErr && !gpsSilent)){ hb.hidden=true; return; }
+    hb.hidden=false;
+    hb.innerHTML = gpsHelp()
+      + '<button class="btn ghost" id="gpsHelpBtn" style="margin-top:10px">Start GPS</button>';
+    var hbtn=document.getElementById('gpsHelpBtn');
+    if(hbtn) hbtn.onclick=function(){
+      // Must run inside the tap: iOS only shows the prompt from a user gesture.
+      try{ if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; } }catch(_){}
+      gpsErr=null; gpsSilent=false; gpsCoarse=false;
+      this.textContent='Asking\u2026'; startGPS(); gpsCheckPerm();
+      var b=this; setTimeout(function(){ b.textContent = gpsOK?'GPS running':'Start GPS'; }, 4000);
+    };
   })();
   var cal=cals[cfg.veh];
   document.getElementById('dMot').className='dot '+(motionOK?(cal&&cal.fwd?'ok':'warn'):'');
@@ -2706,6 +2766,8 @@ function installIcon(){
 /* ================= boot ================= */
 applyTheme();paintSetup();paintHistory();render();installIcon();loadVoices();
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(function(){}); }
+try{ gpsCheckPerm(); }catch(e){}
+
 setView(cfg.view||'gg');setTimeout(loadVoices,700);
 /* Hub backup wiring */
 (function(){ var b=document.getElementById('hubConnect'); if(b) b.onclick=rcConnect;
