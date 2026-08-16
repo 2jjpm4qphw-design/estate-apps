@@ -95,6 +95,25 @@
   .status.err{color:#FFB4A8}
   .empty{color:var(--on-dark-muted);font-size:13.5px;line-height:1.55;padding:12px 2px}
   .banned{margin-top:14px;font-size:12px;color:var(--on-dark-muted)}
+  /* sync status — the app must never again fail silently */
+  .syncbar{margin-top:16px;display:flex;align-items:center;gap:8px;font-size:12px;
+    color:var(--on-dark-muted);flex-wrap:wrap}
+  .syncdot{width:8px;height:8px;border-radius:50%;background:#5a6472;flex:0 0 auto}
+  .syncdot.ok{background:var(--lime)}
+  .syncdot.bad{background:#E0553F}
+  .setup{margin-top:16px;background:var(--mid-navy,#1A3A6B);border-radius:14px;padding:16px 15px}
+  .setup h3{margin:0 0 6px;font-size:15px;color:#fff}
+  .setup p{margin:0 0 12px;font-size:12.5px;line-height:1.45;color:var(--on-dark-muted)}
+  .setup label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--lime);margin:10px 0 5px}
+  .setup input{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.22);
+    border-radius:10px;padding:12px 12px;font:inherit;font-size:16px;background:rgba(0,0,0,.22);color:#fff}
+  .setup input:focus{outline:none;border-color:var(--lime)}
+  .setup .go{width:100%;margin-top:14px;background:var(--lime);color:#12140f;border:none;
+    border-radius:10px;padding:13px;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+  .setup .link{display:block;margin:10px auto 0}
+  .setup .danger{color:#E0553F}
+  .err{margin-top:10px;font-size:12px;color:#E0553F}
   .link{color:var(--lime);text-decoration:underline;background:none;border:none;font:inherit;
     font-size:12px;padding:0;cursor:pointer}
   .spike{margin:14px 0 0;padding:10px 12px;border:1px dashed var(--hair);border-radius:10px;
@@ -127,6 +146,26 @@
   </div>
   <div class="banned" id="bannedWrap" hidden>
     <span id="bannedCount"></span> · <button class="link" id="resetBanned">reset</button>
+  </div>
+
+  <div class="syncbar" id="syncBar">
+    <span class="syncdot" id="syncDot"></span>
+    <span id="syncText">Checking sync…</span>
+    <button class="link" id="btnSync">set up</button>
+  </div>
+
+  <div class="setup" id="setupPanel" hidden>
+    <h3>Sync your favourites</h3>
+    <p>Favourites and muted stations follow you between your phone and the Mac. Paste the same
+       Gist ID and token you used in the Library or the Still Room. Stored only on this device.</p>
+    <label>Gist ID</label>
+    <input type="text" id="cfgId" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="32-character hex ID">
+    <label>Token</label>
+    <input type="password" id="cfgTok" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="ghp_… or github_pat_…">
+    <div class="err" id="cfgErr" hidden></div>
+    <button class="go" id="cfgSave">Connect</button>
+    <button class="link" id="cfgClose">Not now</button>
+    <button class="link danger" id="cfgOut" hidden>Disconnect this device</button>
   </div>
 </main>
 
@@ -393,8 +432,12 @@
   // ---- syncing favourites between devices ----------------------------------
   // Every other estate app follows you between the phone and the Mac; this one did not, so
   // you would build one set of favourites in the car and a different set at the desk.
-  // All the apps are served from the same address, so the Gist credentials you entered in the
-  // Library or the Still Room are already here — nothing to set up.
+  // NOTE (16 Aug 2026): this used to say the credentials from the Library or Still Room would
+  // "already be here, nothing to set up", because all the apps share one origin. That was an
+  // assumption and it was wrong in practice — on iOS each home-screen web app gets its own
+  // storage, so nothing entered in another installed app is visible here. Worse, Wireless was
+  // the ONLY syncing app with no way to enter them and no status line, so when there were no
+  // credentials it did nothing at all, silently, with no way to find out why. Hence the panel.
   // Own-file pattern (wireless.json), as Roadcraft and the Form Book use, so the Hub's own
   // state is never touched. Removals carry a tombstone, or a union merge would quietly
   // resurrect anything you deleted on the other device — the mistake the Hub already made once.
@@ -450,7 +493,8 @@
         if(wgMerge(JSON.parse(txt))){ paintCats(); paintFav(); if(view==='list'){ stations=seedList(cat); renderRows(); }
           say('Favourites updated from your other device'); }
       })
-      .catch(function(e){ try{ console.warn('[wireless] sync pull failed', e); }catch(_){} });
+      .catch(function(e){ try{ console.warn('[wireless] sync pull failed', e); }catch(_){}
+        wgStatus('bad','Sync failed — '+(e&&e.message||'could not reach GitHub')); });
   }
   function wgPush(){
     var c=wgCreds(); if(!c || _syncing) return;
@@ -460,8 +504,72 @@
       headers:{Authorization:'Bearer '+c.token,Accept:'application/vnd.github+json','Content-Type':'application/json'},
       body:JSON.stringify(body)})
       .then(function(r){ if(!r.ok) throw new Error('gist '+r.status); })
-      .catch(function(e){ try{ console.warn('[wireless] sync push failed', e); }catch(_){} })
+      .catch(function(e){ try{ console.warn('[wireless] sync push failed', e); }catch(_){}
+        wgStatus('bad','Could not save favourites — '+(e&&e.message||'no connection')); })
       .then(function(){ _syncing=false; });
+  }
+  // Say out loud what the sync is doing. "Nothing happened and I don't know why" is the
+  // failure this app actually had.
+  function wgStatus(kind, msg){
+    var d=document.getElementById('syncDot'), t=document.getElementById('syncText'),
+        b=document.getElementById('btnSync');
+    if(!d||!t) return;
+    d.className='syncdot'+(kind==='ok'?' ok':(kind==='bad'?' bad':''));
+    t.textContent=msg;
+    if(b) b.textContent = wgCreds() ? 'change' : 'set up';
+  }
+  function wgReport(){
+    if(!wgCreds()){ wgStatus('bad','Favourites are not syncing — no gist connected'); return; }
+    wgStatus('ok','Favourites sync with your other devices');
+  }
+  function wgOpenSetup(open){
+    var pnl=document.getElementById('setupPanel'); if(!pnl) return;
+    pnl.hidden = !open;
+    if(open){
+      var c=wgCreds();
+      document.getElementById('cfgId').value = c?c.id:'';
+      document.getElementById('cfgTok').value = c?c.token:'';
+      document.getElementById('cfgOut').hidden = !c;
+      document.getElementById('cfgErr').hidden = true;
+      try{ pnl.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(_){}
+    }
+  }
+  function wgConnect(){
+    var idEl=document.getElementById('cfgId'), tkEl=document.getElementById('cfgTok'),
+        err=document.getElementById('cfgErr');
+    // Accept a pasted gist URL as well as a bare id — that is what he will actually copy.
+    var id=(idEl.value||'').trim().replace(/^.*\/(?=[0-9a-f]{8,})/i,'').replace(/[^0-9a-f]/gi,'');
+    var tk=(tkEl.value||'').trim();
+    if(!id||!tk){ err.textContent='Enter both the Gist ID and a token.'; err.hidden=false; return; }
+    // Stripping stray characters quietly turns a typo into a different, wrong ID. Say so instead.
+    if(!/^[0-9a-f]{20,40}$/i.test(id)){
+      err.textContent='That does not look like a Gist ID. It is 20\u201340 characters, digits and a\u2013f only \u2014 the last part of the gist\u2019s web address.';
+      err.hidden=false; wgStatus('bad','Not connected'); return;
+    }
+    err.hidden=true; wgStatus('', 'Connecting…');
+    // Prove the credentials work BEFORE saving them, and say what went wrong if they do not.
+    fetch('https://api.github.com/gists/'+id,{headers:{Authorization:'Bearer '+tk,
+      Accept:'application/vnd.github+json'},cache:'no-store'})
+      .then(function(r){
+        if(r.status===401) throw new Error('That token was refused. Check it has the "gist" scope and has not expired.');
+        if(r.status===404) throw new Error('No gist with that ID on this account, or the token cannot see it.');
+        if(!r.ok) throw new Error('GitHub said '+r.status+'.');
+        return r.json();
+      })
+      .then(function(){
+        try{ localStorage.setItem(GID,id); localStorage.setItem(GTOK,tk); }catch(e){}
+        wgOpenSetup(false); wgReport();
+        wgPush();            // create wireless.json straight away so there IS an entry to see
+        setTimeout(wgPull, 1200);
+        say('Connected — favourites will sync');
+      })
+      .catch(function(e){ err.textContent=e.message||'Could not connect.'; err.hidden=false;
+        wgStatus('bad','Not connected'); });
+  }
+  function wgDisconnect(){
+    if(!confirm('Disconnect this device? Your favourites stay on the phone; they just stop syncing.')) return;
+    try{ localStorage.removeItem(GID); localStorage.removeItem(GTOK); }catch(e){}
+    wgOpenSetup(false); wgReport(); say('Disconnected');
   }
   function wgSchedulePush(){ if(!wgCreds()) return; if(_pushTimer) clearTimeout(_pushTimer);
     _pushTimer=setTimeout(function(){ _pushTimer=null; wgPush(); }, 2000); }
@@ -781,6 +889,13 @@
   else if(last && SEEDS[last]){ cat=last; paintCats(); stations=seedList(last); topUp(last); showList();
     elSt.textContent='Ready — ' + catLabel(last); elMeta.textContent='Pick a station'; }
 
+  try{ wgReport(); }catch(e){}
+  try{
+    document.getElementById('btnSync').addEventListener('click', function(){ wgOpenSetup(document.getElementById('setupPanel').hidden); });
+    document.getElementById('cfgSave').addEventListener('click', wgConnect);
+    document.getElementById('cfgClose').addEventListener('click', function(){ wgOpenSetup(false); });
+    document.getElementById('cfgOut').addEventListener('click', wgDisconnect);
+  }catch(e){}
   try{ wgPull(); }catch(e){}
   if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(function(){}); }
 })();
