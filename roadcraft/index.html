@@ -1737,7 +1737,7 @@ var breakWarned=0;
    first-fix timeout) all looked identical and none of them could be diagnosed from the phone.
    Now the reason is captured and shown, and a high-accuracy first fix is not allowed to be
    the only thing tried — indoors it times out forever and the app looks broken. */
-var gpsErr=null, gpsCoarse=false, gpsRetry=null, gpsAsked=0, gpsSilent=false, gpsPerm='';
+var gpsErr=null, gpsCoarse=false, gpsRetry=null, gpsAsked=0, gpsSilent=false, gpsPerm='', gpsBootOnly=false;
 /* 16 Aug 2026, second pass. The first fix reported the error — but the case Mark actually had
    is the one where NEITHER callback ever fires: iOS never answers the request, so there is no
    position and no error either, and the app sits on "waiting" forever looking broken. Three
@@ -1874,7 +1874,16 @@ function lockUI(v){
    it was not in this function at all.
    GPS is now requested FIRST and synchronously, before anything can await. */
 function requestAll(){
+  /* AND the second half of the same bug. At boot the app calls startGPS() outside any tap.
+     iOS never shows the prompt for that call \u2014 but it DOES hand back a watch id. So by the
+     time you tapped Start drive, watchId was already set and startGPS() hit its
+     `if(watchId) return` and did absolutely nothing. Re-ordering the awaits was correct and
+     completely ineffective, because the function it re-ordered was returning immediately.
+     The tap must always tear down whatever the silent boot attempt left behind and ask again. */
+  try{ if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; } }catch(e){}
+  gpsCoarse=false; gpsErr=null; gpsSilent=false;
   startGPS();                    // must be first, and must not be awaited before
+  try{ gpsCheckPerm(); }catch(e){}
   try{speechSynthesis.speak(new SpeechSynthesisUtterance(' '))}catch(e){}
   return enableMotion();         // records the grant so later loads self-arm
 }
@@ -2596,7 +2605,8 @@ document.getElementById('backBtn').onclick=function(){go('history')};
 /* ================= wiring ================= */
 document.getElementById('startBtn').onclick=async function(){
   var b=this;b.textContent='Starting…';
-  await requestAll();
+  var _p=requestAll();          // fires GPS synchronously inside this tap; do not await first
+  await _p;
   b.textContent='Start drive';
   if(!motionOK&&!confirm('No motion sensors, so smoothness and cornering will not be scored. Speed and route will still be recorded.\n\nStart anyway?'))return;
   if(!cals[cfg.veh]){
@@ -2786,7 +2796,10 @@ if(load('granted',0)){
      if no samples arrive. A failure here must NOT clear the stored grant,
      or one bad load disables self-arming forever. */
   try{window.addEventListener('devicemotion',onMotion)}catch(e){}
-  try{startGPS()}catch(e){}
+  /* Silent boot attempt. It works once location has been granted, and is ignored by iOS
+     when it has not \u2014 so it must never be treated as "GPS is running". requestAll()
+     always tears this down and asks again inside the tap. */
+  try{ gpsBootOnly=true; startGPS(); }catch(e){}
   setTimeout(function(){
     if(motionOK)return;
     if(typeof DeviceMotionEvent!=='undefined'&&DeviceMotionEvent.requestPermission){
