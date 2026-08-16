@@ -136,6 +136,8 @@ input[type=color]{width:52px;height:34px;border:1px solid var(--rule);border-rad
 #driveInner{flex:1;display:flex;flex-direction:column;padding:14px 16px 16px}
 .gpshelp{margin:8px 0 2px;padding:10px 12px;border-radius:10px;background:rgba(224,85,63,.12);border:1px solid rgba(224,85,63,.4);font-size:12.5px;line-height:1.45;color:#F2D9D4;text-transform:none;letter-spacing:0;font-weight:400}
 .gpshelp[hidden]{display:none}
+.gpsdiag{margin-top:10px;padding:10px;border-radius:8px;background:rgba(0,0,0,.35);font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.5;color:#DCE3EE;white-space:pre-wrap;word-break:break-word;text-transform:none;letter-spacing:0;font-weight:400}
+.gpsdiag[hidden]{display:none}
 .status{display:flex;gap:14px;align-items:center;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-bottom:4px}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--bad);display:inline-block;margin-right:5px;vertical-align:middle}
 .dot.ok{background:var(--good)}
@@ -492,6 +494,9 @@ canvas.gg2{width:100%;max-width:250px;aspect-ratio:1;margin:8px auto 0;display:b
       </div>
       <button class="btn" id="motionBtn">Enable motion sensors</button>
       <button class="btn ghost" id="gpsBtn">Start GPS</button>
+      <button class="btn ghost" id="diagBtn">Show diagnostics</button>
+      <pre class="gpsdiag" id="diagOut" hidden></pre>
+      <p class="tiny" id="buildStamp" style="margin-top:8px;opacity:.6"></p>
 
       <h2>Warnings</h2>
       <div class="card">
@@ -1738,6 +1743,33 @@ var breakWarned=0;
    Now the reason is captured and shown, and a high-accuracy first fix is not allowed to be
    the only thing tried — indoors it times out forever and the app looks broken. */
 var gpsErr=null, gpsCoarse=false, gpsRetry=null, gpsAsked=0, gpsSilent=false, gpsPerm='', gpsBootOnly=false;
+/* 16 Aug 2026 — after four rounds of fixing things that could not be observed from here.
+   The app now reports its own state in plain English. Anything I cannot see on Mark's phone,
+   the phone says out loud. BUILD is bumped on every change so we can both tell, instantly,
+   whether the copy running on the phone is the copy I changed. */
+var BUILD='2026-08-16-e';
+var gpsLog=[];
+function gpsNote(s){ gpsLog.push(new Date().toLocaleTimeString('en-GB')+' \u2014 '+s); if(gpsLog.length>12) gpsLog.shift(); }
+function gpsDiagText(){
+  var D=[];   // NOT "L" — that is Leaflet's global, and shadowing it broke the map check
+  D.push('Build: '+BUILD);
+  D.push('Address: '+location.protocol+'//'+location.host);
+  D.push('Secure (location allowed): '+(((typeof isSecureContext!=='undefined')?isSecureContext:(location.protocol==='https:'))?'yes':'NO'));
+  D.push('Installed as an app: '+((navigator.standalone===true||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches))?'yes':'no'));
+  D.push('Location supported: '+(navigator.geolocation?'yes':'NO'));
+  D.push('Permission reads: '+(gpsPerm||'unknown'));
+  D.push('Watch open: '+(watchId?('yes (#'+watchId+')'):'no'));
+  D.push('Asked at: '+(gpsAsked?new Date(gpsAsked).toLocaleTimeString('en-GB'):'never'));
+  D.push('Position ever received: '+(gpsOK?('yes, \u00b1'+Math.round(gpsAcc||0)+'m'):'no'));
+  D.push('Last error: '+(gpsErr?('code '+gpsErr.code+(gpsErr.message?(' \u2014 '+gpsErr.message):'')):(gpsSilent?'none \u2014 no answer at all':'none')));
+  D.push('Motion sensors: '+(motionOK?'on':'off'));
+  D.push('Map library loaded: '+((window.L&&window.L.tileLayer)?'yes':'NO \u2014 no internet, or blocked'));
+  D.push('Offline shell active: '+((navigator.serviceWorker&&navigator.serviceWorker.controller)?'yes':'no'));
+  D.push('Online: '+(navigator.onLine?'yes':'NO'));
+  if(gpsLog.length){ D.push(''); D.push('What happened:'); gpsLog.forEach(function(x){ D.push('  '+x); }); }
+  return D.join('\n');
+}
+window.roadcraftDiag=function(){ var t=gpsDiagText(); try{ console.log(t); }catch(e){} return t; };
 /* 16 Aug 2026, second pass. The first fix reported the error — but the case Mark actually had
    is the one where NEITHER callback ever fires: iOS never answers the request, so there is no
    position and no error either, and the app sits on "waiting" forever looking broken. Three
@@ -1784,19 +1816,23 @@ function gpsHelp(){
 }
 function startGPS(){
   var block=gpsCanAsk();
-  if(block){ gpsErr={code:-1, msg:block}; render(); return; }
-  if(watchId)return;
+  // Record the refusal too — a blank account of "what happened" is the very thing this exists
+  // to prevent. Every exit from here must leave a trace.
+  if(block){ gpsErr={code:-1, msg:block}; gpsNote('could not even ask \u2014 '+block); render(); return; }
+  if(watchId){ gpsNote('already watching (#'+watchId+') \u2014 did not ask again'); return; }
   gpsAsked=Date.now(); gpsSilent=false;
+  gpsNote('asked for a position ('+(gpsCoarse?'coarse':'high accuracy')+(gpsBootOnly?', automatic at start-up':', from your tap')+')');
   watchId=navigator.geolocation.watchPosition(onPos, onPosErr,
     {enableHighAccuracy:!gpsCoarse, maximumAge:900, timeout:gpsCoarse?30000:12000});
   // If the phone answers with NEITHER a position nor an error, say so. Silence is the one
   // outcome the previous version could not tell apart from "still trying".
   setTimeout(function(){
-    if(!gpsOK && !gpsErr && gpsAsked && (Date.now()-gpsAsked)>14000){ gpsSilent=true; render(); }
+    if(!gpsOK && !gpsErr && gpsAsked && (Date.now()-gpsAsked)>14000){ gpsSilent=true; gpsNote('15s passed with NO answer of any kind'); render(); }
   }, 15000);
 }
 function onPosErr(e){
-  gpsOK=false; gpsErr=e; render();
+  gpsOK=false; gpsErr=e; gpsNote('refused/failed \u2014 code '+(e&&e.code));
+  render();
   // A refusal will never fix itself by retrying; anything else might.
   if(e && e.code===1) return;
   if(!gpsCoarse){
@@ -1813,6 +1849,7 @@ function onPosErr(e){
   }
 }
 function onPos(p){
+  if(!gpsOK) gpsNote('position received');
   gpsOK=true;gpsAcc=p.coords.accuracy;gpsErr=null;
   if(gpsRetry){ clearTimeout(gpsRetry); gpsRetry=null; }
   gpsSilent=false;
@@ -1880,8 +1917,9 @@ function requestAll(){
      `if(watchId) return` and did absolutely nothing. Re-ordering the awaits was correct and
      completely ineffective, because the function it re-ordered was returning immediately.
      The tap must always tear down whatever the silent boot attempt left behind and ask again. */
-  try{ if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; } }catch(e){}
-  gpsCoarse=false; gpsErr=null; gpsSilent=false;
+  gpsNote('Start drive tapped');
+  try{ if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; gpsNote('cleared the start-up watch'); } }catch(e){}
+  gpsCoarse=false; gpsErr=null; gpsSilent=false; gpsBootOnly=false;
   startGPS();                    // must be first, and must not be awaited before
   try{ gpsCheckPerm(); }catch(e){}
   try{speechSynthesis.speak(new SpeechSynthesisUtterance(' '))}catch(e){}
@@ -1991,8 +2029,16 @@ function render(){
     if(gpsOK||(!gpsErr && !gpsSilent)){ hb.hidden=true; return; }
     hb.hidden=false;
     hb.innerHTML = gpsHelp()
-      + '<button class="btn ghost" id="gpsHelpBtn" style="margin-top:10px">Start GPS</button>';
+      + '<button class="btn ghost" id="gpsHelpBtn" style="margin-top:10px">Start GPS</button>'
+      + '<button class="btn ghost" id="gpsDiagBtn" style="margin-top:8px">What is it doing?</button>'
+      + '<pre class="gpsdiag" id="gpsDiagOut" hidden></pre>';
     var hbtn=document.getElementById('gpsHelpBtn');
+    var dbtn=document.getElementById('gpsDiagBtn');
+    if(dbtn) dbtn.onclick=function(){
+      var o=document.getElementById('gpsDiagOut');
+      o.textContent=gpsDiagText(); o.hidden=!o.hidden;
+      this.textContent=o.hidden?'What is it doing?':'Hide';
+    };
     if(hbtn) hbtn.onclick=function(){
       // Must run inside the tap: iOS only shows the prompt from a user gesture.
       try{ if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; } }catch(_){}
@@ -2777,6 +2823,14 @@ function installIcon(){
 applyTheme();paintSetup();paintHistory();render();installIcon();loadVoices();
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(function(){}); }
 try{ gpsCheckPerm(); }catch(e){}
+try{
+  document.getElementById('buildStamp').textContent='Build '+BUILD;
+  document.getElementById('diagBtn').onclick=function(){
+    var o=document.getElementById('diagOut');
+    o.textContent=gpsDiagText(); o.hidden=!o.hidden;
+    this.textContent=o.hidden?'Show diagnostics':'Hide diagnostics';
+  };
+}catch(e){}
 
 setView(cfg.view||'gg');setTimeout(loadVoices,700);
 /* Hub backup wiring */

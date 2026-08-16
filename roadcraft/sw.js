@@ -1,7 +1,7 @@
 // Roadcraft — shell cache only. Network-first for the page so a new build is picked up
 // on the next online load; bump CACHE on every shell change. Never caches map or weather
 // calls: a stale road-speed limit is worse than none.
-var CACHE = 'roadcraft-v4';
+var CACHE = 'roadcraft-v5';
 var SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', function(e){
   self.skipWaiting();
