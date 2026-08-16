@@ -114,6 +114,12 @@
   .setup .link{display:block;margin:10px auto 0}
   .setup .danger{color:#E0553F}
   .err{margin-top:10px;font-size:12px;color:#E0553F}
+  .sleeppick{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .sleeppick[hidden]{display:none}
+  .sl{flex:1 1 30%;background:rgba(255,255,255,.10);color:#fff;border:1px solid rgba(255,255,255,.26);
+    border-radius:9px;padding:11px 6px;font:inherit;font-size:13px;cursor:pointer}
+  .sl:active{background:rgba(255,255,255,.22)}
+  .sl.on{background:var(--lime);border-color:var(--lime);color:#12140f;font-weight:700}
   .link{color:var(--lime);text-decoration:underline;background:none;border:none;font:inherit;
     font-size:12px;padding:0;cursor:pointer}
   .spike{margin:14px 0 0;padding:10px 12px;border:1px dashed var(--hair);border-radius:10px;
@@ -179,6 +185,16 @@
     <button class="btn" id="btnNext">Next</button>
     <button class="btn half" id="btnFav">☆ Favourite</button>
     <button class="btn half" id="btnBan">Not this</button>
+    <button class="btn half" id="btnSleep">Sleep timer</button>
+    <button class="btn half" id="btnSleepOff" hidden>Cancel sleep</button>
+  </div>
+  <div class="sleeppick" id="sleepPick" hidden>
+    <button class="sl" data-sleep="15">15 min</button>
+    <button class="sl" data-sleep="30">30 min</button>
+    <button class="sl" data-sleep="45">45 min</button>
+    <button class="sl" data-sleep="60">1 hour</button>
+    <button class="sl" data-sleep="90">1&#189; hours</button>
+    <button class="sl" data-sleep="0">Off</button>
   </div>
   <div class="status" id="status"></div>
 </section>
@@ -796,6 +812,79 @@
   // Only a station that never connected in the first place counts as dead and gets skipped.
   var wantPlaying=false, everPlayed=false, retryN=0, retryTimer=null, watchdog=null;
 
+  /* ---------- Sleep timer (16 Aug 2026) ----------
+     For going to sleep to. Three things make this harder than a setTimeout:
+     1. iOS throttles or suspends timers once the screen locks, so a plain setTimeout may fire
+        late or not at all. The audio element's own 'timeupdate' event keeps firing while sound
+        is actually playing, even in the background — so that is used as the heartbeat, with an
+        interval only as a backstop. We compare against a stored end TIME, never a countdown.
+     2. The reconnection loop restarts playback whenever it sees a dropout. If the timer just
+        called pause(), the app would helpfully turn the radio back on at 2am. wantPlaying MUST
+        be cleared first.
+     3. It fades out over the last 30 seconds. Music cutting dead is what wakes you up. */
+  var SLEEP_KEY='wireless:sleep-until', sleepUntil=0, _sleepTick=null, _fadeFrom=null;
+  function sleepLoad(){ try{ var v=+localStorage.getItem(SLEEP_KEY)||0;
+    sleepUntil = (v>Date.now()) ? v : 0; }catch(e){ sleepUntil=0; } }
+  function sleepSave(){ try{ if(sleepUntil) localStorage.setItem(SLEEP_KEY,String(sleepUntil));
+    else localStorage.removeItem(SLEEP_KEY); }catch(e){} }
+  function sleepSet(mins){
+    sleepUntil = mins>0 ? Date.now()+mins*60000 : 0;
+    _fadeFrom = null;
+    try{ audio.volume = 1; }catch(e){}
+    sleepSave(); sleepPaint();
+    if(mins>0){ say('Radio will stop in '+(mins<60?(mins+' minutes'):(mins===60?'an hour':'an hour and a half'))); }
+    else { say('Sleep timer off'); }
+  }
+  function sleepLeft(){ return sleepUntil ? Math.max(0, sleepUntil-Date.now()) : 0; }
+  function sleepFmt(ms){
+    var s=Math.round(ms/1000), m=Math.floor(s/60);
+    if(m>=60){ var hr=Math.floor(m/60); return hr+'h '+(m-hr*60)+'m'; }
+    if(m>0) return m+' min';
+    return s+'s';
+  }
+  function sleepPaint(){
+    var b=document.getElementById('btnSleep'), off=document.getElementById('btnSleepOff'),
+        pick=document.getElementById('sleepPick');
+    if(!b) return;
+    var left=sleepLeft();
+    if(left){ b.textContent='Sleep '+sleepFmt(left); b.classList.add('primary'); if(off) off.hidden=false; }
+    else { b.textContent='Sleep timer'; b.classList.remove('primary'); if(off) off.hidden=true; }
+    if(pick) Array.prototype.forEach.call(pick.querySelectorAll('.sl'), function(x){
+      x.classList.remove('on');
+    });
+  }
+  function sleepCheck(){
+    if(!sleepUntil) return;
+    var left=sleepLeft();
+    // Fade the last 30 seconds rather than cutting dead.
+    if(left<=30000){
+      if(_fadeFrom===null) _fadeFrom=Date.now();
+      try{ audio.volume = Math.max(0, left/30000); }catch(e){}
+    }
+    if(left<=0){
+      sleepUntil=0; sleepSave();
+      wantPlaying=false;                 // FIRST: stop the reconnect loop resuming at 2am
+      clearRetry();
+      try{ audio.pause(); }catch(e){}
+      setTimeout(function(){ try{ audio.volume=1; }catch(e){} }, 400);
+      _fadeFrom=null;
+      try{ document.getElementById('btnPlay').textContent='Play'; }catch(e){}
+      say('Sleep timer finished \u2014 radio off');
+      sleepPaint();
+      return;
+    }
+    sleepPaint();
+  }
+  // The heartbeat: audio timeupdate fires ~4x a second while sound is playing, including with
+  // the screen locked. The interval is only a backstop for when playback has already stopped.
+  try{ audio.addEventListener('timeupdate', sleepCheck); }catch(e){}
+  _sleepTick = setInterval(sleepCheck, 5000);
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') sleepCheck(); });
+  window.__sleepDiag={ set:sleepSet, left:sleepLeft, check:sleepCheck, until:function(){return sleepUntil;},
+                       playing:function(){ return wantPlaying; },
+                       setPlaying:function(v){ wantPlaying=v; },
+                       force:function(ms){ sleepUntil=Date.now()+ms; sleepSave(); } };
+
   function clearRetry(){ if(retryTimer){ clearTimeout(retryTimer); retryTimer=null; }
                          if(watchdog){ clearTimeout(watchdog); watchdog=null; } }
   function reconnect(){
@@ -890,6 +979,18 @@
     elSt.textContent='Ready — ' + catLabel(last); elMeta.textContent='Pick a station'; }
 
   try{ wgReport(); }catch(e){}
+  try{
+    sleepLoad(); sleepPaint();
+    document.getElementById('btnSleep').addEventListener('click', function(){
+      var pick=document.getElementById('sleepPick'); pick.hidden=!pick.hidden;
+    });
+    document.getElementById('btnSleepOff').addEventListener('click', function(){ sleepSet(0); });
+    document.getElementById('sleepPick').addEventListener('click', function(e){
+      var t=e.target.closest && e.target.closest('[data-sleep]'); if(!t) return;
+      sleepSet(+t.getAttribute('data-sleep'));
+      document.getElementById('sleepPick').hidden=true;
+    });
+  }catch(e){}
   try{
     document.getElementById('btnSync').addEventListener('click', function(){ wgOpenSetup(document.getElementById('setupPanel').hidden); });
     document.getElementById('cfgSave').addEventListener('click', wgConnect);
