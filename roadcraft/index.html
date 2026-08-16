@@ -134,6 +134,8 @@ input[type=color]{width:52px;height:34px;border:1px solid var(--rule);border-rad
 #drive{padding:0}
 #drive.on{display:flex;flex-direction:column}
 #driveInner{flex:1;display:flex;flex-direction:column;padding:14px 16px 16px}
+.gpshelp{margin:8px 0 2px;padding:10px 12px;border-radius:10px;background:rgba(224,85,63,.12);border:1px solid rgba(224,85,63,.4);font-size:12.5px;line-height:1.45;color:#F2D9D4;text-transform:none;letter-spacing:0;font-weight:400}
+.gpshelp[hidden]{display:none}
 .status{display:flex;gap:14px;align-items:center;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-bottom:4px}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--bad);display:inline-block;margin-right:5px;vertical-align:middle}
 .dot.ok{background:var(--good)}
@@ -267,6 +269,7 @@ canvas.gg2{width:100%;max-width:250px;aspect-ratio:1;margin:8px auto 0;display:b
           <div><i class="dot" id="dMot"></i><span id="tMot">Motion</span></div>
           <div style="margin-left:auto" id="tClock">00:00</div>
         </div>
+        <div class="gpshelp" id="gpsHelp" hidden></div>
 
         <div class="speedwrap">
           <b class="num" id="speedVal">—</b>
@@ -1729,13 +1732,52 @@ function endDrive(){
 
 /* ================= GPS ================= */
 var breakWarned=0;
+/* 16 Aug 2026 — the app showed "No GPS" and nothing else, because the error callback threw
+   the PositionError away. Three completely different faults (permission refused, no signal,
+   first-fix timeout) all looked identical and none of them could be diagnosed from the phone.
+   Now the reason is captured and shown, and a high-accuracy first fix is not allowed to be
+   the only thing tried — indoors it times out forever and the app looks broken. */
+var gpsErr=null, gpsCoarse=false, gpsRetry=null;
+function gpsSay(e){
+  if(!e) return null;
+  if(e.code===1) return 'Location permission refused';
+  if(e.code===2) return 'No location signal';
+  if(e.code===3) return 'Location timed out';
+  return 'Location unavailable';
+}
+function gpsHelp(){
+  if(!gpsErr) return '';
+  if(gpsErr.code===1) return 'Roadcraft cannot see your location. On the phone: Settings \u203a Privacy & Security \u203a Location Services \u2014 make sure it is on, then find Roadcraft (or Safari) in the list and set it to "While Using the App". Then reopen Roadcraft.';
+  if(gpsErr.code===2) return 'Your phone cannot get a fix. This is usually indoors, in a garage or in a tunnel. Step outside and give it a few seconds.';
+  if(gpsErr.code===3) return 'Your phone did not return a position in time. Still trying with a coarser fix \u2014 outdoors this normally clears within a minute.';
+  return 'Location is unavailable on this device.';
+}
 function startGPS(){
-  if(!navigator.geolocation||watchId)return;
-  watchId=navigator.geolocation.watchPosition(onPos,function(){gpsOK=false;render()},
-    {enableHighAccuracy:true,maximumAge:900,timeout:12000});
+  if(!navigator.geolocation){ gpsErr={code:0}; render(); return; }
+  if(watchId)return;
+  watchId=navigator.geolocation.watchPosition(onPos, onPosErr,
+    {enableHighAccuracy:!gpsCoarse, maximumAge:900, timeout:gpsCoarse?30000:12000});
+}
+function onPosErr(e){
+  gpsOK=false; gpsErr=e; render();
+  // A refusal will never fix itself by retrying; anything else might.
+  if(e && e.code===1) return;
+  if(!gpsCoarse){
+    // Drop to a coarse fix once. High accuracy indoors simply never returns.
+    gpsCoarse=true;
+    try{ navigator.geolocation.clearWatch(watchId); }catch(_){}
+    watchId=null; startGPS(); return;
+  }
+  if(!gpsRetry){
+    gpsRetry=setTimeout(function(){ gpsRetry=null;
+      try{ if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; } }catch(_){}
+      startGPS();
+    }, 20000);
+  }
 }
 function onPos(p){
-  gpsOK=true;gpsAcc=p.coords.accuracy;
+  gpsOK=true;gpsAcc=p.coords.accuracy;gpsErr=null;
+  if(gpsRetry){ clearTimeout(gpsRetry); gpsRetry=null; }
   var v=p.coords.speed;if(v===null||isNaN(v)||v<0)v=0;
   var now=p.timestamp;
   if(gpsPrev){
@@ -1883,7 +1925,13 @@ function render(){
   document.getElementById('speedVal').textContent=gpsOK?Math.round(fmtSpeed(v)):'—';
   document.getElementById('speedUnit').textContent=uSpeed();
   document.getElementById('dGps').className='dot '+(gpsOK?(gpsAcc&&gpsAcc<25?'ok':'warn'):'');
-  document.getElementById('tGps').textContent=gpsOK?(gpsAcc?('GPS ±'+Math.round(gpsAcc)+'m'):'GPS'):'No GPS';
+  document.getElementById('tGps').textContent=gpsOK?(gpsAcc?('GPS ±'+Math.round(gpsAcc)+'m'):'GPS')
+    :(gpsSay(gpsErr)||'Waiting for GPS');
+  (function(){
+    var hb=document.getElementById('gpsHelp'); if(!hb) return;
+    if(gpsOK||!gpsErr){ hb.hidden=true; return; }
+    hb.hidden=false; hb.textContent=gpsHelp();
+  })();
   var cal=cals[cfg.veh];
   document.getElementById('dMot').className='dot '+(motionOK?(cal&&cal.fwd?'ok':'warn'):'');
   document.getElementById('tMot').textContent=!motionOK?'No motion':!cal?'Not calibrated':
@@ -2647,14 +2695,18 @@ function installIcon(){
   var man={name:'Roadcraft',short_name:'Roadcraft',display:'standalone',orientation:'portrait',
     background_color:cfg.navy,theme_color:cfg.navy,start_url:'.',scope:'.',
     icons:[{src:url,sizes:'180x180',type:'image/png',purpose:'any'}]};
-  var l=document.createElement('link');l.rel='apple-touch-icon';l.href=url;document.head.appendChild(l);
-  var m=document.createElement('link');m.rel='manifest';
-  m.href=URL.createObjectURL(new Blob([JSON.stringify(man)],{type:'application/manifest+json'}));
-  document.head.appendChild(m);
+  // 16 Aug 2026 — REMOVED. This drew an icon on a canvas and injected a blob-URL manifest at
+  // runtime, which overrode the proper static manifest.webmanifest and the branded PNG icons.
+  // It is the same fault that made Kennel and Parlour install as a bare "K" and "P": iOS cannot
+  // use a blob manifest, and a runtime apple-touch-icon beats the one in the head. The static
+  // files in estate-apps/roadcraft/ are correct — leave them alone.
+  void url; void man;
 }
 
 /* ================= boot ================= */
-applyTheme();paintSetup();paintHistory();render();installIcon();loadVoices();setView(cfg.view||'gg');setTimeout(loadVoices,700);
+applyTheme();paintSetup();paintHistory();render();installIcon();loadVoices();
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(function(){}); }
+setView(cfg.view||'gg');setTimeout(loadVoices,700);
 /* Hub backup wiring */
 (function(){ var b=document.getElementById('hubConnect'); if(b) b.onclick=rcConnect;
   var c=rcCreds(); if(c){ var a=document.getElementById('hubId'), t=document.getElementById('hubToken'); if(a)a.value=c.id; if(t)t.value=c.token; rcPullIfEmpty().then(function(){ return rcPush(); }); } })();
