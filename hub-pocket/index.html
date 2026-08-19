@@ -79,6 +79,7 @@
   .setup label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 6px}
   .setup input{width:100%;border:1px solid var(--hair);border-radius:12px;padding:13px 14px;font:inherit;font-size:15px}
   .setup input:focus{outline:none;border-color:var(--pink)}
+  .realmtag.fixed{opacity:.9;cursor:default}
   .setup .go{width:100%;border:0;background:var(--pink);color:var(--navy);border-radius:12px;padding:15px;font:inherit;font-size:16px;font-weight:700;margin-top:20px}
   .setup .err{color:#c0392b;font-size:13px;margin-top:12px}
   .setup .signout{width:100%;border:1px solid var(--hair);background:#fff;color:#c0392b;border-radius:12px;padding:13px;font:inherit;font-size:15px;font-weight:600;margin-top:10px}
@@ -241,6 +242,11 @@
   <label>Token</label>
   <input type="password" data-cfg-token autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="ghp_… or github_pat_…">
   <div class="hint">Needs the <code>gist</code> scope — the same token The Hub uses.</div>
+  <label style="margin-top:18px">Work gist ID <span style="font-weight:400;opacity:.6">— optional</span></label>
+  <input type="text" data-cfg-wid autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="leave blank for personal only">
+  <label>Work token</label>
+  <input type="password" data-cfg-wtoken autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="ghp_… or github_pat_…">
+  <div class="hint">Your <b>private</b> work gist — the same one the Master site uses for the Daybook. Adding it shows your work tasks here too, labelled <b>work</b>. This is not the shared gist the CEO reads.</div>
   <button class="go" data-cfg-save>Connect</button>
   <div class="err" data-cfg-err hidden></div>
   <button class="signout" data-reset-tags hidden style="color:#a23a2a">Reset all work/personal tags</button>
@@ -253,6 +259,61 @@
   "use strict";
   var GIST_FILE='life-twoweek.json';
   var ID_KEY='connolly-sync:gist-id', TOK_KEY='connolly-sync:token', CID_KEY='connolly-pocket:client-id';
+  // Work tasks live on Mark's OWN private gist (the same one as the daybook), never on the
+  // shared work gist the CEO reads. Pocket pulls them in and labels them, and any work item
+  // is written back to THAT gist — never to the personal one. See stripWork().
+  var W_FILE='work-tasks.json';
+  var W_ID_KEY='connolly-pocket-work:gist-id', W_TOK_KEY='connolly-pocket-work:token';
+  var wcreds=null;
+  function loadWCreds(){ var id=lsGet(W_ID_KEY), tk=lsGet(W_TOK_KEY); wcreds=(id&&tk)?{id:id,token:tk}:null; return wcreds; }
+  function saveWCreds(id,tk){ if(id&&tk){ lsSet(W_ID_KEY,id); lsSet(W_TOK_KEY,tk); wcreds={id:id,token:tk}; } else { lsDel(W_ID_KEY); lsDel(W_TOK_KEY); wcreds=null; } }
+  function wapi(method, body){
+    if(!wcreds) return Promise.reject(new Error('no work creds'));
+    var init={ method:method, headers:{ 'Authorization':'Bearer '+wcreds.token, 'Accept':'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' } };
+    if(body){ init.body=body; init.headers['Content-Type']='application/json'; }
+    return fetch('https://api.github.com/gists/'+wcreds.id, init).then(function(res){
+      if(!res.ok) throw new Error('work gist '+res.status);
+      return res.json();
+    });
+  }
+  function fetchWork(){
+    return wapi('GET').then(function(g){
+      var f=g&&g.files&&g.files[W_FILE];
+      if(!f) return null;
+      if(f.truncated && f.raw_url){
+        return fetch(f.raw_url,{headers:{'Authorization':'Bearer '+wcreds.token}})
+          .then(function(r){return r.text();}).then(function(t){ return JSON.parse(t||'{}'); });
+      }
+      return JSON.parse(f.content||'{}');
+    });
+  }
+  // Mark every work item so it can be labelled AND, critically, kept out of the personal gist.
+  function spliceWork(st, wp){
+    if(!st||!wp) return;
+    (Array.isArray(wp.focusItems)?wp.focusItems:[]).forEach(function(x){
+      if(!x||!x.id) return; if(st.focus.items.some(function(y){return y&&y.id===x.id;})) return;
+      x.wsrc=1; x.realm='work'; st.focus.items.push(x);
+    });
+    (Array.isArray(wp.todos)?wp.todos:[]).forEach(function(x){
+      if(!x||!x.id) return; if(st.todos.some(function(y){return y&&y.id===x.id;})) return;
+      x.wsrc=1; x.realm='work'; st.todos.push(x);
+    });
+  }
+  // THE SAFETY LINE. Work items must never be written into the personal gist. This mirrors
+  // SYNC_REDACT_CE on the Hub side; there is a test that fails if a work item ever survives it.
+  function stripWork(st){
+    var out={}; for(var k in st) out[k]=st[k];
+    out.focus={}; for(var fk in st.focus) out.focus[fk]=st.focus[fk];
+    out.focus.items=(st.focus.items||[]).filter(function(x){ return !(x&&x.wsrc); });
+    out.todos=(st.todos||[]).filter(function(x){ return !(x&&x.wsrc); });
+    return out;
+  }
+  function workItemIds(st){
+    var ids={};
+    (st&&st.focus&&st.focus.items||[]).forEach(function(x){ if(x&&x.wsrc) ids[x.id]=1; });
+    (st&&st.todos||[]).forEach(function(x){ if(x&&x.wsrc) ids[x.id]=1; });
+    return ids;
+  }
   var $=function(s,r){return (r||document).querySelector(s);};
   var creds=null, cached=null, remoteUpdatedAt=null, weekExpanded=false, pollTimer=null, busy=false;
 
@@ -322,7 +383,12 @@
         // state instead of clobbering it. Ops are idempotent, so replay is safe.
         return api('GET').then(function(g){
           if(g && g.updated_at && base && g.updated_at!==base && tries<3){ tries++; return attempt(); }
-          return writeState(state).then(function(){ cached=state; saveCache(); pending=[]; savePending(); renderAll(); setStatus('synced','synced'); markSaved(); });
+          // Two destinations. Personal edits go to the personal gist (work stripped out by
+          // writeState); anything touching a work item is written to the private work gist
+          // instead. A work tick must never end up in the personal file, or vice versa.
+          return writeState(state)
+            .then(function(){ return flushWork(state); })
+            .then(function(){ cached=state; saveCache(); pending=[]; savePending(); renderAll(); setStatus('synced','synced'); markSaved(); });
         });
       });
     }
@@ -333,6 +399,38 @@
   // save so rapid taps become ONE write. The pending queue persists, so nothing's lost.
   var flushTimer=null, FLUSH_DELAY=(typeof window!=='undefined' && +window.__flushDelay)||1200;
   function scheduleFlush(){ if(flushTimer) clearTimeout(flushTimer); flushTimer=setTimeout(function(){ flushTimer=null; flush(); }, FLUSH_DELAY); }
+  // Write the work half back to Mark's private gist, read-modify-write so a concurrent
+  // push from the Mac is merged rather than clobbered (same shape as the Hub's dbPush).
+  function flushWork(state){
+    if(!wcreds) return Promise.resolve();
+    var ids=workItemIds(state);
+    if(!Object.keys(ids).length) return Promise.resolve();
+    var mineF=(state.focus.items||[]).filter(function(x){ return x&&x.wsrc; });
+    var mineT=(state.todos||[]).filter(function(x){ return x&&x.wsrc; });
+    return wapi('GET').then(function(g){
+      var f=g&&g.files&&g.files[W_FILE], remote={};
+      if(f){ try{ remote=JSON.parse(f.content||'{}'); }catch(_){ remote={}; } }
+      function merge(mine, theirs){
+        theirs=Array.isArray(theirs)?theirs:[];
+        var by={}, order=[];
+        mine.forEach(function(x){ if(x&&x.id&&!by[x.id]){ var c={}; for(var k in x){ if(k!=='wsrc') c[k]=x[k]; } by[x.id]=c; order.push(x.id); } });
+        theirs.forEach(function(x){ if(x&&x.id&&!by[x.id]){ by[x.id]=x; order.push(x.id); } });
+        return order.map(function(k){ return by[k]; });
+      }
+      var out={ app:'work-tasks', savedAt:new Date().toISOString(),
+                focusItems: merge(mineF, remote.focusItems),
+                todos:      merge(mineT, remote.todos),
+                reviewLog:  Array.isArray(remote.reviewLog)?remote.reviewLog:[],
+                deletions:  remote.deletions||{} };
+      var body={files:{}}; body.files[W_FILE]={content:JSON.stringify(out)};
+      return wapi('PATCH', JSON.stringify(body));
+    }).catch(function(e){ console.error('[work] push failed', e); });
+  }
+  // test hooks — let the suite inspect the ACTUAL bytes bound for each gist
+  window.__pkDiag={ stripWork:stripWork, spliceWork:spliceWork, workIds:workItemIds,
+    personalPayload:function(st){ return { schema:1, app:'life-twoweek', state:stripWork(st) }; },
+    setCache:function(st){ ensureShape(st); cached=st; return cached; },
+    cache:function(){ return cached; }, pill:function(it){ return realmPill(it); } };
   function flushNow(){ if(flushTimer){ clearTimeout(flushTimer); flushTimer=null; } flush(); }
   function buzz(){ try{ if(navigator.vibrate) navigator.vibrate(8); }catch(_){ } }
   // "saved · just now" reassurance — last successful write time, persisted across launches.
@@ -352,7 +450,11 @@
   function hwSet(v){ lsSet(HW_KEY, JSON.stringify({date:today(), value:!!v})); }
   function showByRealm(realm){ return !(hideWorkActive() && realm==='work'); }
   // realm pill: untagged ('tag') -> work -> personal -> untagged. Untagged is neutral & always shown.
-  function realmPill(it){ var w=it.realm==='work', p=it.realm==='personal'; return '<button class="realmtag'+(w?' work':(p?' personal':''))+'" data-realm-toggle="'+esc(it.id)+'">'+(w?'work':(p?'personal':'tag'))+'</button>'; }
+  function realmPill(it){ var w=it.realm==='work', p=it.realm==='personal';
+    // An item pulled from the work gist is not a tag you can toggle — it IS work, and it
+    // lives elsewhere. Show it as a fixed label so the two are never confused.
+    if(it && it.wsrc) return '<span class="realmtag work fixed" title="From the work Hub">work</span>';
+    return '<button class="realmtag'+(w?' work':(p?' personal':''))+'" data-realm-toggle="'+esc(it.id)+'">'+(w?'work':(p?'personal':'tag'))+'</button>'; }
   function renderRightNow(){ var el=$('[data-rightnow]'); if(!el||!cached){ return; } ensureShape(cached);
     var f=cached.focus.items.filter(function(it){return it&&it.bucket==='today'&&!it.done&&showByRealm(it.realm);}).sort(focusOrder);
     if(!f.length){ el.hidden=true; el.innerHTML=''; return; }
@@ -451,7 +553,7 @@
     });
   }
   function writeState(state){
-    var payload={ schema:1, app:'life-twoweek', savedAt:new Date().toISOString(), writer:writer(), state:state };
+    var payload={ schema:1, app:'life-twoweek', savedAt:new Date().toISOString(), writer:writer(), state:stripWork(state) };
     var body={files:{}}; body.files[GIST_FILE]={content:JSON.stringify(payload)};
     return api('PATCH',JSON.stringify(body));
   }
@@ -463,7 +565,11 @@
     if(!creds) return Promise.resolve();
     if(pending.length){ flush(); return Promise.resolve(); }
     setStatus('loading','syncing');
-    return fetchState().then(function(state){ ensureShape(state); cached=state; saveCache(); renderAll(); setStatus('synced','synced'); })
+    return fetchState().then(function(state){ ensureShape(state);
+      if(!loadWCreds()){ cached=state; saveCache(); renderAll(); setStatus('synced','synced'); return; }
+      return fetchWork().then(function(wp){ spliceWork(state, wp); cached=state; saveCache(); renderAll(); setStatus('synced','synced'); })
+        .catch(function(we){ console.error('[work] pull failed', we); cached=state; saveCache(); renderAll(); setStatus('synced','synced (work offline)'); });
+    })
       .catch(function(e){ setStatus('error',(typeof navigator!=='undefined'&&navigator.onLine===false)?'offline':'error'); console.error(e, e&&e.detail||''); if(cached) renderAll(); });
   }
 
@@ -615,6 +721,8 @@
     var err=$('[data-cfg-err]');
     if(!id||!tk){ err.textContent='Enter both the Gist ID and a token.'; err.hidden=false; return; }
     saveCreds(id,tk);
+    try{ var _wi=$('[data-cfg-wid]'), _wt=$('[data-cfg-wtoken]');
+      saveWCreds(_wi&&_wi.value.trim(), _wt&&_wt.value.trim()); }catch(_){}
     err.hidden=true; err.textContent='';
     setStatus('loading','checking');
     fetchState().then(function(state){ cached=state; renderAll(); openApp(); })
