@@ -27,8 +27,15 @@
 /* Estate chrome — copied verbatim from StillRoom.html so every room in the house has the
    same strip. Lime is the department name only; never body text on a light ground. */
 .estate-strip{display:flex;align-items:center;gap:9px;padding:9px 16px 8px;flex:none;background:#0D1B3E}
+/* The app's own header sat below the strip with its own generous top padding, so the two
+   stacked into a lot of empty navy before the first word. */
+.topbar{padding-top:6px!important}
+.topbar-in{padding-top:4px!important;padding-bottom:8px!important}
 .estate-strip .em-house{height:13px;width:auto;flex:none;opacity:1}
-.estate-strip .em-dept{font-family:Montserrat,-apple-system,Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C4F000;line-height:1}
+/* 9px, NOT the bumped size. The blanket type increase caught the estate chrome as well as the
+   app's own text, which made this strip taller than every other room's and pushed Today down
+   the screen. The strip is shared furniture: it matches the house, not this app. */
+.estate-strip .em-dept{font-family:Montserrat,-apple-system,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C4F000;line-height:1}
 @media print{.estate-strip{display:none}}
 
 /* ─────────────────────────────  TOKENS  ───────────────────────────── */
@@ -300,6 +307,21 @@ svg .target-txt{fill:var(--muted);font-family:var(--f-mono);font-size:13px;font-
       <div class="divider"></div>
       <div class="stack">
         <div id="setupBody" class="prose small" style="margin:0 0 4px"></div>
+        <!-- 22 Aug 2026 — the Connect card. Every estate app needs one, because a phone that has
+             never been told the gist cannot reach anything. It was missing here, so landing on
+             The Buttery first left you with no way in at all. The credentials are shared across
+             the whole estate: same origin, so entering them once here also connects the Still
+             Room, the Library and every other app on the domain. -->
+        <div id="connectCard" hidden style="border:1px solid var(--line);border-radius:var(--radius);padding:14px;background:var(--surface-2)">
+          <div style="font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--go);margin-bottom:4px">Connect this device</div>
+          <p class="prose small" style="margin:0 0 10px">This phone has not been given the estate credentials. Enter them once and every app on the estate is connected &mdash; the Still Room, the Library, all of them.</p>
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:4px">Gist ID</label>
+          <input id="cfgId" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="32-character hex ID" style="width:100%;box-sizing:border-box">
+          <label style="display:block;font-size:13px;font-weight:600;margin:10px 0 4px">Token</label>
+          <input id="cfgTok" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_… or ghp_…" style="width:100%;box-sizing:border-box">
+          <button class="btn btn-primary" id="cfgSave" style="margin-top:12px;width:100%">Connect</button>
+          <div id="cfgErr" class="prose small" style="margin-top:8px;color:var(--stop)" hidden></div>
+        </div>
         <div class="field">
           <label for="f-act">Typical day</label>
           <select id="f-act">
@@ -1318,6 +1340,33 @@ function gPush(){
 var _gTimer=null;
 function gSchedule(){ if(_gTimer) clearTimeout(_gTimer); _gTimer=setTimeout(gPush, 2500); }
 
+/* Save credentials, but TEST them first. Writing an unverified token to storage and saying
+   "Connected" is how you end up debugging the wrong thing for a week — the Diversions push
+   proved that this afternoon. One read against the gist settles it. */
+function wireConnect(){
+  var btn=document.getElementById('cfgSave'); if(!btn) return;
+  btn.addEventListener('click', function(){
+    var id=(document.getElementById('cfgId').value||'').trim();
+    var tk=(document.getElementById('cfgTok').value||'').trim();
+    var err=document.getElementById('cfgErr');
+    function fail(m){ if(err){ err.textContent=m; err.hidden=false; } btn.textContent='Connect'; btn.disabled=false; }
+    if(err) err.hidden=true;
+    if(!id || !tk) return fail('Both the gist ID and the token are needed.');
+    btn.textContent='Checking\u2026'; btn.disabled=true;
+    fetch('https://api.github.com/gists/'+id, {headers:{'Authorization':'Bearer '+tk,
+      'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}})
+      .then(function(r){
+        if(r.status===404) throw new Error('Not found \u2014 check the gist ID, and that the token can see it.');
+        if(r.status===401 || r.status===403) throw new Error('The token was refused. It needs gist access.');
+        if(!r.ok) throw new Error('GitHub said '+r.status+'.');
+        try{ localStorage.setItem(G_ID,id); localStorage.setItem(G_TOK,tk); }catch(_){}
+        btn.textContent='Connected';
+        gPull(function(){ try{ render(); renderSetupBody(); }catch(_){ } });
+      })
+      .catch(function(e){ fail(e.message||'Could not reach GitHub.'); });
+  });
+}
+
 /* One tap to the room that owns the numbers. Same-tab on a phone home-screen app — opening a new
    window from a standalone PWA drops you into Safari proper and loses the estate chrome. */
 var STILL_ROOM_URL = '../still-room/';
@@ -1328,13 +1377,23 @@ function openStillRoom(){ try{ location.href = STILL_ROOM_URL; }catch(_){ } }
    still render, and the Plan tab says plainly that the numbers are the last ones we saw. */
 function renderSetupBody(){
   var el=document.getElementById('setupBody'); if(!el) return;
+  var card=document.getElementById('connectCard');
   var b=body();
-  if(!b){ el.innerHTML='<b>Could not reach the Still Room yet.</b> Check the sync credentials are set on this device \u2014 without them there is no height or weight, and every target here would be a guess.'; return; }
+  /* Show the way IN, not just the bad news. The first version said "check the credentials are
+     set" and gave him nowhere to set them, which is a complaint dressed as a diagnosis. */
+  if(card) card.hidden = !!gCreds();
+  if(!b){
+    el.innerHTML = gCreds()
+      ? '<b>Connected, but the Still Room has no height or weight yet.</b> Add a reading there and every target here fills in.'
+      : '<b>Not connected yet.</b> Without the estate credentials there is no height or weight, and every number here would be a guess.';
+    return;
+  }
   el.innerHTML = 'From the Still Room: <b>'+b.height+'cm</b>, <b>'+r1(b.weight)+'kg</b>, age <b>'+b.age+'</b>'
     + (b.waist? ', waist <b>'+b.waist+'cm</b>' : '')
     + (b.targetWeight? ' \u00b7 your target <b>'+b.targetWeight+'kg</b>' : '') + '.';
 }
 function boot(){
+  try{ wireConnect(); }catch(_){}
   gPull(function(){ try{ render(); renderSetupBody(); }catch(e){ console.error(e); } });
   try{ render(); }catch(e){ console.error(e); }
 }
