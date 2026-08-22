@@ -56,6 +56,12 @@ h2{font-size:20px;margin:0;color:var(--white);font-weight:700;letter-spacing:-.0
 .row .btn{flex:1}
 .progress{font-size:11px;letter-spacing:.18em;text-transform:uppercase;opacity:.6;font-weight:700}
 .statline{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px}
+.flip-board{display:grid;gap:7px;justify-content:center;margin:4px auto}
+.flip-cell{width:56px;height:56px;border-radius:11px;border:2px solid var(--line,#24467e);
+  background:#12224A;cursor:pointer;padding:0;transition:background .12s,border-color .12s,transform .08s}
+.flip-cell.on{background:var(--lime,#C4F000);border-color:var(--lime,#C4F000)}
+.flip-cell:active{transform:scale(.94)}
+@media (max-width:400px){ .flip-cell{width:48px;height:48px} }
 .clock{font-size:34px;font-weight:800;color:var(--white);font-variant-numeric:tabular-nums;line-height:1}
 .clock.warn{color:var(--lime)}
 .feedback{font-size:13px;font-weight:600;margin-top:12px;line-height:1.5;min-height:18px}
@@ -180,6 +186,11 @@ h2{font-size:20px;margin:0;color:var(--white);font-weight:700;letter-spacing:-.0
     <div class="name">Fives</div>
     <div class="desc">Five letters, six guesses. Lime means right place, pale means right letter, wrong place.</div>
   </button>
+  <button class="tile" onclick="go('flip')">
+    <div class="name">Flip</div>
+    <div class="desc">Tap a tile and its neighbours flip with it. Turn the whole board dark. Ninety seconds, not ninety minutes.</div>
+  </button>
+
   <button class="tile" onclick="go('sudoku')">
     <div class="name">Sudoku</div>
     <div class="desc">Freshly generated each time, single solution guaranteed. Three difficulties, pencil marks included.</div>
@@ -192,6 +203,23 @@ h2{font-size:20px;margin:0;color:var(--white);font-weight:700;letter-spacing:-.0
   </div>
 
   <p class="note">Conundrum and Hive check against a British English dictionary of roughly 77,000 words, so obscure entries may be missing but everyday ones should be there. Fives accepts any five letters you type. Abandoned rounds aren't counted.</p>
+</section>
+
+<section id="flip" class="hidden">
+  <div class="topbar"><button class="back" onclick="go('home')">&lsaquo;</button><h2>Flip</h2></div>
+  <div class="segbar">
+    <button class="seg" id="fl0" onclick="flSetLevel(0)">Gentle</button>
+    <button class="seg" id="fl1" onclick="flSetLevel(1)">Middling</button>
+    <button class="seg" id="fl2" onclick="flSetLevel(2)">Stiff</button>
+  </div>
+  <div class="statline" style="margin-bottom:10px">
+    <div><div class="progress">Moves</div><div class="clock" id="flMoves" style="font-size:24px">0</div></div>
+    <div style="text-align:right"><div class="progress">Lit</div><div class="clock" id="flLit" style="font-size:24px">0</div></div>
+  </div>
+  <div id="flBoard" class="flip-board"></div>
+  <div id="flDone" class="note" style="text-align:center;margin-top:12px"></div>
+  <button class="btn block" style="margin-top:12px" onclick="flNew()">New board</button>
+  <p class="note">Every board is built by flipping a solved one, so a solution always exists. Par is the number of flips it took to scramble &mdash; beat it and you found a shorter route.</p>
 </section>
 
 <section id="conundrum" class="hidden">
@@ -333,7 +361,8 @@ const BLANK={
   con:{rounds:0,total:0,best:0,nines:0,longest:''},
   bee:{rounds:0,total:0,best:0,pangrams:0,bestPct:0},
   fiv:{games:0,wins:0,guesses:0,best:0},
-  sud:{solved:[0,0,0],time:[0,0,0],best:[0,0,0],hints:0}
+  sud:{solved:[0,0,0],time:[0,0,0],best:[0,0,0],hints:0},
+  flip:{solved:[0,0,0],best:[0,0,0]}
 };
 let R=JSON.parse(JSON.stringify(BLANK));
 function loadRecord(){
@@ -355,7 +384,8 @@ const LEVELS=['Gentle','Middling','Stiff'];
 function renderRecord(){
   const el=document.getElementById('recordBody');if(!el)return;
   const sudTotal=R.sud.solved.reduce((a,b)=>a+b,0);
-  if(!R.con.rounds&&!R.bee.rounds&&!R.fiv.games&&!sudTotal){
+  const flipTotal=(R.flip&&R.flip.solved?R.flip.solved:[0,0,0]).reduce((a,b)=>a+b,0);
+  if(!R.con.rounds&&!R.bee.rounds&&!R.fiv.games&&!sudTotal&&!flipTotal){
     el.innerHTML='<div class="empty-record">Nothing played yet. Finish a round and it will show up here.</div>';return;
   }
   let h='';
@@ -383,12 +413,18 @@ function renderRecord(){
     });
     h+=line('Hints taken',R.sud.hints);
   }
+  if(flipTotal) h+='<div class="grouphead">Flip</div>'
+    +line('Boards cleared',flipTotal)
+    +LEVELS.map(function(nm,i){
+        return R.flip.solved[i] ? line(nm+' \u2014 cleared',R.flip.solved[i])
+             + line(nm+' \u2014 fewest moves',R.flip.best[i]||'\u2014',true) : '';
+      }).join('');
   el.innerHTML=h;
 }
 loadRecord();
 
 /* ================= navigation ================= */
-const views=['home','conundrum','hive','fives','sudoku'];
+const views=['home','conundrum','hive','fives','sudoku','flip'];
 function go(id){
   views.forEach(v=>document.getElementById(v).classList.toggle('hidden',v!==id));
   window.scrollTo(0,0);
@@ -397,10 +433,110 @@ function go(id){
   if(id==='hive'&&!hState.puzzle)hNew();
   if(id==='fives'&&!fState.answer)fNew();
   if(id==='sudoku'&&!sState.grid)sNew();
+  if(id==='flip'&&!flState.grid)flNew();
   if(id!=='hive'&&hState.puzzle)hRecord();
   if(id!=='conundrum')cStop();
   if(id!=='sudoku')sStop(); else sStart();
 }
+/* ══════════════════════════ FLIP ══════════════════════════
+   Added 22 August 2026. The Parlour had four games and all four were words or numbers, all
+   solitary, and none of them stoppable — Conundrum has a sixty-second clock but Hive, Fives and
+   Sudoku run until you give up, which at eleven at night is how you end up awake at midnight.
+   This one ends.
+
+   SOLVABILITY IS GUARANTEED BY CONSTRUCTION, which is the only honest way to generate one of
+   these. Start from a solved board (everything dark), apply N random flips, and hand the player
+   the result. A solution must exist because we just performed one backwards. Nothing is
+   searched, nothing is assumed, and no board can ever be impossible.
+
+   PAR is that same N — the number of flips used to scramble. It is not necessarily the shortest
+   route (flipping the same cell twice cancels out, so the true minimum may be lower), which is
+   why beating par is possible and worth something. The app says so rather than pretending par
+   is optimal.
+   ═════════════════════════════════════════════════════════ */
+var flState = { grid:null, n:5, moves:0, par:0, level:1, done:false };
+var FLIP_LEVELS = [ {n:4, scramble:4}, {n:5, scramble:7}, {n:6, scramble:11} ];
+
+function flSetLevel(i){ flState.level=i; flNew(); }
+
+function flNew(){
+  var cfg = FLIP_LEVELS[flState.level] || FLIP_LEVELS[1];
+  var n = cfg.n;
+  var g = [];
+  for (var i=0;i<n*n;i++) g.push(0);
+
+  /* Scramble by flipping. A cell chosen twice undoes itself, so keep going until the board is
+     actually lit — otherwise "Gentle" can hand you a solved board and it looks broken. */
+  var used = {}, taps = 0, guard = 0;
+  while (guard++ < 200) {
+    used = {}; taps = 0;
+    for (var k=0;k<n*n;k++) g[k]=0;
+    for (var t=0;t<cfg.scramble;t++) {
+      var c = Math.floor(Math.random()*n*n);
+      if (used[c]) continue;            // a repeat is a wasted move, not a harder board
+      used[c] = 1; taps++;
+      flApply(g, n, c);
+    }
+    if (flLitCount(g) > 0) break;
+  }
+  flState.grid = g; flState.n = n; flState.moves = 0; flState.par = taps; flState.done = false;
+  flRender();
+}
+
+/** Flip a cell and its orthogonal neighbours. The whole game is this one function. */
+function flApply(g, n, c){
+  var r = Math.floor(c/n), col = c%n;
+  var hit = [[r,col],[r-1,col],[r+1,col],[r,col-1],[r,col+1]];
+  for (var i=0;i<hit.length;i++){
+    var rr=hit[i][0], cc=hit[i][1];
+    if (rr>=0 && rr<n && cc>=0 && cc<n) g[rr*n+cc] ^= 1;
+  }
+}
+function flLitCount(g){ var n=0; for (var i=0;i<g.length;i++) if (g[i]) n++; return n; }
+
+function flTap(c){
+  if (flState.done) return;
+  flApply(flState.grid, flState.n, c);
+  flState.moves++;
+  if (flLitCount(flState.grid) === 0) flWin();
+  flRender();
+}
+
+function flWin(){
+  flState.done = true;
+  var L = flState.level;
+  R.flip.solved[L] = (R.flip.solved[L]||0) + 1;
+  var b = R.flip.best[L] || 0;
+  if (!b || flState.moves < b) R.flip.best[L] = flState.moves;
+  saveRecord();
+}
+
+function flRender(){
+  var el = document.getElementById('flBoard'); if(!el) return;
+  var n = flState.n;
+  el.style.gridTemplateColumns = 'repeat('+n+', auto)';
+  var h = '';
+  for (var i=0;i<n*n;i++){
+    h += '<button class="flip-cell'+(flState.grid[i]?' on':'')+'" onclick="flTap('+i+')" '
+       + 'aria-label="tile '+(i+1)+'"></button>';
+  }
+  el.innerHTML = h;
+  var m = document.getElementById('flMoves'); if(m) m.textContent = flState.moves;
+  var l = document.getElementById('flLit');   if(l) l.textContent = flLitCount(flState.grid);
+  var d = document.getElementById('flDone');
+  if (d) {
+    d.innerHTML = flState.done
+      ? '<b>Done in '+flState.moves+'.</b> ' + (flState.moves < flState.par
+          ? 'Par was '+flState.par+' — you found a shorter way.'
+          : flState.moves === flState.par ? 'Par exactly.' : 'Par was '+flState.par+'.')
+      : 'Par ' + flState.par + '.';
+  }
+  for (var j=0;j<3;j++){
+    var b2 = document.getElementById('fl'+j);
+    if (b2) b2.classList.toggle('on', j===flState.level);
+  }
+}
+
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 
