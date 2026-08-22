@@ -4,7 +4,7 @@
  * (read-modify-write) is unchanged.
  * Bump CACHE on every shell change so phones pick up the new version.
  */
-var CACHE = 'buttery-v1';   // new 22 Aug 2026
+var CACHE = 'buttery-v2';   // 22 Aug 2026 — navy/lime palette, real viewport meta, bigger type
 var SHELL = [
   './',
   './index.html',
