@@ -1,0 +1,2216 @@
+<title>The Buttery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+/* Estate chrome — copied verbatim from StillRoom.html so every room in the house has the
+   same strip. Lime is the department name only; never body text on a light ground. */
+.estate-strip{display:flex;align-items:center;gap:9px;padding:9px 16px 8px;flex:none;background:#0D1B3E}
+.estate-strip .em-house{height:13px;width:auto;flex:none;opacity:1}
+.estate-strip .em-dept{font-family:Montserrat,-apple-system,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C4F000;line-height:1}
+@media print{.estate-strip{display:none}}
+
+/* ─────────────────────────────  TOKENS  ───────────────────────────── */
+:root{
+  --bg:#EFF2F0; --surface:#FFFFFF; --surface-2:#F6F9F7;
+  --ink:#111C18; --ink-2:#41524C; --muted:#6B7C76;
+  --line:#DCE3E0; --line-strong:#C3CDC9;
+  --go:#146B45; --go-soft:#E2F0E9; --go-ink:#0E4E32;
+  --warn:#9A5A08; --warn-soft:#FBEEDC;
+  --stop:#93251F; --stop-soft:#FAE7E5;
+  --data:#1A5C99; --data-soft:#E3EDF6;
+  --shadow:0 1px 2px rgba(17,28,24,.06), 0 6px 20px -12px rgba(17,28,24,.24);
+  --radius:14px;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1310; --surface:#141E1A; --surface-2:#1A2621;
+    --ink:#E9EFEC; --ink-2:#B4C2BC; --muted:#889892;
+    --line:#26332E; --line-strong:#35443E;
+    --go:#46B07D; --go-soft:#153024; --go-ink:#84D6AD;
+    --warn:#DD9A38; --warn-soft:#33260F;
+    --stop:#E8736A; --stop-soft:#361A18;
+    --data:#79B4E6; --data-soft:#132635;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 20px -12px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1310; --surface:#141E1A; --surface-2:#1A2621;
+  --ink:#E9EFEC; --ink-2:#B4C2BC; --muted:#889892;
+  --line:#26332E; --line-strong:#35443E;
+  --go:#46B07D; --go-soft:#153024; --go-ink:#84D6AD;
+  --warn:#DD9A38; --warn-soft:#33260F;
+  --stop:#E8736A; --stop-soft:#361A18;
+  --data:#79B4E6; --data-soft:#132635;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 20px -12px rgba(0,0,0,.7);
+}
+
+/* ─────────────────────────────  BASE  ───────────────────────────── */
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--f-display); font-size:16px; line-height:1.45;
+  -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%;
+  padding-bottom:calc(74px + env(safe-area-inset-bottom,0px));
+}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none;text-align:left}
+input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--data);outline-offset:2px;border-radius:6px}
+.wrap{max-width:540px;margin:0 auto;padding:0 16px}
+
+h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-.015em}
+h1{font-size:24px;font-weight:800}
+h2{font-size:20px;font-weight:700}
+h3{font-size:15px;font-weight:700}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.prose{font-family:var(--f-body);font-size:15.5px;line-height:1.6;color:var(--ink-2)}
+.prose p{margin:0 0 .85em}
+.prose p:last-child{margin-bottom:0}
+.prose strong{color:var(--ink);font-weight:600}
+.small{font-size:13.5px}
+.muted{color:var(--muted)}
+.hint{font-family:var(--f-body);font-size:13.5px;line-height:1.5;color:var(--muted)}
+
+/* ─────────────────────────────  CHROME  ───────────────────────────── */
+.topbar{
+  position:sticky;top:0;z-index:20;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:saturate(160%) blur(12px); -webkit-backdrop-filter:saturate(160%) blur(12px);
+  border-bottom:1px solid var(--line); padding-top:env(safe-area-inset-top,0px);
+}
+.topbar-in{max-width:540px;margin:0 auto;padding:12px 16px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.topbar h1{font-size:20px}
+.topbar .sub{font-size:12px;color:var(--muted);font-weight:600;flex:none}
+
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  background:color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter:saturate(180%) blur(14px); -webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.tabbar-in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px 9px;color:var(--muted);font-size:10.5px;font-weight:700;letter-spacing:.04em}
+.tab .ti{font-size:18px;line-height:1}
+.tab[aria-current="page"]{color:var(--go)}
+
+/* ─────────────────────────────  CARDS  ───────────────────────────── */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.card + .card{margin-top:12px}
+.card-pad{padding:16px}
+.row-between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.grow{flex:1;min-width:0}
+.stack{display:flex;flex-direction:column;gap:12px}
+.section{margin-top:22px}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:9px}
+.divider{height:1px;background:var(--line);margin:15px 0}
+
+/* ─────────────────────────────  BUTTONS  ───────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:46px;padding:0 18px;border-radius:11px;
+  font-weight:700;font-size:15px;letter-spacing:-.01em;text-align:center;
+  border:1px solid var(--line-strong);background:var(--surface);
+  transition:transform .08s ease;
+}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--go);border-color:var(--go);color:#fff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn-primary{color:#08140E}}
+:root[data-theme="dark"] .btn-primary{color:#08140E}
+.btn-quiet{background:var(--surface-2);border-color:var(--line)}
+.btn-block{display:flex;width:100%}
+.btn-sm{min-height:36px;padding:0 12px;font-size:13px;border-radius:9px}
+
+/* ─────────────────────────────  CHIPS  ───────────────────────────── */
+.chip{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-family:var(--f-mono);font-size:11.5px;font-weight:600;white-space:nowrap;letter-spacing:-.01em}
+.chip-go{background:var(--go-soft);color:var(--go-ink)}
+.chip-warn{background:var(--warn-soft);color:var(--warn)}
+.chip-stop{background:var(--stop-soft);color:var(--stop)}
+.chip-neutral{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.chip-data{background:var(--data-soft);color:var(--data)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+
+/* ─────────────────────────────  METERS  ───────────────────────────── */
+.meters{display:grid;grid-template-columns:repeat(3,1fr)}
+.meter{padding:13px 12px;border-right:1px solid var(--line)}
+.meter:last-child{border-right:none}
+.meter-label{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.meter-val{font-family:var(--f-mono);font-size:19px;font-weight:600;line-height:1.15;margin-top:3px;letter-spacing:-.02em}
+.meter-of{font-size:11.5px;color:var(--muted);font-family:var(--f-mono)}
+.bar{height:5px;border-radius:3px;background:var(--line);margin-top:8px;overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:3px;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.bar-go > i{background:var(--go)} .bar-warn > i{background:var(--warn)}
+.bar-stop > i{background:var(--stop)} .bar-data > i{background:var(--data)}
+
+/* ─────────────────────────────  MEALS  ───────────────────────────── */
+.meal-head{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px}
+.meal-slot{width:34px;height:34px;border-radius:9px;flex:none;display:grid;place-items:center;background:var(--surface-2);border:1px solid var(--line);font-size:14px;font-weight:700}
+.meal-title{display:block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.meal-pick{display:block;font-size:15.5px;font-weight:600;letter-spacing:-.012em;margin-top:1px;line-height:1.3}
+.meal-pick.empty{color:var(--muted);font-weight:500}
+.meal-card.done .meal-slot{background:var(--go-soft);border-color:transparent;color:var(--go-ink)}
+.meal-card.off .meal-slot{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.caret{flex:none;color:var(--muted);font-size:14px;transition:transform .2s ease}
+.meal-card.open .caret{transform:rotate(90deg)}
+.meal-body{border-top:1px solid var(--line);padding:14px 16px;display:none}
+.meal-card.open .meal-body{display:block}
+
+/* ─────────────────────────────  OPTIONS  ───────────────────────────── */
+.opt{display:block;width:100%;padding:12px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2)}
+.opt + .opt{margin-top:8px}
+.opt-name{font-size:14.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35;display:block}
+.opt-meta{margin-top:6px}
+.opt-note{display:block;font-size:12.5px;color:var(--muted);margin-top:6px;font-family:var(--f-body);line-height:1.45}
+.opt.star{border-color:var(--go);background:var(--go-soft)}
+.extra-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--line)}
+.extra-row:first-child{border-top:none}
+
+/* ─────────────────────────────  FOOD LIST  ───────────────────────────── */
+.taste-prog{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.taste-prog > i{display:block;height:100%;background:var(--go);border-radius:3px;transition:width .3s ease}
+.taste-card{
+  background:var(--surface);border:1px solid var(--line);border-radius:18px;
+  box-shadow:var(--shadow);min-height:150px;display:grid;place-items:center;
+  padding:26px 22px;text-align:center;
+}
+.taste-food{font-size:27px;font-weight:800;letter-spacing:-.03em;line-height:1.15;text-wrap:balance}
+.taste-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:16px}
+.tbtn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  min-height:84px;border-radius:14px;border:1px solid var(--line-strong);background:var(--surface);
+  font-size:13px;font-weight:700;letter-spacing:-.01em;text-align:center;
+  transition:transform .08s ease;
+}
+.tbtn:active{transform:scale(.96)}
+.tbtn .tb-i{font-size:22px;line-height:1}
+.tbtn-no{color:var(--stop);border-color:var(--stop);background:var(--stop-soft)}
+.tbtn-ok{color:var(--ink-2)}
+.tbtn-love{color:var(--go-ink);border-color:var(--go);background:var(--go-soft)}
+
+.cmp{width:100%;border-collapse:collapse;margin:4px 0 14px;font-family:var(--f-mono);font-size:12px}
+.cmp th,.cmp td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.cmp th:first-child,.cmp td:first-child{text-align:left;font-family:var(--f-display);font-weight:600;font-size:12.5px}
+.cmp thead th{font-family:var(--f-display);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom-color:var(--line-strong)}
+.cmp tbody tr.win td{color:var(--go-ink);background:var(--go-soft)}
+.cmp tbody tr.lose td:nth-child(3){color:var(--stop);font-weight:600}
+
+.taste-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid var(--line);font-size:14px}
+.taste-row:first-child{border-top:none}
+.taste-mini{display:flex;gap:5px;flex:none}
+.mini{
+  width:34px;height:34px;border-radius:9px;border:1px solid var(--line);
+  background:var(--surface-2);color:var(--muted);font-size:13px;font-weight:700;
+  display:grid;place-items:center;
+}
+.mini-no{background:var(--stop-soft);color:var(--stop);border-color:var(--stop)}
+.mini-ok{background:var(--surface);color:var(--ink);border-color:var(--line-strong)}
+.mini-love{background:var(--go-soft);color:var(--go-ink);border-color:var(--go)}
+.star-tag{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--go-ink);display:block;margin-bottom:4px}
+
+/* ─────────────────────────────  PLACES  ───────────────────────────── */
+.place{
+  display:flex;align-items:center;gap:13px;width:100%;
+  padding:15px 16px;border-radius:12px;border:1px solid var(--line);
+  background:var(--surface);box-shadow:var(--shadow);
+}
+.place + .place{margin-top:9px}
+.place-icon{width:38px;height:38px;flex:none;border-radius:10px;display:grid;place-items:center;background:var(--surface-2);border:1px solid var(--line);font-size:17px}
+.place-name{display:block;font-size:15.5px;font-weight:700;letter-spacing:-.015em;line-height:1.25}
+.place-tag{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-top:2px}
+.place-arrow{flex:none;color:var(--muted);font-size:15px}
+
+.venue-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.venue-btn{padding:14px 13px;border-radius:12px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow);min-height:76px;display:flex;flex-direction:column;justify-content:space-between;gap:7px}
+.venue-btn .vn{display:block;font-size:14.5px;font-weight:700;letter-spacing:-.015em;line-height:1.2}
+.venue-btn .vt{display:block;font-size:11px;font-weight:600;color:var(--muted);line-height:1.3}
+
+.rule-box{border-left:3px solid var(--go);background:var(--go-soft);padding:13px 15px;border-radius:0 11px 11px 0}
+.rule-box .eyebrow{color:var(--go-ink);opacity:.75}
+.rule-box p{margin:5px 0 0;font-family:var(--f-body);font-size:15.5px;line-height:1.5;color:var(--go-ink)}
+
+.avoid-list{list-style:none;margin:0;padding:0}
+.avoid-list li{display:flex;gap:9px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);font-size:13.5px;line-height:1.45}
+.avoid-list li:first-child{border-top:none}
+.avoid-x{color:var(--stop);font-weight:800;flex:none;font-size:12px;margin-top:3px}
+.avoid-ok{color:var(--go);font-weight:800;flex:none;font-size:12px;margin-top:3px}
+
+/* ─────────────────────────────  FORM  ───────────────────────────── */
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select{width:100%;min-height:48px;padding:0 13px;border:1px solid var(--line-strong);border-radius:11px;background:var(--surface);font-family:var(--f-mono);font-size:17px;font-weight:500}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+/* ─────────────────────────────  CHART  ───────────────────────────── */
+.chart-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.chart-empty{padding:22px 16px;text-align:center;color:var(--muted);font-family:var(--f-body);font-size:14px;line-height:1.55}
+svg .grid{stroke:var(--line);stroke-width:1}
+svg .axis-txt{fill:var(--muted);font-family:var(--f-mono);font-size:9.5px;font-weight:500}
+svg .pt-lbl{fill:var(--ink);font-family:var(--f-mono);font-size:11px;font-weight:600}
+svg .target{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;opacity:.6}
+svg .target-txt{fill:var(--muted);font-family:var(--f-mono);font-size:9px;font-weight:600}
+
+/* ─────────────────────────────  MISC  ───────────────────────────── */
+.screen{display:none;padding-top:16px}
+.screen.active{display:block}
+.toast{
+  position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));
+  transform:translateX(-50%) translateY(8px);
+  background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:999px;
+  font-size:13.5px;font-weight:600;z-index:50;opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s;max-width:88vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="estate-strip" aria-hidden="true"><img class="em-house" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAABGCAMAAAAdMRrrAAADAFBMVEUAAAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABnduxjAAAAAXRSTlMAQObYZgAAAmlJREFUeNrtmtt2hCAMRU/+/6fbNZ2qQLgkBARNXuoqKrDnkAsIzDAikPgZ1VPLGn1MA4FeD4EcgkN4FASyMUewNwYyNUewGQYaA+CLYRMYNN4cwpNSh0cbkUvh4xivTowuYD7FZIgqxHZxrVmegPuETZTgEBzCCQGJR0D6j8N3INeSe9smEMAMuzbV9pbdlECIE19kLriW8O9VNG9RAh6nBKBHCdhRCR4d9ofAdSHqdikI/M3VVzwLQmbocyEc5RSCQBeGPYpuOc6e4rdgTwivVsIyeQJ/b+UVJuzt8gT05gkaMRk55GWUoFlTFgsx+9vNV4LGs9i4o3WUoPGvRk45O4/ZEBRhRh+a6NwcpXkhMupVG6pV0T2YOhEyB2WjIRShiLIVVYYTbqvTPRCqU5I/Ixx4LfLMF0LYkBkeci0D8tx7lTCvNh/Q/f27DfQwgwabso9vdfL/iu/lvHkGfV99QQeEwgXFJyh0hMggOKWJTz1ZCvZ6BMnS2eG17z8a3KFPevoTtKHOLz07qEGg1pMVtOSS1AABAQTZKhmrhLbjJU1CXYHQqwTGSyTLbXkI7HcNBfcGVRSyWg40bTmYRgdbx6ht2QCCMLVRV5EO4WkQsAgE0xDZmtgqc/f2EFmaFRcimaBZhaDOepHRoYwhQyYuqJMfksoQZEpgqnXBl44o4Omp/sZBSLTFVKxCIaCmEU3VHFdX8uXQVbOLV4MRBHYg86IDy6B1OZQhyNYBc/o4ZT8BXQxqELopTIHQyUB1MiShcAcE8dae2R5hbURjdyXHfOOFV5pDYFTrEByCQ3gzhMVClUNwCL/2A4cGHxiWr8/FAAAAAElFTkSuQmCC"><span class="em-dept">The Household</span></div>
+<div class="topbar">
+  <div class="topbar-in">
+    <h1 id="topTitle">Today</h1>
+    <span class="sub" id="topSub"></span>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="screen" id="s-setup">
+    <div class="card card-pad">
+      <span class="eyebrow">First run</span>
+      <h2 style="margin-top:6px">One question and you're set</h2>
+      <p class="prose small" style="margin-top:8px">Your height, weight, age and waist come from the Still Room &mdash; the house already holds them, so there is nothing to type and nothing that can disagree. The only thing it does not know is how much you move.</p>
+      <div class="divider"></div>
+      <div class="stack">
+        <div id="setupBody" class="prose small" style="margin:0 0 4px"></div>
+        <div class="field">
+          <label for="f-act">Typical day</label>
+          <select id="f-act">
+            <option value="1.3">Mostly desk-based, little walking</option>
+            <option value="1.45" selected>Desk job but I walk a fair bit</option>
+            <option value="1.6">On my feet or training most days</option>
+          </select>
+        </div>
+        <p class="hint">Height is worked back from 113kg at BMI 32, so correct it if it is wrong — everything else depends on it.</p>
+        <p class="hint">Measure your waist at the belly button, standing, breathing out normally — not where your trousers sit. It is the number that tracks visceral fat best, and the one this app cares most about. If you have not got a tape measure to hand, skip it and add it later.</p>
+        <button class="btn btn-primary btn-block" id="setupGo">Build my plan</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-today">
+    <div class="card"><div class="meters" id="meters"></div></div>
+    <div class="section">
+      <div class="section-head">
+        <span class="eyebrow">The plan</span>
+        <button class="btn btn-sm btn-quiet" id="planAll">Decide it for me</button>
+      </div>
+      <div id="meals"></div>
+    </div>
+    <div id="topup"></div>
+    <div class="section">
+      <span class="eyebrow">Movement</span>
+      <div class="card card-pad" style="margin-top:9px">
+        <div class="row-between">
+          <div class="grow">
+            <div style="font-weight:600;font-size:14.5px">Walk after lunch</div>
+            <div class="hint" style="margin-top:2px">10–15 minutes, within half an hour of eating. Blunts the glucose spike far more than the same walk done later.</div>
+          </div>
+          <button class="btn btn-sm" id="walkBtn">No</button>
+        </div>
+        <div class="divider"></div>
+        <div class="row-between">
+          <div class="grow">
+            <div style="font-weight:600;font-size:14.5px">Resistance work</div>
+            <div class="hint" style="margin-top:2px">Twice a week. Protects muscle while you are in a deficit — that matters more at 56 than at 36.</div>
+          </div>
+          <button class="btn btn-sm" id="liftBtn">No</button>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <button class="btn btn-quiet btn-block" id="wipeDay">Clear today and start over</button>
+      <p class="hint" style="margin-top:11px;text-align:center">A bad day is one day. There is no streak here to break.</p>
+    </div>
+  </section>
+
+  <section class="screen" id="s-taste"></section>
+  <section class="screen" id="s-where"></section>
+  <section class="screen" id="s-numbers"></section>
+  <section class="screen" id="s-plan"></section>
+</div>
+
+<nav class="tabbar">
+  <div class="tabbar-in">
+    <button class="tab" data-go="today"><span class="ti">◧</span>Today</button>
+    <button class="tab" data-go="where"><span class="ti">⌖</span>Where</button>
+    <button class="tab" data-go="numbers"><span class="ti">◔</span>Numbers</button>
+    <button class="tab" data-go="plan"><span class="ti">≡</span>Plan</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════════════
+   DATA
+   conf: HIGH  = read off the retailer's own current UK product page
+         MED   = secondary source, or worked out from a per-100g table
+         EST   = reasoned estimate (home cooking, unbranded street food)
+   sug: grams of sugar, shown where it is the more revealing number
+   ═══════════════════════════════════════════════════════════════════ */
+
+const PLACES = [
+
+/* ─────────────  BREAKFAST AT HOME  ───────────── */
+{
+  id:'home-b', slot:'breakfast', icon:'☕', name:'Breakfast at home', tag:'Five options, all under two minutes',
+  rule:'Protein first, before anything else touches the plate. If breakfast is under 20g of protein you will be hungry by ten and the day is already harder than it needs to be.',
+  items:[
+    {id:'hb1', n:'Greek yogurt, berries, almonds', k:290, p:22, c:12, s:0.2, conf:'EST', star:true,
+     note:'170g FAGE 0% or skyr, 80g berries, 20g almonds. Sixty seconds, no cooking, no washing up.'},
+    {id:'hb2', n:'Three-egg scramble, spinach, tomato', k:290, p:22, c:4, s:0.6, conf:'EST',
+     note:'No toast. That is the whole point of this one.'},
+    {id:'hb3', n:'Cottage cheese, walnuts, black pepper', k:275, p:26, c:7, s:1.1, conf:'EST',
+     note:'Highest protein for the least effort on this list. 300g pot, 20g walnuts.'},
+    {id:'hb4', n:'Two boiled eggs, one slice seeded rye', k:300, p:18, c:18, s:0.9, conf:'EST',
+     note:'The bread version, for when you want bread. One slice, seeded, not white.'},
+    {id:'hb5', n:'Protein shake and an apple', k:250, p:28, c:22, s:0.3, conf:'EST',
+     note:'The running-late option. Still counts, and far better than skipping and raiding Pret at eleven.'}
+  ],
+  avoid:[
+    'Cereal, granola and porridge sachets — refined starch with sugar on top, and almost no protein.',
+    'Orange juice. 300ml is roughly 26g of sugar with the fibre removed.',
+    'Toast on its own.'
+  ]
+},
+
+/* ─────────────  BREAKFAST IN THE CAR  ───────────── */
+{
+  id:'car', slot:'breakfast', icon:'⛽', name:'Breakfast in the car', tag:'Garages, forecourts, services',
+  rule:'Breakfast comes out of the fridge, and it has to be something that was recently an animal — egg, milk or yogurt. Anything from a shelf, a warmer or a bakery counter is not breakfast. Second check, for the fridge only: if it is a drink, turn it round and find the sugar number. Under 10g a bottle or put it back.',
+  venues:[
+    {
+      id:'g-bp', name:'BP / M&S', tag:'The best garage stop', conf:'HIGH',
+      rule:'M&S Food is BP’s standard forecourt format, and the chilled grab-and-go fixture is the best food in any garage in Britain. Go straight past the bakery to the fridge.',
+      items:[
+        {id:'gbp0', n:'M&S Egg & Spinach Pot + High Protein Vanilla Yogurt', k:267, p:34, c:13.5, sug:7.9, s:0.59, conf:'HIGH', star:true,
+         note:'Close to a perfect garage breakfast. 34g of protein, under 8g of sugar, and barely any salt.'},
+        {id:'gbp1', n:'M&S High Protein Vanilla Yogurt, 200g', k:142, p:22, c:11.8, sug:7.8, s:0.16, conf:'HIGH', note:''},
+        {id:'gbp2', n:'M&S Egg & Spinach Pot, 100g', k:125, p:11.9, c:1.7, sug:0.1, s:0.43, conf:'HIGH',
+         note:'0.1g of sugar — the lowest-sugar item anywhere in this app. Needs a partner to reach 20g protein.'}
+      ],
+      avoid:[
+        'The bakery counter and anything in a warmer.',
+        'Juice and smoothies from the chiller — they are in the fridge but they were never an animal.'
+      ],
+      caveat:'Forecourt M&S stocks a subset of the full range. The yogurts and egg pots are core grab-and-go lines and are usually there, but not guaranteed at every site.'
+    },
+    {
+      id:'g-esso', name:'Esso / Tesco', tag:'Most predictable', conf:'HIGH',
+      rule:'Esso runs Tesco Express on the forecourt, and Tesco own-label is the best-documented food in Britain. You will find the same three things at every site.',
+      items:[
+        {id:'ges0', n:'Tesco Egg Protein Pot + High Protein Vanilla Yogurt', k:289, p:31.3, c:21.2, sug:16.6, s:0.35, conf:'HIGH', star:true,
+         note:'Good protein, but note the sugar — almost all of it is in the flavoured yogurt.'},
+        {id:'ges1', n:'Tesco Egg Protein Pot, 90g', k:121, p:11.3, c:1.4, sug:0.2, s:0.26, conf:'HIGH', note:''},
+        {id:'ges2', n:'Tesco High Protein Natural Yogurt', k:98, p:17, c:5.9, sug:5.9, s:0.12, conf:'MED', star:true,
+         note:'Figures for a 150g serving, worked out from the per-100g table. The natural version has a quarter of the sugar of the vanilla, on the same shelf. Take it if the pot size suits.'},
+        {id:'ges3', n:'Tesco High Protein Vanilla Yogurt, 200g', k:168, p:20, c:19.8, sug:16.4, s:0.09, conf:'HIGH',
+         note:'20g protein and almost no salt, but 16.4g of sugar. Fine occasionally, not every morning.'},
+        {id:'ges4', n:'Plain almonds, 30g', k:191, p:6.3, c:2.1, sug:1.3, s:0.01, conf:'HIGH',
+         note:'A partner, never the main event — 20g of protein from almonds costs 600 calories. Plain or natural, never dry roasted or salted.'}
+      ],
+      avoid:[
+        'Porridge pots. A golden syrup one is 37g of carbs and 12g of sugar dressed as a wholesome breakfast.',
+        'Cereal and granola bars — around 4g of protein for 11g of sugar, and the wrapper holds two.',
+        'The meal deal. It exists to sell you crisps.'
+      ]
+    },
+    {
+      id:'g-chiller', name:'Any branded chiller', tag:'Works anywhere', conf:'HIGH',
+      rule:'When the shop is unfamiliar, ignore the shop and go to the branded drinks chiller. Protein shakes are national convenience lines and they are stocked almost everywhere. Turn the bottle round and read the sugar before you buy it.',
+      items:[
+        {id:'gch1', n:'Grenade Protein Shake, White Chocolate 330ml', k:173, p:26, c:8.9, sug:6.9, s:0.34, conf:'HIGH', star:true,
+         note:'The single best object in a British garage for you. 26g of protein for under 7g of sugar.'},
+        {id:'gch2', n:'UFIT High Protein Milkshake, 330ml', k:149, p:25, c:11.2, sug:10.9, s:0.43, conf:'HIGH',
+         note:'Nearly as good. Slightly more sugar.'},
+        {id:'gch3', n:'Arla Protein Yogurt, 200g pot', k:142, p:20, c:12.8, sug:12, s:0.22, conf:'HIGH',
+         note:'The Arla *yogurt pot* is good. The Arla Protein *milk bottle* is not — see the traps list.'}
+      ],
+      avoid:[
+        'For Goodness Shakes RECOVERY — 50g of sugar, worse than a can of Coke. Their ULTIMATE bottle next to it is 40g protein and 8g sugar. Same brand, same fridge, adjacent on the shelf. Read the label every time.',
+        'Arla Protein chocolate milk, 482ml — 27g protein but 22.7g sugar and 0.82g salt.',
+        'Yazoo No Added Sugar — only 6.6g protein and still 9.4g sugar. It is not a protein drink.',
+        'Biltong and beef jerky. Superb protein, but a 40g bag is 1.8g of salt — nearly a third of your day in ninety seconds. This whole category is out for you.'
+      ]
+    },
+    {
+      id:'g-local', name:'Co-op / Spar / Local', tag:'Skyr is the sleeper', conf:'MED',
+      rule:'Small convenience shops rarely have a high-protein range, but almost all of them have skyr and eggs. Natural skyr is 10g of protein and 4g of sugar per 100g — the flavoured versions triple the sugar for no extra protein.',
+      items:[
+        {id:'gl1', n:"Sainsbury's On The Go Egg Protein Pot, 90g", k:127, p:12, c:2, s:0.3, conf:'MED',
+         note:'Product confirmed on Sainsbury’s own site; the salt figure is an estimate, so treat it as approximate.'},
+        {id:'gl2', n:'Co-op Vanilla Skyr, 150g', k:119, p:14, c:13.8, sug:12.3, s:0.11, conf:'MED',
+         note:'Worked out from the per-100g panel. Natural skyr, if they have it, is a third of the sugar.'}
+      ],
+      avoid:[
+        'Anything from the counter or the warmer.',
+        'Flavoured yogurt drinks — reliably sugar with a health claim on the front.'
+      ]
+    },
+    {
+      id:'g-services', name:'Motorway services', tag:'Walk past the hot counters', conf:'HIGH',
+      rule:'At services, walk past every hot counter and go to the shop. Moto sites carry M&S Food; Welcome Break carries Waitrose. That is the same chilled fixture as a good supermarket, and Pret is usually there too. Everything with a queue and a heat lamp is out on salt before you even look at the carbs.',
+      items:[
+        {id:'gsv1', n:'M&S or Waitrose chiller — egg pot plus a protein yogurt', k:267, p:34, c:13.5, sug:8, s:0.6, conf:'MED', star:true,
+         note:'Same order as the BP stop. Figures based on the M&S pairing.'},
+        {id:'gsv2', n:'Pret Egg & Spinach Protein Pot', k:103, p:11.4, c:2.3, s:0.57, conf:'HIGH',
+         note:'Take two, or one plus a shake.'}
+      ],
+      avoid:[
+        'Burger King, KFC and every hot breakfast counter — out on salt and refined carbs together.',
+        'Krispy Kreme. Obviously.',
+        'The "healthy" fruit pot with juice in it.'
+      ]
+    },
+    {
+      id:'g-greggs', name:'Greggs', tag:'Honestly: closed', conf:'HIGH',
+      rule:'Treat Greggs as closed for breakfast. If you are standing in one with no alternative, order black coffee and nothing else, and eat properly when you get in.',
+      items:[
+        {id:'ggr1', n:'Bacon Breakfast Roll — the least bad thing there', k:321, p:19, c:33, sug:5.3, s:1.9, conf:'HIGH',
+         note:'It fails you twice: 1.9g of salt is a third of your daily allowance before eight in the morning, and 33g of white-bread carbohydrate is exactly the load you are avoiding. Once a fortnight, with a low-salt rest of day, not a habit.'}
+      ],
+      avoid:[
+        'Sausage rolls, bakes, pastries — the entire counter.',
+        'The porridge. Greggs does not publish full nutrition online, which itself tells you something.',
+        'The sausage breakfast roll — 388 kcal, 39g carbs, 1.8g salt, and less protein than the bacon one.'
+      ],
+      caveat:'Greggs publishes calories for some lines but directs customers to an in-store leaflet for full nutrition. The two rolls above are from their own website; everything else there is unverified and, on category alone, worse.'
+    },
+    {
+      id:'g-costa', name:'Costa / Starbucks', tag:'Drive-thru', conf:'MED',
+      rule:'Order a flat white with skimmed or semi-skimmed milk, no syrup, no sugar. Decaf is nutritionally identical. Anything with a flavour name in it — caramel, vanilla, hazelnut, mocha, chai, spiced, iced anything — is a milkshake with coffee in it.',
+      items:[
+        {id:'gco1', n:'Decaf flat white, skimmed milk', k:89, p:9, c:12, sug:12, s:0.2, conf:'MED', star:true,
+         note:'Costa primo size. A small dose of milk protein for very few calories. Starbucks’ short is about half of everything.'},
+        {id:'gco2', n:'Americano, black', k:5, p:0.5, c:1, sug:0, s:0, conf:'MED', note:''}
+      ],
+      avoid:[
+        'Every syrup. The pumps are the whole problem.',
+        'Frappuccinos and iced flavoured drinks.',
+        'Oat milk, if you are watching glucose — higher carb and lower protein than dairy.',
+        'The pastry they offer you at the window.'
+      ],
+      caveat:'Costa does not publish per-drink macros cleanly, so these come from a nutrition database. The order is right; the exact numbers are approximate.'
+    }
+  ]
+},
+
+/* ─────────────  LUNCH AT WORK  ───────────── */
+{
+  id:'work', slot:'lunch', icon:'⌖', name:'Lunch at work', tag:'Seven venues within five minutes',
+  rule:'This is the meal you get wrong, at the venue you default to, when you are hungry and out of decisions. So do not browse. Pick the shop, take the top item, walk out.',
+  venues:[
+    {
+      id:'pret', name:'Pret A Manger', tag:'Best data · watch the salt', conf:'HIGH',
+      rule:'Buy protein by the pot, not by the plate. Two protein pots beat any salad or Super Plate — more protein, fewer calories, and about half the salt, because at Pret the salt lives in the dressings and the grain bases. Nothing served in bread. Never a Super Plate.',
+      items:[
+        {id:'p0', n:'Chicken & Edamame Pot + Egg & Spinach Pot', k:276, p:36.9, c:8.9, s:1.74, conf:'HIGH', star:true,
+         note:'The best order in the shop, and a straight swap for your tuna sandwich: 240 fewer calories, twice the protein, a fifth of the carbs.'},
+        {id:'p1', n:'Chicken & Edamame Protein Pot', k:173, p:25.5, c:6.6, s:1.17, conf:'HIGH', note:''},
+        {id:'p2', n:'Egg & Spinach Protein Pot', k:103, p:11.4, c:2.3, s:0.57, conf:'HIGH', note:''},
+        {id:'p3', n:'Tuna Niçoise Salad', k:357, p:29.6, c:8.5, s:1.97, conf:'HIGH',
+         note:'If you want tuna, this is the tuna. Not the baguette.'},
+        {id:'p4', n:'Roasted Salmon & Mango Protein Plate', k:402, p:26, c:13.6, s:1.81, conf:'HIGH', note:''},
+        {id:'p5', n:'Smoked Salmon & Egg Protein Pot', k:136, p:12.9, c:1.9, s:1.61, conf:'HIGH', note:''},
+        {id:'p6', n:'Chicken & Greens Protein Plate', k:285, p:34.2, c:14.6, s:2.85, conf:'HIGH',
+         note:'Great macros, but 2.85g of salt is half your day in one box. Occasional, not default.'}
+      ],
+      avoid:[
+        'Tuna baguette and crisps — 515 kcal and 59g of carbs before the crisps. This is your current habit, and the two protein pots replace it for fewer calories and more protein.',
+        'Miso Salmon Super Plate — 761 kcal and 3.16g salt. Health halo; the worst item in the shop for you.',
+        'Classic Super Club — 528 kcal, 43g carbs, 2.75g salt.',
+        'Shawarma Spiced Chicken Flatbread — sounds virtuous, is 57g carbs and 15g sugar.',
+        'Any juice or smoothie.'
+      ]
+    },
+    {
+      id:'ms', name:'M&S', tag:'Best overall', conf:'HIGH',
+      rule:'Shop the High Protein chilled range, and inside it pick the one whose carbs come from beans or vegetables rather than pasta, rice or bread. The range is engineered to 30g+ protein a pack, so protein looks after itself. Your only job is rejecting the pasta members.',
+      items:[
+        {id:'m1', n:'High Protein Chicken & Mushroom Courgetti, 370g', k:274, p:34, c:6.7, s:1.67, conf:'HIGH', star:true,
+         note:'The best single item found anywhere on the high street. 34g protein, under 7g carbs, 274 calories.'},
+        {id:'m2', n:'High Protein Beef Brisket & Smoky Tomato Beans, 380g', k:369, p:33.1, c:33.4, s:1.06, conf:'HIGH', star:true,
+         note:'Best salt figure of any 30g-protein meal on the high street, plus 11g of fibre. The carbs are beans, which is the good kind.'},
+        {id:'m3', n:'High Protein Cod, Scallop & Prawn Linguine, 385g', k:296, p:30.8, c:27, s:1.35, conf:'HIGH', note:''},
+        {id:'m4', n:'High Protein Naked Chicken Caesar Salad, 250g', k:297, p:27.8, c:8.3, s:1.5, conf:'MED',
+         note:'Worked out from the per-100g table, so close rather than exact.'},
+        {id:'m5', n:'High Protein Buffalo Chicken, 370g', k:444, p:35.5, c:36.3, s:1.78, conf:'HIGH', note:''},
+        {id:'m6', n:'High Protein Bang Bang Chicken, 355g', k:465, p:44, c:27.7, s:2.95, conf:'HIGH',
+         note:'44g of protein is excellent, but 2.95g of salt is half your daily limit. Not on a day you have already eaten out.'}
+      ],
+      avoid:[
+        'High Protein Pasta & Meatballs Box — 472 kcal, 49g carbs.',
+        'High Protein Chicken Arrabbiata — the protein is real, the pasta undoes it.',
+        'The High Protein bakery lines — bagels, rolls, wraps. Protein-fortified refined carbs are the wrong tool here.',
+        'Any sandwich, including the prawn mayo.'
+      ]
+    },
+    {
+      id:'waitrose', name:'Waitrose', tag:'Lowest salt', conf:'HIGH',
+      rule:'Take the own-label High Protein ready meal, and treat anything branded Glo as a dessert in disguise — check sugars before anything else. Waitrose own-label high protein is the lowest-salt line on the high street; the healthy-looking third-party salads carry 16–25g of sugar.',
+      items:[
+        {id:'w1', n:'High Protein Naked Chicken Katsu & Rice Salad, 255g', k:291, p:22.2, c:23, s:0.82, conf:'HIGH', star:true,
+         note:'0.82g of salt — the lowest-salt lunch in this app. Check the chiller, it goes in and out of stock.'},
+        {id:'w2', n:'High Protein Moroccan Style Chicken Tagine, 400g', k:393, p:33.4, c:39.9, s:1.54, conf:'HIGH',
+         note:'12.8g of fibre, the highest here. Fibre is what flattens the glucose curve.'},
+        {id:'w3', n:'High Protein Mexican Style Chicken & Grain Salad, 255g', k:286, p:22.4, c:27.3, s:1.25, conf:'HIGH', note:'11.2g of fibre.'},
+        {id:'w4', n:'High Protein Green Pesto Chicken, 400g', k:292, p:24.3, c:28.1, s:1.38, conf:'HIGH', note:''},
+        {id:'w5', n:'High Protein Beef & Noodles, 400g', k:331, p:21.7, c:44.1, s:1.03, conf:'HIGH',
+         note:'Low salt but 44g of carbs. Fine on a day you have walked a lot.'}
+      ],
+      avoid:[
+        'Glo Smoky Chicken & Rice Salad — sold as "protein packed", actually 24.5g of sugar and 2.8g of salt for 17.6g of protein.',
+        'Glo Spicy Chicken & Couscous Salad — 16g of sugar.',
+        'High Protein Smoky Chicken Burrito Bowl — 54g of carbs, highest in the range.'
+      ]
+    },
+    {
+      id:'sains', name:"Sainsbury's", tag:'Build it, don’t buy it', conf:'HIGH',
+      rule:'No single Sainsbury’s pack reliably clears 25g of protein — there is no equivalent of the M&S or Waitrose high-protein meal ranges. So pair a modest salad with a plain cooked-protein pack from the fixture two aisles over. Skip anything with pasta, rice or couscous in the name.',
+      items:[
+        {id:'sb0', n:'Chicken Caesar Salad + half a pack of chargrilled chicken slices', k:350, p:42, c:12, s:1.4, conf:'MED', star:true,
+         note:'The assembly play. 42g of protein for 350 calories — nothing off the shelf here comes close.'},
+        {id:'sb1', n:'Myprotein Greek Style Chicken Salad, 290g', k:305, p:24.5, c:21.8, s:0.44, conf:'HIGH', star:true,
+         note:'0.44g of salt and 11.2g of fibre. Best off-the-shelf single item in the shop.'},
+        {id:'sb2', n:'Chargrilled British Chicken Breast Slices, 90g', k:106, p:22.9, c:0.5, s:0.5, conf:'HIGH',
+         note:'Keep a pack in the office fridge. Turns any sad salad into a real lunch.'},
+        {id:'sb3', n:"Sainsbury's Chicken Caesar Salad, 180g", k:244, p:19.2, c:11.5, s:1.13, conf:'HIGH', note:''},
+        {id:'sb4', n:"Sainsbury's Mediterranean Chicken Salad, 280g", k:325, p:17.5, c:33.2, s:1.12, conf:'HIGH',
+         note:'Only if the others are gone. 33g of carbs for 17g of protein is a poor trade.'}
+      ],
+      avoid:[
+        'Chicken & Pesto Pasta Salad, Taste the Difference — 443 kcal, 51g carbs.',
+        'High Protein Chicken Salad Sandwich — the protein claim does not rescue the bread.',
+        'Anything with pasta, rice or couscous in the name.',
+        'The meal deal crisps. The deal is not a deal.'
+      ]
+    },
+    {
+      id:'mcd', name:"McDonald's", tag:'Grilled, no fries', conf:'MED',
+      rule:'Two words decide it: grilled, and no fries. Order grilled chicken in whatever format exists, refuse the meal upgrade, and accept that anything other than the plain salad costs you roughly 2g of salt.',
+      items:[
+        {id:'mc1', n:'Grilled Chicken Salad × 2, no dressing', k:266, p:40, c:8, s:1.4, conf:'MED', star:true,
+         note:'Looks eccentric, orders fine, cheaper than a meal, and by a distance the best macros in the building.'},
+        {id:'mc2', n:'Grilled Chicken Salad, no dressing', k:133, p:20, c:4, s:0.7, conf:'MED', note:''},
+        {id:'mc3', n:'The Fajita Chicken One — grilled', k:345, p:29, c:39, s:2.3, conf:'MED',
+         note:'The normal-looking order. 29g protein for 345 kcal is decent, but 2.3g of salt in one wrap is a real cost for your blood pressure.'}
+      ],
+      avoid:[
+        'Big Mac — 508 kcal, 43g carbs, 2.3g salt.',
+        'Medium fries — 337 kcal for 3g of protein, the worst ratio in this app.',
+        'McCrispy, and any Crispy Chicken Salad — breading doubles it and the word "salad" is doing no work.',
+        'Milkshakes, frappés, anything from the McCafé counter with a syrup pump.'
+      ],
+      caveat:'McDonald’s UK publishes calories but not full macros, so protein, carbs and salt here come from a nutrition database. Calories are reliable; the rest is close but not exact.'
+    },
+    {
+      id:'subway', name:'Subway', tag:'Verify in store', conf:'LOW',
+      rule:'As a salad, double meat, no sweet sauce. That one sentence fixes almost any Subway order and survives any menu rename. Take mustard, vinegar, olive oil or chilli. Refuse teriyaki, sweet onion, BBQ, honey mustard, and anything creamy.',
+      items:[
+        {id:'sw1', n:'Chicken Breast Salad, double meat, no bread', k:200, p:33, c:8, s:1.6, conf:'LOW', star:true,
+         note:'Doubling the meat is what makes this work — a standard portion is only 18g of protein.'},
+        {id:'sw2', n:'Chicken Breast Salad, standard', k:124, p:18, c:7.5, s:0.9, conf:'LOW', note:''},
+        {id:'sw3', n:'Steak & Cheese Salad', k:175, p:18, c:13, s:1.1, conf:'LOW', note:''},
+        {id:'sw4', n:'Turkey Breast & Ham Salad', k:110, p:15, c:7.1, s:1, conf:'LOW', note:''}
+      ],
+      avoid:[
+        'Any footlong, and most six-inch subs — the bread alone is 40–45g of carbs before anything goes in it.',
+        'Chicken teriyaki in any format. Teriyaki sauce is a sugar delivery system.',
+        'Meatball marinara.',
+        'The cookie. Especially the cookie.'
+      ],
+      caveat:'I could not reach Subway UK’s official nutrition data — their current PDF is blocked and the menu was renamed in the 2025–26 Subway Series refresh. Item names may be stale and the numbers come from a third-party database. Use this venue as a rule, not a table.'
+    },
+    {
+      id:'street', name:'Street food', tag:'Rule only · no data', conf:'NONE',
+      rule:'Buy a protein you can watch cooking, and ask for it without the carrier. Grilled chicken, lamb or halloumi skewers; a salt beef or gyros box with no pitta; a poke bowl with double fish on a salad base instead of rice; a Turkish or Greek grill plate with salad instead of chips. Pay for the meat, decline the starch, decline the sauce drizzle. If it can only arrive in bread or on rice, it is the wrong stall.',
+      items:[
+        {id:'st1', n:'Chicken shish box, salad, no pitta or rice', k:450, p:40, c:14, s:1.5, conf:'EST', star:true,
+         note:'Estimated from typical portion sizes, not measured. Treat the numbers as a guide.'},
+        {id:'st2', n:'Poke bowl, double fish, salad base not rice', k:420, p:38, c:16, s:2, conf:'EST',
+         note:'Soy and ponzu are where the salt hides. Ask for dressing on the side.'},
+        {id:'st3', n:'Grill plate — chicken or lamb, salad, no chips', k:500, p:42, c:12, s:1.8, conf:'EST', note:''}
+      ],
+      avoid:[
+        'Anything wrapped, on rice, or served with chips.',
+        'Burritos and loaded fries — reliably over 900 calories.',
+        'The sauce drizzle. It is nearly always sugar, oil, or both.'
+      ],
+      caveat:'There is no reliable nutrition data for independent street food stalls and I am not going to invent any. The figures above are reasoned estimates from typical portions.'
+    }
+  ]
+},
+
+/* ─────────────  LUNCH ON THE ROAD  ───────────── */
+{
+  id:'road-l', slot:'lunch', icon:'⛽', name:'Lunch on the road', tag:'Forecourts and services',
+  rule:'Every gram of salt has to buy you at least 20 grams of protein. Salt is on the front of every UK pack by law and protein is on the back — divide one by the other, and under 20 goes back on the shelf. That single sum rejects pasties, sausage rolls, hot counters, cheese, crisps and every "protein plate" that got there via soy sauce and bacon, and it accepts eggs, plain cooked chicken and tinned fish. It also handles hot-hold food correctly: no label, no ratio, no purchase.',
+  venues:[
+    {
+      id:'r-tesco', name:'Esso / Tesco', tag:'Meal deal, done right', conf:'HIGH',
+      rule:'The meal deal is not the enemy — the wrong meal deal is. Tesco puts the Egg Protein Pot on the SNACK list, which turns the whole thing round: a chicken salad as the main, an egg pot as the snack, water as the drink. Same price as the sandwich-crisps-Coke version and about 350 calories lighter.',
+      items:[
+        {id:'rte0', n:'MEAL DEAL: Chicken & Bacon Layered Salad + Egg Protein Pot + water', k:466, p:32.8, s:0.80, conf:'HIGH', star:true,
+         note:'Every target met with salt to spare. The egg pot counts as your snack — most people never notice it is on that list. Against your usual club sandwich, crisps and a Coke, this saves about 350 calories, 1.3g of salt and 35g of sugar for the same money.'},
+        {id:'rte1', n:'Tesco Ready To Eat Sliced Roast Chicken Breast 200g + an apple', k:330, p:52.4, s:0.86, conf:'HIGH', star:true,
+         note:'Best protein-per-gram-of-salt on any forecourt shelf in Britain — a ratio of 61 against a target of 20. Eaten straight from the pack, one-handed. Not sold as lunch, which is exactly why it is good.'},
+        {id:'rte2', n:'Tesco Finest Roast Chicken 120g + Egg Protein Pot', k:282, p:44.2, s:0.91, conf:'HIGH', star:true,
+         note:'Finest is whole-muscle chicken. The ordinary Roast Chicken Slices are formed and reconstituted at roughly double the salt — the ingredients list tells you which is which.'},
+        {id:'rte3', n:'Calorie Controlled Chicken Salad Sandwich + Egg Protein Pot', k:420, p:35.3, s:1.26, conf:'HIGH',
+         note:'The best one-handed meal deal. If you need to eat while driving, this is the one.'},
+        {id:'rte4', n:'Chicken & Bacon Caesar Salad 265g + Egg Protein Pot', k:492, p:35.8, s:1.27, conf:'HIGH',
+         note:'The backup when the layered salad has gone. Needs a fork.'},
+        {id:'rte5', n:'Tesco Egg Protein Pot, 90g', k:121, p:11.3, c:1.4, sug:0.2, s:0.26, conf:'HIGH',
+         note:'Ratio of 43. Buy two if that is all there is.'}
+      ],
+      avoid:[
+        'The Chicken Club sandwich — 506 kcal and 1.70g of salt. Ratio of 18, so it fails by the rule.',
+        'The crisps. Not for the salt, which is only 0.37g a bag — for 166 calories buying you 2g of protein and 17g of refined starch.',
+        'Any pasta salad, whatever the protein claim on the front.',
+        'Fridge Raiders — 9g of protein for 0.7g of salt is a ratio of 13. Emergency only.',
+        'There is no Tesco high-protein chilled savoury range like M&S has. Do not go looking for one.'
+      ]
+    },
+    {
+      id:'r-bp', name:'BP / M&S', tag:'Depends on the site', conf:'HIGH',
+      rule:'Forecourt M&S is a subset of the real thing, and the size of the site decides what is there — a big A-road station has the full food-to-go chiller, a small one has sandwiches and little else. Walk to the chiller, not the sandwich fixture.',
+      items:[
+        {id:'rbp0', n:'Two M&S Egg & Spinach Pots', k:250, p:23.8, c:3.4, sug:0.2, s:0.86, conf:'HIGH', star:true,
+         note:'Ratio of 28, and you can eat them one-handed. Protein is a shade under target, so add an apple or a small bag of plain nuts.'},
+        {id:'rbp1', n:'M&S High Protein Naked Chicken Caesar Salad, 250g', k:298, p:27.8, c:8.3, s:1.5, conf:'MED',
+         note:'Perfect on protein and carbs, but the salt eats your whole lunch budget in one box, and it needs a fork. Good occasionally, not daily.'},
+        {id:'rbp2', n:'M&S Egg & Spinach Pot, 100g', k:125, p:11.9, c:1.7, sug:0.1, s:0.43, conf:'HIGH', note:''},
+        {id:'rbp3', n:'M&S High Protein Buffalo Chicken, 370g', k:444, p:35.5, c:36.3, s:1.78, conf:'HIGH',
+         note:'Only if there is a microwave. 9g of fibre is good; the salt is over budget.'}
+      ],
+      avoid:[
+        'M&S Honey Mustard Chicken Pasta Salad — 598 kcal and 75g of carbs. The purest example of the looks-like-a-salad trap in British food-to-go.',
+        'The Nutrient Dense salads — 300 calories but only 10g of protein. Marketed as the healthy choice, useless for you.',
+        'The bakery and anything in a hot cabinet.'
+      ]
+    },
+    {
+      id:'r-shell', name:'Shell / Waitrose', tag:'Best case, if you find one', conf:'HIGH',
+      rule:'A Waitrose-stocked Shell is the best forecourt in Britain and better than most supermarkets. There are only about a hundred of them, so do not plan a journey around it — but when you are at one, take advantage.',
+      items:[
+        {id:'rsh0', n:'Waitrose Cooked Chicken Breast Pieces, half pack + Egg & Spinach Pot', k:256, p:38.3, s:0.88, conf:'HIGH', star:true,
+         note:'Ratio of 44. Two items that are not sold as lunch, beating everything that is.'},
+        {id:'rsh1', n:'Two Waitrose Egg & Spinach Protein Pots', k:220, p:23, s:0.70, conf:'HIGH', star:true,
+         note:'0.35g of salt each — the lowest-salt protein pot on the high street.'},
+        {id:'rsh2', n:'Waitrose Egg & Spinach Protein Pot, 90g', k:110, p:11.5, s:0.35, conf:'HIGH', note:''}
+      ],
+      avoid:[
+        'The deli by Shell hot counter. Hot-hold food is legally exempt from nutrition labelling, so there is no number to check — no label, no ratio, no purchase.',
+        'Costa food. They do not publish nutrition for the in-store food range at all. Treat Costa as a drinks stop and nothing else.',
+        'Waitrose High Protein Smoky Chicken Burrito Bowl — 54g of carbs, the highest in their range.'
+      ]
+    },
+    {
+      id:'r-services', name:'Motorway services', tag:'The operator decides', conf:'HIGH',
+      rule:'Which operator you have pulled into decides everything. Moto has M&S Food. Welcome Break has Waitrose. Roadchef has neither — it is Costa, McDonald’s and LEON. At all three, walk past every hot counter and go to the shop.',
+      items:[
+        {id:'rms0', n:'Welcome Break — Waitrose cooked chicken + egg pot', k:256, p:38.3, s:0.88, conf:'HIGH', star:true,
+         note:'Waitrose at Welcome Break is the best food on the entire motorway network.'},
+        {id:'rms1', n:'Moto — two M&S Egg & Spinach Pots', k:250, p:23.8, c:3.4, s:0.86, conf:'HIGH', star:true, note:''},
+        {id:'rms2', n:'Pret Chicken & Edamame Protein Pot', k:173, p:25.5, c:6.6, sug:0.5, s:1.17, conf:'HIGH',
+         note:'Pret is at both Moto and Welcome Break. This is the pot to buy — see the do-not-buy list for the one that looks better and is not.'},
+        {id:'rms3', n:'Roadchef — LEON Chicken Caesar Salad', k:388, p:30, c:13, sug:3.4, s:1.7, conf:'HIGH',
+         note:'The least-bad hot-brand option on the network. Salt is over budget and 23g of fat is high, but at a Roadchef there is nothing better.'}
+      ],
+      avoid:[
+        'Pret Chicken & Greens Protein Plate — 2.85g of salt. That is 57% of your entire day in one lunch, and more than twice a Greggs sausage roll. One of the saltiest "healthy" items in UK food-to-go.',
+        'KFC, Burger King, Taco Bell, Chopstix, PizzaExpress, Krispy Kreme.',
+        'West Cornwall Pasty and Phat Pasty — pastry, no published numbers, and hot-hold food carries no label.',
+        'Subway. The salt is in the meats, the cheese and the sauces, not just the bread, so ordering it as a salad does not rescue it.',
+        'Do not plan around a McDonald’s salad existing — I could not confirm one is currently on the UK menu.'
+      ]
+    },
+    {
+      id:'r-local', name:'Co-op / Spar / Local', tag:'Build it from two things', conf:'MED',
+      rule:'The weakest tier — small chillers dominated by pasta salads. Ignore the lunch fixture completely. Go to the cooked meats chiller and the egg shelf and build lunch out of two things that were never sold as lunch. It will beat the sandwich aisle on protein, salt, calories and usually price.',
+      items:[
+        {id:'rco0', n:'Cooked chicken from the meats chiller + an egg pot', k:280, p:40, s:0.9, conf:'MED', star:true,
+         note:'Estimated from the Tesco and Waitrose equivalents. Look for whole-muscle chicken rather than formed slices — formed is about double the salt.'},
+        {id:'rco1', n:'Co-op Egg Protein Pot, 90g', k:118, p:11.5, s:0.3, conf:'MED',
+         note:'Product confirmed in the Co-op range; the numbers are estimated from the Tesco and Waitrose versions because Co-op do not publish the panel online.'}
+      ],
+      avoid:[
+        'Every pasta salad on the shelf. Pasta-led, mayonnaise-dressed, low protein density, whatever the front of the pack says.',
+        'Salted edamame pots. This one is counterintuitive: an Itsu 76g pot is 0.91g of salt for 3.9g of protein — a ratio of 4, one of the worst in this app. The salt sits on the pods you do not even eat and goes straight onto your tongue.',
+        'The sandwich fixture generally — small-format chillers are where the worst of it ends up.'
+      ]
+    },
+    {
+      id:'r-wheel', name:'Eating at the wheel', tag:'No fork, one hand', conf:'HIGH',
+      rule:'A salad box needs a fork and a flat surface, and you have neither. The good news is that the best things on a forecourt are already one-handed — the chicken you eat from the pack and the egg pot you tip straight into your mouth beat anything that comes with cutlery.',
+      items:[
+        {id:'row0', n:'Tesco Ready To Eat Sliced Roast Chicken Breast 200g, from the pack', k:248, p:52.4, s:0.86, conf:'HIGH', star:true,
+         note:'The single best thing you can buy at a garage, and it needs no cutlery, no plate and no attention.'},
+        {id:'row1', n:'Two egg protein pots, tipped straight in', k:240, p:23, s:0.6, conf:'HIGH', star:true,
+         note:'Tesco, Waitrose or M&S — all three are between 0.26g and 0.43g of salt.'},
+        {id:'row2', n:'Tesco Calorie Controlled Chicken Salad Sandwich', k:299, p:24, s:1.0, conf:'HIGH',
+         note:'The only sandwich in this app. Ratio of 24, and it is one-handed by design.'},
+        {id:'row3', n:'Fridge Raiders Chicken Bites, 45g', k:95, p:9, c:2.5, sug:0.5, s:0.70, conf:'HIGH',
+         note:'Ratio of 13, so it fails the rule. Genuine emergency only, and never as the whole lunch.'}
+      ],
+      avoid:[
+        'Cheese as the protein source — cheddar runs about 1.8g of salt per 100g, and Babybel and Cheestrings are salt-dense for what they give you.',
+        'Anything needing a fork while the car is moving. Park up, or pick differently.',
+        'Eating and driving as the default. If you can give it ten minutes in a lay-by you will eat less and notice it more.'
+      ]
+    },
+    {
+      id:'r-greggs', name:'Greggs', tag:'Still a coffee stop', conf:'MED',
+      rule:'Treat a forecourt Greggs as a coffee stop. The units on forecourts are bakery-only kiosks with a hot cabinet and almost no chilled space, so even the things that would be borderline elsewhere are not there.',
+      items:[
+        {id:'rgr1', n:'Sausage roll — the least bad thing there, and it still fails', k:348, p:10.2, c:24.1, sug:0.9, s:1.30, conf:'MED',
+         note:'10g of protein for 1.3g of salt is a ratio of 8, against a target of 20. Plus 22g of fat, 10g of it saturated. If you are standing there with no alternative, it is better than two of them — but the honest answer is a coffee and a proper lunch later.'}
+      ],
+      avoid:[
+        'Pasties, bakes, and everything else in the hot cabinet.',
+        'The sweet counter.',
+        'Driving to a Greggs on purpose.'
+      ],
+      caveat:'Greggs launched a chilled salad range in May 2026, including a Chicken Caesar Salad with Egg. They have not published protein or salt figures for it, and forecourt kiosks are very unlikely to stock it. If you are in a full high-street Greggs and it is in the chiller, read the pack and apply the ratio — but do not count on it.'
+    }
+  ]
+},
+
+/* ─────────────  LUNCH AT HOME  ───────────── */
+{
+  id:'home-l', slot:'lunch', icon:'◨', name:'Lunch at home', tag:'Mostly last night’s dinner',
+  rule:'Cook double at dinner and lunch solves itself. A box in the fridge beats any decision you have to make at half past twelve while hungry — this is the single highest-leverage habit on the whole list.',
+  items:[
+    {id:'hl0', n:'Last night’s dinner, reheated', k:470, p:38, c:22, s:1, conf:'EST', star:true,
+     note:'Numbers are the average of the dinner options. Cook double, box it while you are washing up, done.'},
+    {id:'hl1', n:'Tin of tuna or mackerel, big salad, olive oil', k:400, p:38, c:10, s:1, conf:'EST',
+     note:'Buy tuna in spring water, not brine — brine roughly doubles the salt.'},
+    {id:'hl2', n:'Three-egg omelette and a salad', k:380, p:26, c:6, s:0.9, conf:'EST', note:''},
+    {id:'hl3', n:'Chicken or prawns, microwave veg, olive oil', k:420, p:40, c:14, s:0.8, conf:'EST',
+     note:'Pre-cooked chicken from a packet is fine. It is not cheating.'},
+    {id:'hl4', n:'Cottage cheese, tomatoes, two oatcakes', k:330, p:28, c:22, s:1.4, conf:'EST',
+     note:'The no-cooking option when you cannot face the kitchen.'}
+  ],
+  avoid:[
+    'Toast and something. It is never enough protein and you will be hungry at three.',
+    'Finishing whatever the family left. That is not a decision, it is a default.',
+    'Crisps as a side. There is no version of this where crisps help.'
+  ]
+},
+
+/* ─────────────  DINNER AT HOME  ───────────── */
+{
+  id:'home-d', slot:'dinner', icon:'◗', name:'Dinner at home', tag:'Cook double, always',
+  rule:'A palm of protein, half the plate non-starchy vegetables, and a small fist of slow carbohydrate or none. Then cook twice as much as you need, because that is tomorrow’s lunch and you will not have to think about it.',
+  items:[
+    {id:'hd1', n:'Salmon fillet, roast veg, three new potatoes', k:480, p:36, c:28, s:0.6, conf:'EST', star:true,
+     note:'Oily fish twice a week helps blood pressure and triglycerides both.'},
+    {id:'hd2', n:'Chicken breast, big salad, olive oil', k:450, p:45, c:12, s:0.8, conf:'EST',
+     note:'Dress it yourself — oil, vinegar, mustard. Shop dressings are where the sugar hides.'},
+    {id:'hd3', n:'Chilli con carne with kidney beans, no rice', k:500, p:38, c:35, s:1.2, conf:'EST', star:true,
+     note:'Beans instead of rice: same bowl, a much flatter glucose response, four times the fibre.'},
+    {id:'hd4', n:'Steak, green veg, mustard', k:470, p:45, c:8, s:0.8, conf:'EST',
+     note:'Red meat a couple of times a week is fine. It is the processed stuff that is the problem.'},
+    {id:'hd5', n:'Prawn and vegetable stir fry, small noodles', k:450, p:32, c:40, s:1.5, conf:'EST',
+     note:'Watch the soy — a tablespoon is roughly 1g of salt. Use low-salt, or use less.'},
+    {id:'hd6', n:'Vegetable and feta frittata, side salad', k:420, p:28, c:12, s:1.2, conf:'EST',
+     note:'Six eggs makes two portions, so tomorrow’s lunch is already done.'}
+  ],
+  avoid:[
+    'A big bowl of pasta or rice as the main event.',
+    'Shop-bought sauces and dressings — check the sugar, it is usually startling.',
+    'Second helpings served straight from the pan. Box the extra first, then sit down.'
+  ]
+},
+
+/* ─────────────  HUNGRY NOW  ───────────── */
+{
+  id:'hungry', slot:'snack', icon:'◦', name:'Hungry right now', tag:'Eat something, then read the note',
+  rule:'Eat the snack. Then look at what your last meal was — hunger between meals almost always means that meal was light on protein, and that is a fixable thing rather than a willpower thing.',
+  items:[
+    {id:'sn1', n:"Sainsbury's Protein Big Pot yogurt, 200g", k:148, p:23, c:11.8, s:0.1, conf:'HIGH', star:true,
+     note:'23g of protein and almost no salt. The best snack on this list by a distance.'},
+    {id:'sn2', n:'FAGE Total 0%, 150g pot', k:81, p:15.5, c:4.5, s:0.15, conf:'HIGH', note:''},
+    {id:'sn3', n:'Edamame beans, half a pack', k:134, p:12.1, c:3.1, s:0.02, conf:'HIGH',
+     note:'Protein, fibre and essentially no salt. Fiddly to eat, which slows you down — that helps.'},
+    {id:'sn4', n:'Plain almonds, 25g', k:145, p:5.4, c:2.5, s:0, conf:'EST',
+     note:'Weigh them out once into a small tub. Loose nuts from a big bag do not stop.'},
+    {id:'sn5', n:'Mini Babybel Protein × 2', k:96, p:10.4, c:0.2, s:0.68, conf:'HIGH',
+     note:'Convenient and low carb, but the saltiest thing here per gram of protein.'},
+    {id:'sn6', n:'Grenade Carb Killa bar', k:214, p:21, c:20, sug:1.4, s:0.2, conf:'HIGH',
+     note:'The emergency backup. Genuinely compliant numbers — but 18g of that carb is polyols, which bloat a lot of people. Most bars marketed as "protein" are nothing like this one.'}
+  ],
+  avoid:[
+    'Crisps, obviously — but specifically: they are the thing you buy because the meal deal made it free.',
+    'Cereal and granola bars — around 4g of protein for 11g of sugar.',
+    'Biltong and jerky. Great protein, but 1.8g of salt in a 40g bag rules the category out for your blood pressure.',
+    'Anything eaten standing at the fridge. Put it on a plate and sit down; you will eat less and notice it more.'
+  ]
+},
+
+/* ─────────────  DRINKS  ───────────── */
+{
+  id:'drinks', slot:null, logAs:'extra', icon:'◇', name:'Drinks', tag:'Including the Diet Coke question',
+  rule:'The honest hierarchy: your weight and, if you take them, your tablets are doing about 90% of the work on your blood pressure. Every drink here is worth somewhere between nothing and 7 mmHg on weak evidence, and the effects do not stack. Drinks are a garnish. Get them roughly right and stop thinking about them.',
+  venues:[
+    {
+      id:'d-coke', name:'Your Diet Coke', tag:'The straight answer', conf:'HIGH',
+      rule:'Keep it. Cap it at one or two a day and drink it with a meal rather than sipping it across the afternoon. The reason to cap it is your teeth, not cancer.',
+      brief:[
+        '<strong>The randomised evidence says it is not hurting you.</strong> Nine trials comparing diet drinks with unsweetened ones found no difference in weight, waist, fasting glucose, HbA1c, lipids or blood pressure. A 2026 trial ran this exact question in 181 adults with type 2 diabetes who already drank diet drinks — half were switched to plain water for six months. <em>The water group did worse</em>: HbA1c 0.29% higher and 1.1kg more weight gained. One trial, and imperfect, but it is the study closest to your situation and it points the opposite way to the headlines.',
+        '<strong>Why the scary studies look scary.</strong> Observational research does link diet drinks to hypertension, stroke and visceral fat. The problem is that nobody becomes a diet-drink drinker at random. People switch <em>because</em> they already have a rising waistline or a prediabetes diagnosis. You are the textbook case: you would enter any of those studies as "daily diet cola drinker, BMI 32, prediabetic", and anything that happened next would get partly blamed on the cola. That is called reverse causation and it is the leading explanation for why every observational study looks alarming and every randomised one comes back flat.',
+        '<strong>The 2023 cancer headline.</strong> The WHO cancer agency put aspartame in the "possibly carcinogenic" group — the same category as aloe vera extract and pickled vegetables. It is a statement about whether a hazard exists at all, not about risk at real doses. On the same day, the safety committee reaffirmed the acceptable daily intake unchanged. At your body weight you would need roughly <strong>15 to 22 cans a day</strong> to reach it.',
+        '<strong>What is actually worth acting on: your teeth.</strong> Diet Coke contains phosphoric and citric acid, and sugar-free versions erode enamel exactly as much as full-sugar ones — sugar is irrelevant to that mechanism. This is the one clearly-evidenced harm of a daily cola habit. Drink it with a meal instead of sipping it for two hours, use a straw, rinse with water afterwards, and do not brush your teeth for thirty minutes.'
+      ],
+      items:[
+        {id:'dc1', n:'Caffeine-free Diet Coke, with a meal', k:1, p:0, c:0, sug:0, s:0.02, conf:'HIGH', star:true,
+         note:'Where to buy it: 2 litre bottles are in every big supermarket, and Tesco own-brand caffeine-free diet cola is about 75p for 2 litres. Coke Zero Zero Caffeine and Pepsi Max No Caffeine are equally caffeine-free. What you will not find is any caffeine-free option in convenience stores, meal deals, pubs or cafés — that is the gap you have noticed, and the fix is buying it in the weekly shop.'}
+      ],
+      avoid:[
+        'Sipping it across the whole afternoon. Same dose of acid, hours more contact with your teeth.',
+        'Brushing straight after. Enamel is softened for about half an hour; brushing then does the damage.',
+        'Six a day. Not because of the sweetener, but because at that volume it is displacing water and milk, and it keeps your palate expecting everything to be very sweet.'
+      ]
+    },
+    {
+      id:'d-every', name:'Everyday', tag:'Milk is the underrated one', conf:'HIGH',
+      rule:'Water is the default — but not because it burns fat. The randomised evidence for drinking more water and losing weight is flatly null. It is the default because it costs nothing and displaces everything else. Drink enough not to be thirsty and stop chasing a litre target.',
+      items:[
+        {id:'dv1', n:'Water, still or plain sparkling, slice of lemon', k:0, p:0, c:0, sug:0, s:0, conf:'HIGH', star:true,
+         note:'Plain sparkling water is gentle on enamel. Flavoured sparkling waters are not — the citric acid in them measurably softens it. Put a slice of lemon in the glass rather than buying lemon-flavoured water.'},
+        {id:'dv2', n:'Skimmed or semi-skimmed milk, 200ml', k:70, p:7.2, c:9.6, s:0.14, conf:'HIGH', star:true,
+         note:'The most underrated drink on this list for you. Protein to protect muscle while you lose fat, plus potassium and calcium. Skimmed gives identical protein to semi-skimmed for a third fewer calories.'},
+        {id:'dv3', n:'Sugar-free squash, diluted', k:3, p:0, c:0.3, sug:0, s:0, conf:'HIGH',
+         note:'About 1 calorie per 100ml made up. The cheapest way to make water interesting, and less acidic than cola.'},
+        {id:'dv4', n:'Tea or coffee, black or a splash of milk', k:10, p:0.7, c:1, sug:1, s:0.02, conf:'HIGH',
+         note:'Coffee does not raise blood pressure long-term in habitual drinkers, and decaf keeps almost all of the association with lower diabetes risk — so your caffeine-free preference costs you nothing there.'},
+        {id:'dv5', n:'Hibiscus tea, hot or iced', k:0, p:0, c:0, sug:0, s:0, conf:'HIGH',
+         note:'Zero calories and possibly a little blood pressure benefit. See the blood pressure section for how much to believe.'}
+      ],
+      avoid:[
+        'Energy drinks — the only drink category with a consistent unfavourable heart signal: blood pressure up in half the studies, QT prolongation in two thirds of those that measured it. And that was in healthy 22-year-olds, not hypertensive 56-year-olds. The sugar-free ones still deliver the caffeine load.',
+        'Fruit juice. A glass of orange juice is about three oranges drunk in two minutes with the fibre removed — nutritionally far closer to a fizzy drink than to fruit.',
+        'Smoothies. Better than juice because the fibre survives, but a 250ml shop-bought one is still a serious carbohydrate load. One small glass of juice or smoothie a day is a sensible ceiling.',
+        'Sweetened iced coffee, frappés and milkshakes.',
+        'Flavoured or "vitamin" waters with added sugar.'
+      ]
+    },
+    {
+      id:'d-coffee', name:'Coffee shop', tag:'The oat milk question', conf:'HIGH',
+      rule:'The order is a flat white or cappuccino, no syrup, no sugar — decaf is nutritionally identical. The only real decision left is which milk, and the answer is not the one you would expect. Soya beats oat on every measure that matters to you, and every UK chain has it.',
+      brief:[
+        'You drink oat flat whites almost exclusively, so here is the straight comparison rather than a rule. Figures are for the milk in one regular flat white, about 140ml, from the manufacturers’ own current UK panels.',
+        '<table class="cmp"><thead><tr><th>Milk</th><th>kcal</th><th>Protein</th><th>Carbs</th></tr></thead><tbody>'
+        + '<tr class="win"><td>Soya barista</td><td>59</td><td>4.6g</td><td>3.8g</td></tr>'
+        + '<tr><td>Skimmed dairy</td><td>49</td><td>5.0g</td><td>7.0g</td></tr>'
+        + '<tr><td>Semi-skimmed</td><td>66</td><td>5.0g</td><td>6.7g</td></tr>'
+        + '<tr class="lose"><td>Oat barista</td><td>85</td><td>1.5g</td><td>9.9g</td></tr>'
+        + '</tbody></table>',
+        '<strong>Oat is not a disaster, and I am not going to tell you to stop.</strong> An oat flat white is about 87 calories including the espresso. Two a day is roughly 175 calories — real, but not the thing standing between you and losing weight.',
+        '<strong>The actual cost is protein, and it is bigger than it looks.</strong> Oat gives you 1.5g a cup against 5g from dairy. Two a day is about 7g of protein you are not getting, every day, against a 140g target — roughly 50g a week, which is a third of a day. For a man in a calorie deficit trying to hold onto muscle at 56, that is the part worth caring about.',
+        '<strong>On the sugar: it is real but small.</strong> Oat drink contains no added sugar, yet a flat white’s worth carries about 4.8g of it. That is because oat drinks are made by using enzymes to break oat starch down into maltose — the sweetness is manufactured out of the starch itself, and maltose is absorbed fast. In a 140ml flat white that is roughly a teaspoon, so on its own it is minor. Alongside a pastry, or on an empty stomach, less so.',
+        '<strong>Do not be fooled by the carbohydrate column above.</strong> Dairy looks worse than soya on carbs, but all of it is lactose, which is absorbed slowly and barely moves glucose. Oat’s carbohydrate is the fast kind. The numbers are not comparing like with like, which is exactly why a carbohydrate figure on its own is a poor way to choose food.',
+        '<strong>Where the evidence actually is.</strong> The mechanism above is well documented. What I could <em>not</em> find is good randomised data on what a coffee-sized serving of oat drink does to blood glucose in someone like you — the "oat milk spikes your blood sugar" claim online rests largely on individual continuous-glucose-monitor anecdotes and blog posts. Treat the size of the effect as unknown, and the protein gap as the certain part.',
+        '<strong>So: switch to soya and change nothing else.</strong> It steams and tastes much the same, it is on the menu at Costa, Starbucks, Pret and Nero, and per cup it is 26 fewer calories, three times the protein and six grams fewer carbohydrate than oat. If you would rather keep oat, keep it — just log it, and get that protein back somewhere else in the day.'
+      ],
+      items:[
+        {id:'cs0', n:'Flat white with soya, no syrup', k:61, p:4.6, c:3.8, sug:2, s:0.14, conf:'HIGH', star:true,
+         note:'The straight swap for your usual order. Best of the non-dairy options on calories, protein and carbs all at once.'},
+        {id:'cs1', n:'Flat white with skimmed dairy', k:51, p:5, c:7, s:0.15, conf:'HIGH', star:true,
+         note:'The lowest-calorie version with full protein, if you are happy with dairy. Those 7g of carbohydrate are lactose, which is absorbed slowly — not comparable to the maltose in oat.'},
+        {id:'cs2', n:'Flat white with oat, no syrup', k:87, p:1.5, c:9.9, sug:4.8, s:0.14, conf:'HIGH',
+         note:'Your current order. Fine to keep — just be aware it is nearly a protein-free drink, and count it.'},
+        {id:'cs3', n:'Americano, black', k:5, p:0.5, c:1, sug:0, s:0, conf:'MED', note:''},
+        {id:'cs4', n:'Large latte with soya', k:103, p:7.9, c:6.5, sug:3.4, s:0.24, conf:'HIGH',
+         note:'About 8g of protein. A useful contribution to your 140g, not a solution — and it is food, not free.'}
+      ],
+      avoid:[
+        'Every syrup. The pumps are the entire problem, whatever milk is underneath.',
+        'Frappuccinos and iced flavoured drinks.',
+        'Almond and coconut milk. Both are lower in protein than oat — almond is typically under 0.5g per 100ml. If you are going non-dairy, soya is the only one that keeps the protein.',
+        'The pastry they offer you at the till.'
+      ],
+      caveat:'Milk figures are from Oatly’s and Alpro’s own current UK nutrition panels and standard UK dairy composition, scaled to about 140ml of milk per flat white. Chains vary their cup sizes, so treat these as close rather than exact — the ranking between the milks holds regardless of size.'
+    },
+    {
+      id:'d-out', name:'When you are out', tag:'Alcohol, without the lecture', conf:'HIGH',
+      rule:'You rarely drink, and that means cutting down further is one of the least productive things available to you. The blood pressure benefit of cutting alcohol lives almost entirely in heavy drinkers cutting hard — there is not 3 mmHg sitting there waiting for you to claim. So treat this as a calorie question, not a virtue one.',
+      items:[
+        {id:'al1', n:'Single spirit with slimline tonic', k:58, p:0, c:0, sug:0, s:0.02, conf:'HIGH', star:true,
+         note:'About a quarter of a pint of lager, and effectively no sugar. The clear winner if you want a drink in your hand.'},
+        {id:'al2', n:'Guinness 0.0, 330ml', k:56, p:0.7, c:7.6, sug:2.3, s:0.02, conf:'MED', star:true,
+         note:'Remarkable — 56 calories a bottle and it drinks like a proper pint. Check the current label, formulations change.'},
+        {id:'al3', n:'Soda water and lime', k:2, p:0, c:0, sug:0, s:0.02, conf:'HIGH', note:''},
+        {id:'al4', n:'Lucky Saint 0.5%, 500ml', k:80, p:0.5, c:0.5, sug:0.5, s:0.02, conf:'MED',
+         note:'Lowest sugar of the alcohol-free beers.'},
+        {id:'al5', n:'Dry wine, small 175ml glass', k:159, p:0, c:2, sug:1, s:0.01, conf:'HIGH',
+         note:'The 250ml large glass is 228 calories. Ask for the small one and it is not a close contest.'}
+      ],
+      avoid:[
+        'Regular tonic instead of slimline — 4.9g of sugar per 100ml against zero. One a day for a year is roughly 11,500 calories and 2.7kg of sugar more than the slimline version. One of the few switches here with a genuinely material consequence.',
+        'A pint of lager — 244 calories, and it is rarely one pint.',
+        'A large 250ml glass of wine — 228 calories, most of a meal.',
+        'Peroni Libera, among the alcohol-free beers — 3g of sugar per 100ml, the most of the group.'
+      ]
+    },
+    {
+      id:'d-bp', name:'Blood pressure', tag:'What actually works', conf:'HIGH',
+      rule:'Read the numbers before you get excited. Losing 10kg is worth roughly 5 to 10 mmHg. A single starting-dose tablet is worth about 10. Everything on this page is worth 2 to 7 mmHg at best, mostly on weak or short trials, and the effects are not additive — stacking three of them does not give you 15 mmHg.',
+      brief:[
+        '<strong>Beetroot juice.</strong> Eleven trials show about −5.3 mmHg on clinic readings, but <em>nothing at all</em> on 24-hour monitoring, which is the more reliable measure. And a 70ml shot carries 9.1g of sugar — daily, that is about 64g of sugar a week for a prediabetic man, at roughly £2 a day. Poor trade. Eat the nitrate instead: rocket, spinach, lettuce, celery and beetroot itself all carry it, with fibre instead of liquid sugar.',
+        '<strong>Hibiscus tea.</strong> Seventeen trials average −7.1 mmHg, but they disagree with each other so violently that the true effect could plausibly be 2. Still: zero calories, cheap, caffeine-free, pleasant iced. A low-cost bet worth taking, and one to mention to your GP if you are on a diuretic or an ACE inhibitor.',
+        '<strong>Cocoa flavanols</strong> have the best evidence here — about −3.7 mmHg on 24-hour monitoring and −6.9 in people who already have hypertension. But the trial dose was 586mg of flavanols, which is not a mug of instant hot chocolate, and the one huge trial testing whether this prevents actual heart attacks came back null. Unsweetened cocoa powder stirred into milk is defensible. Cadbury\'s is not a blood pressure intervention.',
+        '<strong>Green tea</strong> is worth about −2 mmHg and needs twelve weeks. Small, probably real, not a treatment.'
+      ],
+      items:[
+        {id:'bp1', n:'Eat the nitrate — rocket, spinach, beetroot', k:25, p:2, c:4, sug:2, s:0.05, conf:'EST', star:true,
+         note:'Same nitrate as the shots, with fibre instead of sugar. One oddity worth knowing: antibacterial mouthwash abolishes the effect entirely, because the conversion depends on bacteria living in your mouth.'},
+        {id:'bp2', n:'Hibiscus tea', k:0, p:0, c:0, sug:0, s:0, conf:'HIGH', star:true, note:''},
+        {id:'bp3', n:'Unsweetened cocoa in milk, 200ml', k:105, p:8.5, c:10, sug:9.6, s:0.15, conf:'EST',
+         note:'Flavanols plus 8g of protein, without the sugar of instant hot chocolate.'},
+        {id:'bp4', n:'Green tea', k:0, p:0, c:0, sug:0, s:0, conf:'HIGH', note:''}
+      ],
+      avoid:[
+        'Daily beetroot shots — 9g of sugar each for a clinic-only effect that vanishes on 24-hour monitoring.',
+        'Instant hot chocolate as a "flavanol" drink. Most commercial cocoa is alkalised, which destroys the flavanols, and it arrives with sugar.',
+        'Expecting any of this to replace losing weight. It will not come close.'
+      ],
+      caveat:'One real safety point, and it is the only one in this app. Potassium-based salt substitutes — LoSalt and similar — genuinely lower blood pressure and cut strokes in trials. But NICE specifically says they should NOT be used by people with diabetes, kidney disease, or anyone taking ACE inhibitors or angiotensin receptor blockers, which are the two most commonly prescribed blood pressure drug classes. You are 56, prediabetic and hypertensive, so there is a fair chance at least one of those applies. Do not start one without asking your GP to check your kidney function and potassium first. Plain salt reduction, which is what the rest of this app is built on, carries no such warning.'
+    }
+  ]
+}
+];
+
+/* ─────────────  TOP-UPS  ─────────────
+   The meal options above are deliberately lean, and for a man of Mark's
+   size three of them do not add up to a day. Under-eating is not a win —
+   it is how a nine o'clock binge starts. These exist to close the gap
+   with protein rather than with whatever is in the cupboard at 9pm. */
+const EXTRAS = [
+  {id:'x1', n:'Another 100g of the protein at dinner', k:165, p:31, c:0, s:0.2, conf:'EST',
+   note:'The cleanest way to close a gap. Chicken, salmon, steak, prawns — just more of it.'},
+  {id:'x2', n:'A second protein yogurt or protein pot', k:150, p:21, c:9, s:0.3, conf:'EST', note:''},
+  {id:'x3', n:'Extra veg, roasted in olive oil', k:160, p:3, c:14, s:0.1, conf:'EST',
+   note:'A tablespoon of olive oil is 120 calories on its own. Useful when you need calories, not just volume.'},
+  {id:'x4', n:'Handful of nuts, 30g', k:190, p:6, c:3, s:0.01, conf:'EST', note:''},
+  {id:'x5', n:'Two oatcakes with nut butter', k:200, p:6, c:20, s:0.5, conf:'EST', note:''},
+  {id:'x6', n:'Apple and a chunk of cheese', k:170, p:8, c:16, s:0.5, conf:'EST', note:''},
+  {id:'x7', n:'Half an avocado', k:160, p:2, c:2, s:0.01, conf:'EST',
+   note:'Fat, fibre and potassium. Potassium works directly against sodium on blood pressure.'}
+];
+
+/* ─────────────  THE FOOD LIST  ─────────────
+   Answered once, three ways: never / fine / love. A "never" hides every
+   option built on it. A "love" floats options to the top. Answering is
+   resumable and partial answers work — the filter only acts on what it
+   has been told. */
+const FOOD_CATS = [
+  {id:'fish', n:'Fish and seafood', foods:[
+    ['tuna','Tuna'],['salmon','Salmon'],['smokedsalmon','Smoked salmon'],['mackerel','Mackerel'],
+    ['sardines','Sardines'],['cod','White fish — cod, haddock'],['prawns','Prawns'],['scallops','Scallops'],
+    ['crab','Crab'],['anchovy','Anchovies'],['rawfish','Raw fish — sushi, poke']
+  ]},
+  {id:'meat', n:'Meat', foods:[
+    ['chicken','Chicken'],['turkey','Turkey'],['beef','Beef and steak'],['brisket','Slow-cooked beef, brisket'],
+    ['lamb','Lamb'],['pork','Pork'],['bacon','Bacon'],['ham','Ham'],['sausage','Sausage'],['meatball','Meatballs']
+  ]},
+  {id:'dairy', n:'Eggs and dairy', foods:[
+    ['egg','Eggs'],['greekyog','Greek yogurt'],['skyr','Skyr'],['cottage','Cottage cheese'],
+    ['feta','Feta'],['halloumi','Halloumi'],['hardcheese','Cheddar and hard cheese'],['bluecheese','Blue cheese'],
+    ['creamcheese','Cream cheese'],['shake','Protein shakes'],['milk','Dairy milk in coffee'],
+    ['oatmilk','Oat milk'],['soyamilk','Soya milk']
+  ]},
+  {id:'beans', n:'Beans, pulses and nuts', foods:[
+    ['edamame','Edamame'],['kidneybean','Kidney beans'],['butterbean','Butter beans'],['chickpea','Chickpeas'],
+    ['lentil','Lentils'],['bakedbean','Beans in tomato sauce'],['almond','Almonds'],['walnut','Walnuts'],
+    ['cashew','Cashews'],['peanutbutter','Peanut and nut butter']
+  ]},
+  {id:'veg', n:'Vegetables', foods:[
+    ['leaves','Salad leaves'],['spinach','Spinach'],['tomato','Tomatoes'],['cucumber','Cucumber'],
+    ['pepper','Peppers'],['broccoli','Broccoli'],['cauliflower','Cauliflower'],['courgette','Courgette'],
+    ['mushroom','Mushrooms'],['avocado','Avocado'],['olive','Olives'],['onion','Onions'],
+    ['carrot','Carrots'],['greenbean','Green beans'],['sweetcorn','Sweetcorn'],['beetroot','Beetroot'],
+    ['coleslaw','Coleslaw'],['peas','Peas']
+  ]},
+  {id:'carb', n:'The carbohydrate side', foods:[
+    ['rice','Rice'],['pasta','Pasta'],['noodle','Noodles'],['potato','Potatoes'],['bread','Bread'],
+    ['oatcake','Oatcakes'],['couscous','Couscous'],['quinoa','Quinoa and grains'],['oats','Oats and porridge']
+  ]},
+  {id:'flavour', n:'Flavours and sauces', foods:[
+    ['spicy','Chilli heat'],['curry','Curry and tikka spice'],['katsu','Katsu'],['pesto','Pesto'],
+    ['mustard','Mustard'],['mayo','Mayonnaise'],['caesar','Caesar dressing'],['oliveoil','Olive oil dressing'],
+    ['soy','Soy sauce'],['teriyaki','Teriyaki'],['harissa','Harissa and Moroccan spice'],['garlic','Garlic'],
+    ['coriander','Coriander'],['ginger','Ginger'],['lemon','Lemon and lime'],['buffalo','Buffalo and hot sauce'],
+    ['bbq','BBQ sauce']
+  ]},
+  {id:'fruit', n:'Fruit', foods:[
+    ['berries','Berries'],['apple','Apples'],['banana','Bananas'],['mango','Mango'],
+    ['orange','Oranges and citrus'],['grape','Grapes'],['melon','Melon']
+  ]},
+  {id:'drink', n:'Drinks', foods:[
+    ['coffee','Coffee'],['tea','Tea'],['dietcoke','Diet Coke'],['sparkling','Sparkling water']
+  ]}
+];
+
+/* Which foods each option is actually built on. Only the defining two to
+   four — over-tagging would let one "never" wipe out the whole app. */
+const TAGS = {
+  hb1:['greekyog','berries','almond'], hb2:['egg','spinach','tomato'], hb3:['cottage','walnut'],
+  hb4:['egg','bread'], hb5:['shake','apple'],
+
+  gbp0:['egg','spinach','greekyog'], gbp1:['greekyog'], gbp2:['egg','spinach'],
+  ges0:['egg','greekyog'], ges1:['egg'], ges2:['greekyog'], ges3:['greekyog'], ges4:['almond'],
+  gch1:['shake'], gch2:['shake'], gch3:['greekyog'],
+  gl1:['egg'], gl2:['skyr'],
+  gsv1:['egg','greekyog'], gsv2:['egg','spinach'],
+  ggr1:['bacon','bread'],
+  gco1:['coffee','milk'], gco2:['coffee'],
+
+  p0:['chicken','edamame','egg','spinach'], p1:['chicken','edamame'], p2:['egg','spinach'],
+  p3:['tuna','egg','olive','greenbean'], p4:['salmon','mango'], p5:['smokedsalmon','egg'],
+  p6:['chicken','leaves'],
+  m1:['chicken','mushroom','courgette'], m2:['brisket','beef','bakedbean','tomato'],
+  m3:['cod','scallops','prawns','pasta'], m4:['chicken','caesar','leaves'],
+  m5:['chicken','buffalo','spicy'], m6:['chicken','spicy'],
+  w1:['chicken','katsu','rice'], w2:['chicken','harissa'], w3:['chicken','quinoa','spicy'],
+  w4:['chicken','pesto'], w5:['beef','noodle'],
+  sb0:['chicken','caesar','leaves'], sb1:['chicken','feta','olive'], sb2:['chicken'],
+  sb3:['chicken','caesar','leaves'], sb4:['chicken','tomato','pepper'],
+  mc1:['chicken','leaves'], mc2:['chicken','leaves'], mc3:['chicken','bread','spicy'],
+  sw1:['chicken','leaves'], sw2:['chicken','leaves'], sw3:['beef','hardcheese','leaves'],
+  sw4:['turkey','ham','leaves'],
+  st1:['chicken','leaves'], st2:['rawfish','leaves'], st3:['chicken','lamb','leaves'],
+
+  rte0:['chicken','bacon','leaves','egg'], rte1:['chicken','apple'], rte2:['chicken','egg'],
+  rte3:['chicken','bread','egg'], rte4:['chicken','bacon','caesar','leaves'], rte5:['egg'],
+  rbp0:['egg','spinach'], rbp1:['chicken','caesar','leaves'], rbp2:['egg','spinach'],
+  rbp3:['chicken','buffalo','spicy'],
+  rsh0:['chicken','egg','spinach'], rsh1:['egg','spinach'], rsh2:['egg','spinach'],
+  rms0:['chicken','egg'], rms1:['egg','spinach'], rms2:['chicken','edamame'],
+  rms3:['chicken','caesar','leaves'],
+  rco0:['chicken','egg'], rco1:['egg'],
+  row0:['chicken'], row1:['egg'], row2:['chicken','bread'], row3:['chicken'],
+  rgr1:['sausage','pork'],
+
+  hl1:['tuna','mackerel','leaves','oliveoil'], hl2:['egg','leaves'], hl3:['chicken','prawns'],
+  hl4:['cottage','tomato','oatcake'],
+
+  hd1:['salmon','potato'], hd2:['chicken','leaves','oliveoil'], hd3:['beef','kidneybean','spicy'],
+  hd4:['beef','mustard'], hd5:['prawns','noodle','soy'], hd6:['egg','feta','leaves'],
+
+  sn1:['greekyog'], sn2:['greekyog'], sn3:['edamame'], sn4:['almond'], sn5:['hardcheese'],
+
+  dc1:['dietcoke'], dv1:['sparkling','lemon'], dv2:['milk'], dv4:['coffee','tea'], dv5:['tea'],
+  cs0:['coffee','soyamilk'], cs1:['coffee','milk'], cs2:['coffee','oatmilk'],
+  cs3:['coffee'], cs4:['coffee','soyamilk'],
+  al4:['sparkling','lemon'],
+  bp1:['beetroot','spinach'], bp2:['tea'], bp3:['milk'], bp4:['tea'],
+
+  x2:['greekyog'], x3:['oliveoil'], x4:['almond'], x5:['oatcake','peanutbutter'],
+  x6:['apple','hardcheese'], x7:['avocado']
+};
+
+const ALL_FOODS = (function(){
+  const out = [];
+  FOOD_CATS.forEach(function(c){
+    c.foods.forEach(function(f){ out.push({id:f[0], n:f[1], cat:c.n, catId:c.id}); });
+  });
+  return out;
+})();
+
+/* ═════════════════════════════  STATE  ═════════════════════════════ */
+
+const KEY = 'fmr.v2';
+const BLANK = { profile:null, log:{}, measures:[], tab:'today', open:null, place:null, venue:null,
+                slotHint:null, topupOpen:false, taste:{}, tasteOrder:[], tasteReview:false, showHidden:{} };
+let S = load();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return JSON.parse(JSON.stringify(BLANK));
+    return Object.assign(JSON.parse(JSON.stringify(BLANK)), JSON.parse(raw));
+  }catch(e){ return JSON.parse(JSON.stringify(BLANK)); }
+}
+/* saveLocal writes the device copy only. save() also queues a push to the gist, so every
+   existing call site gets cloud backup for free without being touched — there are dozens of
+   them and editing each one is how you miss three. */
+function saveLocal(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
+}
+function save(){
+  saveLocal();
+  try{ gSchedule(); }catch(_){}
+}
+
+/* ═════════════════════════════  HELPERS  ═════════════════════════════ */
+
+const $  = (s,r)=> (r||document).querySelector(s);
+const $$ = (s,r)=> Array.from((r||document).querySelectorAll(s));
+const esc = t => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
+const r1 = v => Math.round(v*10)/10;
+
+function todayKey(d){
+  const x = d || new Date();
+  return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
+}
+function keyToDate(k){ const a=k.split('-').map(Number); return new Date(a[0],a[1]-1,a[2]); }
+function shortDate(k){ return keyToDate(k).toLocaleDateString('en-GB',{day:'numeric',month:'short'}); }
+
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=> t.classList.remove('show'), 2400);
+}
+
+/* Salt is the axis the high street varies most on, and the one that
+   matters most for blood pressure, so it gets its own banding. */
+function saltBand(g){ return g <= 1.5 ? 'go' : g <= 2.5 ? 'warn' : 'stop'; }
+function sugarBand(g){ return g <= 5 ? 'go' : g <= 12 ? 'warn' : 'stop'; }
+
+function confChip(c){
+  if(!c || c==='HIGH') return '';
+  const label = c==='MED' ? 'approx' : c==='EST' ? 'estimate' : 'unverified';
+  return '<span class="chip chip-neutral">'+label+'</span>';
+}
+function macroChips(o){
+  let h = '<div class="chips opt-meta">'
+    + '<span class="chip chip-data">'+Math.round(o.k)+' kcal</span>'
+    + '<span class="chip chip-go">'+r1(o.p)+'g protein</span>';
+  if(o.c != null) h += '<span class="chip chip-neutral">'+r1(o.c)+'g carbs</span>';
+  if(o.sug != null) h += '<span class="chip chip-'+sugarBand(o.sug)+'">'+r1(o.sug)+'g sugar</span>';
+  h += '<span class="chip chip-'+saltBand(o.s)+'">'+r1(o.s)+'g salt</span>' + confChip(o.conf) + '</div>';
+  return h;
+}
+
+/* ═════════════════════════════  TARGETS  ═════════════════════════════ */
+
+/* ══════════════ THE STILL ROOM IS THE BODY OF RECORD ══════════════
+   22 Aug 2026. The app arrived with its own setup screen asking for height, weight, age and
+   waist. The Hub has held all four for months, in the Still Room, alongside 42 blood metrics
+   and a waist-to-height ratio it already computes. Two records of one body is the failure we
+   have fixed twice this week, and it is worse here: a weight logged in one and not the other
+   does not merely look untidy, it silently changes the calorie target.
+
+   So NOTHING about Mark's body is entered here. It is read.
+
+   What that caught immediately: the handover inferred 188cm and age 56 by back-calculating from
+   "BMI 32". The Still Room says 184cm and 55 — his own figures, entered by him. Four centimetres
+   and a year move the daily target by ~40 kcal and the BMI from 32 to 33.3. The instruction to
+   "verify the height, everything depends on it" was right; the answer was already in the house.
+
+   PROTEIN is against Mark's OWN target weight (95kg, set in the Still Room), not the textbook
+   BMI-25 weight of 84.6kg. A target he chose is one he might reach, and 1.6g/kg of 95 is 152g.
+   ═══════════════════════════════════════════════════════════════════ */
+var SR = { profile:null, readings:[] };          // filled by the Still Room bridge
+
+/* ══════════════════════ THE SHARED GIST ══════════════════════
+   The handover lists "no data backup" as an open gap: localStorage only, and a cleared browser
+   takes the history with it. In the estate that is not a gap — every app already reads and
+   writes one gist, which gives backup, phone-to-Mac sync, and lets the Hub show today's protein
+   on the dashboard. Same credentials as every other app on this phone, same pattern as the
+   Still Room.
+
+   Read: state.health.profile and state.health.readings — the body, owned by the Still Room.
+   Write: state.buttery — the food log, owned by here. Neither touches the other's half.
+
+   READ-MODIFY-WRITE, serialised. Two writers to one gist within a moment of each other is what
+   produced the 409s in June. Pull, change only our key, push. */
+var G_ID='connolly-sync:gist-id', G_TOK='connolly-sync:token', G_FILE='life-twoweek.json';
+var _gInFlight=false, _gDirty=false;
+
+function gCreds(){
+  try{ var i=localStorage.getItem(G_ID), t=localStorage.getItem(G_TOK);
+       return (i&&t)?{id:i,token:t}:null; }catch(_){ return null; }
+}
+function gHeaders(c){ return { 'Authorization':'Bearer '+c.token,
+  'Accept':'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' }; }
+
+function gPull(cb){
+  var c=gCreds(); if(!c){ if(cb) cb(false); return; }
+  fetch('https://api.github.com/gists/'+c.id, {headers:gHeaders(c)})
+    .then(function(r){ if(!r.ok) throw new Error('gist-'+r.status); return r.json(); })
+    .then(function(j){
+      var f=j.files&&j.files[G_FILE]; if(!f) throw new Error('no-file');
+      return f.truncated&&f.raw_url ? fetch(f.raw_url,{headers:gHeaders(c)}).then(function(x){return x.text();})
+                                    : f.content;
+    })
+    .then(function(raw){
+      var doc=JSON.parse(raw||'{}'), st=doc.state||doc;
+      var h=st.health||{};
+      SR.profile  = h.profile || null;
+      SR.readings = Array.isArray(h.readings) ? h.readings.slice().sort(function(a,b){
+                      return String(a.date).localeCompare(String(b.date)); }) : [];
+      /* The food log, if the cloud has one. Merge by DAY rather than replacing: a day logged on
+         the phone and a day logged on the Mac must both survive. Local wins a same-day clash,
+         because the device you are holding is the one that just ate. */
+      var cloud = st.buttery || null;
+      if(cloud && cloud.log){
+        Object.keys(cloud.log).forEach(function(k){ if(!S.log[k]) S.log[k]=cloud.log[k]; });
+      }
+      if(cloud && cloud.taste && !Object.keys(S.taste||{}).length) S.taste=cloud.taste;
+      if(cloud && cloud.profile && !S.profile) S.profile=cloud.profile;
+      saveLocal();
+      if(cb) cb(true);
+    })
+    .catch(function(e){ console.warn('[buttery] pull failed', e); if(cb) cb(false); });
+}
+
+function gPush(){
+  var c=gCreds(); if(!c) return;
+  if(_gInFlight){ _gDirty=true; return; }         // one writer at a time; coalesce the rest
+  _gInFlight=true;
+  fetch('https://api.github.com/gists/'+c.id, {headers:gHeaders(c)})
+    .then(function(r){ if(!r.ok) throw new Error('gist-'+r.status); return r.json(); })
+    .then(function(j){
+      var f=j.files&&j.files[G_FILE];
+      return f.truncated&&f.raw_url ? fetch(f.raw_url,{headers:gHeaders(c)}).then(function(x){return x.text();})
+                                    : f.content;
+    })
+    .then(function(raw){
+      var doc=JSON.parse(raw||'{}'); var st=doc.state||doc;
+      st.buttery = { log:S.log, taste:S.taste, tasteOrder:S.tasteOrder,
+                     profile:S.profile, savedAt:new Date().toISOString() };
+      if(doc.state) doc.state=st; else doc=st;
+      var body={files:{}}; body.files[G_FILE]={content:JSON.stringify(doc)};
+      return fetch('https://api.github.com/gists/'+c.id,
+        {method:'PATCH', headers:gHeaders(c), body:JSON.stringify(body)});
+    })
+    .then(function(r){ if(!r.ok) throw new Error('patch-'+r.status); })
+    .catch(function(e){ console.warn('[buttery] push failed', e); })
+    .then(function(){
+      _gInFlight=false;
+      if(_gDirty){ _gDirty=false; setTimeout(gPush, 1200); }
+    });
+}
+var _gTimer=null;
+function gSchedule(){ if(_gTimer) clearTimeout(_gTimer); _gTimer=setTimeout(gPush, 2500); }
+
+/* One tap to the room that owns the numbers. Same-tab on a phone home-screen app — opening a new
+   window from a standalone PWA drops you into Safari proper and loses the estate chrome. */
+var STILL_ROOM_URL = '../still-room/';
+function openStillRoom(){ try{ location.href = STILL_ROOM_URL; }catch(_){ } }
+
+/* The body must be in hand BEFORE the first paint, or the meters render against a null target
+   and Mark sees "—" where his protein goal should be. Pull, then render; if the pull fails we
+   still render, and the Plan tab says plainly that the numbers are the last ones we saw. */
+function renderSetupBody(){
+  var el=document.getElementById('setupBody'); if(!el) return;
+  var b=body();
+  if(!b){ el.innerHTML='<b>Could not reach the Still Room yet.</b> Check the sync credentials are set on this device \u2014 without them there is no height or weight, and every target here would be a guess.'; return; }
+  el.innerHTML = 'From the Still Room: <b>'+b.height+'cm</b>, <b>'+r1(b.weight)+'kg</b>, age <b>'+b.age+'</b>'
+    + (b.waist? ', waist <b>'+b.waist+'cm</b>' : '')
+    + (b.targetWeight? ' \u00b7 your target <b>'+b.targetWeight+'kg</b>' : '') + '.';
+}
+function boot(){
+  gPull(function(){ try{ render(); renderSetupBody(); }catch(e){ console.error(e); } });
+  try{ render(); }catch(e){ console.error(e); }
+}
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden) gPull(function(){ try{ render(); }catch(_){ } });
+});
+
+function srLatest(field){
+  for(var i=SR.readings.length-1; i>=0; i--){
+    var r=SR.readings[i];
+    if(r && r[field]!=null && r[field]!=='') return r[field];
+  }
+  return null;
+}
+/** The body, as the Still Room holds it. Never written from here. */
+function body(){
+  var p = SR.profile || {};
+  var w = srLatest('weight');
+  if(!p.heightCm || !w) return null;             // no guessing, and no defaults that look real
+  return { height:+p.heightCm, weight:+w, age:+(p.age||0), sex:(p.sex||'male'),
+           waist:srLatest('waist'), targetWeight:+(p.targetWeightKg||0) };
+}
+function targets(){
+  const b = body();
+  if(!b) return null;
+  const act = (S.profile && S.profile.activity) || 1.45;       // the one thing only this app knows
+  const bmr  = 10*b.weight + 6.25*b.height - 5*b.age + 5;      // Mifflin-St Jeor, male
+  const tdee = bmr * act;
+  const kcal = Math.max(1500, Math.round((tdee - 550)/25)*25); // about 0.5 kg a week
+  /* His target, not the textbook one — but fall back to BMI 25 if he has not set one. */
+  const goalW = b.targetWeight > 0 ? b.targetWeight : 25 * Math.pow(b.height/100, 2);
+  const protein = Math.round((goalW * 1.6)/5)*5;               // 1.6 g per kg of goal weight
+  return { kcal, protein, salt:5, fibre:30, goalW:r1(goalW), tdee:Math.round(tdee),
+           waist:b.waist, weight:b.weight, height:b.height, age:b.age };
+}
+function bmi(w){ const b=body(); return b ? w / Math.pow(b.height/100,2) : 0; }
+
+/* ═════════════════════════════  DAY  ═════════════════════════════ */
+
+function day(k){
+  const key = k || todayKey();
+  if(!S.log[key]) S.log[key] = { meals:{}, extras:[], walk:false, lift:false };
+  const d = S.log[key];
+  if(!d.meals) d.meals = {};
+  if(!d.extras) d.extras = [];
+  return d;
+}
+function dayTotals(){
+  const d = day(), t = {k:0,p:0,c:0,s:0};
+  Object.keys(d.meals).forEach(function(slot){
+    const m = d.meals[slot];
+    if(!m) return;
+    t.k += m.k||0; t.p += m.p||0; t.c += m.c||0; t.s += m.s||0;
+  });
+  d.extras.forEach(function(m){
+    t.k += m.k||0; t.p += m.p||0; t.c += m.c||0; t.s += m.s||0;
+  });
+  return t;
+}
+function mealsLogged(){
+  const d = day();
+  return Object.keys(d.meals).filter(function(s){ return d.meals[s]; }).length;
+}
+
+const SLOTS = [
+  {id:'breakfast', label:'Breakfast', icon:'☕'},
+  {id:'lunch',     label:'Lunch',     icon:'⌖'},
+  {id:'dinner',    label:'Dinner',    icon:'◗'},
+  {id:'snack',     label:'Snack',     icon:'◦'}
+];
+
+function placesFor(slot){ return PLACES.filter(function(p){ return p.slot === slot; }); }
+
+function allItems(){
+  const out = EXTRAS.slice();
+  PLACES.forEach(function(p){
+    (p.items||[]).forEach(function(i){ out.push(i); });
+    (p.venues||[]).forEach(function(v){ v.items.forEach(function(i){ out.push(i); }); });
+  });
+  return out;
+}
+function findItem(id){
+  const all = allItems();
+  for(let i=0;i<all.length;i++){ if(all[i].id===id) return all[i]; }
+  return null;
+}
+
+/* ── The food list, applied ──────────────────────────────────────── */
+
+function tasteAnswered(){ return Object.keys(S.taste).length; }
+function itemBlocked(item){
+  const t = TAGS[item.id];
+  if(!t) return false;
+  for(let i=0;i<t.length;i++){ if(S.taste[t[i]]==='no') return true; }
+  return false;
+}
+function itemLove(item){
+  const t = TAGS[item.id];
+  if(!t) return 0;
+  let n = 0;
+  t.forEach(function(x){ if(S.taste[x]==='love') n++; });
+  return n;
+}
+/* Loved things float up, best picks stay on top. Stable otherwise. */
+function rankItems(items){
+  return items.map(function(o,i){ return {o:o, i:i, s:(o.star?100:0) + itemLove(o)*10}; })
+    .sort(function(a,b){ return b.s - a.s || a.i - b.i; })
+    .map(function(x){ return x.o; });
+}
+function splitItems(items){
+  const shown = [], hidden = [];
+  items.forEach(function(o){ (itemBlocked(o) ? hidden : shown).push(o); });
+  return { shown: rankItems(shown), hidden: hidden };
+}
+
+/* Deterministic rotation, so "decide it for me" never lands on the same
+   thing two days running and never feels like a slot machine. */
+function autoPick(slot, key){
+  const pool = [];
+  placesFor(slot).forEach(function(p){
+    if(p.items) p.items.forEach(function(o){ if(!itemBlocked(o)) pool.push(o); });
+  });
+  if(!pool.length) return null;
+  const seed = Number(key.replace(/-/g,'')) + slot.length*7;
+  const loved = pool.filter(function(o){ return itemLove(o) > 0; });
+  const from = loved.length ? loved : pool;
+  return from[seed % from.length];
+}
+
+/* ═════════════════════════════  TODAY  ═════════════════════════════ */
+
+function renderMeters(){
+  const T = targets(); if(!T) return;
+  const t = dayTotals();
+  $('#meters').innerHTML =
+      meter('Protein', Math.round(t.p), 'of '+T.protein+'g', clamp(t.p/T.protein*100,0,100), 'go')
+    + meter('Calories', Math.round(t.k), 'of '+T.kcal, clamp(t.k/T.kcal*100,0,100), t.k<=T.kcal?'data':'warn')
+    + meter('Salt', r1(t.s), 'of '+T.salt+'g', clamp(t.s/T.salt*100,0,100), t.s<=T.salt*0.7?'go':(t.s<=T.salt?'warn':'stop'));
+}
+function meter(label,val,of,pct,band){
+  return '<div class="meter"><div class="meter-label">'+label+'</div><div class="meter-val">'+val+'</div>'
+    + '<div class="meter-of">'+of+'</div><div class="bar bar-'+band+'"><i style="width:'+pct.toFixed(1)+'%"></i></div></div>';
+}
+
+function renderMeals(){
+  const d = day();
+  $('#meals').innerHTML = SLOTS.map(function(slot){
+    const picked = d.meals[slot.id];
+    const isOff = picked && picked.off;
+    const open = S.open === slot.id;
+    const cls = 'card meal-card' + (picked && !isOff ? ' done':'') + (isOff?' off':'') + (open?' open':'');
+    const title = picked ? picked.n : 'Not decided yet';
+
+    let body = '';
+    if(open){
+      const places = placesFor(slot.id);
+      body = '<p class="hint" style="margin:0 0 11px">Where are you?</p>'
+        + places.map(function(p){
+            return '<button class="place" data-act="place" data-id="'+p.id+'" data-slot="'+slot.id+'">'
+              + '<span class="place-icon">'+p.icon+'</span>'
+              + '<span class="grow"><span class="place-name">'+esc(p.name)+'</span>'
+              + '<span class="place-tag">'+esc(p.tag)+'</span></span>'
+              + '<span class="place-arrow">›</span></button>';
+          }).join('')
+        + '<button class="btn btn-quiet btn-block" style="margin-top:11px" data-act="off" data-slot="'+slot.id+'">I went off plan</button>';
+    }
+    return '<div class="'+cls+'">'
+      + '<button class="meal-head" data-act="toggle" data-slot="'+slot.id+'" aria-expanded="'+(open?'true':'false')+'">'
+        + '<span class="meal-slot">'+(picked && !isOff ? '✓' : slot.icon)+'</span>'
+        + '<span class="grow"><span class="meal-title">'+slot.label+'</span>'
+        + '<span class="meal-pick'+(picked?'':' empty')+'">'+esc(title)+'</span></span>'
+        + '<span class="caret">›</span></button>'
+      + '<div class="meal-body">'+body+'</div></div>';
+  }).join('');
+}
+
+function renderTopUp(){
+  const T = targets(), t = dayTotals(), d = day();
+  const host = $('#topup');
+  const gapK = T.kcal - t.k, gapP = T.protein - t.p;
+  const logged = mealsLogged();
+  const short = logged >= 1 && (gapK > 350 || gapP > 20);
+
+  let html = '';
+
+  if(!tasteAnswered()){
+    html += '<div class="section"><span class="eyebrow">Worth four minutes</span>'
+      + '<div class="card card-pad" style="margin-top:9px">'
+      + '<h3>Tell it what you actually eat</h3>'
+      + '<p class="prose small" style="margin-top:7px">'+ALL_FOODS.length+' foods, one at a time, three buttons. '
+      + 'Anything you say you never eat disappears from every list; anything you love floats to the top. Stop whenever you like.</p>'
+      + '<button class="btn btn-primary btn-block" style="margin-top:12px" data-act="tastestart">Start the food list</button>'
+      + '</div></div>';
+  }
+
+  if(d.extras.length){
+    html += '<div class="section"><span class="eyebrow">Added on top</span><div class="card" style="margin-top:9px">'
+      + d.extras.map(function(x,i){
+          return '<div class="extra-row"><span class="grow"><span style="font-weight:600;font-size:14px">'+esc(x.n)+'</span>'
+            + '<span class="chips" style="margin-top:5px"><span class="chip chip-data">'+Math.round(x.k)+' kcal</span>'
+            + '<span class="chip chip-go">'+r1(x.p)+'g protein</span></span></span>'
+            + '<button class="btn btn-sm btn-quiet" data-act="rmextra" data-i="'+i+'" aria-label="Remove">✕</button></div>';
+        }).join('')
+      + '</div></div>';
+  }
+
+  if(short || S.topupOpen){
+    const headline = short
+      ? (gapK > 700 ? 'That is not enough food' : 'Still a bit short')
+      : 'Add something';
+    html += '<div class="section"><span class="eyebrow">'+headline+'</span>'
+      + '<div class="card card-pad" style="margin-top:9px;border-color:'+(gapK>700?'var(--warn)':'var(--line)')+'">';
+    if(short){
+      html += '<div class="chips" style="margin-bottom:10px">'
+        + (gapK>0 ? '<span class="chip chip-warn">'+Math.round(gapK)+' kcal short</span>' : '')
+        + (gapP>0 ? '<span class="chip chip-warn">'+Math.round(gapP)+'g protein short</span>' : '')
+        + '</div>'
+        + '<p class="prose small" style="margin-bottom:12px">The options in this app are lean on purpose, and three of them do not add up to a day for a man your size. '
+        + 'Eating '+Math.round(t.k)+' calories is not discipline — it is how nine o’clock goes wrong. Close the gap now, with protein, on purpose.</p>';
+    }
+    html += EXTRAS.map(function(x){ return optionHTML(x, 'extra'); }).join('')
+      + '<button class="btn btn-sm btn-quiet btn-block" style="margin-top:10px" data-act="closetopup">Not now</button>'
+      + '</div></div>';
+  }else if(logged >= 1){
+    html += '<div class="section"><button class="btn btn-quiet btn-block" data-act="opentopup">Still hungry — add something</button></div>';
+  }
+
+  host.innerHTML = html;
+}
+
+function renderToggles(){
+  const d = day();
+  const w = $('#walkBtn'), l = $('#liftBtn');
+  w.textContent = d.walk ? 'Done' : 'No';
+  w.className = 'btn btn-sm' + (d.walk ? ' btn-primary':' btn-quiet');
+  l.textContent = d.lift ? 'Done' : 'No';
+  l.className = 'btn btn-sm' + (d.lift ? ' btn-primary':' btn-quiet');
+}
+
+/* ═════════════════════════════  WHERE  ═════════════════════════════ */
+
+function optionHTML(o, slot){
+  return '<button class="opt'+(o.star?' star':'')+'" data-act="pick" data-id="'+o.id+'" data-slot="'+(slot||'')+'">'
+    + (o.star ? '<span class="star-tag">Best pick</span>' : '')
+    + '<span class="opt-name">'+esc(o.n)+'</span>'
+    + macroChips(o)
+    + (o.note ? '<span class="opt-note">'+esc(o.note)+'</span>' : '')
+    + '</button>';
+}
+function ruleBox(text){
+  return '<div class="rule-box"><span class="eyebrow">The rule</span><p>'+esc(text)+'</p></div>';
+}
+function briefBox(paras){
+  return '<div class="card card-pad" style="margin-top:12px"><div class="prose small">'
+    + paras.map(function(p){
+        return /^<(table|ul|ol|div|figure|h[1-6])\b/.test(p) ? p : '<p>'+p+'</p>';
+      }).join('')
+    + '</div></div>';
+}
+function caveatBox(text){
+  return '<div class="card card-pad" style="margin-top:12px;border-color:var(--line-strong)">'
+    + '<span class="eyebrow" style="color:var(--warn)">Read this first</span>'
+    + '<p class="prose small" style="margin-top:6px">'+esc(text)+'</p></div>';
+}
+function avoidBox(list){
+  return '<div class="section"><span class="eyebrow">Do not buy</span>'
+    + '<div class="card card-pad" style="margin-top:9px"><ul class="avoid-list">'
+    + list.map(function(a){ return '<li><span class="avoid-x">✕</span><span>'+esc(a)+'</span></li>'; }).join('')
+    + '</ul></div></div>';
+}
+function itemsBox(items, slot, key){
+  const sp = splitItems(items);
+  const open = S.showHidden[key];
+  let inner;
+
+  if(!sp.shown.length && !open){
+    inner = '<div class="chart-empty">Everything here is built on something you said you never eat. '
+      + 'That is useful to know — it means this is the wrong shop for you, not the wrong day.</div>';
+  }else{
+    inner = sp.shown.map(function(o){ return optionHTML(o, slot); }).join('');
+  }
+  if(sp.hidden.length){
+    inner += open
+      ? '<div style="margin-top:12px"><p class="hint" style="margin:0 0 8px">Hidden by your food list:</p>'
+        + sp.hidden.map(function(o){ return optionHTML(o, slot); }).join('')
+        + '<button class="btn btn-sm btn-quiet btn-block" style="margin-top:8px" data-act="hidefew" data-key="'+key+'">Hide these again</button></div>'
+      : '<button class="btn btn-sm btn-quiet btn-block" style="margin-top:9px" data-act="showhidden" data-key="'+key+'">'
+        + sp.hidden.length + (sp.hidden.length===1?' option':' options') + ' hidden by your food list — show anyway</button>';
+  }
+  return '<div class="section"><span class="eyebrow">Have one of these</span>'
+    + '<div style="margin-top:9px">'+inner+'</div></div>';
+}
+
+function renderWhere(){
+  const host = $('#s-where');
+
+  /* Level 0 — all the places */
+  if(!S.place){
+    const groups = [
+      ['Breakfast', placesFor('breakfast')],
+      ['Lunch',     placesFor('lunch')],
+      ['Dinner',    placesFor('dinner')],
+      ['Anytime',   PLACES.filter(function(p){ return p.slot==='snack' || p.slot===null; })]
+    ];
+    host.innerHTML =
+      '<p class="hint" style="margin:0 0 16px">Tell it where you are. You get one rule and a short list — nothing to work out, nothing to search.</p>'
+      + groups.map(function(g){
+          return '<div class="section" style="margin-top:0;margin-bottom:20px"><span class="eyebrow">'+g[0]+'</span>'
+            + '<div style="margin-top:9px">'
+            + g[1].map(function(p){
+                return '<button class="place" data-act="place" data-id="'+p.id+'">'
+                  + '<span class="place-icon">'+p.icon+'</span>'
+                  + '<span class="grow"><span class="place-name">'+esc(p.name)+'</span>'
+                  + '<span class="place-tag">'+esc(p.tag)+'</span></span>'
+                  + '<span class="place-arrow">›</span></button>';
+              }).join('')
+            + '</div></div>';
+        }).join('')
+      + '<div class="card card-pad"><span class="eyebrow">Somewhere not on the list</span>'
+      + '<h3 style="margin-top:7px">The 30-second rule</h3>'
+      + '<div class="prose small" style="margin-top:8px">'
+      + '<p><strong>One:</strong> find the protein — a whole named animal, egg or bean, not a mince or a paste. '
+      + '<strong>Two:</strong> refuse the carrier — no bread, wrap, rice, chips or crisps. '
+      + '<strong>Three:</strong> add something green.</p>'
+      + '<p>If you cannot do all three, buy just the protein and eat properly when you get home.</p>'
+      + '</div></div>';
+    return;
+  }
+
+  const place = PLACES.filter(function(p){ return p.id===S.place; })[0];
+  if(!place){ S.place=null; renderWhere(); return; }
+
+  /* Level 2 — a venue inside a place */
+  if(S.venue){
+    const v = (place.venues||[]).filter(function(x){ return x.id===S.venue; })[0];
+    if(!v){ S.venue=null; renderWhere(); return; }
+    host.innerHTML =
+      '<button class="btn btn-sm btn-quiet" data-act="backvenue" style="margin-bottom:14px">‹ '+esc(place.name)+'</button>'
+      + '<h2 style="margin-bottom:12px">'+esc(v.name)+'</h2>'
+      + ruleBox(v.rule)
+      + (v.brief ? briefBox(v.brief) : '')
+      + (v.caveat ? caveatBox(v.caveat) : '')
+      + itemsBox(v.items, place.logAs || place.slot, v.id)
+      + avoidBox(v.avoid);
+    return;
+  }
+
+  /* Level 1 — a place: either venues, or items directly */
+  let html = '<button class="btn btn-sm btn-quiet" data-act="backplace" style="margin-bottom:14px">‹ Everywhere</button>'
+    + '<h2 style="margin-bottom:12px">'+esc(place.name)+'</h2>'
+    + ruleBox(place.rule);
+
+  if(place.venues){
+    html += '<div class="section"><span class="eyebrow">Which one</span>'
+      + '<div class="venue-grid" style="margin-top:9px">'
+      + place.venues.map(function(v){
+          return '<button class="venue-btn" data-act="venue" data-id="'+v.id+'">'
+            + '<span class="vn">'+esc(v.name)+'</span><span class="vt">'+esc(v.tag)+'</span></button>';
+        }).join('')
+      + '</div></div>';
+  }else{
+    html += itemsBox(place.items, place.logAs || place.slot, place.id);
+    if(place.avoid) html += avoidBox(place.avoid);
+  }
+  host.innerHTML = html;
+}
+
+/* ═════════════════════════════  FOOD LIST  ═════════════════════════════ */
+
+function nextFoodIndex(){
+  for(let i=0;i<ALL_FOODS.length;i++){ if(!S.taste[ALL_FOODS[i].id]) return i; }
+  return -1;
+}
+
+function renderTaste(){
+  const host = $('#s-taste');
+  const done = tasteAnswered(), total = ALL_FOODS.length;
+
+  /* Review and edit everything already answered */
+  if(S.tasteReview){
+    host.innerHTML =
+      '<button class="btn btn-sm btn-quiet" data-act="tastereviewoff" style="margin-bottom:14px">‹ Back</button>'
+      + '<h2 style="margin-bottom:6px">Your food list</h2>'
+      + '<p class="hint" style="margin:0 0 16px">Change anything. Blank means you have not said, and the app will keep showing it.</p>'
+      + FOOD_CATS.map(function(c){
+          return '<div class="section" style="margin-top:0;margin-bottom:18px"><span class="eyebrow">'+esc(c.n)+'</span>'
+            + '<div class="card" style="margin-top:9px">'
+            + c.foods.map(function(f){
+                const v = S.taste[f[0]];
+                return '<div class="taste-row"><span class="grow">'+esc(f[1])+'</span><span class="taste-mini">'
+                  + miniBtn(f[0],'no','✕',v) + miniBtn(f[0],'ok','✓',v) + miniBtn(f[0],'love','★',v)
+                  + '</span></div>';
+              }).join('')
+            + '</div></div>';
+        }).join('')
+      + '<div class="section"><button class="btn btn-quiet btn-block" data-act="tastereset">Clear my whole food list</button></div>';
+    return;
+  }
+
+  const idx = nextFoodIndex();
+
+  /* Finished */
+  if(idx === -1){
+    host.innerHTML =
+      '<div class="card card-pad" style="text-align:center">'
+        + '<span class="eyebrow">Done</span>'
+        + '<h2 style="margin-top:8px">All '+total+' answered</h2>'
+        + '<p class="prose small" style="margin-top:10px">Every list in the app is now filtered and reordered around this. '
+        + 'Things you love float to the top; things you never eat are hidden, with a count so you can always see what was taken out.</p>'
+        + '<button class="btn btn-primary btn-block" style="margin-top:14px" data-act="tastedone">Back to the app</button>'
+        + '<button class="btn btn-quiet btn-block" style="margin-top:8px" data-act="tastereview">Review and change answers</button>'
+      + '</div>';
+    return;
+  }
+
+  const f = ALL_FOODS[idx];
+  const pct = (done/total*100).toFixed(1);
+  const catFoods = ALL_FOODS.filter(function(x){ return x.catId===f.catId; });
+  const catDone = catFoods.filter(function(x){ return S.taste[x.id]; }).length;
+
+  host.innerHTML =
+      '<div class="taste-prog"><i style="width:'+pct+'%"></i></div>'
+    + '<div style="margin:10px 0 20px">'
+      + '<span class="eyebrow">'+esc(f.cat)+' · '+(catDone+1)+' of '+catFoods.length+'</span></div>'
+
+    + '<div class="taste-card"><span class="taste-food">'+esc(f.n)+'</span></div>'
+
+    + '<div class="taste-btns">'
+      + '<button class="tbtn tbtn-no" data-act="taste" data-id="'+f.id+'" data-v="no"><span class="tb-i">✕</span>Never</button>'
+      + '<button class="tbtn tbtn-ok" data-act="taste" data-id="'+f.id+'" data-v="ok"><span class="tb-i">✓</span>Fine</button>'
+      + '<button class="tbtn tbtn-love" data-act="taste" data-id="'+f.id+'" data-v="love"><span class="tb-i">★</span>Love it</button>'
+    + '</div>'
+
+    + '<div class="section" style="margin-top:20px">'
+      + '<button class="btn btn-quiet btn-block" data-act="tasteskipcat" data-cat="'+f.catId+'">Mark the rest of "'+esc(f.cat)+'" as fine</button>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'
+        + '<button class="btn btn-quiet" data-act="tasteback"'+(done?'':' disabled style="opacity:.4"')+'>‹ Undo last</button>'
+        + '<button class="btn btn-quiet" data-act="tastedone">Stop for now</button>'
+      + '</div>'
+      + '<p class="hint" style="margin-top:13px;text-align:center">Stop whenever you like — the app uses whatever you have answered so far. '
+      + 'Nothing breaks if you only get through twenty.</p>'
+    + '</div>';
+}
+
+function miniBtn(food, val, glyph, cur){
+  const on = cur===val;
+  return '<button class="mini'+(on?' mini-'+val:'')+'" data-act="tasteset" data-id="'+food+'" data-v="'+val+'" '
+    + 'aria-label="'+val+'">'+glyph+'</button>';
+}
+
+/* ═════════════════════════════  NUMBERS  ═════════════════════════════ */
+
+function renderNumbers(){
+  const T = targets();
+  /* Read from the Still Room, never from a local copy. Its shape is {date, weight, waist, ...}
+     with every field optional, so the chart builders below filter for what they need. */
+  const ms = SR.readings.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+  const weights = ms.filter(function(m){ return m.weight != null; });
+  const waists  = ms.filter(function(m){ return m.waist  != null; });
+  const bps     = ms.filter(function(m){ return m.sys != null && m.dia != null; });
+  const first = weights[0], last = weights[weights.length-1];
+  const wFirst = waists[0], wLast = waists[waists.length-1];
+
+  let head = '';
+  if(last){
+    const dW = last.weight - (first ? first.weight : last.weight);
+    head = '<div class="card"><div class="meters">'
+      + meterPlain('Weight', r1(last.weight)+'kg', dW===0 ? 'starting point' : (dW<0?'':'+')+r1(dW)+'kg since start')
+      + meterPlain('BMI', bmi(last.weight).toFixed(1), 'goal 25 = '+T.goalW+'kg')
+      + meterPlain('Waist', wLast ? Math.round(wLast.waist)+'cm' : '—',
+          (wFirst && wLast && wFirst!==wLast) ? ((wLast.waist-wFirst.waist)<=0?'':'+')+r1(wLast.waist-wFirst.waist)+'cm' : 'goal under 94cm')
+      + '</div></div>';
+  }
+
+  $('#s-numbers').innerHTML = head
+    + '<div class="card card-pad" style="margin-top:'+(head?'12px':'0')+'">'
+      + '<span class="eyebrow">Log a reading</span>'
+      + '<p class="hint" style="margin:6px 0 13px">Fill in whatever you have; blanks are skipped. Once a week for weight and waist is plenty — daily weighing mostly shows you water.</p>'
+      + '<div class="stack">'
+        + '<div class="field-row">'
+          + '<div class="field"><label for="n-weight">Weight (kg)</label><input id="n-weight" type="number" inputmode="decimal" step="0.1"></div>'
+          + '<div class="field"><label for="n-waist">Waist (cm)</label><input id="n-waist" type="number" inputmode="decimal" step="0.5"></div>'
+        + '</div>'
+        + '<div class="field-row-3">'
+          + '<div class="field"><label for="n-sys">Systolic</label><input id="n-sys" type="number" inputmode="numeric"></div>'
+          + '<div class="field"><label for="n-dia">Diastolic</label><input id="n-dia" type="number" inputmode="numeric"></div>'
+          + '<div class="field"><label for="n-pulse">Pulse</label><input id="n-pulse" type="number" inputmode="numeric"></div>'
+        + '</div>'
+        + '<button class="btn btn-primary btn-block" data-act="savemeasure">Save reading</button>'
+      + '</div></div>'
+
+    + sectionCard('Waist', 'The number that tracks visceral fat',
+        waists.length >= 2
+          ? lineChart(waists.map(function(m){ return {x:m.date,y:m.waist}; }), {unit:'cm', target:94, targetLabel:'94cm'})
+          : emptyState('Log your waist twice, a week or two apart, and the trend appears here. Waist moves before the scale does when you are losing visceral fat, which is why it is first on this page.'))
+
+    + sectionCard('Weight', weights.length===0 ? 'No readings yet' : weights.length===1 ? 'One reading so far'
+        : (first.weight-last.weight>0 ? 'Down '+r1(first.weight-last.weight)+'kg' : 'Holding steady'),
+        weights.length >= 2
+          ? lineChart(weights.map(function(m){ return {x:m.date,y:m.weight}; }), {unit:'kg', target:T.goalW, targetLabel:'BMI 25'})
+          : emptyState('Two weigh-ins and this becomes a trend line. Expect it to zigzag — that is water, not fat.'))
+
+    + sectionCard('Blood pressure', 'Home readings · target under 135/85',
+        (bps.length >= 1 ? bpChart(bps)
+          : emptyState('Each reading shows as a bar from diastolic to systolic against the target band.'))
+        + '<div style="padding:13px 15px;border-top:1px solid var(--line)"><div class="prose small">'
+        + '<p style="margin:0"><strong>Before you measure:</strong> sit still for five minutes, arm supported at heart height, and record the second of two readings. '
+        + 'And no coffee in the previous half hour — caffeine causes a short-lived rise of a couple of mmHg in anyone not fully habituated, which is enough to make a fine reading look bad.</p>'
+        + '</div></div>')
+
+    + (ms.length ? '<div class="section"><button class="btn btn-quiet btn-block" data-act="undomeasure">Delete my most recent reading</button></div>' : '');
+}
+
+function meterPlain(label,val,sub){
+  return '<div class="meter"><div class="meter-label">'+label+'</div><div class="meter-val">'+val+'</div>'
+    + '<div class="meter-of">'+esc(sub)+'</div></div>';
+}
+function sectionCard(title, sub, inner){
+  return '<div class="section"><div class="section-head"><span class="eyebrow">'+esc(title)+'</span>'
+    + '<span class="small muted">'+esc(sub)+'</span></div><div class="card">'+inner+'</div></div>';
+}
+function emptyState(msg){ return '<div class="chart-empty">'+esc(msg)+'</div>'; }
+
+/* Single series, one hue, 2px stroke, emphasised endpoint, direct label
+   on the last point, dashed target. No legend — the heading names it. */
+function lineChart(pts, opt){
+  const W=500,H=170,mL=14,mR=52,mT=18,mB=26;
+  const vals = pts.map(function(p){ return p.y; }).concat([opt.target]);
+  let lo = Math.min.apply(null,vals), hi = Math.max.apply(null,vals);
+  const pad = Math.max((hi-lo)*0.18, 1.2); lo-=pad; hi+=pad;
+  const n = pts.length;
+  const X = function(i){ return mL + (n===1 ? (W-mL-mR)/2 : i*(W-mL-mR)/(n-1)); };
+  const Y = function(v){ return mT + (hi-v)/(hi-lo)*(H-mT-mB); };
+  const d = pts.map(function(p,i){ return (i?'L':'M')+X(i).toFixed(1)+' '+Y(p.y).toFixed(1); }).join(' ');
+  const area = d+' L '+X(n-1).toFixed(1)+' '+(H-mB)+' L '+X(0).toFixed(1)+' '+(H-mB)+' Z';
+  const last = pts[n-1], tY = Y(opt.target);
+  const showT = opt.target>lo && opt.target<hi;
+  const gid = 'g-'+opt.unit;
+
+  return '<div class="chart-wrap"><svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" role="img" '
+    + 'aria-label="'+esc(opt.unit)+' trend, latest '+r1(last.y)+esc(opt.unit)+'">'
+    + '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0%" stop-color="var(--go)" stop-opacity=".18"/>'
+      + '<stop offset="100%" stop-color="var(--go)" stop-opacity="0"/></linearGradient></defs>'
+    + '<line class="grid" x1="'+mL+'" y1="'+(H-mB)+'" x2="'+(W-mR)+'" y2="'+(H-mB)+'"/>'
+    + (showT ? '<line class="target" x1="'+mL+'" y1="'+tY.toFixed(1)+'" x2="'+(W-mR)+'" y2="'+tY.toFixed(1)+'"/>'
+        + '<text class="target-txt" x="'+(W-mR+5)+'" y="'+(tY+3).toFixed(1)+'">'+esc(opt.targetLabel)+'</text>' : '')
+    + '<path d="'+area+'" fill="url(#'+gid+')"/>'
+    + '<path d="'+d+'" fill="none" stroke="var(--go)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
+    + pts.map(function(p,i){
+        return '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="'+(i===n-1?5:2.6)+'" fill="var(--go)" '
+          + 'stroke="var(--surface)" stroke-width="2"><title>'+esc(shortDate(p.x))+' — '+r1(p.y)+esc(opt.unit)+'</title></circle>';
+      }).join('')
+    + '<text class="pt-lbl" x="'+(X(n-1)+9).toFixed(1)+'" y="'+(Y(last.y)-9).toFixed(1)+'">'+r1(last.y)+esc(opt.unit)+'</text>'
+    + '<text class="axis-txt" x="'+mL+'" y="'+(H-8)+'">'+esc(shortDate(pts[0].x))+'</text>'
+    + '<text class="axis-txt" x="'+(W-mR)+'" y="'+(H-8)+'" text-anchor="end">'+esc(shortDate(last.x))+'</text>'
+    + '</svg></div>';
+}
+
+/* Blood pressure is a range, not two independent series, so it is drawn
+   as one bar per reading against the target band. */
+function bpChart(bps){
+  const rows = bps.slice(-12);
+  const W=500,H=180,mL=34,mR=14,mT=18,mB=26;
+  const lo=55, hi=Math.max(175, Math.max.apply(null, rows.map(function(r){return r.sys;}))+12);
+  const n=rows.length, slot=(W-mL-mR)/n, bw=Math.min(20, slot*0.46);
+  const Y = function(v){ return mT + (hi-v)/(hi-lo)*(H-mT-mB); };
+  const bT=Y(135), bB=Y(85);
+
+  let out = '<div class="chart-wrap"><svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" role="img" aria-label="Blood pressure readings against target band">'
+    + '<rect x="'+mL+'" y="'+bT.toFixed(1)+'" width="'+(W-mL-mR)+'" height="'+(bB-bT).toFixed(1)+'" fill="var(--go)" opacity=".09"/>'
+    + '<line class="target" x1="'+mL+'" y1="'+bT.toFixed(1)+'" x2="'+(W-mR)+'" y2="'+bT.toFixed(1)+'"/>'
+    + '<line class="target" x1="'+mL+'" y1="'+bB.toFixed(1)+'" x2="'+(W-mR)+'" y2="'+bB.toFixed(1)+'"/>'
+    + '<text class="axis-txt" x="'+(mL-6)+'" y="'+(bT+3).toFixed(1)+'" text-anchor="end">135</text>'
+    + '<text class="axis-txt" x="'+(mL-6)+'" y="'+(bB+3).toFixed(1)+'" text-anchor="end">85</text>';
+
+  rows.forEach(function(r,i){
+    const cx = mL + slot*i + slot/2, top = Y(r.sys), bot = Y(r.dia);
+    const col = (r.sys<135 && r.dia<85) ? 'var(--go)' : ((r.sys<150 && r.dia<95) ? 'var(--warn)' : 'var(--stop)');
+    out += '<rect x="'+(cx-bw/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(4,bot-top).toFixed(1)+'" '
+      + 'rx="4" fill="'+col+'" stroke="var(--surface)" stroke-width="2">'
+      + '<title>'+esc(shortDate(r.date))+' — '+r.sys+'/'+r.dia+'</title></rect>';
+    if(i===n-1) out += '<text class="pt-lbl" x="'+cx.toFixed(1)+'" y="'+(top-8).toFixed(1)+'" text-anchor="middle">'+r.sys+'/'+r.dia+'</text>';
+  });
+  out += '<text class="axis-txt" x="'+mL+'" y="'+(H-8)+'">'+esc(shortDate(rows[0].date))+'</text>';
+  if(n>1) out += '<text class="axis-txt" x="'+(W-mR)+'" y="'+(H-8)+'" text-anchor="end">'+esc(shortDate(rows[n-1].date))+'</text>';
+  return out + '</svg></div>';
+}
+
+/* ═════════════════════════════  PLAN  ═════════════════════════════ */
+
+function renderPlan(){
+  const T = targets();
+  $('#s-plan').innerHTML =
+    '<div class="card card-pad"><span class="eyebrow">Your targets</span>'
+      + '<div class="chips" style="margin-top:10px">'
+        + '<span class="chip chip-data">'+T.kcal+' kcal a day</span>'
+        + '<span class="chip chip-go">'+T.protein+'g protein</span>'
+        + '<span class="chip chip-warn">under '+T.salt+'g salt</span>'
+        + '<span class="chip chip-neutral">'+T.fibre+'g fibre</span></div>'
+      + '<div class="prose small" style="margin-top:13px">'
+        + '<p>Worked out from your height, weight and age: roughly <strong>'+T.tdee+' kcal</strong> to hold steady, minus 550 to lose about <strong>half a kilo a week</strong>. '
+        + 'Protein is set at 1.6g per kg of your target weight — deliberately high, because at 56 in a calorie deficit you lose muscle unless you defend it. '
+        + 'Salt is 5g rather than the UK 6g limit, because of your blood pressure.</p></div></div>'
+
+    + tasteCard()
+
+    + planCard('How this works', [
+        '<strong>You are not counting anything.</strong> The numbers on each item are there if you want them and ignorable if you do not. Your whole job is: open the app, tap where you are, tap the thing at the top, eat it.',
+        '<strong>The app is organised by place, not by food.</strong> That is deliberate. "What should I eat?" is an impossible question standing in a garage at seven in the morning. "I am at a BP garage" has one answer.',
+        '<strong>There is no streak.</strong> Streaks are the worst possible mechanic for an ADHD brain — they work brilliantly right up until the day you miss, and then the structure becomes evidence against you. A bad day here is a bad day. Tomorrow the app looks identical.',
+        '<strong>Off plan is a button, not a failure.</strong> Pressing it is more useful than closing the app, because it keeps you in the loop.',
+        '<strong>Every list is short and pre-sorted.</strong> The one marked <em>Best pick</em> is genuinely the best one. You do not have to read the rest.'
+      ])
+
+    + planCard('Why these rules and not others', [
+        '<strong>Visceral fat goes first.</strong> This is the genuinely encouraging thing about your starting point. The fat around your organs is metabolically active and it responds to a calorie deficit earlier and faster than the fat under your skin. People routinely see real visceral fat reduction in eight to twelve weeks while the mirror has barely changed. Which is why <strong>waist</strong>, not weight, is the first number on the Numbers page.',
+        '<strong>Protein does three jobs at once.</strong> It keeps muscle on you while you lose fat, it is the most filling macronutrient per calorie, and it barely moves blood glucose. For a prediabetic 56-year-old it is the single highest-leverage change available.',
+        '<strong>Salt turned out to be the hidden problem.</strong> Researching the venues threw up something I did not expect: the high-protein high-street options are consistently <em>salty</em>. Several Pret items that look ideal on protein and calories carry 2.5 to 3.1g of salt — half a day in one box. For your blood pressure that matters more than the calorie gap between options. So salt has its own colour on every single item and its own meter on Today.',
+        '<strong>Refined carbs, not carbs.</strong> Nothing here bans carbohydrate. It bans the carrier — bread, wraps, rice, chips, crisps — because that is where the fast starch and most of the calories sit, and it is the part you were not eating for pleasure anyway. Beans, lentils, vegetables and whole grains all stay.',
+        '<strong>The walk after lunch.</strong> Ten to fifteen minutes within half an hour of eating measurably blunts the post-meal glucose spike, more than the same walk done two hours later. It is the cheapest thing on this list.',
+        '<strong>Your Diet Coke is fine.</strong> No sugar, no calories, no good evidence it works against fat loss, glucose or blood pressure. I am not going to take away something that costs you nothing.'
+      ])
+
+    + planCard('What I am not sure about', [
+        'Straight answer on data quality, because you will notice if I fudge it.',
+        '<strong>Pret, M&S, Waitrose, Sainsbury’s and Tesco figures are solid</strong> — read off the retailers’ own current UK product pages. A few are worked out from a per-100g table and are marked <em>approx</em>.',
+        '<strong>McDonald’s is half-solid.</strong> They publish calories in the UK but not full macros, so protein, carbs and salt come from a nutrition database.',
+        '<strong>Subway is the weak one.</strong> Their official UK nutrition PDF is blocked and the menu was renamed in the 2025–26 refresh, so some item names may be stale. Use the rule, check in store.',
+        '<strong>Street food has no data and I did not invent any.</strong> Those figures are reasoned estimates from typical portions and are labelled as estimates.',
+        '<strong>Home meals are estimates too.</strong> Portions vary. Treat them as the right ballpark, not a measurement.',
+        'Menus change constantly. When something here is wrong or gone, tell me and I will update the app.'
+      ])
+
+    + planCard('Before you start', [
+        'I am not a doctor and this is not medical advice. Two things worth raising with your GP or practice nurse — not because they are likely problems, but because they are the ones that actually matter:',
+        '<strong>If you take blood pressure medication</strong>, losing weight and cutting salt will lower your blood pressure on top of what the tablets are already doing. That is the goal, but it can overshoot. Dizziness on standing is the sign, and doses sometimes need reducing.',
+        '<strong>If you take anything for blood glucose</strong>, the same logic applies in the other direction.',
+        'Worth asking for: a repeat HbA1c in three months, and today’s weight and waist noted in your records so there is a baseline that is not just this app.'
+      ])
+
+    + '<div class="section">'
+      + '<button class="btn btn-quiet btn-block" data-act="export">Export my data</button>'
+      + '<button class="btn btn-quiet btn-block" style="margin-top:8px" data-act="editprofile">Change my height, weight or age</button>'
+      + '<p class="hint" style="margin-top:12px;text-align:center">Your data is stored on this device only and never leaves your phone. Export it now and then, so a cleared browser cannot take your history with it.</p>'
+    + '</div>';
+}
+function tasteCard(){
+  const done = tasteAnswered(), total = ALL_FOODS.length;
+  const nos = Object.keys(S.taste).filter(function(k){ return S.taste[k]==='no'; }).length;
+  const loves = Object.keys(S.taste).filter(function(k){ return S.taste[k]==='love'; }).length;
+
+  let body;
+  if(!done){
+    body = '<p class="prose small" style="margin-top:8px">'+total+' foods, one at a time, three big buttons: '
+      + '<strong>never</strong>, <strong>fine</strong>, <strong>love it</strong>. Takes about four minutes, and you can stop anywhere — '
+      + 'the app uses whatever you have answered. Afterwards every list here is filtered and reordered around it.</p>'
+      + '<button class="btn btn-primary btn-block" style="margin-top:13px" data-act="tastestart">Start the food list</button>';
+  }else{
+    body = '<div class="bar bar-go" style="margin-top:11px"><i style="width:'+(done/total*100).toFixed(1)+'%"></i></div>'
+      + '<div class="chips" style="margin-top:11px">'
+      + '<span class="chip chip-neutral">'+done+' of '+total+' answered</span>'
+      + (nos ? '<span class="chip chip-stop">'+nos+' never</span>' : '')
+      + (loves ? '<span class="chip chip-go">'+loves+' loved</span>' : '')
+      + '</div>'
+      + '<button class="btn btn-'+(done<total?'primary':'quiet')+' btn-block" style="margin-top:13px" data-act="tastestart">'
+      + (done<total ? 'Carry on — '+(total-done)+' left' : 'Review and change answers') + '</button>';
+  }
+  return '<div class="section"><span class="eyebrow">Foods you like and do not like</span>'
+    + '<div class="card card-pad" style="margin-top:9px">'+body+'</div></div>';
+}
+
+function planCard(title, paras){
+  return '<div class="section"><span class="eyebrow">'+esc(title)+'</span>'
+    + '<div class="card card-pad" style="margin-top:9px"><div class="prose small">'
+    + paras.map(function(p){ return '<p>'+p+'</p>'; }).join('')
+    + '</div></div></div>';
+}
+
+/* ═════════════════════════════  NAV  ═════════════════════════════ */
+
+const TITLES = {today:'Today', where:'Where are you?', numbers:'Numbers', plan:'The plan',
+                setup:'Set up', taste:'Your food list'};
+
+function go(tab){ S.tab = tab; save(); render(); window.scrollTo(0,0); }
+
+function render(){
+  const setup = !S.profile;
+  const tab = setup ? 'setup' : S.tab;
+  $$('.screen').forEach(function(el){ el.classList.remove('active'); });
+  const el = $('#s-'+tab); if(el) el.classList.add('active');
+  $('#topTitle').textContent = TITLES[tab] || 'Today';
+  $('.tabbar').style.display = setup ? 'none' : '';
+  $$('.tab').forEach(function(b){ b.setAttribute('aria-current', b.dataset.go===tab ? 'page':'false'); });
+  if(setup){ $('#topSub').textContent=''; return; }
+
+  const T = targets();
+  if(tab==='today'){
+    $('#topSub').textContent = new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+    renderMeters(); renderTopUp(); renderMeals(); renderToggles();
+  }else if(tab==='where'){
+    $('#topSub').textContent = S.place ? '' : 'pick a place';
+    renderWhere();
+  }else if(tab==='numbers'){
+    $('#topSub').textContent = SR.readings.length + (SR.readings.length===1?' reading':' readings') + ' \u00b7 from the Still Room';
+    renderNumbers();
+  }else if(tab==='plan'){
+    $('#topSub').textContent = T.kcal+' kcal · '+T.protein+'g protein';
+    renderPlan();
+  }else if(tab==='taste'){
+    $('#topSub').textContent = tasteAnswered()+' of '+ALL_FOODS.length;
+    renderTaste();
+  }
+}
+
+/* ═════════════════════════════  EVENTS  ═════════════════════════════ */
+
+document.addEventListener('click', function(e){
+  const tabBtn = e.target.closest('.tab');
+  if(tabBtn){ S.place=null; S.venue=null; S.slotHint=null; go(tabBtn.dataset.go); return; }
+
+  const a = e.target.closest('[data-act]');
+  if(!a) return;
+  const act = a.dataset.act;
+
+  if(act==='toggle'){
+    S.open = (S.open === a.dataset.slot) ? null : a.dataset.slot;
+    save(); renderMeals(); return;
+  }
+
+  if(act==='place'){
+    S.place = a.dataset.id; S.venue = null;
+    S.slotHint = a.dataset.slot || null;
+    S.open = null; save(); go('where'); return;
+  }
+  if(act==='venue'){ S.venue = a.dataset.id; save(); renderWhere(); window.scrollTo(0,0); return; }
+  if(act==='backvenue'){ S.venue = null; save(); renderWhere(); window.scrollTo(0,0); return; }
+  if(act==='backplace'){ S.place = null; S.venue = null; S.slotHint = null; save(); render(); window.scrollTo(0,0); return; }
+
+  if(act==='pick'){
+    const item = findItem(a.dataset.id);
+    if(!item) return;
+
+    if(a.dataset.slot === 'extra'){
+      day().extras.push({id:item.id, n:item.n, k:item.k, p:item.p, c:item.c||0, s:item.s});
+      save(); render(); toast('Added');
+      return;
+    }
+
+    const slot = S.slotHint || a.dataset.slot;
+    if(!slot){
+      toast('That one is a drink — nothing to log');
+      return;
+    }
+    const d = day();
+    d.meals[slot] = {id:item.id, n:item.n, k:item.k, p:item.p, c:item.c||0, s:item.s};
+    S.open = null; S.place = null; S.venue = null; S.slotHint = null;
+    save(); go('today');
+    toast(slot.charAt(0).toUpperCase()+slot.slice(1)+' logged');
+    return;
+  }
+
+  if(act==='off'){
+    day().meals[a.dataset.slot] = {id:'off', n:'Off plan — noted, moving on', off:true, k:0,p:0,c:0,s:0};
+    S.open = null; save(); render();
+    toast('Noted. Next meal is a clean slate.');
+    return;
+  }
+
+  /* ── the food list ── */
+  if(act==='taste'){
+    const id = a.dataset.id;
+    if(!S.taste[id]) S.tasteOrder.push(id);
+    S.taste[id] = a.dataset.v;
+    save(); renderTaste();
+    $('#topSub').textContent = tasteAnswered()+' of '+ALL_FOODS.length;
+    return;
+  }
+  if(act==='tasteset'){
+    const id = a.dataset.id, v = a.dataset.v;
+    if(S.taste[id] === v){
+      delete S.taste[id];
+      S.tasteOrder = S.tasteOrder.filter(function(x){ return x!==id; });
+    }else{
+      if(!S.taste[id]) S.tasteOrder.push(id);
+      S.taste[id] = v;
+    }
+    save(); renderTaste(); return;
+  }
+  if(act==='tasteskipcat'){
+    ALL_FOODS.forEach(function(f){
+      if(f.catId===a.dataset.cat && !S.taste[f.id]){ S.taste[f.id]='ok'; S.tasteOrder.push(f.id); }
+    });
+    save(); renderTaste();
+    $('#topSub').textContent = tasteAnswered()+' of '+ALL_FOODS.length;
+    return;
+  }
+  if(act==='tasteback'){
+    const last = S.tasteOrder.pop();
+    if(last) delete S.taste[last];
+    save(); renderTaste();
+    $('#topSub').textContent = tasteAnswered()+' of '+ALL_FOODS.length;
+    return;
+  }
+  if(act==='tastereview'){ S.tasteReview = true; save(); renderTaste(); window.scrollTo(0,0); return; }
+  if(act==='tastereviewoff'){ S.tasteReview = false; save(); renderTaste(); window.scrollTo(0,0); return; }
+  if(act==='tastereset'){
+    S.taste = {}; S.tasteOrder = []; S.tasteReview = false; save(); renderTaste();
+    toast('Food list cleared'); return;
+  }
+  if(act==='tastestart'){ S.tasteReview = false; go('taste'); return; }
+  if(act==='tastedone'){
+    S.tasteReview = false;
+    const n = tasteAnswered();
+    go('today');
+    toast(n ? n+' answered — lists are filtered' : 'Nothing saved yet');
+    return;
+  }
+  if(act==='showhidden'){ S.showHidden[a.dataset.key] = true; save(); renderWhere(); return; }
+  if(act==='hidefew'){ S.showHidden[a.dataset.key] = false; save(); renderWhere(); return; }
+
+  if(act==='rmextra'){ day().extras.splice(Number(a.dataset.i),1); save(); render(); return; }
+  if(act==='opentopup'){ S.topupOpen = true; save(); render(); return; }
+  if(act==='closetopup'){ S.topupOpen = false; save(); render(); return; }
+
+  if(act==='savemeasure'){
+    const g = function(id){ const v = parseFloat($('#'+id).value); return isNaN(v) ? null : v; };
+    const rec = {date:todayKey(), weight:g('n-weight'), waist:g('n-waist'), sys:g('n-sys'), dia:g('n-dia'), pulse:g('n-pulse')};
+    if(rec.weight==null && rec.waist==null && rec.sys==null){ toast('Nothing to save — fill in a field'); return; }
+    if(rec.weight!=null && S.profile) S.profile.weight = rec.weight;
+    /* WRITES REMOVED 22 Aug 2026 — the Still Room owns the body of record. Sending Mark there
+       is one extra tap and it keeps one history instead of two that disagree. */
+    toast('Log it in the Still Room \u2014 opening it now'); openStillRoom(); return;
+  }
+  if(act==='undomeasure'){ toast('Readings are edited in the Still Room'); openStillRoom(); return; }
+  if(act==='editprofile'){ S.profile = null; save(); render(); return; }
+  if(act==='export'){ doExport(); return; }
+});
+
+/* Setup now asks ONE question — how active a day is — because that is the only thing the Still
+   Room does not already know. Height, weight, age and waist are read, not typed. Asking a man
+   his height when the house has held it since June is how you end up with two answers. */
+$('#setupGo').addEventListener('click', function(){
+  var act = parseFloat($('#f-act').value);
+  if(!(act>0.9 && act<2.5)) act = 1.45;
+  S.profile = { activity: act };
+  S.tab='today'; save(); render();
+});
+
+$('#walkBtn').addEventListener('click', function(){ const d=day(); d.walk=!d.walk; save(); renderToggles(); });
+$('#liftBtn').addEventListener('click', function(){ const d=day(); d.lift=!d.lift; save(); renderToggles(); });
+$('#wipeDay').addEventListener('click', function(){
+  S.log[todayKey()] = {meals:{}, extras:[], walk:false, lift:false};
+  S.open=null; S.topupOpen=false; save(); render(); toast('Today reset');
+});
+$('#planAll').addEventListener('click', function(){
+  const key = todayKey(), d = day();
+  let filled = 0;
+  ['breakfast','lunch','dinner','snack'].forEach(function(slot){
+    if(d.meals[slot]) return;
+    const o = autoPick(slot, key);
+    if(o){ d.meals[slot] = {id:o.id, n:o.n, k:o.k, p:o.p, c:o.c||0, s:o.s}; filled++; }
+  });
+  save(); render();
+  toast(filled ? 'Decided. Change any of it by tapping.' : 'Already decided');
+});
+
+/* ═════════════════════════════  EXPORT  ═════════════════════════════ */
+
+async function doExport(){
+  const payload = JSON.stringify({
+    app:'five-minute-radius', version:3, exported:todayKey(),
+    profile:S.profile, body:body(), targets:targets(), taste:S.taste, log:S.log
+  }, null, 2);
+  const name = 'five-minute-radius-'+todayKey()+'.json';
+  try{
+    const downloads = (window.claude && window.claude.use) ? await window.claude.use('downloads') : null;
+    if(downloads){ await downloads.save({filename:name, data:payload}); toast('Exported'); return; }
+  }catch(err){
+    if(err && err.code === 'declined') return;
+  }
+  const w = window.open('','_blank');
+  if(w){
+    w.document.write('<pre style="white-space:pre-wrap;font:13px ui-monospace,monospace;padding:16px">'+esc(payload)+'</pre>');
+    w.document.close();
+  }else{
+    toast('Could not export here — try from a browser tab');
+  }
+}
+
+/* ═════════════════════════════  BOOT  ═════════════════════════════ */
+
+if(S.profile) day();
+boot();   // pull the Still Room first, then paint — see boot() above
+</script>
