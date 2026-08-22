@@ -1339,10 +1339,27 @@ var RULES = [
       + 'Salt is on the front of every UK pack and protein on the back. Divide. Under 20 goes back.',
     from:'BP readings, May to August 2026' },
   { id:'carb', head:'Bread can carry the protein. It cannot BE the meal.',
-    why:'Your triglyceride-to-HDL ratio was 4.3 in March. That pattern answers to refined '
-      + 'carbohydrate, not to fat. A sandwich is mostly bread; a salad with the same chicken in '
-      + 'it is mostly chicken.',
-    from:'Trig 4.0 / HDL 0.94, March 2026' },
+    why:'Your triglyceride-to-HDL ratio was 4.3 in March and 2.05 in August. That pattern '
+      + 'answers to refined carbohydrate and to body fat \u2014 not to dietary fat. A sandwich is '
+      + 'mostly bread; a salad with the same chicken in it is mostly chicken.',
+    from:'Trig 4.0 (Mar) \u2192 1.91 (Aug), both non-fasting' },
+  /* WHAT MOVED IT, and why the app says so rather than letting a wrong lever get the credit.
+     Mark's first read was that swapping dairy milk for oat or black coffee between May and
+     August halved his triglycerides. Two coffees is about 30 kcal a day; it cannot.
+     His own weight record explains it: the 18 March blood was drawn when he weighed 116.0 kg,
+     the heaviest reading in his recent history (16 Mar 116.02, 20 Mar 116.0). By the August
+     test he was 112-113. Triglycerides track weight and visceral fat more tightly than almost
+     any other marker, and roughly 4 kg is enough to do this.
+     Both samples were non-fasting, which is the UK clinical standard for lipids and means they
+     ARE comparable \u2014 an earlier version of this note wrongly assumed one was fasted and
+     dismissed the whole comparison. Against non-fasting thresholds (about 2.0, not 1.7), 4.0
+     was genuinely high and 1.91 is near normal. The improvement is real. The cause was weight. */
+  { id:'weight', head:'The lever is the 4kg, not the coffee',
+    why:'Your triglycerides halved between March and August. In March you weighed 116kg \u2014 '
+      + 'your heaviest recent reading, and the blood was drawn two days after it. By August you '
+      + 'were 112. That is what moved it, not the change of milk. Keep doing the thing that took '
+      + 'the weight off, because it is the same lever that moves your blood pressure and your waist.',
+    from:'Weight 116.0kg on 16 Mar vs 112.4kg in May' },
   { id:'fat', head:'Do not fear the olive oil, the avocado or the nuts',
     why:'Your LDL is 2.3 and controlled. HDL at 0.93 is the marker still going the wrong way, '
       + 'and monounsaturated fat and oily fish are what raise it. Fat is also what makes a meal '
