@@ -241,8 +241,21 @@
   }
 
   // ---- render ----
-  function fmtDate(d){ if(!d) return ''; if(/^\d{4}-\d{2}-\d{2}$/.test(d)){ var p=d.split('-'); return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString('en-GB',{day:'numeric',month:'short'}); } if(/^\d{4}-\d{2}$/.test(d)){ var q=d.split('-'); return new Date(+q[0],+q[1]-1,1).toLocaleDateString('en-GB',{month:'long'})+' '+q[0]; } return d; }
-  function dsort(a,b){ var ax=(a.date||'9999'), bx=(b.date||'9999'); return ax<bx?-1:(ax>bx?1:0); }
+  function fmtDate(d){ if(!d) return ''; if(/^\d{4}-\d{2}-\d{2}$/.test(d)){ var p=d.split('-'); return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString('en-GB',{day:'numeric',month:'short'}); } if(/^\d{4}-\d{2}$/.test(d)){ var q=d.split('-'); return new Date(+q[0],+q[1]-1,1).toLocaleDateString('en-GB',{month:'long'})+' '+q[0]; } if(/^\d{4}$/.test(d)) return 'During '+d;   // a bare year is a promise, not a date
+    return d; }
+  /* 22 Aug 2026 — sort a VAGUE date to the end of the period it names, not the start.
+     Plain string comparison put '2026' ahead of '2026-08-28', because it is a prefix. With 44 of
+     the 112 titles dated only by year ("Blue Lights series 4, sometime in 2026"), that pushed
+     every vague entry to the TOP of the app and buried the things actually out next week. Pad a
+     bare year to 31 Dec and a bare month to the 31st, so "sometime in 2026" lands after
+     everything with a real date in 2026 — which is what it means. */
+  function dkey(d){
+    d = d || '';
+    if(/^\d{4}$/.test(d))        return d + '-12-31';
+    if(/^\d{4}-\d{2}$/.test(d))  return d + '-31';
+    return d || '9999';
+  }
+  function dsort(a,b){ var ax=dkey(a.date), bx=dkey(b.date); return ax<bx?-1:(ax>bx?1:0); }
   function renderPlatChips(){
     var el=$('[data-plat-chips]'); if(!el) return;
     var present={}; CATALOGUE.forEach(function(it){ present[it.platform]=1; });

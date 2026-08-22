@@ -4,7 +4,7 @@
  * (read-modify-write) is unchanged.
  * Bump CACHE on every shell change so phones pick up the new version.
  */
-var CACHE = 'diversions-v4';
+var CACHE = 'diversions-v5';   // bumped 22 Aug 2026 — vague dates now sort to the end of their period
 var SHELL = [
   './',
   './index.html',
