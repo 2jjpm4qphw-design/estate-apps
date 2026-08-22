@@ -1219,7 +1219,10 @@ function toast(msg){
 
 /* Salt is the axis the high street varies most on, and the one that
    matters most for blood pressure, so it gets its own banding. */
-function saltBand(g){ return g <= 1.5 ? 'go' : g <= 2.5 ? 'warn' : 'stop'; }
+/* Tightened 22 Aug 2026 against a 4g daily target rather than a generic 5g. At 4g a day, a
+   single 2.5g item is 62% of the day — that cannot be an amber. Green is now a quarter of the
+   day or less, amber up to a third, red beyond it. */
+function saltBand(g){ return g <= 1.0 ? 'go' : g <= 1.5 ? 'warn' : 'stop'; }
 function sugarBand(g){ return g <= 5 ? 'go' : g <= 12 ? 'warn' : 'stop'; }
 
 function confChip(c){
@@ -1233,7 +1236,19 @@ function macroChips(o){
     + '<span class="chip chip-go">'+r1(o.p)+'g protein</span>';
   if(o.c != null) h += '<span class="chip chip-neutral">'+r1(o.c)+'g carbs</span>';
   if(o.sug != null) h += '<span class="chip chip-'+sugarBand(o.sug)+'">'+r1(o.sug)+'g sugar</span>';
-  h += '<span class="chip chip-'+saltBand(o.s)+'">'+r1(o.s)+'g salt</span>' + confChip(o.conf) + '</div>';
+  h += '<span class="chip chip-'+saltBand(o.s)+'">'+r1(o.s)+'g salt</span>';
+  /* THE RATIO, shown rather than left as arithmetic. The rule is "every gram of salt must buy
+     20g of protein" — but a rule you have to do division for, standing in a garage, is a rule
+     you stop using. So the app does the sum. */
+  if (o.s > 0 && o.p != null) {
+    var ratio = o.p / o.s;
+    h += '<span class="chip chip-' + (ratio >= 20 ? 'go' : ratio >= 12 ? 'warn' : 'stop') + '">'
+       + Math.round(ratio) + 'g protein per g salt</span>';
+  }
+  /* Dairy is flagged, never hidden. It bloats him every time and the blood tests were clear,
+     which means the symptom is the evidence — but it is his call in the moment, not the app's. */
+  if (itemHasDairy(o.id)) h += '<span class="chip chip-warn">contains dairy</span>';
+  h += confChip(o.conf) + '</div>';
   return h;
 }
 
@@ -1256,6 +1271,93 @@ function macroChips(o){
    PROTEIN is against Mark's OWN target weight (95kg, set in the Still Room), not the textbook
    BMI-25 weight of 84.6kg. A target he chose is one he might reach, and 1.6g/kg of 95 is 152g.
    ═══════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════════════════
+   MARK'S RULES — derived from 154 blood results, not from anybody's opinion
+   Built 22 August 2026, from state.health read out of the Still Room.
+
+   Every rule below names the number it came from. If a future reading contradicts one, the
+   rule changes — that is the whole point of deriving them rather than typing them in. The
+   previous version of this app carried a hard-coded PLAN_RAG list that no result had ever
+   touched; Mark's instruction was "based on the blood results NOT the guessing of any other
+   chat", so that list is gone entirely and nothing here is inherited from it.
+
+   THE FOUR FINDINGS THAT SHAPE EVERYTHING:
+
+   1. BLOOD PRESSURE is the loudest problem, and it is current.
+      Last seven readings: 149/86, 148/81, 109/92, 144/97, 124/87, 148/98, 147/94.
+      Four of the last seven at or above 144 systolic, diastolic repeatedly 94-98.
+      -> SALT is a first-order constraint, not a footnote.
+
+   2. THE LIPID PATTERN SAYS CARBOHYDRATE, NOT FAT.
+      Trig/HDL: 4.0/0.94 = 4.3 (Mar 2026) -> 1.91/0.93 = 2.05 (Aug 2026).
+      High triglycerides with low HDL is the visceral-fat/insulin-resistance signature, and it
+      responds to refined carbohydrate, alcohol and fructose far more than to dietary fat.
+      LDL is 2.3 and handled by a statin. HDL at 0.93 is the one marker still going the wrong
+      way, and olive oil, oily fish and nuts raise it.
+      -> Fat is NOT the enemy here. Refined carbohydrate is. This is the opposite of generic
+         "eat less fat" advice, and it is specific to Mark's panel.
+
+   3. DAIRY IS OUT ON SYMPTOMS, NOT ON BLOODS.
+      Mark: "milk makes me feel bloated and sore and my tummy swells although it didn't come up
+      with anything on the blood tests." That is exactly what lactose intolerance and non-IgE
+      dairy sensitivity look like — neither shows on allergy bloods. A negative test does not
+      overrule a symptom you get every time. Dairy is therefore avoided by DEFAULT, and where
+      an item contains it the app says so rather than hiding it.
+      NOTE: his EoE is in remission on Tezepelumab, i.e. controlled by drug, not by diet. So
+      this is NOT an elimination diet and wheat/egg/soy/nuts are not restricted.
+
+   4. KIDNEYS SAY NO SALT SUBSTITUTES.
+      eGFR 90 -> 90 -> 85 -> 79 while creatinine rose 76 -> 93. Potassium ran 5.4 and 5.3.
+      LoSalt and similar genuinely lower blood pressure and would otherwise be an obvious win.
+      With a falling eGFR and potassium that has run high, they are the one thing NICE says
+      this exact patient should not start without their GP checking first.
+
+   AND THE SATIETY PROBLEM, which is the one Mark actually asked about:
+      "sandwiches, bagels, crisps, rolls are too much of my diet... I need a diet that leaves
+      me feeling full not empty."
+      Those four are the least filling calories available: refined carbohydrate is high energy,
+      low protein, low fibre, low volume. The fix is not smaller portions of the same thing —
+      it is protein, fat, fibre and VOLUME, all four of which his lipid panel also argues for.
+      The two problems have the same answer, which is why this can work.
+   ═══════════════════════════════════════════════════════════════════════════════════════ */
+
+/** The rules, each carrying the evidence it came from so it can be audited or overturned. */
+/* The dairy list. Named explicitly rather than pattern-matched on the word "milk", because
+   feta, halloumi and cottage cheese contain no such word and would slip straight through.
+   These are the food ids already used by the tag table, so nothing new has to be maintained. */
+var DAIRY = ['milk','greekyog','feta','hardcheese','cottage','halloumi','mozzarella','cream',
+             'butter','yoghurt','soft_cheese','parmesan','mayo_dairy'];
+function itemHasDairy(id){
+  var t = TAGS[id] || [];
+  for (var i=0;i<t.length;i++) if (DAIRY.indexOf(t[i]) !== -1) return true;
+  return false;
+}
+
+var RULES = [
+  { id:'salt', head:'Every gram of salt must buy 20g of protein',
+    why:'Your last seven blood-pressure readings average 138/91, with four at or above 144. '
+      + 'Salt is on the front of every UK pack and protein on the back. Divide. Under 20 goes back.',
+    from:'BP readings, May to August 2026' },
+  { id:'carb', head:'Bread can carry the protein. It cannot BE the meal.',
+    why:'Your triglyceride-to-HDL ratio was 4.3 in March. That pattern answers to refined '
+      + 'carbohydrate, not to fat. A sandwich is mostly bread; a salad with the same chicken in '
+      + 'it is mostly chicken.',
+    from:'Trig 4.0 / HDL 0.94, March 2026' },
+  { id:'fat', head:'Do not fear the olive oil, the avocado or the nuts',
+    why:'Your LDL is 2.3 and controlled. HDL at 0.93 is the marker still going the wrong way, '
+      + 'and monounsaturated fat and oily fish are what raise it. Fat is also what makes a meal '
+      + 'hold you until the evening.',
+    from:'HDL 1.09 -> 0.94 -> 0.93; LDL 2.3 on a statin' },
+  { id:'dairy', head:'Dairy-free by default',
+    why:'It bloats you and makes you sore every time, and a clear blood test does not overrule '
+      + 'that. Items containing it are flagged, not hidden — you decide.',
+    from:'Your own symptoms, Aug 2026' },
+  { id:'full', head:'Fill the gap with protein, fat and volume — never more bread',
+    why:'Under-eating at lunch is what produces the 9pm raid on the cupboard. If a meal comes '
+      + 'to under 400 kcal it is a snack, and the app will say so.',
+    from:'Stated problem: "full not empty"' }
+];
+
 var SR = { profile:null, readings:[] };          // filled by the Still Room bridge
 
 /* ══════════════════════ THE SHARED GIST ══════════════════════
@@ -1426,7 +1528,11 @@ function targets(){
   /* His target, not the textbook one — but fall back to BMI 25 if he has not set one. */
   const goalW = b.targetWeight > 0 ? b.targetWeight : 25 * Math.pow(b.height/100, 2);
   const protein = Math.round((goalW * 1.6)/5)*5;               // 1.6 g per kg of goal weight
-  return { kcal, protein, salt:5, fibre:30, goalW:r1(goalW), tdee:Math.round(tdee),
+  /* Salt 4g, not the 5g a generic plan uses and not the UK's 6g limit. Four of his last seven
+     readings were at or above 144 systolic, and the trials that move blood pressure meaningfully
+     are the ones that get intake near 4g. He is starting from shop sandwiches and forecourt
+     food, where 6g is easy to pass before dinner. */
+  return { kcal, protein, salt:4, fibre:30, goalW:r1(goalW), tdee:Math.round(tdee),
            waist:b.waist, weight:b.weight, height:b.height, age:b.age };
 }
 function bmi(w){ const b=body(); return b ? w / Math.pow(b.height/100,2) : 0; }
@@ -1985,9 +2091,30 @@ function bpChart(bps){
 
 /* ═════════════════════════════  PLAN  ═════════════════════════════ */
 
+/* The rules, with their evidence, at the top of the Plan tab. Deliberately the FIRST thing on
+   that screen: the point of this rebuild is that every instruction can be traced to a number,
+   and a rule whose reasoning is buried three cards down might as well have been asserted. */
+function rulesCard(){
+  return '<div class="card card-pad"><span class="eyebrow">Your rules, and where each came from</span>'
+    + '<p class="prose small" style="margin:8px 0 0">Built from 154 blood results in the Still Room '
+    + 'on 22 August 2026. Nothing here was carried over from the earlier version of this app \u2014 '
+    + 'that list was typed in from memory and no result had ever touched it. If a future reading '
+    + 'contradicts one of these, the rule changes.</p>'
+    + '<div class="divider"></div>'
+    + RULES.map(function(r){
+        return '<div style="margin-bottom:14px">'
+          + '<div style="font-weight:700;font-size:15px;line-height:1.35">' + esc(r.head) + '</div>'
+          + '<div class="prose small" style="margin-top:4px">' + esc(r.why) + '</div>'
+          + '<div class="chips" style="margin-top:6px"><span class="chip chip-neutral">'
+          + esc(r.from) + '</span></div></div>';
+      }).join('')
+    + '</div>';
+}
+
 function renderPlan(){
   const T = targets();
   $('#s-plan').innerHTML =
+    rulesCard() +
     '<div class="card card-pad"><span class="eyebrow">Your targets</span>'
       + '<div class="chips" style="margin-top:10px">'
         + '<span class="chip chip-data">'+T.kcal+' kcal a day</span>'
