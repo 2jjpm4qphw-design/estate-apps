@@ -1,0 +1,1144 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Garage">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0D1B3E">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>The Garage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap">
+</head>
+<body>
+<style>
+/* ══════════════════════ ESTATE CHROME ══════════════════════
+   Copied verbatim from the Buttery and the Still Room. 9px on the department label, NOT the
+   app's own body size — the strip is shared furniture and matches the house, not this room.
+   Getting that wrong in the Buttery made its strip taller than everyone else's. */
+.estate-strip{display:flex;align-items:center;gap:9px;padding:9px 16px 8px;background:#0D1B3E}
+.estate-strip .em-house{height:13px;width:auto;flex:none;opacity:1}
+.estate-strip .em-dept{font-family:Montserrat,-apple-system,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C4F000;line-height:1}
+@media print{.estate-strip{display:none}}
+
+/* ══════════════════════ TOKENS ══════════════════════
+   The estate palette. Navy ground, lime as accent and fill ONLY — never body text, and never
+   text on a light ground, where lime reads at about 1.3:1 and is invisible. */
+:root{
+  --bg:#0D1B3E; --surface:#12224A; --surface-2:#172954;
+  --ink:#FFFFFF; --ink-2:#D6DEEE; --muted:#9FB0CE;
+  --line:#24467e; --line-strong:#3159A0;
+  --go:#C4F000; --go-soft:#1B3418; --go-ink:#DCF95E;
+  --warn:#F2B23C; --warn-soft:#3A2C10;
+  --stop:#FF7A6E; --stop-soft:#3D1B18;
+  --data:#7FB6F0; --data-soft:#14294A;
+  --shadow:0 1px 2px rgba(0,0,0,.45), 0 6px 20px -12px rgba(0,0,0,.8);
+  --radius:14px;
+  --f:"Montserrat","Helvetica Neue",Arial,sans-serif;
+  --f-mono:ui-monospace,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:16px;
+     line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
+     padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none;text-align:left}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--data);outline-offset:2px;border-radius:6px}
+.wrap{max-width:540px;margin:0 auto;padding:0 16px}
+h1,h2,h3{margin:0;letter-spacing:-.015em}
+h1{font-size:20px;font-weight:800}
+h2{font-size:19px;font-weight:700;margin:22px 0 10px}
+h3{font-size:15px;font-weight:700}
+p{margin:0 0 .8em}
+.hint{font-size:14.5px;line-height:1.5;color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:14.5px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+
+/* ══════════════════════ CHROME ══════════════════════ */
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 90%,transparent);
+        backdrop-filter:saturate(160%) blur(12px);-webkit-backdrop-filter:saturate(160%) blur(12px);
+        border-bottom:1px solid var(--line)}
+.topbar-in{max-width:540px;margin:0 auto;padding:6px 16px 10px;display:flex;align-items:baseline;
+           justify-content:space-between;gap:12px}
+.topbar .sub{font-size:13.5px;color:var(--muted);font-weight:600;flex:none}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;
+        background:color-mix(in srgb,var(--surface) 96%,transparent);
+        backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);
+        border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabbar-in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 8px;
+     color:var(--muted);font-size:11.5px;font-weight:700;letter-spacing:.03em}
+.tab .ti{font-size:17px;line-height:1}
+.tab[aria-current="page"]{color:var(--go)}
+.view[hidden]{display:none}
+
+/* ══════════════════════ CARDS ══════════════════════ */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);overflow:hidden}
+.card+.card{margin-top:12px}
+.pad{padding:15px 16px}
+.rowb{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.grow{flex:1;min-width:0}
+.stack{display:flex;flex-direction:column;gap:12px}
+.sep{border-top:1px solid var(--line)}
+
+/* status colours, used identically everywhere so a colour always means the same thing */
+.st-go{color:var(--go-ink)} .st-warn{color:var(--warn)} .st-stop{color:var(--stop)}
+.pill{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.04em;
+      padding:3px 9px;border-radius:999px;text-transform:uppercase}
+.pill.go{background:var(--go-soft);color:var(--go-ink)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.stop{background:var(--stop-soft);color:var(--stop)}
+.pill.flat{background:var(--surface-2);color:var(--muted)}
+
+/* the big number, used for mpg and cost per mile */
+.big{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--go-ink)}
+.big.plain{color:var(--ink)}
+.unit{font-size:14px;font-weight:700;color:var(--muted);margin-left:4px;letter-spacing:0}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:15px}
+.kv+.kv{border-top:1px solid var(--line)}
+.kv b{font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ══════════════════════ FORMS ══════════════════════ */
+.f{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f .wide{grid-column:1/-1}
+label.fl{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;
+         text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+input[type=text],input[type=number],input[type=date],select,textarea{
+  width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
+  padding:11px 12px;font-size:16px;color:var(--ink);-webkit-appearance:none;appearance:none}
+textarea{min-height:70px;resize:vertical;font-size:15.5px}
+select{background-image:none}
+.btn{display:inline-block;background:var(--go);color:#0D1B3E;font-weight:800;font-size:15px;
+     padding:12px 16px;border-radius:11px;text-align:center;width:100%;letter-spacing:.01em}
+.btn.ghost{background:transparent;color:var(--ink-2);border:1px solid var(--line-strong);font-weight:700}
+.btn.danger{background:transparent;color:var(--stop);border:1px solid var(--stop);font-weight:700}
+.btn.sm{padding:8px 12px;font-size:13.5px;width:auto;border-radius:9px}
+.toggle{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:15px}
+.toggle input{width:22px;height:22px;accent-color:var(--go);flex:none}
+
+/* ══════════════════════ TYRES ══════════════════════ */
+.corners{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.corner{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:11px}
+.corner .cn{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.corner .cv{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2}
+.corner .cs{font-size:12.5px;font-weight:600}
+.corner.under{border-color:var(--warn)} .corner.bad{border-color:var(--stop)}
+
+/* ══════════════════════ LISTS ══════════════════════ */
+.item{padding:13px 16px;border-top:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
+.item:first-child{border-top:none}
+.item .t{font-size:15.5px;font-weight:600;line-height:1.35}
+.item .s{font-size:13.5px;color:var(--muted);margin-top:2px}
+.item .r{flex:none;text-align:right}
+.done{opacity:.5}
+.done .t{text-decoration:line-through}
+
+/* ══════════════════════ CHART ══════════════════════ */
+.spark{width:100%;height:78px;display:block}
+.spark .ln{fill:none;stroke:var(--go);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.spark .dt{fill:var(--go)}
+.spark .avg{stroke:var(--line-strong);stroke-width:1;stroke-dasharray:3 3}
+
+details{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+        padding:13px 16px;margin-top:12px}
+details summary{font-size:15px;font-weight:700;cursor:pointer;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:' \25BE';color:var(--muted)}
+details[open] summary::after{content:' \25B4'}
+details .body{margin-top:10px;font-size:15px;line-height:1.55;color:var(--ink-2)}
+details .body p{margin:0 0 .7em}
+details .body p:last-child{margin-bottom:0}
+</style>
+
+<div class="estate-strip" aria-hidden="true"><img class="em-house" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAABGCAMAAAAdMRrrAAADAFBMVEUAAAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABnduxjAAAAAXRSTlMAQObYZgAAAmlJREFUeNrtmtt2hCAMRU/+/6fbNZ2qQLgkBARNXuoqKrDnkAsIzDAikPgZ1VPLGn1MA4FeD4EcgkN4FASyMUewNwYyNUewGQYaA+CLYRMYNN4cwpNSh0cbkUvh4xivTowuYD7FZIgqxHZxrVmegPuETZTgEBzCCQGJR0D6j8N3INeSe9smEMAMuzbV9pbdlECIE19kLriW8O9VNG9RAh6nBKBHCdhRCR4d9ofAdSHqdikI/M3VVzwLQmbocyEc5RSCQBeGPYpuOc6e4rdgTwivVsIyeQJ/b+UVJuzt8gT05gkaMRk55GWUoFlTFgsx+9vNV4LGs9i4o3WUoPGvRk45O4/ZEBRhRh+a6NwcpXkhMupVG6pV0T2YOhEyB2WjIRShiLIVVYYTbqvTPRCqU5I/Ixx4LfLMF0LYkBkeci0D8tx7lTCvNh/Q/f27DfQwgwabso9vdfL/iu/lvHkGfV99QQeEwgXFJyh0hMggOKWJTz1ZCvZ6BMnS2eG17z8a3KFPevoTtKHOLz07qEGg1pMVtOSS1AABAQTZKhmrhLbjJU1CXYHQqwTGSyTLbXkI7HcNBfcGVRSyWg40bTmYRgdbx6ht2QCCMLVRV5EO4WkQsAgE0xDZmtgqc/f2EFmaFRcimaBZhaDOepHRoYwhQyYuqJMfksoQZEpgqnXBl44o4Omp/sZBSLTFVKxCIaCmEU3VHFdX8uXQVbOLV4MRBHYg86IDy6B1OZQhyNYBc/o4ZT8BXQxqELopTIHQyUB1MiShcAcE8dae2R5hbURjdyXHfOOFV5pDYFTrEByCQ3gzhMVClUNwCL/2A4cGHxiWr8/FAAAAAElFTkSuQmCC"><span class="em-dept">Of the Estate</span></div>
+
+<header class="topbar"><div class="topbar-in">
+  <h1 id="hTitle">The Garage</h1>
+  <span class="sub" id="hSub">&mdash;</span>
+</div></header>
+
+<main class="wrap">
+
+<!-- ────────────────────────── NOW ────────────────────────── -->
+<section class="view" id="v-now">
+  <div id="nowBody"></div>
+
+  <details id="connectCard" hidden>
+    <summary>Connect to the estate</summary>
+    <div class="body">
+      <p>The Garage keeps its records in the same gist as every other room, so a fill logged on
+      the forecourt is on the Mac before you are home, and nothing is lost if this phone is.</p>
+      <div class="f">
+        <div class="wide"><label class="fl" for="cfgId">Gist ID</label><input id="cfgId" type="text" autocomplete="off" spellcheck="false"></div>
+        <div class="wide"><label class="fl" for="cfgTok">Token</label><input id="cfgTok" type="text" autocomplete="off" spellcheck="false"></div>
+        <div class="wide"><button class="btn" id="cfgSave">Connect</button></div>
+      </div>
+      <p class="hint" id="cfgErr" hidden style="color:var(--stop);margin-top:8px"></p>
+    </div>
+  </details>
+</section>
+
+<!-- ────────────────────────── FUEL ────────────────────────── -->
+<section class="view" id="v-fuel" hidden>
+  <div id="fuelBody"></div>
+
+  <h2>Log a fill</h2>
+  <div class="card"><div class="pad">
+    <div class="f">
+      <div><label class="fl" for="fDate">Date</label><input id="fDate" type="date"></div>
+      <div><label class="fl" for="fOdo">Odometer (miles)</label><input id="fOdo" type="number" inputmode="numeric" step="1" placeholder="e.g. 24310"></div>
+      <div><label class="fl" for="fLit">Litres</label><input id="fLit" type="number" inputmode="decimal" step="0.01" placeholder="38.42"></div>
+      <div><label class="fl" for="fCost">Cost (&pound;)</label><input id="fCost" type="number" inputmode="decimal" step="0.01" placeholder="54.20"></div>
+      <div class="wide"><label class="toggle"><input id="fBrim" type="checkbox" checked> Filled right to the brim</label>
+        <p class="hint" style="margin:0">This is the one that matters. Economy can only be worked out between two brimmed tanks &mdash; leave it unticked for a splash-and-dash and the maths simply skips over it rather than reporting a wrong figure.</p></div>
+      <div class="wide"><label class="fl" for="fNote">Note</label><input id="fNote" type="text" placeholder="optional &mdash; motorway run, Shell V-Power, towing"></div>
+      <div class="wide"><button class="btn" id="fAdd">Save this fill</button></div>
+    </div>
+    <p class="hint" id="fErr" hidden style="color:var(--stop);margin-top:10px"></p>
+  </div></div>
+
+  <h2>Every fill</h2>
+  <div id="fuelList"></div>
+</section>
+
+<!-- ────────────────────────── TYRES ────────────────────────── -->
+<section class="view" id="v-tyres" hidden>
+  <div id="tyreBody"></div>
+
+  <h2>Record a check</h2>
+  <div class="card"><div class="pad">
+    <div class="f">
+      <div><label class="fl" for="tDate">Date</label><input id="tDate" type="date"></div>
+      <div><label class="fl" for="tOdo">Odometer</label><input id="tOdo" type="number" inputmode="numeric" step="1"></div>
+    </div>
+    <p class="eyebrow" style="margin:14px 0 8px">Pressures, cold, in psi</p>
+    <div class="corners">
+      <div class="corner"><div class="cn">Front left</div><input id="pFL" type="number" inputmode="decimal" step="0.5"></div>
+      <div class="corner"><div class="cn">Front right</div><input id="pFR" type="number" inputmode="decimal" step="0.5"></div>
+      <div class="corner"><div class="cn">Rear left</div><input id="pRL" type="number" inputmode="decimal" step="0.5"></div>
+      <div class="corner"><div class="cn">Rear right</div><input id="pRR" type="number" inputmode="decimal" step="0.5"></div>
+    </div>
+    <p class="eyebrow" style="margin:14px 0 8px">Tread depth in mm &mdash; optional, and once a season is plenty</p>
+    <div class="corners">
+      <div class="corner"><div class="cn">Front left</div><input id="dFL" type="number" inputmode="decimal" step="0.1"></div>
+      <div class="corner"><div class="cn">Front right</div><input id="dFR" type="number" inputmode="decimal" step="0.1"></div>
+      <div class="corner"><div class="cn">Rear left</div><input id="dRL" type="number" inputmode="decimal" step="0.1"></div>
+      <div class="corner"><div class="cn">Rear right</div><input id="dRR" type="number" inputmode="decimal" step="0.1"></div>
+    </div>
+    <div style="margin-top:12px"><button class="btn" id="tAdd">Save this check</button></div>
+    <p class="hint" id="tErr" hidden style="color:var(--stop);margin-top:10px"></p>
+  </div></div>
+
+  <h2>Your target pressures</h2>
+  <div class="card"><div class="pad">
+    <div class="f">
+      <div><label class="fl" for="tgtF">Front (psi)</label><input id="tgtF" type="number" inputmode="decimal" step="0.5"></div>
+      <div><label class="fl" for="tgtR">Rear (psi)</label><input id="tgtR" type="number" inputmode="decimal" step="0.5"></div>
+      <div class="wide"><button class="btn ghost" id="tgtSave">Save targets</button></div>
+    </div>
+    <p class="hint" style="margin-top:10px"><b>These are yours to set and I have deliberately left them blank.</b>
+    The right figures are on a sticker on the driver&rsquo;s door pillar &mdash; open the door and look at the
+    frame &mdash; or in the handbook. They differ by wheel size and by load, so a number I found on the
+    internet would be a guess dressed up as a fact, and a guess is how you end up driving on
+    the wrong pressures for a year.</p>
+  </div></div>
+
+  <h2>Every check</h2>
+  <div id="tyreList"></div>
+</section>
+
+<!-- ────────────────────────── CARE ────────────────────────── -->
+<section class="view" id="v-care" hidden>
+  <div id="careBody"></div>
+</section>
+
+<!-- ────────────────────────── FAULTS ────────────────────────── -->
+<section class="view" id="v-faults" hidden>
+  <h2 style="margin-top:16px">Something&rsquo;s not right</h2>
+  <div class="card"><div class="pad">
+    <div class="f">
+      <div class="wide"><label class="fl" for="xText">What is it doing?</label><input id="xText" type="text" placeholder="Rattle from the passenger door over bumps"></div>
+      <div><label class="fl" for="xDate">Noticed</label><input id="xDate" type="date"></div>
+      <div><label class="fl" for="xSev">How bad</label><select id="xSev">
+        <option value="watch">Keep an eye on it</option>
+        <option value="book">Book it in</option>
+        <option value="urgent">Don&rsquo;t drive it</option>
+      </select></div>
+      <div class="wide"><label class="fl" for="xNote">Anything else</label><textarea id="xNote" placeholder="Only when it's cold. Stops after ten minutes."></textarea></div>
+      <div class="wide"><button class="btn" id="xAdd">Add it to the list</button></div>
+    </div>
+    <p class="hint" style="margin-top:10px">The point of this list is that you arrive at the garage with it, rather than
+    standing at the counter trying to remember what the noise sounded like.</p>
+  </div></div>
+
+  <h2>Open</h2>
+  <div id="faultOpen"></div>
+  <h2>Sorted</h2>
+  <div id="faultDone"></div>
+</section>
+
+</main>
+
+<nav class="tabbar"><div class="tabbar-in">
+  <button class="tab" data-go="now"    aria-current="page"><span class="ti">&#9679;</span>Now</button>
+  <button class="tab" data-go="fuel"><span class="ti">&#9053;</span>Fuel</button>
+  <button class="tab" data-go="tyres"><span class="ti">&#9711;</span>Tyres</button>
+  <button class="tab" data-go="care"><span class="ti">&#9874;</span>Care</button>
+  <button class="tab" data-go="faults"><span class="ti">&#9888;</span>Faults</button>
+</div></nav>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE GARAGE — 23 August 2026
+   A logbook for the Fiat 124 Spider. Fills, pressures, the recurring jobs, and the list of
+   things that are wrong.
+
+   WHY IT IS A SEPARATE APP FROM ROADCRAFT, which is the decision worth recording. Roadcraft
+   already shows fuel and tyre figures, but they are MODELS — a physics estimate scaled by a
+   guess, and a tyre-temperature curve. Nothing in Roadcraft has ever been measured. This app is
+   the opposite: nothing in here is calculated from driving, all of it was read off a pump or a
+   gauge. Mixing measured and modelled numbers in one screen is how you end up with two mpg
+   figures that disagree and no idea which to believe. Kept apart, the measured one can later
+   CALIBRATE the modelled one, which is the useful direction.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+var BUILD = '2026-08-23a';
+var GAL   = 4.54609;          // litres in an imperial gallon. UK mpg or none at all.
+var PSI_BAR = 0.0689476;
+
+/* ─────────────────────── STATE ─────────────────────── */
+var LS = 'garage:v1';
+var S = {
+  car:   { name:'Fiat 124 Spider', reg:'', tank:45 },
+  fills: [],      // {id,date,odo,litres,cost,brim,note}
+  tyres: [],      // {id,date,odo,p:{fl,fr,rl,rr},d:{fl,fr,rl,rr}}
+  targets:{ front:null, rear:null },
+  done:  [],      // {id,care,date,odo,cost,note}
+  off:   {},      // careId -> true, jobs Mark has switched off
+  faults:[]       // {id,text,date,sev,note,fixed,fixedAt}
+};
+function loadLocal(){
+  try{ var raw=localStorage.getItem(LS); if(!raw) return;
+       var o=JSON.parse(raw);
+       Object.keys(S).forEach(function(k){ if(o[k]!=null) S[k]=o[k]; });
+  }catch(_){}
+}
+function saveLocal(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(_){} }
+function save(){ saveLocal(); try{ gSchedule(); }catch(_){} render(); }
+
+/* ─────────────────────── SMALL HELPERS ─────────────────────── */
+function $(s,r){ return (r||document).querySelector(s); }
+function num(v){ var n=parseFloat(v); return isFinite(n)?n:null; }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function todayIso(){ var d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+/* One decimal place, but WITHOUT a pointless trailing zero. "4.0 psi under" is how a machine
+   talks; "4 psi under" is how a person does, and this text is read at a petrol station in the
+   rain. Half a psi still shows as 29.5, which is the only reason the decimal exists. */
+function r1(n){ return String(Math.round(n*10)/10); }
+function r2(n){ return (Math.round(n*100)/100).toFixed(2); }
+function comma(n){ return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+function daysBetween(a,b){ return Math.round((Date.parse(b)-Date.parse(a))/86400000); }
+function addMonths(iso, m){
+  var d=new Date(iso+'T12:00:00'); var day=d.getDate();
+  d.setMonth(d.getMonth()+m);
+  if(d.getDate()<day) d.setDate(0);           // 31 Jan + 1 month is 28 Feb, not 3 March
+  return d.toISOString().slice(0,10);
+}
+function niceDate(iso){
+  if(!iso) return '—';
+  var d=new Date(iso+'T12:00:00');
+  if(isNaN(d)) return iso;
+  return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear();
+}
+/** "in 9 days" / "3 weeks ago" — the phrasing people actually use. */
+function relDays(n){
+  if(n===0) return 'today';
+  var a=Math.abs(n), s;
+  if(a===1) s='1 day'; else if(a<21) s=a+' days';
+  else if(a<60) s=Math.round(a/7)+' weeks';
+  else if(a<730) s=Math.round(a/30.4)+' months';
+  else s=r1(a/365)+' years';
+  return n>0 ? 'in '+s : s+' ago';
+}
+
+/* ═══════════════════════ THE ODOMETER ═══════════════════════
+   Deliberately DERIVED rather than a field of its own. Every fill, every tyre check and every
+   job done already carries a reading, so asking for it separately would be asking twice and
+   giving two numbers the chance to disagree. The highest one ever entered is the odometer. */
+function odoNow(){
+  var m=0;
+  S.fills.forEach(function(f){ if(f.odo>m) m=f.odo; });
+  S.tyres.forEach(function(t){ if(t.odo>m) m=t.odo; });
+  S.done .forEach(function(d){ if(d.odo>m) m=d.odo; });
+  return m||null;
+}
+/** Miles a day, from the fill history — used to turn "due in 2,000 miles" into a date. */
+function milesPerDay(){
+  var f=S.fills.slice().sort(byOdo);
+  if(f.length<2) return null;
+  var first=f[0], last=f[f.length-1];
+  var d=daysBetween(first.date, last.date), mi=last.odo-first.odo;
+  if(!(d>13) || !(mi>0)) return null;      // under a fortnight of history says nothing
+  return mi/d;
+}
+function byOdo(a,b){ return (a.odo-b.odo) || String(a.date).localeCompare(String(b.date)); }
+
+/* ═══════════════════════ FUEL ═══════════════════════
+   BRIM TO BRIM, and nothing else. A tank is only a known quantity when it is full, so the only
+   honest measurement is: fill to the brim, drive, fill to the brim again, and divide the miles
+   by everything that went in since. Partial fills in between are not thrown away — their litres
+   are counted into the span — but they cannot open or close one.
+
+   This is why the brim tick exists and why a fill without it shows no mpg. The alternative,
+   which most fuel apps do, is to divide by whatever went in and print a figure that swings by
+   fifteen per cent depending on how the nozzle cut off. */
+function segments(){
+  var f=S.fills.slice().sort(byOdo), out=[], anchor=null, litres=0, cost=0;
+  for(var i=0;i<f.length;i++){
+    var x=f[i];
+    if(anchor){ litres+=(num(x.litres)||0); cost+=(num(x.cost)||0); }
+    if(x.brim){
+      if(anchor && x.odo>anchor.odo && litres>0){
+        var miles=x.odo-anchor.odo;
+        out.push({ from:anchor, to:x, miles:miles, litres:litres, cost:cost,
+                   mpg: miles*GAL/litres, ppm: cost>0 ? cost/miles : null });
+      }
+      anchor=x; litres=0; cost=0;
+    }
+  }
+  return out;
+}
+function avgMpg(segs){
+  if(!segs.length) return null;
+  var mi=0, li=0;
+  segs.forEach(function(s){ mi+=s.miles; li+=s.litres; });
+  return mi*GAL/li;      // weighted by distance, which is the correct average. Averaging the
+                         // per-fill mpg figures would let a 20-mile tank count as much as a 400.
+}
+function avgPPM(segs){
+  var mi=0,c=0;
+  segs.forEach(function(s){ if(s.cost>0){ mi+=s.miles; c+=s.cost; } });
+  return mi>0 ? c/mi : null;
+}
+
+/* ═══════════════════════ TYRES ═══════════════════════ */
+var CORNERS=[['fl','Front left'],['fr','Front right'],['rl','Rear left'],['rr','Rear right']];
+function targetFor(k){ return k.charAt(0)==='f' ? num(S.targets.front) : num(S.targets.rear); }
+/** How a single corner is doing, as a band and a sentence. */
+function cornerState(chk, k){
+  var p=num(chk.p&&chk.p[k]), t=targetFor(k), d=num(chk.d&&chk.d[k]);
+  var band='flat', note=[];
+  if(p!=null && t!=null){
+    var off=p-t;
+    if(off<=-4){ band='stop'; note.push(r1(-off)+' psi under'); }
+    else if(off<=-2){ band='warn'; note.push(r1(-off)+' psi under'); }
+    else if(off>=4){ band='warn'; note.push(r1(off)+' psi over'); }
+    else { band='go'; note.push('on target'); }
+  }
+  if(d!=null){
+    /* 1.6mm is the legal minimum across the central three-quarters of the tread. 3mm is where
+       wet stopping distances start to lengthen sharply, which is why it is the usual advice to
+       replace — not because it is a rule, but because the last 1.4mm is the worst 1.4mm. */
+    if(d<1.6){ band='stop'; note.push(r1(d)+'mm — below the legal limit'); }
+    else if(d<3){ if(band!=='stop') band='warn'; note.push(r1(d)+'mm — think about replacing'); }
+    else note.push(r1(d)+'mm');
+  }
+  return { psi:p, band:band, note:note.join(' · ') };
+}
+/* A SLOW PUNCTURE reads as one corner drifting, not four. Four corners falling together is
+   just time and temperature — every tyre loses roughly 1-2 psi a month, and cold weather takes
+   more. One corner falling on its own, check after check, is air escaping. That distinction is
+   the whole reason for recording four numbers instead of one. */
+function slowPuncture(){
+  var chks=S.tyres.slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); }).slice(0,3);
+  if(chks.length<3) return null;
+  var worst=null, ok=true;
+  for(var i=0;i<3;i++){
+    var best=null;
+    CORNERS.forEach(function(c){
+      var p=num(chks[i].p&&chks[i].p[c[0]]), t=targetFor(c[0]);
+      if(p==null||t==null) return;
+      var def=t-p;
+      if(!best || def>best.def) best={k:c[0],name:c[1],def:def};
+    });
+    if(!best || best.def<2){ ok=false; break; }
+    if(worst===null) worst=best; else if(best.k!==worst.k){ ok=false; break; }
+  }
+  return ok&&worst ? worst : null;
+}
+
+/* ═══════════════════════ THE CARE SCHEDULE ═══════════════════════
+   One engine for everything with a date on it — statutory paperwork, mechanical servicing, the
+   convertible's own jobs, and the small habits. They all reduce to the same shape: last done,
+   plus an interval in months and/or miles, whichever arrives first.
+
+   EVERY ITEM CARRIES ITS REASON. Not decoration: an app that nags about eighteen things without
+   saying why is one you stop opening, and Mark's standing request is to be able to see the
+   logic when he has forgotten it. Anything here can be switched off — a schedule you have
+   pruned to what you actually care about gets read; one that shouts about everything does not.
+
+   INTERVALS ARE STARTING POINTS, not gospel. Where I have chosen shorter than the factory
+   figure, the reason is written into the item and the factory figure is named. */
+var CARE = [
+
+  /* ── the law and the paperwork ── */
+  {id:'mot', name:'MOT', group:'Paperwork', months:12,
+   why:'Driving without a valid one invalidates the insurance as well, so the real cost of forgetting is not the £1,000 fine — it is being uninsured without knowing it. You can book the test up to a month early and keep the same anniversary date.'},
+  {id:'tax', name:'Vehicle tax', group:'Paperwork', months:12,
+   why:'DVLA no longer send a paper reminder you can lose, and enforcement is automatic number-plate cameras rather than a person noticing. Set it to 12 months if you pay annually, 6 if you do not.'},
+  {id:'ins', name:'Insurance renewal', group:'Paperwork', months:12,
+   why:'The renewal quote is almost always worse than a fresh one, and the saving is largest if you shop about three weeks out rather than on the day. This reminder is set early on purpose.'},
+  {id:'rac', name:'Breakdown cover', group:'Paperwork', months:12,
+   why:'Worth its own line because it renews on a different date from the insurance and is the one people discover has lapsed at the roadside.'},
+
+  /* ── the convertible's own jobs, which he asked for by name ── */
+  {id:'drains', name:'Clear the soft-top drains', group:'The roof', months:6,
+   why:'Water off the roof does not run away over the bodywork — it runs into two wells behind the seats and down a tube out of the bottom of the car. Leaves and grit collect in the filters at the top of those tubes, the well fills, and it overflows INWARDS into the footwell. This is the single most common leak on the car and it is not a roof fault at all. The handbook asks for the filters to be cleaned at least once a year; twice is better, and the autumn one is the one that matters, after the leaves have come down.'},
+  {id:'fabric', name:'Clean and re-proof the roof fabric', group:'The roof', months:6,
+   why:'The fabric sheds water because of a proofing layer, not because it is waterproof in itself, and that layer washes off. Once it soaks instead of beading it stays damp, and damp is what rots the stitching and mists the rear window. Spring before the season, autumn before the wet.'},
+  {id:'seals', name:'Condition the roof and door seals', group:'The roof', months:12,
+   why:'Rubber seals dry out, shrink and then let water past at the top of the windscreen frame. A silicone or rubber conditioner takes ten minutes and is far cheaper than a set of seals. It also stops the roof squeaking against the frame.'},
+
+  /* ── mechanical ── */
+  {id:'oil', name:'Engine oil and filter', group:'Mechanical', months:6, miles:8000,
+   why:'This engine is a 1.4 MultiAir turbo, and the MultiAir unit works hydraulically off the engine oil — the oil is not just lubricant here, it is part of how the valves are actuated. Dirty or low oil shows up as rough running and eventually as an expensive unit. Fiat’s book allows up to 10,000 miles or 12 months and there is a variable indicator on the dash; 8,000 or 6 months is deliberately shorter than the book, because short runs and a turbo are the two conditions the long interval is not written for, and both describe this car.'},
+  {id:'service', name:'Full service', group:'Mechanical', months:12, miles:10000,
+   why:'The scheduled visits fall at 10, 20, 30 and 40 thousand: oil, filters, brake and belt inspection, battery. Keeping the stamps also holds the value on a car people buy with their heart.'},
+  {id:'brakefluid', name:'Brake fluid', group:'Mechanical', months:24,
+   why:'Brake fluid absorbs water out of the air through the hoses. Water boils where fluid does not, so wet fluid gives you a soft pedal exactly when you have been braking hard — down a hill, or on a good road. Two years is the standard interval and it is a cheap job.'},
+  {id:'cabin', name:'Cabin air filter', group:'Mechanical', months:24, miles:20000,
+   why:'Not a safety item. It is the reason the demister gets slow and the car smells musty, which on a car that spends time damp is a real annoyance.'},
+  {id:'airfilter', name:'Engine air filter', group:'Mechanical', miles:20000,
+   why:'A blocked one costs you economy before it costs you anything else, so it shows up in the mpg trend on the Fuel tab before it shows up anywhere else.'},
+  {id:'plugs', name:'Spark plugs', group:'Mechanical', miles:30000,
+   why:'Thirty thousand on this engine. Worn plugs on a turbo petrol give a stumble under load rather than a misfire at idle, so it is easy to blame the fuel instead.'},
+  {id:'coolant', name:'Coolant', group:'Mechanical', months:48,
+   why:'Long-life coolant, so this is a long interval — but check the handbook rather than me before spending money on it, because the specification matters more than the timing and the wrong type does harm.'},
+
+  /* ── the small habits, which is where most of the value is ── */
+  {id:'pressures', name:'Check the tyre pressures', group:'Habits', months:1,
+   why:'Every tyre loses one to two psi a month with nothing wrong at all, and more in cold weather. Five minutes on the Tyres tab, and it is the only way the slow-puncture warning can work — that needs three checks in a row to say anything.'},
+  {id:'aircon', name:'Run the air conditioning', group:'Habits', months:1,
+   why:'The compressor seals are lubricated by oil carried round in the refrigerant, so a system that is never run dries out and starts to leak. Ten minutes with it on, in January as much as July. A re-gas is not expensive; a compressor is.'},
+  {id:'battery', name:'Put the battery on a conditioner', group:'Habits', months:3,
+   why:'A weekend car does short runs and then sits, which is the exact pattern that kills a battery — never fully charged, slowly sulphating. A few hours on a conditioner every few months roughly doubles its life.'},
+  {id:'screenwash', name:'Top up the screenwash', group:'Habits', months:3,
+   why:'Here because it is an MOT failure and because you only ever notice it is empty at the moment you need it. Use proper screenwash rather than water: water freezes in the jets and grows algae in the bottle.'},
+  {id:'rotate', name:'Rotate the tyres', group:'Habits', miles:10000,
+   why:'Only if the front and rear are the same size — check before you book it, as some setups are staggered and cannot be swapped. Where it does apply it evens out the wear on a rear-wheel-drive car, which chews the rears.'}
+];
+function careById(id){ for(var i=0;i<CARE.length;i++) if(CARE[i].id===id) return CARE[i]; return null; }
+function lastDone(id){
+  var best=null;
+  S.done.forEach(function(d){ if(d.care===id && (!best || d.date>best.date)) best=d; });
+  return best;
+}
+/* Status of one job. Two clocks, months and miles, and the SOONER one wins — that is what
+   "whichever comes first" means and it has to be computed both ways round, because a car doing
+   4,000 miles a year is governed by the calendar and one doing 20,000 is governed by the road. */
+function careStatus(c){
+  var last=lastDone(c.id);
+  if(!last) return { band:'flat', head:'Never recorded', sub:'Tell it when this was last done and it starts counting.', unset:true, sort:1e9 };
+  var today=todayIso(), odo=odoNow(), mpd=milesPerDay();
+  var byDate=null, byMiles=null, parts=[];
+
+  if(c.months){
+    var due=addMonths(last.date, c.months);
+    byDate=daysBetween(today, due);
+    parts.push({days:byDate, why:'due '+niceDate(due), kind:'date'});
+  }
+  if(c.miles && last.odo!=null && odo!=null){
+    var left=(last.odo+c.miles)-odo;
+    var days= mpd ? Math.round(left/mpd) : null;
+    byMiles=left;
+    parts.push({days:days, why:(left>=0?comma(left)+' miles to go':comma(-left)+' miles over'), kind:'miles', miles:left});
+  }
+  if(!parts.length) return { band:'flat', head:'No interval set', sub:'', sort:1e9 };
+
+  /* Rank by days where we know them; a miles-only job with no mileage history has no days, so
+     it falls back to the miles remaining rather than pretending to a date. */
+  var dated = parts.filter(function(p){ return p.days!=null; });
+  var lead  = dated.length ? dated.sort(function(a,b){ return a.days-b.days; })[0] : parts[0];
+  var d = lead.days;
+
+  var band, head;
+  if(d==null){
+    band = (lead.miles!=null && lead.miles<0) ? 'stop' : (lead.miles!=null && lead.miles<500 ? 'warn':'go');
+    head = lead.why;
+  } else if(d<0){ band='stop'; head='Overdue — '+relDays(d).replace('ago','late'); }
+  else if(d<=30){ band='warn'; head='Due '+relDays(d); }
+  else { band='go'; head='Due '+relDays(d); }
+
+  var sub = parts.map(function(p){ return p.why; }).join(' · ')
+          + ' · last done '+niceDate(last.date)+(last.odo?' at '+comma(last.odo)+' miles':'');
+  return { band:band, head:head, sub:sub, sort:(d==null? (lead.miles!=null? lead.miles/20 : 9e8) : d), last:last };
+}
+function careActive(){ return CARE.filter(function(c){ return !S.off[c.id]; }); }
+function careRanked(){
+  return careActive().map(function(c){ var st=careStatus(c); return {c:c,st:st}; })
+    .sort(function(a,b){ return a.st.sort-b.st.sort; });
+}
+
+/* ═══════════════════════ RENDER ═══════════════════════ */
+var view='now';
+function go(v){
+  view=v;
+  ['now','fuel','tyres','care','faults'].forEach(function(k){
+    var el=$('#v-'+k); if(el) el.hidden=(k!==v);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(b){
+    if(b.dataset.go===v) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  window.scrollTo(0,0);
+  render();
+}
+function render(){
+  try{
+    var odo=odoNow();
+    $('#hSub').textContent = odo ? comma(odo)+' miles' : S.car.name;
+    $('#hTitle').textContent = 'The Garage';
+    if(view==='now')    renderNow();
+    if(view==='fuel')   renderFuel();
+    if(view==='tyres')  renderTyres();
+    if(view==='care')   renderCare();
+    if(view==='faults') renderFaults();
+    var cc=$('#connectCard'); if(cc) cc.hidden = !!gCreds();
+  }catch(e){ console.error('[garage] render', e); }
+}
+
+/* ── NOW ── */
+function renderNow(){
+  var h='', odo=odoNow(), segs=segments(), avg=avgMpg(segs), ppm=avgPPM(segs);
+
+  h+='<div class="card"><div class="pad">'
+   + '<div class="eyebrow">'+esc(S.car.name)+(S.car.reg?' · '+esc(S.car.reg):'')+'</div>'
+   + '<div class="rowb" style="margin-top:8px;align-items:flex-end">'
+   +   '<div><div class="big plain">'+(odo?comma(odo):'—')+'<span class="unit">miles</span></div></div>'
+   +   '<div style="text-align:right">'+(avg
+        ? '<div class="big">'+r1(avg)+'<span class="unit">mpg</span></div>'
+        : '<div class="hint" style="max-width:170px;margin:0">Two brimmed fills and this becomes a number</div>')+'</div>'
+   + '</div>';
+  if(ppm) h+='<div class="kv" style="margin-top:10px"><span class="muted">Fuel, per mile</span><b>'+(ppm*100).toFixed(1)+'p</b></div>';
+  h+='</div></div>';
+
+  /* What actually needs doing. Only overdue and due-within-30-days reach this card; everything
+     else lives on the Care tab. A "now" screen that lists eighteen things is not a now screen. */
+  var soon=careRanked().filter(function(r){ return r.st.band==='stop'||r.st.band==='warn'; });
+  h+='<h2>Needs you</h2>';
+  if(!soon.length){
+    h+='<div class="card"><div class="pad"><p style="margin:0"><b>Nothing is due.</b></p>'
+     + '<p class="hint" style="margin:6px 0 0">'+(S.done.length
+        ? 'Next up is '+esc(careRanked()[0].c.name.toLowerCase())+', '+esc(careRanked()[0].st.head.toLowerCase())+'.'
+        : 'Though nothing has a starting date yet either — the Care tab is where you tell it when things were last done.')+'</p></div></div>';
+  } else {
+    h+='<div class="card">';
+    soon.forEach(function(r){
+      h+='<div class="item"><div class="grow"><div class="t">'+esc(r.c.name)+'</div>'
+       + '<div class="s">'+esc(r.st.sub)+'</div></div>'
+       + '<div class="r"><span class="pill '+r.st.band+'">'+esc(r.st.head.replace(/^Due /,''))+'</span></div></div>';
+    });
+    h+='</div>';
+  }
+
+  /* Tyres, in one line, because the four numbers are on their own tab. */
+  var last=S.tyres.slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); })[0];
+  h+='<h2>Tyres</h2><div class="card"><div class="pad">';
+  if(!last){
+    h+='<p style="margin:0">Nothing recorded yet.</p><p class="hint" style="margin:6px 0 0">Four numbers off a gauge, and the slow-puncture warning starts working after the third check.</p>';
+  } else {
+    var worst='go', bits=[];
+    CORNERS.forEach(function(c){
+      var st=cornerState(last,c[0]);
+      if(st.band==='stop') worst='stop'; else if(st.band==='warn'&&worst!=='stop') worst='warn';
+      if(st.psi!=null) bits.push(c[1].split(' ')[0].charAt(0)+c[1].split(' ')[1].charAt(0)+' '+r1(st.psi));
+    });
+    var ago=daysBetween(last.date, todayIso());
+    h+='<div class="rowb"><div class="grow"><b>Checked '+relDays(-ago)+'</b>'
+     + '<div class="s muted" style="font-size:13.5px">'+esc(bits.join('  ·  '))+' psi</div></div>'
+     + '<span class="pill '+worst+'">'+(worst==='go'?'fine':worst==='warn'?'look':'act')+'</span></div>';
+    var sp=slowPuncture();
+    if(sp) h+='<p class="hint" style="margin:10px 0 0;color:var(--warn)"><b>'+esc(sp.name)+' has been the low corner on the last three checks</b>, by '+r1(sp.def)+' psi or more. Four corners dropping together is just time. One corner dropping on its own is air getting out.</p>';
+    if(ago>45) h+='<p class="hint" style="margin:10px 0 0">That is a while. A tyre loses one to two psi a month doing nothing at all.</p>';
+  }
+  h+='</div></div>';
+
+  var open=S.faults.filter(function(f){ return !f.fixed; });
+  if(open.length){
+    h+='<h2>On the list</h2><div class="card">';
+    open.slice(0,4).forEach(function(f){
+      h+='<div class="item"><div class="grow"><div class="t">'+esc(f.text)+'</div>'
+       + '<div class="s">noticed '+niceDate(f.date)+'</div></div>'
+       + '<div class="r"><span class="pill '+(f.sev==='urgent'?'stop':f.sev==='book'?'warn':'flat')+'">'
+       + (f.sev==='urgent'?'urgent':f.sev==='book'?'book it':'watch')+'</span></div></div>';
+    });
+    if(open.length>4) h+='<div class="item"><div class="grow s">and '+(open.length-4)+' more on the Faults tab</div></div>';
+    h+='</div>';
+  }
+  $('#nowBody').innerHTML=h;
+}
+
+/* ── FUEL ── */
+function renderFuel(){
+  var segs=segments(), avg=avgMpg(segs), ppm=avgPPM(segs), h='';
+  var last=segs[segs.length-1];
+
+  h+='<div class="card"><div class="pad">';
+  if(!segs.length){
+    h+='<p style="margin:0"><b>No economy figure yet.</b></p>'
+     + '<p class="hint" style="margin:6px 0 0">It needs two fills that were both taken right to the brim. '
+     + (S.fills.length? 'You have '+S.fills.length+' fill'+(S.fills.length>1?'s':'')+' logged; ':'')
+     + 'the first brimmed fill is only a starting line — the second one is what produces a number.</p>';
+  } else {
+    h+='<div class="rowb" style="align-items:flex-end">'
+     + '<div><div class="eyebrow">Last tank</div><div class="big">'+r1(last.mpg)+'<span class="unit">mpg</span></div></div>'
+     + '<div style="text-align:right"><div class="eyebrow">All time</div><div class="big plain" style="font-size:26px">'+r1(avg)+'<span class="unit">mpg</span></div></div>'
+     + '</div>';
+    var diff=last.mpg-avg;
+    if(segs.length>2 && Math.abs(diff)>=2)
+      h+='<p class="hint" style="margin:10px 0 0">That tank was '+r1(Math.abs(diff))+' mpg '+(diff>0?'better':'worse')
+       + ' than your average. A single tank swings on the kind of miles it was — worth noticing only if the next one agrees with it.</p>';
+    h+=sparkline(segs);
+    h+='<div class="kv"><span class="muted">Miles measured</span><b>'+comma(segs.reduce(function(n,s){return n+s.miles;},0))+'</b></div>';
+    if(ppm) h+='<div class="kv"><span class="muted">Fuel per mile</span><b>'+(ppm*100).toFixed(1)+'p</b></div>';
+    if(ppm) h+='<div class="kv"><span class="muted">A hundred miles costs</span><b>&pound;'+r2(ppm*100)+'</b></div>';
+    var tank=num(S.car.tank);
+    if(tank&&avg) h+='<div class="kv"><span class="muted">A full tank should go</span><b>'+comma(tank*avg/GAL)+' miles</b></div>';
+  }
+  h+='</div></div>';
+  $('#fuelBody').innerHTML=h;
+
+  var f=S.fills.slice().sort(byOdo).reverse(), l='';
+  if(!f.length) l='<div class="card"><div class="pad"><p class="hint" style="margin:0">Nothing logged yet.</p></div></div>';
+  else {
+    var segByTo={}; segs.forEach(function(s){ segByTo[s.to.id]=s; });
+    l='<div class="card">';
+    f.forEach(function(x){
+      var s=segByTo[x.id];
+      l+='<div class="item"><div class="grow">'
+       + '<div class="t">'+niceDate(x.date)+' · '+r1(x.litres)+'L'
+       + (x.cost? ' · &pound;'+r2(x.cost):'')+(x.brim?'':' <span class="pill flat">part</span>')+'</div>'
+       + '<div class="s">'+comma(x.odo)+' miles'+(s? ' · '+comma(s.miles)+' miles on that tank':'')
+       + (x.note? ' · '+esc(x.note):'')+'</div></div>'
+       + '<div class="r">'+(s? '<b style="font-size:17px">'+r1(s.mpg)+'</b><div class="s">mpg</div>'
+                             : '<span class="s muted">'+(x.brim?'—':'part fill')+'</span>')
+       + '<div style="margin-top:6px"><button class="btn ghost sm" data-del-fill="'+x.id+'">Delete</button></div></div></div>';
+    });
+    l+='</div>';
+  }
+  $('#fuelList').innerHTML=l;
+}
+/* A sparkline rather than a chart library: fifteen lines of SVG, no dependency, and it answers
+   the only question worth asking of an mpg series — is it drifting down? A drifting average is
+   the earliest cheap warning of a blocked air filter, dragging brakes, or soft tyres. */
+function sparkline(segs){
+  if(segs.length<3) return '';
+  var v=segs.map(function(s){ return s.mpg; });
+  var lo=Math.min.apply(null,v), hi=Math.max.apply(null,v);
+  if(hi-lo<1){ lo-=1; hi+=1; }
+  var W=300,H=78,P=6;
+  var x=function(i){ return P+i*(W-2*P)/(v.length-1); };
+  var y=function(n){ return H-P-((n-lo)/(hi-lo))*(H-2*P); };
+  var d=v.map(function(n,i){ return (i?'L':'M')+r1(x(i))+' '+r1(y(n)); }).join(' ');
+  var a=avgMpg(segs);
+  return '<svg class="spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="margin:12px 0 2px">'
+    + '<line class="avg" x1="'+P+'" x2="'+(W-P)+'" y1="'+r1(y(a))+'" y2="'+r1(y(a))+'"/>'
+    + '<path class="ln" d="'+d+'"/>'
+    + '<circle class="dt" cx="'+r1(x(v.length-1))+'" cy="'+r1(y(v[v.length-1]))+'" r="3.2"/></svg>'
+    + '<div class="hint" style="margin:0">'+segs.length+' tanks, '+r1(lo)+' to '+r1(hi)+' mpg. The dashed line is your average.</div>';
+}
+
+/* ── TYRES ── */
+function renderTyres(){
+  var last=S.tyres.slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); })[0];
+  var h='';
+  if(!S.targets.front && !S.targets.rear){
+    h+='<div class="card"><div class="pad"><p style="margin:0"><b>Set your target pressures first.</b></p>'
+     + '<p class="hint" style="margin:6px 0 0">Without them a reading is just a number — nothing can be called low. They are on the sticker inside the driver’s door frame.</p></div></div>';
+  }
+  if(last){
+    h+='<h2 style="margin-top:16px">Last check — '+niceDate(last.date)+'</h2><div class="corners">';
+    CORNERS.forEach(function(c){
+      var st=cornerState(last,c[0]);
+      h+='<div class="corner '+(st.band==='stop'?'bad':st.band==='warn'?'under':'')+'">'
+       + '<div class="cn">'+c[1]+'</div>'
+       + '<div class="cv st-'+st.band+'">'+(st.psi!=null?r1(st.psi):'—')+'<span class="unit">psi</span></div>'
+       + '<div class="cs muted">'+esc(st.note||'—')+'</div></div>';
+    });
+    h+='</div>';
+    var t=targetFor('fl');
+    if(t) h+='<p class="hint" style="margin:10px 0 0">Target '+r1(num(S.targets.front))+' front, '
+      + r1(num(S.targets.rear)||num(S.targets.front))+' rear — that is '+r2(num(S.targets.front)*PSI_BAR)+' bar, if the pump is metric.</p>';
+    var sp=slowPuncture();
+    if(sp) h+='<div class="card" style="margin-top:12px;border-color:var(--warn)"><div class="pad">'
+      + '<p style="margin:0"><b class="st-warn">'+esc(sp.name)+' keeps coming up short.</b></p>'
+      + '<p class="hint" style="margin:6px 0 0">Lowest against target on all three of the last checks, by '+r1(sp.def)+' psi or more. '
+      + 'All four dropping together is normal — tyres lose one to two psi a month and more in the cold. One corner on its own is a slow puncture until proved otherwise, and a garage will find it in ten minutes in a tank of water.</p></div></div>';
+  }
+  $('#tyreBody').innerHTML=h;
+
+  var l='', all=S.tyres.slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); });
+  if(!all.length) l='<div class="card"><div class="pad"><p class="hint" style="margin:0">Nothing recorded yet.</p></div></div>';
+  else {
+    l='<div class="card">';
+    all.forEach(function(t){
+      var bits=CORNERS.map(function(c){ var p=num(t.p&&t.p[c[0]]); return p!=null?r1(p):'—'; });
+      l+='<div class="item"><div class="grow"><div class="t">'+niceDate(t.date)+'</div>'
+       + '<div class="s">'+bits.join(' · ')+' psi'+(t.odo?' · '+comma(t.odo)+' miles':'')+'</div></div>'
+       + '<div class="r"><button class="btn ghost sm" data-del-tyre="'+t.id+'">Delete</button></div></div>';
+    });
+    l+='</div>';
+  }
+  $('#tyreList').innerHTML=l;
+}
+
+/* ── CARE ── */
+function renderCare(){
+  var ranked=careRanked(), h='';
+  var setup=ranked.filter(function(r){ return r.st.unset; });
+
+  h+='<h2 style="margin-top:16px">What is coming</h2>';
+  var live=ranked.filter(function(r){ return !r.st.unset; });
+  if(!live.length){
+    h+='<div class="card"><div class="pad"><p class="hint" style="margin:0">Nothing has a starting date yet. Give any job below the date it was last done and it starts counting from there — if you are guessing, guess late rather than early.</p></div></div>';
+  } else {
+    h+='<div class="card">';
+    live.forEach(function(r){
+      h+='<div class="item"><div class="grow"><div class="t">'+esc(r.c.name)+'</div>'
+       + '<div class="s">'+esc(r.st.sub)+'</div>'
+       + '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">'
+       +   '<button class="btn ghost sm" data-did="'+r.c.id+'">Done today</button>'
+       +   '<button class="btn ghost sm" data-why="'+r.c.id+'">Why</button>'
+       +   '<button class="btn ghost sm" data-off="'+r.c.id+'">Not for me</button>'
+       + '</div>'
+       + '<div class="hint" data-whybox="'+r.c.id+'" hidden style="margin-top:9px">'+esc(r.c.why)+'</div>'
+       + '</div>'
+       + '<div class="r"><span class="pill '+r.st.band+'">'+esc(r.st.head.replace(/^Due /,'').replace(/^Overdue — /,''))+'</span></div></div>';
+    });
+    h+='</div>';
+  }
+
+  if(setup.length){
+    h+='<h2>Not started</h2>'
+     + '<p class="hint" style="margin:-4px 0 10px">Each of these needs one thing: when it was last done. If you have no idea, put a date you are sure is late enough and it will nag you sooner rather than never.</p>'
+     + '<div class="card">';
+    var group='';
+    setup.forEach(function(r){
+      if(r.c.group!==group){ group=r.c.group;
+        h+='<div class="item" style="padding-bottom:4px"><div class="eyebrow">'+esc(group)+'</div></div>'; }
+      h+='<div class="item"><div class="grow"><div class="t">'+esc(r.c.name)+'</div>'
+       + '<div class="s">'+esc(intervalWords(r.c))+'</div>'
+       + '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">'
+       +   '<button class="btn ghost sm" data-set="'+r.c.id+'">Set the date</button>'
+       +   '<button class="btn ghost sm" data-why="'+r.c.id+'">Why</button>'
+       +   '<button class="btn ghost sm" data-off="'+r.c.id+'">Not for me</button>'
+       + '</div>'
+       + '<div data-setbox="'+r.c.id+'" hidden style="margin-top:10px">'
+       +   '<div class="f"><div><label class="fl">Last done</label><input type="date" data-setdate="'+r.c.id+'" value="'+todayIso()+'"></div>'
+       +   '<div><label class="fl">At (miles)</label><input type="number" inputmode="numeric" data-setodo="'+r.c.id+'" value="'+(odoNow()||'')+'"></div>'
+       +   '<div class="wide"><button class="btn sm" data-setgo="'+r.c.id+'">Save</button></div></div></div>'
+       + '<div class="hint" data-whybox="'+r.c.id+'" hidden style="margin-top:9px">'+esc(r.c.why)+'</div>'
+       + '</div></div>';
+    });
+    h+='</div>';
+  }
+
+  var offIds=Object.keys(S.off).filter(function(k){ return S.off[k]; });
+  if(offIds.length){
+    h+='<h2>Switched off</h2><div class="card">';
+    offIds.forEach(function(id){
+      var c=careById(id); if(!c) return;
+      h+='<div class="item done"><div class="grow"><div class="t">'+esc(c.name)+'</div></div>'
+       + '<div class="r"><button class="btn ghost sm" data-on="'+id+'">Bring it back</button></div></div>';
+    });
+    h+='</div>';
+  }
+
+  if(S.done.length){
+    h+='<h2>What has been done</h2><div class="card">';
+    S.done.slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); }).slice(0,25).forEach(function(d){
+      var c=careById(d.care);
+      h+='<div class="item"><div class="grow"><div class="t">'+esc(c?c.name:d.care)+'</div>'
+       + '<div class="s">'+niceDate(d.date)+(d.odo?' · '+comma(d.odo)+' miles':'')+'</div></div>'
+       + '<div class="r"><button class="btn ghost sm" data-del-done="'+d.id+'">Delete</button></div></div>';
+    });
+    h+='</div>';
+  }
+
+  h+='<details><summary>Where these intervals come from</summary><div class="body">'
+   + '<p>Everything here is a starting point, not a rule. Where I have set something shorter than '
+   + 'the factory figure, the reason is in that job’s <b>Why</b>, and the factory figure is named '
+   + 'so you can put it back.</p>'
+   + '<p>The two clocks — months and miles — both run, and whichever arrives first is the one '
+   + 'shown. That matters more than it sounds: a car doing four thousand miles a year is governed '
+   + 'entirely by the calendar, and one doing twenty thousand entirely by the road. This car is '
+   + 'probably the first.</p>'
+   + '<p>The mileage countdown turns into a date using your own miles per day, worked out from the '
+   + 'fill history. Until there is a fortnight of it, a miles-only job shows miles rather than '
+   + 'inventing a date.</p>'
+   + '<p><b>Anything you do not want, switch off.</b> Eighteen reminders that all shout equally is a '
+   + 'list you stop reading, and then the two that mattered go with it.</p></div></details>';
+
+  h+='<h2>The car</h2><div class="card"><div class="pad"><div class="f">'
+   + '<div class="wide"><label class="fl">Name</label><input type="text" id="carName" value="'+esc(S.car.name)+'"></div>'
+   + '<div><label class="fl">Registration</label><input type="text" id="carReg" value="'+esc(S.car.reg)+'"></div>'
+   + '<div><label class="fl">Tank (litres)</label><input type="number" inputmode="decimal" step="0.5" id="carTank" value="'+esc(S.car.tank)+'"></div>'
+   + '<div class="wide"><button class="btn ghost" id="carSave">Save</button></div>'
+   + '</div><p class="hint" style="margin-top:10px">Build '+BUILD+'.</p></div></div>';
+
+  $('#careBody').innerHTML=h;
+}
+function intervalWords(c){
+  var b=[];
+  if(c.months) b.push(c.months===1?'every month':c.months===12?'every year':'every '+c.months+' months');
+  if(c.miles)  b.push('every '+comma(c.miles)+' miles');
+  return b.join(', or ')+(b.length>1?' — whichever comes first':'');
+}
+
+/* ── FAULTS ── */
+function renderFaults(){
+  function list(items, done){
+    if(!items.length) return '<div class="card"><div class="pad"><p class="hint" style="margin:0">'
+      +(done?'Nothing yet.':'Nothing on the list. Good.')+'</p></div></div>';
+    var h='<div class="card">';
+    items.forEach(function(f){
+      h+='<div class="item'+(done?' done':'')+'"><div class="grow"><div class="t">'+esc(f.text)+'</div>'
+       + '<div class="s">noticed '+niceDate(f.date)+(f.fixed?' · sorted '+niceDate(f.fixedAt):'')+'</div>'
+       + (f.note? '<div class="s" style="margin-top:5px">'+esc(f.note)+'</div>':'')
+       + '</div><div class="r">'
+       + (done? '<button class="btn ghost sm" data-unfix="'+f.id+'">Reopen</button>'
+              : '<span class="pill '+(f.sev==='urgent'?'stop':f.sev==='book'?'warn':'flat')+'">'
+                +(f.sev==='urgent'?'urgent':f.sev==='book'?'book it':'watch')+'</span>'
+                +'<div style="margin-top:6px"><button class="btn ghost sm" data-fix="'+f.id+'">Sorted</button></div>')
+       + '<div style="margin-top:6px"><button class="btn ghost sm" data-del-fault="'+f.id+'">Delete</button></div>'
+       + '</div></div>';
+    });
+    return h+'</div>';
+  }
+  var sev={urgent:0,book:1,watch:2};
+  $('#faultOpen').innerHTML=list(S.faults.filter(function(f){ return !f.fixed; })
+    .sort(function(a,b){ return (sev[a.sev]-sev[b.sev]) || String(a.date).localeCompare(String(b.date)); }), false);
+  $('#faultDone').innerHTML=list(S.faults.filter(function(f){ return f.fixed; })
+    .sort(function(a,b){ return String(b.fixedAt).localeCompare(String(a.fixedAt)); }), true);
+}
+
+/* ═══════════════════════ EVENTS ═══════════════════════
+   One delegated listener rather than handlers attached at render time. render() replaces whole
+   blocks of innerHTML, so anything bound to a node inside them is detached the moment the list
+   redraws — which is exactly the bug that made a Parlour test click ten dead buttons. */
+document.addEventListener('click', function(e){
+  var t=e.target.closest ? e.target.closest('button') : null; if(!t) return;
+  var d=t.dataset;
+
+  if(d.go){ go(d.go); return; }
+
+  if(d.delFill){ S.fills=S.fills.filter(function(x){ return x.id!==d.delFill; }); save(); return; }
+  if(d.delTyre){ S.tyres=S.tyres.filter(function(x){ return x.id!==d.delTyre; }); save(); return; }
+  if(d.delDone){ S.done =S.done .filter(function(x){ return x.id!==d.delDone; }); save(); return; }
+  if(d.delFault){ S.faults=S.faults.filter(function(x){ return x.id!==d.delFault; }); save(); return; }
+
+  if(d.why){ var b=document.querySelector('[data-whybox="'+d.why+'"]'); if(b) b.hidden=!b.hidden; return; }
+  if(d.set){ var s=document.querySelector('[data-setbox="'+d.set+'"]'); if(s) s.hidden=!s.hidden; return; }
+  if(d.setgo){
+    var dt=document.querySelector('[data-setdate="'+d.setgo+'"]');
+    var od=document.querySelector('[data-setodo="'+d.setgo+'"]');
+    S.done.push({ id:uid(), care:d.setgo, date:(dt&&dt.value)||todayIso(), odo:num(od&&od.value) });
+    save(); return;
+  }
+  if(d.did){ S.done.push({ id:uid(), care:d.did, date:todayIso(), odo:odoNow() }); save(); return; }
+  if(d.off){ S.off[d.off]=true;  save(); return; }
+  if(d.on){  delete S.off[d.on]; save(); return; }
+
+  if(d.fix){ S.faults.forEach(function(f){ if(f.id===d.fix){ f.fixed=true; f.fixedAt=todayIso(); } }); save(); return; }
+  if(d.unfix){ S.faults.forEach(function(f){ if(f.id===d.unfix){ f.fixed=false; f.fixedAt=''; } }); save(); return; }
+
+  if(t.id==='fAdd')    return addFill();
+  if(t.id==='tAdd')    return addTyre();
+  if(t.id==='tgtSave') return saveTargets();
+  if(t.id==='xAdd')    return addFault();
+  if(t.id==='carSave') return saveCar();
+});
+
+function fail(id,msg){ var el=$(id); if(el){ el.textContent=msg; el.hidden=false; } }
+function clearFail(id){ var el=$(id); if(el) el.hidden=true; }
+
+function addFill(){
+  clearFail('#fErr');
+  var odo=num($('#fOdo').value), lit=num($('#fLit').value);
+  if(odo==null) return fail('#fErr','The odometer reading is the one thing this cannot work without.');
+  if(lit==null||lit<=0) return fail('#fErr','How many litres went in?');
+  /* Refuse a reading that goes BACKWARDS. An odometer only counts up, so a lower number is a
+     typo — and a typo here does not just look wrong, it silently produces a negative distance
+     and a nonsense mpg for the tank on either side of it. Better to stop at the gate. */
+  var hi=odoNow();
+  if(hi!=null && odo<hi) return fail('#fErr','That is below the '+comma(hi)+' miles already recorded. An odometer only goes up — check the digits.');
+  var tank=num(S.car.tank);
+  if(tank && lit>tank*1.08) return fail('#fErr',r1(lit)+' litres into a '+tank+'-litre tank. Check the pump receipt — that will not fit.');
+  S.fills.push({ id:uid(), date:$('#fDate').value||todayIso(), odo:odo, litres:lit,
+                 cost:num($('#fCost').value), brim:$('#fBrim').checked, note:$('#fNote').value||'' });
+  $('#fOdo').value=''; $('#fLit').value=''; $('#fCost').value=''; $('#fNote').value='';
+  $('#fBrim').checked=true; $('#fDate').value=todayIso();
+  save();
+}
+function addTyre(){
+  clearFail('#tErr');
+  var p={}, dd={}, any=false;
+  [['fl','FL'],['fr','FR'],['rl','RL'],['rr','RR']].forEach(function(c){
+    var v=num($('#p'+c[1]).value); if(v!=null){ p[c[0]]=v; any=true; }
+    var w=num($('#d'+c[1]).value); if(w!=null) dd[c[0]]=w;
+  });
+  if(!any) return fail('#tErr','At least one pressure, or there is nothing to record.');
+  S.tyres.push({ id:uid(), date:$('#tDate').value||todayIso(), odo:num($('#tOdo').value), p:p, d:dd });
+  ['FL','FR','RL','RR'].forEach(function(k){ $('#p'+k).value=''; $('#d'+k).value=''; });
+  $('#tDate').value=todayIso();
+  save();
+}
+function saveTargets(){
+  S.targets.front=num($('#tgtF').value);
+  S.targets.rear =num($('#tgtR').value);
+  save();
+}
+function addFault(){
+  var txt=($('#xText').value||'').trim();
+  if(!txt) return;
+  S.faults.push({ id:uid(), text:txt, date:$('#xDate').value||todayIso(),
+                  sev:$('#xSev').value, note:$('#xNote').value||'', fixed:false });
+  $('#xText').value=''; $('#xNote').value=''; $('#xDate').value=todayIso();
+  save();
+}
+function saveCar(){
+  S.car.name=($('#carName').value||'').trim()||'The car';
+  S.car.reg =($('#carReg').value||'').trim();
+  S.car.tank=num($('#carTank').value);
+  save();
+}
+
+/* ═══════════════════════ THE SHARED GIST ═══════════════════════
+   Same credentials, same file, same read-modify-write discipline as every other room. We touch
+   state.garage and nothing else — two writers to one gist a moment apart is what produced the
+   409s in June, so: pull, change only our key, push, one at a time. */
+var G_ID='connolly-sync:gist-id', G_TOK='connolly-sync:token', G_FILE='life-twoweek.json';
+var _gInFlight=false, _gDirty=false, _gTimer=null;
+function gCreds(){
+  try{ var i=localStorage.getItem(G_ID), t=localStorage.getItem(G_TOK);
+       return (i&&t)?{id:i,token:t}:null; }catch(_){ return null; }
+}
+function gHeaders(c){ return { 'Authorization':'Bearer '+c.token,
+  'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28' }; }
+function gBody(c){
+  return fetch('https://api.github.com/gists/'+c.id,{headers:gHeaders(c)})
+    .then(function(r){ if(!r.ok) throw new Error('gist-'+r.status); return r.json(); })
+    .then(function(j){
+      var f=j.files&&j.files[G_FILE]; if(!f) throw new Error('no-file');
+      return f.truncated&&f.raw_url ? fetch(f.raw_url,{headers:gHeaders(c)}).then(function(x){return x.text();})
+                                    : f.content;
+    });
+}
+function gPull(cb){
+  var c=gCreds(); if(!c){ if(cb) cb(false); return; }
+  gBody(c).then(function(raw){
+    var doc=JSON.parse(raw||'{}'), st=doc.state||doc, g=st.garage;
+    if(g){
+      /* MERGE BY ID, never replace. A fill logged on the forecourt and a job ticked off on the
+         Mac must both survive; replacing wholesale is how the daybook lost a fortnight in June.
+         Local wins a clash on the same id, because the device in your hand is the one that just
+         changed something. */
+      ['fills','tyres','done','faults'].forEach(function(k){
+        if(!Array.isArray(g[k])) return;
+        var have={}; S[k].forEach(function(x){ have[x.id]=true; });
+        g[k].forEach(function(x){ if(x&&x.id&&!have[x.id]) S[k].push(x); });
+      });
+      if(g.car && !S.fills.length && !S.done.length) S.car=g.car;
+      if(g.targets && S.targets.front==null && S.targets.rear==null) S.targets=g.targets;
+      if(g.off) Object.keys(g.off).forEach(function(k){ if(g.off[k]) S.off[k]=true; });
+      saveLocal();
+    }
+    if(cb) cb(true);
+  }).catch(function(e){ console.warn('[garage] pull failed', e); if(cb) cb(false); });
+}
+function gPush(){
+  var c=gCreds(); if(!c) return;
+  if(_gInFlight){ _gDirty=true; return; }
+  _gInFlight=true;
+  gBody(c).then(function(raw){
+    var doc=JSON.parse(raw||'{}'), st=doc.state||doc;
+    st.garage={ car:S.car, fills:S.fills, tyres:S.tyres, targets:S.targets,
+                done:S.done, off:S.off, faults:S.faults,
+                /* A small summary the Hub can read without knowing anything about this app's
+                   internals — what is overdue, and the last economy figure. */
+                nextUp: careRanked().filter(function(r){ return r.st.band==='stop'||r.st.band==='warn'; })
+                          .map(function(r){ return { name:r.c.name, when:r.st.head, band:r.st.band }; }),
+                odo: odoNow(), mpg: avgMpg(segments()),
+                savedAt:new Date().toISOString() };
+    if(doc.state) doc.state=st; else doc=st;
+    var body={files:{}}; body.files[G_FILE]={content:JSON.stringify(doc)};
+    return fetch('https://api.github.com/gists/'+c.id,
+      {method:'PATCH',headers:gHeaders(c),body:JSON.stringify(body)});
+  })
+  .then(function(r){ if(r && !r.ok) throw new Error('patch-'+r.status); })
+  .catch(function(e){ console.warn('[garage] push failed', e); })
+  .then(function(){ _gInFlight=false; if(_gDirty){ _gDirty=false; setTimeout(gPush,1200); } });
+}
+function gSchedule(){ if(_gTimer) clearTimeout(_gTimer); _gTimer=setTimeout(gPush,2500); }
+
+function wireConnect(){
+  var btn=$('#cfgSave'); if(!btn) return;
+  btn.addEventListener('click', function(){
+    var id=($('#cfgId').value||'').trim(), tk=($('#cfgTok').value||'').trim();
+    function bad(m){ fail('#cfgErr',m); btn.textContent='Connect'; btn.disabled=false; }
+    clearFail('#cfgErr');
+    if(!id||!tk) return bad('Both the gist ID and the token are needed.');
+    btn.textContent='Checking…'; btn.disabled=true;
+    /* Verify BEFORE writing to storage. Saying "Connected" on an unverified token is how the
+       Diversions push went unexplained for five days. */
+    fetch('https://api.github.com/gists/'+id,{headers:{'Authorization':'Bearer '+tk,
+      'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}})
+      .then(function(r){
+        if(r.status===404) throw new Error('Not found — check the gist ID, and that the token can see it.');
+        if(r.status===401||r.status===403) throw new Error('The token was refused. It needs gist access.');
+        if(!r.ok) throw new Error('GitHub said '+r.status+'.');
+        try{ localStorage.setItem(G_ID,id); localStorage.setItem(G_TOK,tk); }catch(_){}
+        btn.textContent='Connected'; btn.disabled=false;
+        gPull(function(){ render(); });
+      })
+      .catch(function(e){ bad(e.message||'Could not reach GitHub.'); });
+  });
+}
+
+/* ═══════════════════════ BOOT ═══════════════════════ */
+function boot(){
+  loadLocal();
+  ['#fDate','#tDate','#xDate'].forEach(function(s){ var el=$(s); if(el&&!el.value) el.value=todayIso(); });
+  if(S.targets.front!=null) $('#tgtF').value=S.targets.front;
+  if(S.targets.rear !=null) $('#tgtR').value=S.targets.rear;
+  wireConnect();
+  render();
+  gPull(function(){ render(); });
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(function(){});
+}
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden) gPull(function(){ render(); });
+});
+boot();
+
+/* Exposed for the test harness. Top-level `var` in a classic script DOES become a window
+   property, but function declarations are the ones that reliably survive minification and
+   re-entry, so the ones the tests reach for are named here explicitly. Three separate false
+   negatives yesterday came from a test asking window for something that was never on it. */
+window.__garage = { S:S, CARE:CARE, segments:segments, avgMpg:avgMpg, avgPPM:avgPPM,
+                    careStatus:careStatus, careRanked:careRanked, slowPuncture:slowPuncture,
+                    cornerState:cornerState, addMonths:addMonths, odoNow:odoNow,
+                    milesPerDay:milesPerDay, render:render, go:go, save:save,
+                    addFill:addFill, addTyre:addTyre, BUILD:BUILD, GAL:GAL };
+</script>
+</body>
+</html>

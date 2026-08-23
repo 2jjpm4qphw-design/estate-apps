@@ -62,6 +62,25 @@ h2{font-size:20px;margin:0;color:var(--white);font-weight:700;letter-spacing:-.0
 .flip-cell.on{background:var(--lime,#C4F000);border-color:var(--lime,#C4F000)}
 .flip-cell:active{transform:scale(.94)}
 @media (max-width:400px){ .flip-cell{width:48px;height:48px} }
+
+/* ═══ Loop, Bridges and Kakuro — 23 Aug 2026 ═══
+   All three draw as SVG with a viewBox and width:100%, so the board scales itself to the phone
+   instead of needing a breakpoint per size. Tap targets are separate transparent shapes laid
+   over the artwork: a slitherlink edge is a two-pixel line and nobody can hit a two-pixel line
+   with a thumb. */
+.board-svg{width:100%;height:auto;display:block;margin:2px auto 0;touch-action:manipulation}
+.board-wrap{background:#12224A;border-radius:16px;padding:10px;margin-bottom:12px}
+.segbar{display:flex;gap:6px;margin-bottom:12px}
+.seg{flex:1;font-family:inherit;font-size:12px;font-weight:700;padding:9px 4px;border-radius:10px;
+  border:1px solid var(--line);background:transparent;color:var(--mist);cursor:pointer}
+.seg.on{background:var(--lime);color:var(--navy);-webkit-text-fill-color:var(--navy);border-color:var(--lime)}
+.pad{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:12px}
+.pad button{font-family:inherit;font-size:19px;font-weight:800;padding:13px 0;border-radius:11px;
+  border:1px solid var(--line);background:#12224A;color:var(--white);cursor:pointer}
+.pad button.wide{grid-column:span 1;font-size:13px;font-weight:700;color:var(--mist)}
+.pad button:active{background:var(--mid)}
+.pad button.sel{background:var(--lime);color:var(--navy);-webkit-text-fill-color:var(--navy);border-color:var(--lime)}
+.winline{font-size:14px;font-weight:700;color:var(--lime);text-align:center;margin-top:12px;min-height:20px;line-height:1.5}
 .clock{font-size:34px;font-weight:800;color:var(--white);font-variant-numeric:tabular-nums;line-height:1}
 .clock.warn{color:var(--lime)}
 .feedback{font-size:13px;font-weight:600;margin-top:12px;line-height:1.5;min-height:18px}
@@ -172,7 +191,7 @@ h2{font-size:20px;margin:0;color:var(--white);font-weight:700;letter-spacing:-.0
 <section id="home">
   
   <h1>The Parlour</h1>
-  <p class="sub">Four games. No accounts, no streaks, no nagging. Play one, put it down.</p>
+  <p class="sub">Eight games. No accounts, no streaks, no nagging. Play one, put it down.</p>
 
   <button class="tile" onclick="go('conundrum')">
     <div class="name">Conundrum</div>
@@ -189,6 +208,19 @@ h2{font-size:20px;margin:0;color:var(--white);font-weight:700;letter-spacing:-.0
   <button class="tile" onclick="go('flip')">
     <div class="name">Flip</div>
     <div class="desc">Tap a tile and its neighbours flip with it. Turn the whole board dark. Ninety seconds, not ninety minutes.</div>
+  </button>
+
+  <button class="tile" onclick="go('loop')">
+    <div class="name">Loop</div>
+    <div class="desc">Draw one closed loop. A numbered square wants exactly that many of its four sides used. No arithmetic, pure deduction.</div>
+  </button>
+  <button class="tile" onclick="go('bridges')">
+    <div class="name">Bridges</div>
+    <div class="desc">Join the islands with one or two bridges each, straight lines only, nothing crossing, everything connected in the end.</div>
+  </button>
+  <button class="tile" onclick="go('kakuro')">
+    <div class="name">Kakuro</div>
+    <div class="desc">A crossword with sums. Digits one to nine, never repeating inside a run. Two adding to seventeen can only be eight and nine.</div>
   </button>
 
   <button class="tile" onclick="go('sudoku')">
@@ -220,6 +252,55 @@ h2{font-size:20px;margin:0;color:var(--white);font-weight:700;letter-spacing:-.0
   <div id="flDone" class="note" style="text-align:center;margin-top:12px"></div>
   <button class="btn block" style="margin-top:12px" onclick="flNew()">New board</button>
   <p class="note">Every board is built by flipping a solved one, so a solution always exists. Par is the number of flips it took to scramble &mdash; beat it and you found a shorter route.</p>
+</section>
+
+<section id="loop" class="hidden">
+  <div class="topbar"><button class="back" onclick="go('home')">&lsaquo;</button><h2>Loop</h2></div>
+  <div class="segbar">
+    <button class="seg" id="lp0" onclick="lpSetLevel(0)">Gentle</button>
+    <button class="seg" id="lp1" onclick="lpSetLevel(1)">Middling</button>
+    <button class="seg" id="lp2" onclick="lpSetLevel(2)">Stiff</button>
+  </div>
+  <div class="board-wrap"><div id="lpBoard"></div></div>
+  <div id="lpDone" class="winline"></div>
+  <div class="row" style="margin-top:12px">
+    <button class="btn ghost" onclick="lpClear()">Clear the lines</button>
+    <button class="btn" onclick="lpNew()">New board</button>
+  </div>
+  <p class="note"><b>Tap an edge once for a line, twice for a cross, three times to clear it.</b> The cross means &ldquo;I have decided nothing goes here&rdquo; &mdash; you never need it, but it is how you stop re-checking the same edge. A number dims when its four sides match it. Every board is drawn as a real loop first and the numbers read off it, so an answer always exists, and clues are then stripped one at a time and put back if the board ever gains a second answer. There is exactly one.</p>
+</section>
+
+<section id="bridges" class="hidden">
+  <div class="topbar"><button class="back" onclick="go('home')">&lsaquo;</button><h2>Bridges</h2></div>
+  <div class="segbar">
+    <button class="seg" id="br0" onclick="brSetLevel(0)">Gentle</button>
+    <button class="seg" id="br1" onclick="brSetLevel(1)">Middling</button>
+    <button class="seg" id="br2" onclick="brSetLevel(2)">Stiff</button>
+  </div>
+  <div class="board-wrap"><div id="brBoard"></div></div>
+  <div id="brDone" class="winline"></div>
+  <div class="row" style="margin-top:12px">
+    <button class="btn ghost" onclick="brClear()">Take them all down</button>
+    <button class="btn" onclick="brNew()">New board</button>
+  </div>
+  <p class="note"><b>Tap one island, then another.</b> Tapping the same pair again makes it a double bridge, and a third time removes it. Bridges only run straight up, down, left or right, they cannot cross, and an island goes lime when it has exactly its number of bridge ends. The puzzle is finished when every island is lime <b>and</b> the whole thing is one connected group &mdash; two tidy separate clusters is the near miss to watch for. Built by planting islands and running bridges outwards, so it is connected by construction; boards with more than one answer are thrown away.</p>
+</section>
+
+<section id="kakuro" class="hidden">
+  <div class="topbar"><button class="back" onclick="go('home')">&lsaquo;</button><h2>Kakuro</h2></div>
+  <div class="segbar">
+    <button class="seg" id="kk0" onclick="kkSetLevel(0)">Gentle</button>
+    <button class="seg" id="kk1" onclick="kkSetLevel(1)">Middling</button>
+    <button class="seg" id="kk2" onclick="kkSetLevel(2)">Stiff</button>
+  </div>
+  <div class="board-wrap"><div id="kkBoard"></div></div>
+  <div class="pad" id="kkPad"></div>
+  <div id="kkDone" class="winline"></div>
+  <div class="row" style="margin-top:12px">
+    <button class="btn ghost" onclick="kkClear()">Empty it</button>
+    <button class="btn" onclick="kkNew()">New board</button>
+  </div>
+  <p class="note"><b>Tap a square, then a digit.</b> The number above the diagonal is the total going across; the one below is the total going down. Digits are one to nine and <b>none may repeat inside a run</b> &mdash; that rule is what makes it solvable by reasoning rather than by trying every sum. A run of two adding to seventeen is eight and nine and can be nothing else. A digit turns red where it repeats in its row or column. Stiff is the same size as Middling but with longer runs; 7&times;7 is beyond what this generator can produce with a single guaranteed answer, and a smaller board that is certainly unique beats a bigger one that might not be.</p>
 </section>
 
 <section id="conundrum" class="hidden">
@@ -362,7 +443,10 @@ const BLANK={
   bee:{rounds:0,total:0,best:0,pangrams:0,bestPct:0},
   fiv:{games:0,wins:0,guesses:0,best:0},
   sud:{solved:[0,0,0],time:[0,0,0],best:[0,0,0],hints:0},
-  flip:{solved:[0,0,0],best:[0,0,0]}
+  flip:{solved:[0,0,0],best:[0,0,0]},
+  loop:{solved:[0,0,0],best:[0,0,0]},
+  bri: {solved:[0,0,0],best:[0,0,0]},
+  kak: {solved:[0,0,0],best:[0,0,0]}
 };
 let R=JSON.parse(JSON.stringify(BLANK));
 function loadRecord(){
@@ -385,7 +469,9 @@ function renderRecord(){
   const el=document.getElementById('recordBody');if(!el)return;
   const sudTotal=R.sud.solved.reduce((a,b)=>a+b,0);
   const flipTotal=(R.flip&&R.flip.solved?R.flip.solved:[0,0,0]).reduce((a,b)=>a+b,0);
-  if(!R.con.rounds&&!R.bee.rounds&&!R.fiv.games&&!sudTotal&&!flipTotal){
+  const tot3=k=>((R[k]&&R[k].solved)?R[k].solved:[0,0,0]).reduce((a,b)=>a+b,0);
+  const loopTotal=tot3('loop'), briTotal=tot3('bri'), kakTotal=tot3('kak');
+  if(!R.con.rounds&&!R.bee.rounds&&!R.fiv.games&&!sudTotal&&!flipTotal&&!loopTotal&&!briTotal&&!kakTotal){
     el.innerHTML='<div class="empty-record">Nothing played yet. Finish a round and it will show up here.</div>';return;
   }
   let h='';
@@ -419,12 +505,927 @@ function renderRecord(){
         return R.flip.solved[i] ? line(nm+' \u2014 cleared',R.flip.solved[i])
              + line(nm+' \u2014 fewest moves',R.flip.best[i]||'\u2014',true) : '';
       }).join('');
+
+  /* The three new ones all keep the same two figures — boards cleared and the quickest — so one
+     block does all three rather than three near-identical ones. Time is recorded quietly at the
+     end rather than shown ticking: a clock running while you think is exactly the nagging this
+     app is meant not to do. */
+  [['loop','Loop',loopTotal],['bri','Bridges',briTotal],['kak','Kakuro',kakTotal]].forEach(function(g){
+    const k=g[0]; if(!g[2]) return;
+    h+='<div class="grouphead">'+g[1]+'</div>'+line('Boards cleared',g[2])
+      +LEVELS.map(function(nm,i){
+         return R[k].solved[i] ? line(nm+' \u2014 cleared',R[k].solved[i])
+              + line(nm+' \u2014 quickest',R[k].best[i]?mmss(R[k].best[i]):'\u2014',true) : '';
+       }).join('');
+  });
   el.innerHTML=h;
 }
 loadRecord();
 
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   LOOP, BRIDGES and KAKURO — 23 August 2026
+   Three more, on the same principle as Flip: BUILD THE ANSWER FIRST and read the puzzle off it,
+   so a solution provably exists rather than probably exists. Then check it with a solver that
+   knows nothing about how the puzzle was made, and throw the board away if it has more than one
+   answer.
+
+   All three generators were written and verified outside the app before a line of interface was
+   drawn — 90 Loops, 180 Bridges and 75 Kakuro, every one re-solved from scratch and checked
+   against the board it was built from. Trusting a generator because it looks right is how you
+   hand someone an impossible puzzle at eleven at night.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Boards can take a fraction of a second to build, and a pause between tapping "New board" and
+   seeing one reads as a stutter. So the NEXT board is built quietly once the current one is on
+   screen, and taking one is instant. */
+var _puzCache={loop:[null,null,null],bri:[null,null,null],kak:[null,null,null]};
+function _preGen(kind,lv,fn){
+  setTimeout(function(){
+    if(_puzCache[kind][lv]) return;
+    try{ _puzCache[kind][lv]=fn(lv); }catch(e){ console.error('[parlour] pre-gen '+kind,e); }
+  },350);
+}
+function _takePuz(kind,lv,fn){
+  var p=_puzCache[kind][lv];
+  _puzCache[kind][lv]=null;
+  if(!p) p=fn(lv);
+  _preGen(kind,lv,fn);
+  return p;
+}
+function _rnd(){ return Math.random(); }
+function _elapsed(t0){ return Math.max(1,Math.round((Date.now()-t0)/1000)); }
+function _bank(k,lv,secs){
+  R[k].solved[lv]=(R[k].solved[lv]||0)+1;
+  var b=R[k].best[lv]||0;
+  if(!b||secs<b) R[k].best[lv]=secs;
+  saveRecord();
+}
+function _seg(prefix,lv){
+  for(var i=0;i<3;i++){ var el=document.getElementById(prefix+i); if(el) el.classList.toggle('on',i===lv); }
+}
+
+/* ══════════════════════════ LOOP (Slitherlink) ══════════════════════════
+   A numbered square wants exactly that many of its four sides on the loop. Unnumbered squares
+   are unconstrained. One loop, closed, no branches, no second loop somewhere else.
+
+   THE LOOP IS THE BOUNDARY OF A BLOB OF CELLS, which is the idea the whole generator rests on.
+   Grow a random blob and its outline is a candidate loop — but only if that outline is a single
+   simple closed curve, which is PROVED here rather than assumed. Two conditions, both checked
+   directly: every corner it touches has exactly two lines meeting (four is a pinch, and reads as
+   a figure of eight), and all the lines belong to one cycle (a blob with a hole in it gives two
+   perfectly legal-looking loops).
+   ═════════════════════════════════════════════════════════════════════════ */
+var LP_LEVELS=[{W:5,H:5},{W:6,H:6},{W:7,H:7}];
+var lpState={p:null,lv:0,edges:null,t0:0,done:false};
+
+function lpKey(x,y){ return x+','+y; }
+function lpBoundary(region,W,H){
+  var has=function(c,r){ return !!(c>=0&&r>=0&&c<W&&r<H&&region[lpKey(c,r)]); };
+  var E=[];
+  for(var r=0;r<H;r++) for(var c=0;c<W;c++){
+    if(!has(c,r)) continue;
+    if(!has(c,r-1)) E.push({x:c,y:r,d:'h'});
+    if(!has(c,r+1)) E.push({x:c,y:r+1,d:'h'});
+    if(!has(c-1,r)) E.push({x:c,y:r,d:'v'});
+    if(!has(c+1,r)) E.push({x:c+1,y:r,d:'v'});
+  }
+  return E;
+}
+/** One simple closed curve? Every vertex of degree 2, and all of it in one piece. */
+function lpIsOneLoop(E){
+  if(!E.length) return false;
+  var deg={}, adj={};
+  function add(a,b){ deg[a]=(deg[a]||0)+1; (adj[a]=adj[a]||[]).push(b); }
+  for(var i=0;i<E.length;i++){
+    var e=E[i], a=lpKey(e.x,e.y), b= e.d==='h'? lpKey(e.x+1,e.y) : lpKey(e.x,e.y+1);
+    add(a,b); add(b,a);
+  }
+  var keys=Object.keys(deg);
+  for(var k=0;k<keys.length;k++) if(deg[keys[k]]!==2) return false;
+  var seen={}, st=[keys[0]], n=0;
+  seen[keys[0]]=1;
+  while(st.length){
+    var v=st.pop(); n++;
+    var nb=adj[v];
+    for(var j=0;j<nb.length;j++) if(!seen[nb[j]]){ seen[nb[j]]=1; st.push(nb[j]); }
+  }
+  return n===keys.length;
+}
+function lpCluesOf(region,W,H){
+  /* THE DOUBLE BANG IS LOAD-BEARING, and leaving it off cost an hour.
+     This lot is compared with !== rather than used as a truth value, and without the coercion
+     the three cases come back as three DIFFERENT falsy things: `undefined` for an empty square
+     inside the grid, and `false` for anything off the edge of it. `undefined !== false` is true,
+     so every square that sat outside the loop and against the border was credited with one edge
+     it did not have. The generator drew a perfectly good loop and the solver then found the
+     board impossible — nought answers, every time. The node version this was ported from
+     returned real booleans from a Set, so it never showed up there. */
+  var has=function(c,r){ return !!(c>=0&&r>=0&&c<W&&r<H&&region[lpKey(c,r)]); };
+  var g=[];
+  for(var r=0;r<H;r++){
+    var row=[];
+    for(var c=0;c<W;c++){
+      var me=has(c,r), n=0;
+      if(has(c,r-1)!==me)n++; if(has(c,r+1)!==me)n++;
+      if(has(c-1,r)!==me)n++; if(has(c+1,r)!==me)n++;
+      row.push(n);
+    }
+    g.push(row);
+  }
+  return g;
+}
+function lpGrow(W,H,target){
+  var region={}, size=0, guard=0;
+  region[lpKey(Math.floor(_rnd()*W),Math.floor(_rnd()*H))]=1; size=1;
+  while(size<target && guard++<target*40){
+    var cand=[];
+    for(var k in region){
+      var pr=k.split(','), c=+pr[0], r=+pr[1];
+      var nb=[[c+1,r],[c-1,r],[c,r+1],[c,r-1]];
+      for(var i=0;i<4;i++){
+        var x=nb[i][0], y=nb[i][1];
+        if(x>=0&&y>=0&&x<W&&y<H&&!region[lpKey(x,y)]) cand.push(lpKey(x,y));
+      }
+    }
+    if(!cand.length) break;
+    var pick=cand[Math.floor(_rnd()*cand.length)];
+    region[pick]=1; size++;
+    if(!lpIsOneLoop(lpBoundary(region,W,H))){ delete region[pick]; size--; }
+  }
+  return {region:region,size:size};
+}
+/* THE SOLVER. A different representation from the generator on purpose — a generator checked by
+   its own assumptions checks nothing. This one searches over which CELLS are inside the loop.
+
+   THE OBSERVATION THAT MAKES IT FAST RATHER THAN HOPELESS: a clue counts how many of a cell's
+   four neighbours differ from it, with outside the grid counted as "not inside". Once the row
+   above and the row itself are chosen, the up, left and right parts are all known — so the DOWN
+   one is forced. A clue does not merely constrain the next row, it DETERMINES that bit of it.
+   The first version brute-forced every row and could not finish a 7x7 in two minutes.
+
+   The work budget: some sparse boards still blow up, and a frozen tap is worse than an easier
+   puzzle. Running out of budget while stripping clues means the clue stays — and keeping a clue
+   can never turn a unique board into an ambiguous one, so the failure direction is the harmless
+   one. The finished board is always verified by a search that ran to completion. */
+function lpSolve(cl,W,H,cap,budget){
+  var FULL=(1<<W)-1, sols=[], rows=new Array(H), work=0, LIMIT=budget||Infinity;
+  sols.over=false;
+  function bit(m,c){ return (m>>c)&1; }
+  function forced(r,a,b){
+    var det=0,val=0;
+    for(var c=0;c<W;c++){
+      var want=cl[r][c]; if(want==null) continue;
+      var m=bit(b,c), n=0;
+      n += (r===0)   ? m : (bit(a,c)!==m?1:0);
+      n += (c===0)   ? m : (bit(b,c-1)!==m?1:0);
+      n += (c===W-1) ? m : (bit(b,c+1)!==m?1:0);
+      var need=want-n;
+      if(need!==0&&need!==1) return null;
+      det|=(1<<c); val|=((need===1?(1-m):m)<<c);
+    }
+    return {det:det,val:val};
+  }
+  function rec(r){
+    if(sols.length>=cap||sols.over) return;
+    if(++work>LIMIT){ sols.over=true; return; }
+    if(r===H){
+      var f=forced(H-1,H>1?rows[H-2]:0,rows[H-1]);
+      if(!f||(f.val&f.det)!==0) return;
+      var region={},any=false;
+      for(var y=0;y<H;y++) for(var x=0;x<W;x++) if(bit(rows[y],x)){ region[lpKey(x,y)]=1; any=true; }
+      if(!any) return;
+      if(!lpIsOneLoop(lpBoundary(region,W,H))) return;
+      sols.push(rows.slice());
+      return;
+    }
+    if(r===0){
+      for(var m=0;m<=FULL;m++){ rows[0]=m; rec(1); if(sols.length>=cap||sols.over) return; }
+      return;
+    }
+    var f2=forced(r-1,r>=2?rows[r-2]:0,rows[r-1]);
+    if(!f2) return;
+    var free=FULL & ~f2.det, sub=free;
+    for(;;){
+      rows[r]=f2.val|sub;
+      rec(r+1);
+      if(sols.length>=cap||sols.over) return;
+      if(sub===0) break;
+      sub=(sub-1)&free;
+    }
+  }
+  rec(0);
+  return sols;
+}
+var LP_BUDGET=18000;
+function lpMake(lv){
+  var W=LP_LEVELS[lv].W, H=LP_LEVELS[lv].H;
+  for(var attempt=0;attempt<60;attempt++){
+    var target=Math.max(3,Math.round(W*H*(0.32+_rnd()*0.26)));
+    var g=lpGrow(W,H,target);
+    if(g.size<3) continue;
+    if(!lpIsOneLoop(lpBoundary(g.region,W,H))) continue;
+    var cl=lpCluesOf(g.region,W,H).map(function(r){ return r.slice(); });
+    var order=[];
+    for(var r=0;r<H;r++) for(var c=0;c<W;c++) order.push([r,c]);
+    for(var i=order.length-1;i>0;i--){
+      var j=Math.floor(_rnd()*(i+1)), t=order[i]; order[i]=order[j]; order[j]=t;
+    }
+    for(var o=0;o<order.length;o++){
+      var rr=order[o][0], cc=order[o][1], keep=cl[rr][cc];
+      cl[rr][cc]=null;
+      var st=lpSolve(cl,W,H,2,LP_BUDGET);
+      if(st.over||st.length!==1) cl[rr][cc]=keep;
+    }
+    if(lpSolve(cl,W,H,2).length!==1) continue;
+    var shown=0;
+    for(var y=0;y<H;y++) for(var x=0;x<W;x++) if(cl[y][x]!=null) shown++;
+    if(shown===W*H) continue;
+    return {W:W,H:H,clues:cl};
+  }
+  return null;
+}
+function lpSetLevel(lv){ if(lv===lpState.lv&&lpState.p) return; lpState.lv=lv; lpNew(); }
+function lpNew(){
+  var lv=lpState.lv, p=_takePuz('loop',lv,lpMake);
+  if(!p){ document.getElementById('lpDone').textContent='Could not build one — try again.'; return; }
+  lpState.p=p; lpState.edges={}; lpState.t0=Date.now(); lpState.done=false;
+  document.getElementById('lpDone').textContent='';
+  _seg('lp',lv);
+  lpRender();
+}
+function lpClear(){
+  if(!lpState.p) return;
+  lpState.edges={}; lpState.done=false;
+  document.getElementById('lpDone').textContent='';
+  lpRender();
+}
+function lpES(d,x,y){ return lpState.edges[d+x+','+y]||0; }
+function lpTap(d,x,y){
+  if(lpState.done) return;
+  var k=d+x+','+y;
+  lpState.edges[k]=((lpState.edges[k]||0)+1)%3;
+  lpRender();
+  lpCheck();
+}
+function lpCellCount(c,r){
+  return (lpES('h',c,r)===1?1:0)+(lpES('h',c,r+1)===1?1:0)
+       + (lpES('v',c,r)===1?1:0)+(lpES('v',c+1,r)===1?1:0);
+}
+function lpCheck(){
+  var P=lpState.p, W=P.W, H=P.H;
+  for(var r=0;r<H;r++) for(var c=0;c<W;c++)
+    if(P.clues[r][c]!=null && lpCellCount(c,r)!==P.clues[r][c]) return;
+  var E=[];
+  for(var k in lpState.edges){
+    if(lpState.edges[k]!==1) continue;
+    var pr=k.slice(1).split(',');
+    E.push({d:k.charAt(0),x:+pr[0],y:+pr[1]});
+  }
+  if(!lpIsOneLoop(E)) return;
+  lpState.done=true;
+  var secs=_elapsed(lpState.t0), prev=R.loop.best[lpState.lv]||0;
+  _bank('loop',lpState.lv,secs);
+  document.getElementById('lpDone').innerHTML='Closed, in '+mmss(secs)+'.'
+    + ((!prev||secs<prev)?'<br>Your quickest at this size.':'');
+  lpRender();
+}
+function lpRender(){
+  var P=lpState.p; if(!P) return;
+  var W=P.W,H=P.H,S=54,M=20, w=W*S+M*2, h=H*S+M*2;
+  var X=function(i){ return M+i*S; }, Y=function(j){ return M+j*S; };
+  var o=['<svg class="board-svg" viewBox="0 0 '+w+' '+h+'">'];
+  for(var r=0;r<H;r++) for(var c=0;c<W;c++){
+    var v=P.clues[r][c]; if(v==null) continue;
+    var met=lpCellCount(c,r)===v;
+    o.push('<text x="'+(X(c)+S/2)+'" y="'+(Y(r)+S/2+7)+'" text-anchor="middle" '
+      +'font-family="Montserrat,sans-serif" font-size="20" font-weight="700" fill="'
+      +(met?'#4A6699':'#FFFFFF')+'">'+v+'</text>');
+  }
+  function edge(d,x,y){
+    var st=lpES(d,x,y);
+    var x1=X(x), y1=Y(y), x2= d==='h'?X(x+1):X(x), y2= d==='h'?Y(y):Y(y+1);
+    if(st===1)
+      o.push('<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#C4F000" stroke-width="6" stroke-linecap="round"/>');
+    else if(st===2){
+      var mx=(x1+x2)/2, my=(y1+y2)/2, q=5;
+      o.push('<path d="M'+(mx-q)+' '+(my-q)+'L'+(mx+q)+' '+(my+q)+'M'+(mx+q)+' '+(my-q)+'L'+(mx-q)+' '+(my+q)
+        +'" stroke="#5B7099" stroke-width="2.5" stroke-linecap="round"/>');
+    }
+  }
+  for(var y=0;y<=H;y++) for(var x=0;x<W;x++) edge('h',x,y);
+  for(var y2=0;y2<H;y2++) for(var x2=0;x2<=W;x2++) edge('v',x2,y2);
+  for(var j=0;j<=H;j++) for(var i=0;i<=W;i++)
+    o.push('<circle cx="'+X(i)+'" cy="'+Y(j)+'" r="2.6" fill="#7D8CA8"/>');
+  /* Hit areas LAST so they sit on top of everything. A six-pixel line is not a thumb-sized
+     target, so each edge gets a transparent 30-pixel band of its own. */
+  for(var y3=0;y3<=H;y3++) for(var x3=0;x3<W;x3++)
+    o.push('<rect x="'+(X(x3)+7)+'" y="'+(Y(y3)-15)+'" width="'+(S-14)+'" height="30" fill="transparent" '
+      +'onclick="lpTap(\'h\','+x3+','+y3+')"/>');
+  for(var y4=0;y4<H;y4++) for(var x4=0;x4<=W;x4++)
+    o.push('<rect x="'+(X(x4)-15)+'" y="'+(Y(y4)+7)+'" width="30" height="'+(S-14)+'" fill="transparent" '
+      +'onclick="lpTap(\'v\','+x4+','+y4+')"/>');
+  o.push('</svg>');
+  document.getElementById('lpBoard').innerHTML=o.join('');
+}
+
+/* ══════════════════════════ BRIDGES (Hashiwokakero) ══════════════════════════
+   BUILT FROM A SPANNING STRUCTURE, which is the whole trick. Scattering numbered islands and
+   hoping is hopeless. Instead: plant an island, run a bridge out to a new island, repeat. What
+   you have at the end is a tree, so everything is reachable from everything BY CONSTRUCTION, and
+   each island's number is simply how many bridge ends it collected along the way. Extra bridges
+   are then added between existing islands so the answer is not always a tree, which is a tell.
+
+   Roughly half the boards turn out to have a second answer — not a fault, a tree plus extras
+   genuinely can be rejoined another way. Building one costs well under a millisecond, so the
+   ambiguous ones are thrown away and another is built.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var BR_LEVELS=[{N:7,C:8},{N:9,C:12},{N:11,C:16}];
+var brState={p:null,lv:0,pairs:null,cross:null,link:null,sel:-1,t0:0,done:false};
+
+function brBuild(N,count){
+  var cell=[];
+  for(var r=0;r<N;r++){ var row=[]; for(var c=0;c<N;c++) row.push(null); cell.push(row); }
+  var isl=[], bridges=[], DIRS=[[0,1],[0,-1],[1,0],[-1,0]];
+  function plant(r,c){ var i=isl.length; isl.push({r:r,c:c,deg:0}); cell[r][c]={island:i}; return i; }
+  /* Islands must not touch. Two side by side cannot have a bridge between them and yet look as
+     though they should — an unfair puzzle rather than a hard one. */
+  function freeFor(r,c){
+    if(r<0||c<0||r>=N||c>=N||cell[r][c]) return false;
+    for(var i=0;i<4;i++){
+      var y=r+DIRS[i][0], x=c+DIRS[i][1];
+      if(y>=0&&x>=0&&y<N&&x<N&&cell[y][x]&&cell[y][x].island!=null) return false;
+    }
+    return true;
+  }
+  function clear(r1,c1,r2,c2){
+    if(r1===r2){ for(var c=Math.min(c1,c2)+1;c<Math.max(c1,c2);c++) if(cell[r1][c]) return false; return true; }
+    for(var r=Math.min(r1,r2)+1;r<Math.max(r1,r2);r++) if(cell[r][c1]) return false;
+    return true;
+  }
+  function bar(r1,c1,r2,c2){
+    if(r1===r2){ for(var c=Math.min(c1,c2)+1;c<Math.max(c1,c2);c++) cell[r1][c]={bar:1}; }
+    else { for(var r=Math.min(r1,r2)+1;r<Math.max(r1,r2);r++) cell[r][c1]={bar:1}; }
+  }
+  plant(1+Math.floor(_rnd()*(N-2)),1+Math.floor(_rnd()*(N-2)));
+  var guard=0;
+  while(isl.length<count && guard++<count*200){
+    var fi=Math.floor(_rnd()*isl.length), from=isl[fi];
+    if(from.deg>=7) continue;
+    var d=DIRS[Math.floor(_rnd()*4)], dist=2+Math.floor(_rnd()*4);
+    var r2=from.r+d[0]*dist, c2=from.c+d[1]*dist;
+    if(!freeFor(r2,c2)||!clear(from.r,from.c,r2,c2)) continue;
+    var n=_rnd()<0.35?2:1, i2=plant(r2,c2);
+    bar(from.r,from.c,r2,c2);
+    bridges.push({a:fi,b:i2,n:n}); from.deg+=n; isl[i2].deg+=n;
+  }
+  if(isl.length<Math.max(5,count-3)) return null;
+  var extra=0, tries=0;
+  while(extra<Math.round(isl.length*0.35)&&tries++<400){
+    var i=Math.floor(_rnd()*isl.length), dd=DIRS[Math.floor(_rnd()*4)];
+    var rr=isl[i].r+dd[0], cc=isl[i].c+dd[1], hit=-1;
+    while(rr>=0&&cc>=0&&rr<N&&cc<N){
+      if(cell[rr][cc]){ if(cell[rr][cc].island!=null) hit=cell[rr][cc].island; break; }
+      rr+=dd[0]; cc+=dd[1];
+    }
+    if(hit<0) continue;
+    if(Math.abs(isl[i].r-isl[hit].r)+Math.abs(isl[i].c-isl[hit].c)<2) continue;
+    var ex=null;
+    for(var b=0;b<bridges.length;b++){
+      var B=bridges[b];
+      if((B.a===i&&B.b===hit)||(B.a===hit&&B.b===i)){ ex=B; break; }
+    }
+    if(ex){
+      if(ex.n>=2||isl[i].deg>=8||isl[hit].deg>=8) continue;
+      ex.n=2; isl[i].deg++; isl[hit].deg++; extra++; continue;
+    }
+    var n2=_rnd()<0.35?2:1;
+    if(isl[i].deg+n2>8||isl[hit].deg+n2>8) continue;
+    bar(isl[i].r,isl[i].c,isl[hit].r,isl[hit].c);
+    bridges.push({a:i,b:hit,n:n2}); isl[i].deg+=n2; isl[hit].deg+=n2; extra++;
+  }
+  return {N:N,islands:isl.map(function(x){ return {r:x.r,c:x.c,n:x.deg}; })};
+}
+/** Candidate pairs: from each island, look out until another island comes into view. */
+function brPairs(P){
+  var at={}, pairs=[], seen={};
+  P.islands.forEach(function(s,i){ at[s.r+','+s.c]=i; });
+  P.islands.forEach(function(s,i){
+    [[0,1],[1,0]].forEach(function(d){
+      var r=s.r+d[0], c=s.c+d[1];
+      while(r>=0&&c>=0&&r<P.N&&c<P.N){
+        var j=at[r+','+c];
+        if(j!=null){
+          var k=Math.min(i,j)+'-'+Math.max(i,j);
+          if(!seen[k]){ seen[k]=1; pairs.push({a:i,b:j,h:d[0]===0}); }
+          break;
+        }
+        r+=d[0]; c+=d[1];
+      }
+    });
+  });
+  return pairs;
+}
+function brCrossings(P,pairs){
+  var I=P.islands, cross=pairs.map(function(){ return []; });
+  pairs.forEach(function(p,i){
+    pairs.forEach(function(q,j){
+      if(i>=j||p.h===q.h) return;
+      var Hh=p.h?p:q, V=p.h?q:p;
+      var hr=I[Hh.a].r, hc1=Math.min(I[Hh.a].c,I[Hh.b].c), hc2=Math.max(I[Hh.a].c,I[Hh.b].c);
+      var vc=I[V.a].c, vr1=Math.min(I[V.a].r,I[V.b].r), vr2=Math.max(I[V.a].r,I[V.b].r);
+      if(hc1<vc&&vc<hc2&&vr1<hr&&hr<vr2){ cross[i].push(j); cross[j].push(i); }
+    });
+  });
+  return cross;
+}
+/* THE SOLVER works island by island rather than pair by pair: for each island, enumerate the
+   ways its still-undecided bridges can add up to what it still needs. Far tighter than trying 0,
+   1 and 2 on every pair independently, because the numbers do the pruning for you.
+   Connectivity is checked only at the end — it is the one rule that no local constraint can
+   express, which is exactly what makes the game interesting. */
+function brSolve(P,cap){
+  var I=P.islands, pairs=brPairs(P), cross=brCrossings(P,pairs);
+  var inc=I.map(function(){ return []; });
+  pairs.forEach(function(p,i){ inc[p.a].push(i); inc[p.b].push(i); });
+  var val=[], used=[], sols=[];
+  for(var q=0;q<pairs.length;q++) val.push(-1);
+  for(var q2=0;q2<I.length;q2++) used.push(0);
+  function connected(){
+    var adj=I.map(function(){ return []; });
+    pairs.forEach(function(p,i){ if(val[i]>0){ adj[p.a].push(p.b); adj[p.b].push(p.a); } });
+    var seen={0:1}, st=[0], n=0;
+    while(st.length){
+      var v=st.pop(); n++;
+      for(var z=0;z<adj[v].length;z++) if(!seen[adj[v][z]]){ seen[adj[v][z]]=1; st.push(adj[v][z]); }
+    }
+    return n===I.length;
+  }
+  function place(i,v){
+    if(v>0) for(var z=0;z<cross[i].length;z++) if(val[cross[i][z]]>0) return false;
+    val[i]=v; used[pairs[i].a]+=v; used[pairs[i].b]+=v; return true;
+  }
+  function unplace(i){ var v=val[i]; used[pairs[i].a]-=v; used[pairs[i].b]-=v; val[i]=-1; }
+  function rec(k){
+    if(sols.length>=cap) return;
+    if(k===I.length){
+      for(var i=0;i<pairs.length;i++) if(val[i]<0) return;
+      if(connected()) sols.push(val.slice());
+      return;
+    }
+    var open=inc[k].filter(function(i){ return val[i]<0; }), need=I[k].n-used[k];
+    if(need<0||need>open.length*2) return;
+    (function walk(t,leftOver){
+      if(sols.length>=cap) return;
+      if(t===open.length){ if(leftOver===0) rec(k+1); return; }
+      if(leftOver<0||leftOver>(open.length-t)*2) return;
+      for(var v=0;v<=2;v++){
+        var i=open[t], other= pairs[i].a===k?pairs[i].b:pairs[i].a;
+        if(used[other]+v>I[other].n) continue;
+        if(!place(i,v)) continue;
+        walk(t+1,leftOver-v);
+        unplace(i);
+        if(sols.length>=cap) return;
+      }
+    })(0,need);
+  }
+  rec(0);
+  return sols;
+}
+function brMake(lv){
+  var N=BR_LEVELS[lv].N, C=BR_LEVELS[lv].C, fallback=null;
+  for(var t=0;t<60;t++){
+    var p=brBuild(N,C);
+    if(!p) continue;
+    var s=brSolve(p,2);
+    if(s.length===1) return p;
+    if(s.length>=1&&!fallback) fallback=p;
+  }
+  return fallback;
+}
+function brSetLevel(lv){ if(lv===brState.lv&&brState.p) return; brState.lv=lv; brNew(); }
+function brNew(){
+  var lv=brState.lv, p=_takePuz('bri',lv,brMake);
+  if(!p){ document.getElementById('brDone').textContent='Could not build one — try again.'; return; }
+  brState.p=p; brState.pairs=brPairs(p); brState.cross=brCrossings(p,brState.pairs);
+  brState.link=brState.pairs.map(function(){ return 0; });
+  brState.sel=-1; brState.t0=Date.now(); brState.done=false;
+  document.getElementById('brDone').textContent='';
+  _seg('br',lv);
+  brRender();
+}
+function brClear(){
+  if(!brState.p) return;
+  brState.link=brState.pairs.map(function(){ return 0; });
+  brState.sel=-1; brState.done=false;
+  document.getElementById('brDone').textContent='';
+  brRender();
+}
+function brDeg(i){
+  var d=0;
+  brState.pairs.forEach(function(p,k){ if(p.a===i||p.b===i) d+=brState.link[k]; });
+  return d;
+}
+function brTap(i){
+  if(brState.done) return;
+  if(brState.sel<0||brState.sel===i){ brState.sel = brState.sel===i ? -1 : i; brRender(); return; }
+  var a=brState.sel, b=i, idx=-1;
+  brState.pairs.forEach(function(p,k){ if((p.a===a&&p.b===b)||(p.a===b&&p.b===a)) idx=k; });
+  if(idx<0){ brState.sel=i; brRender(); return; }   // no straight clear line: just move the selection
+  var nxt=(brState.link[idx]+1)%3;
+  if(nxt>0)
+    for(var z=0;z<brState.cross[idx].length;z++)
+      if(brState.link[brState.cross[idx][z]]>0){ brState.sel=-1; brRender(); return; }
+  brState.link[idx]=nxt;
+  brState.sel=-1;
+  brRender();
+  brCheck();
+}
+function brCheck(){
+  var I=brState.p.islands;
+  for(var i=0;i<I.length;i++) if(brDeg(i)!==I[i].n) return;
+  var adj=I.map(function(){ return []; });
+  brState.pairs.forEach(function(p,k){ if(brState.link[k]>0){ adj[p.a].push(p.b); adj[p.b].push(p.a); } });
+  var seen={0:1}, st=[0], n=0;
+  while(st.length){
+    var v=st.pop(); n++;
+    for(var z=0;z<adj[v].length;z++) if(!seen[adj[v][z]]){ seen[adj[v][z]]=1; st.push(adj[v][z]); }
+  }
+  if(n!==I.length){
+    document.getElementById('brDone').innerHTML='<span style="color:#FF8E8E">Every island has its number — but they are not all joined to each other.</span>';
+    return;
+  }
+  brState.done=true;
+  var secs=_elapsed(brState.t0), prev=R.bri.best[brState.lv]||0;
+  _bank('bri',brState.lv,secs);
+  document.getElementById('brDone').innerHTML='All joined, in '+mmss(secs)+'.'
+    + ((!prev||secs<prev)?'<br>Your quickest at this size.':'');
+  brRender();
+}
+function brRender(){
+  var P=brState.p; if(!P) return;
+  var N=P.N, S=Math.min(46,Math.round(400/N)), M=S*0.8, w=(N-1)*S+M*2;
+  var X=function(c){ return M+c*S; }, Y=function(r){ return M+r*S; };
+  var I=P.islands, o=['<svg class="board-svg" viewBox="0 0 '+w+' '+w+'">'];
+  var RAD=Math.min(S*0.42,19);
+  // bridges first, so the islands sit on top of them
+  brState.pairs.forEach(function(p,k){
+    var n=brState.link[k]; if(!n) return;
+    var A=I[p.a], B=I[p.b], off=3.6;
+    for(var t=0;t<n;t++){
+      var sh=(n===2)?(t===0?-off:off):0, x1,y1,x2,y2;
+      if(p.h){ x1=X(A.c); x2=X(B.c); y1=Y(A.r)+sh; y2=Y(B.r)+sh; }
+      else   { y1=Y(A.r); y2=Y(B.r); x1=X(A.c)+sh; x2=X(B.c)+sh; }
+      o.push('<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#C4F000" stroke-width="2.6"/>');
+    }
+  });
+  I.forEach(function(s,i){
+    var d=brDeg(i), full=d===s.n, over=d>s.n, sel=brState.sel===i;
+    var fill = sel?'#C4F000' : (full?'#233F16':'#12224A');
+    var stroke = over?'#FF8E8E' : (sel?'#C4F000' : (full?'#C4F000':'#3159A0'));
+    var ink = sel?'#0D1B3E' : (over?'#FF8E8E':(full?'#C4F000':'#FFFFFF'));
+    o.push('<circle cx="'+X(s.c)+'" cy="'+Y(s.r)+'" r="'+RAD+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="2"/>');
+    o.push('<text x="'+X(s.c)+'" y="'+(Y(s.r)+RAD*0.36)+'" text-anchor="middle" font-family="Montserrat,sans-serif" '
+      +'font-size="'+Math.round(RAD*1.05)+'" font-weight="800" fill="'+ink+'">'+s.n+'</text>');
+    // a generous invisible target: the circle itself gets small on the big board
+    o.push('<circle cx="'+X(s.c)+'" cy="'+Y(s.r)+'" r="'+(S*0.5)+'" fill="transparent" onclick="brTap('+i+')"/>');
+  });
+  o.push('</svg>');
+  document.getElementById('brBoard').innerHTML=o.join('');
+}
+
+/* ══════════════════════════ KAKURO ══════════════════════════
+   Digits 1-9, never repeating inside a run, each run adding to its clue. The no-repeat rule is
+   what makes it deduction rather than arithmetic: a run of two adding to 17 is 8 and 9, and
+   there is nothing else it could be.
+
+   THREE THINGS HAD TO BE GOT RIGHT, and I got two of them wrong first.
+
+   1. THE PATTERN IS CHOSEN BY SEARCH, row by row, carrying the open vertical run length in each
+      column. Sprinkling blocks and asking "is the grid legal yet?" after each never works — it
+      cannot be true early on, so every block is rejected and nothing is built. Cutting the long
+      runs deliberately does not work either: cut every row at the middle column and there is
+      then no legal place left to cut a COLUMN without stranding a single cell. A search can back
+      out of that; greedy construction cannot see it coming.
+
+   2. RUNS ARE KEPT SHORT. Nine is the theoretical limit — nine distinct digits — but long runs
+      have a great many fillings and produce boards with dozens of answers.
+
+   3. THE DEADLY RECTANGLE, which is what made every early board ambiguous and only became
+      visible by printing the actual solutions and comparing them. Four white cells at the
+      corners of a rectangle, sharing a row-run in both rows and a column-run in both columns:
+      swap each row's pair over and every total is unchanged — provided the two rows' pairs
+      happen to add to the same amount down each column. That last clause is the point. It is a
+      property of the DIGITS, not of the layout, which is why rejecting every pattern containing
+      a rectangle was far too strict and produced no boards at all. Rejecting the FILL when the
+      sums line up is the right test, and it is cheap.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var KK_LEVELS=[{N:5,bf:0.40,mr:3},{N:6,bf:0.46,mr:3},{N:6,bf:0.52,mr:4}];
+var kkState={p:null,lv:0,vals:null,sel:null,t0:0,done:false};
+
+function kkRuns(G,N){
+  var out=[];
+  for(var r=1;r<=N;r++){
+    var c=1;
+    while(c<=N){
+      if(!G[r][c]){ c++; continue; }
+      var cells=[], start=c;
+      while(c<=N&&G[r][c]){ cells.push([r,c]); c++; }
+      out.push({dir:'h',head:[r,start-1],cells:cells});
+    }
+  }
+  for(var c2=1;c2<=N;c2++){
+    var r2=1;
+    while(r2<=N){
+      if(!G[r2][c2]){ r2++; continue; }
+      var cl=[], st=r2;
+      while(r2<=N&&G[r2][c2]){ cl.push([r2,c2]); r2++; }
+      out.push({dir:'v',head:[st-1,c2],cells:cl});
+    }
+  }
+  return out;
+}
+function kkLegal(G,N,MAX){
+  var RR=kkRuns(G,N);
+  for(var i=0;i<RR.length;i++) if(RR[i].cells.length<2||RR[i].cells.length>MAX) return false;
+  var h={},v={};
+  RR.forEach(function(run){ run.cells.forEach(function(p){ (run.dir==='h'?h:v)[p[0]+','+p[1]]=1; }); });
+  for(var r=1;r<=N;r++) for(var c=1;c<=N;c++)
+    if(G[r][c]&&(!h[r+','+c]||!v[r+','+c])) return false;
+  return true;
+}
+function kkRectangles(G,N){
+  var hid=[],vid=[];
+  for(var r=0;r<=N;r++){
+    var a=[],b=[];
+    for(var c=0;c<=N;c++){ a.push(-1); b.push(-1); }
+    hid.push(a); vid.push(b);
+  }
+  kkRuns(G,N).forEach(function(run,i){
+    run.cells.forEach(function(p){ (run.dir==='h'?hid:vid)[p[0]][p[1]]=i; });
+  });
+  var out=[];
+  for(var r1=1;r1<=N;r1++) for(var r2=r1+1;r2<=N;r2++)
+    for(var c1=1;c1<=N;c1++) for(var c2=c1+1;c2<=N;c2++){
+      if(!(G[r1][c1]&&G[r1][c2]&&G[r2][c1]&&G[r2][c2])) continue;
+      if(hid[r1][c1]!==hid[r1][c2]||hid[r2][c1]!==hid[r2][c2]) continue;
+      if(vid[r1][c1]!==vid[r2][c1]||vid[r1][c2]!==vid[r2][c2]) continue;
+      out.push([r1,r2,c1,c2]);
+    }
+  return out;
+}
+function kkSwappable(v,rects){
+  for(var i=0;i<rects.length;i++){
+    var q=rects[i];
+    if(v[q[0]+','+q[2]]+v[q[1]+','+q[2]] === v[q[0]+','+q[3]]+v[q[1]+','+q[3]]) return true;
+  }
+  return false;
+}
+function kkPattern(N,blockFrac,MAX){
+  var FULL=(1<<N)-1, masks=[];
+  for(var m=0;m<=FULL;m++){
+    var ok=true, len=0;
+    for(var c=0;c<N;c++){
+      if(m&(1<<c)){ if(len===1||len>MAX){ ok=false; break; } len=0; }
+      else len++;
+    }
+    if(ok&&(len===1||len>MAX)) ok=false;
+    if(ok) masks.push(m);
+  }
+  var rows=new Array(N), wantWhite=Math.round(N*N*(1-blockFrac));
+  function grid(){
+    var G=[];
+    for(var r=0;r<=N;r++){
+      var row=[];
+      for(var c=0;c<=N;c++) row.push(r>0&&c>0&&!(rows[r-1]&(1<<(c-1))));
+      G.push(row);
+    }
+    return G;
+  }
+  function rec(r,colRun,whites){
+    if(r===N){
+      for(var c=0;c<N;c++) if(colRun[c]===1) return false;   // a cell stranded at the bottom
+      if(whites<wantWhite-Math.round(N*0.8)) return false;
+      return kkLegal(grid(),N,MAX);
+    }
+    var order=masks.slice();
+    for(var i=order.length-1;i>0;i--){
+      var j=Math.floor(_rnd()*(i+1)), t=order[i]; order[i]=order[j]; order[j]=t;
+    }
+    for(var o=0;o<order.length;o++){
+      var m2=order[o], nxt=colRun.slice(), good=true, w=0;
+      for(var c2=0;c2<N;c2++){
+        if(m2&(1<<c2)){ if(nxt[c2]===1){ good=false; break; } nxt[c2]=0; }
+        else { nxt[c2]++; if(nxt[c2]>MAX){ good=false; break; } w++; }
+      }
+      if(!good) continue;
+      rows[r]=m2;
+      if(rec(r+1,nxt,whites+w)) return true;
+    }
+    return false;
+  }
+  var zero=[];
+  for(var z=0;z<N;z++) zero.push(0);
+  return rec(0,zero,0) ? grid() : null;
+}
+function kkFill(G,N){
+  var RR=kkRuns(G,N), memberOf={};
+  RR.forEach(function(run,i){
+    run.cells.forEach(function(p){ (memberOf[p[0]+','+p[1]]=memberOf[p[0]+','+p[1]]||[]).push(i); });
+  });
+  var cells=[];
+  for(var r=1;r<=N;r++) for(var c=1;c<=N;c++) if(G[r][c]) cells.push([r,c]);
+  var val={}, usedIn=RR.map(function(){ return {}; });
+  function rec(k){
+    if(k===cells.length) return true;
+    var key=cells[k][0]+','+cells[k][1], mine=memberOf[key];
+    var digits=[1,2,3,4,5,6,7,8,9];
+    for(var i=8;i>0;i--){
+      var j=Math.floor(_rnd()*(i+1)), t=digits[i]; digits[i]=digits[j]; digits[j]=t;
+    }
+    for(var d=0;d<9;d++){
+      var v=digits[d], clash=false;
+      for(var q=0;q<mine.length;q++) if(usedIn[mine[q]][v]){ clash=true; break; }
+      if(clash) continue;
+      for(var q2=0;q2<mine.length;q2++) usedIn[mine[q2]][v]=1;
+      val[key]=v;
+      if(rec(k+1)) return true;
+      for(var q3=0;q3<mine.length;q3++) delete usedIn[mine[q3]][v];
+      delete val[key];
+    }
+    return false;
+  }
+  return rec(0)?val:null;
+}
+/* The pruning that makes the solver quick: with k cells still empty in a run and certain digits
+   already spent, the remaining total must sit between the smallest k unused digits added
+   together and the largest k. A run of three needing 6 more with the 1 and the 2 already gone is
+   impossible, and saying so at that moment removes an entire subtree. */
+function kkSolve(G,N,clue,cap){
+  var RR=kkRuns(G,N), memberOf={};
+  RR.forEach(function(run,i){
+    run.cells.forEach(function(p){ (memberOf[p[0]+','+p[1]]=memberOf[p[0]+','+p[1]]||[]).push(i); });
+  });
+  var cells=[];
+  for(var r=1;r<=N;r++) for(var c=1;c<=N;c++) if(G[r][c]) cells.push([r,c]);
+  var left=RR.map(function(run){ return run.cells.length; }), sum=clue.slice();
+  var used=RR.map(function(){ return {}; }), val=[], sols=[];
+  for(var z=0;z<cells.length;z++) val.push(0);
+  function reachable(i){
+    var k=left[i], need=sum[i];
+    if(k===0) return need===0;
+    var free=[];
+    for(var d=1;d<=9;d++) if(!used[i][d]) free.push(d);
+    if(free.length<k) return false;
+    var lo=0,hi=0;
+    for(var t=0;t<k;t++){ lo+=free[t]; hi+=free[free.length-1-t]; }
+    return need>=lo&&need<=hi;
+  }
+  function rec(k){
+    if(sols.length>=cap) return;
+    if(k===cells.length){ sols.push(val.slice()); return; }
+    var mine=memberOf[cells[k][0]+','+cells[k][1]];
+    for(var d=1;d<=9;d++){
+      var bad=false;
+      for(var q=0;q<mine.length;q++) if(used[mine[q]][d]||sum[mine[q]]-d<0){ bad=true; break; }
+      if(bad) continue;
+      for(var q2=0;q2<mine.length;q2++){ used[mine[q2]][d]=1; sum[mine[q2]]-=d; left[mine[q2]]--; }
+      var okAll=true;
+      for(var q3=0;q3<mine.length;q3++) if(!reachable(mine[q3])){ okAll=false; break; }
+      if(okAll){ val[k]=d; rec(k+1); val[k]=0; }
+      for(var q4=0;q4<mine.length;q4++){ delete used[mine[q4]][d]; sum[mine[q4]]+=d; left[mine[q4]]++; }
+      if(sols.length>=cap) return;
+    }
+  }
+  rec(0);
+  return sols;
+}
+function kkMake(lv){
+  var L=KK_LEVELS[lv], N=L.N;
+  for(var t=0;t<2500;t++){
+    var G=kkPattern(N,L.bf,L.mr);
+    if(!G) continue;
+    var rects=kkRectangles(G,N), RR=kkRuns(G,N);
+    for(var f=0;f<12;f++){
+      var v=kkFill(G,N);
+      if(!v) continue;
+      if(kkSwappable(v,rects)) continue;
+      var clue=RR.map(function(run){
+        return run.cells.reduce(function(a,p){ return a+v[p[0]+','+p[1]]; },0);
+      });
+      if(kkSolve(G,N,clue,2).length!==1) continue;
+      return {N:N,G:G,runs:RR,clue:clue};
+    }
+  }
+  return null;
+}
+function kkSetLevel(lv){ if(lv===kkState.lv&&kkState.p) return; kkState.lv=lv; kkNew(); }
+function kkNew(){
+  var lv=kkState.lv, p=_takePuz('kak',lv,kkMake);
+  if(!p){ document.getElementById('kkDone').textContent='Could not build one — try again.'; return; }
+  kkState.p=p; kkState.vals={}; kkState.sel=null; kkState.t0=Date.now(); kkState.done=false;
+  document.getElementById('kkDone').textContent='';
+  _seg('kk',lv);
+  kkRender(); kkPadRender();
+}
+function kkClear(){
+  if(!kkState.p) return;
+  kkState.vals={}; kkState.done=false;
+  document.getElementById('kkDone').textContent='';
+  kkRender();
+}
+function kkPick(r,c){ if(kkState.done) return; kkState.sel=r+','+c; kkRender(); }
+function kkPut(d){
+  if(kkState.done||!kkState.sel) return;
+  if(d===0) delete kkState.vals[kkState.sel]; else kkState.vals[kkState.sel]=d;
+  kkRender(); kkCheck();
+}
+/** Which cells clash: the same digit appearing twice inside one run. */
+function kkClashes(){
+  var bad={};
+  kkState.p.runs.forEach(function(run){
+    var seen={};
+    run.cells.forEach(function(p){
+      var v=kkState.vals[p[0]+','+p[1]]; if(!v) return;
+      if(seen[v]){ bad[p[0]+','+p[1]]=1; bad[seen[v]]=1; } else seen[v]=p[0]+','+p[1];
+    });
+  });
+  return bad;
+}
+function kkCheck(){
+  var P=kkState.p, ok=true;
+  P.runs.forEach(function(run,i){
+    var t=0;
+    run.cells.forEach(function(p){
+      var v=kkState.vals[p[0]+','+p[1]];
+      if(!v) ok=false; else t+=v;
+    });
+    if(t!==P.clue[i]) ok=false;
+  });
+  if(!ok) return;
+  for(var k in kkClashes()) return;
+  kkState.done=true;
+  var secs=_elapsed(kkState.t0), prev=R.kak.best[kkState.lv]||0;
+  _bank('kak',kkState.lv,secs);
+  document.getElementById('kkDone').innerHTML='Every sum right, in '+mmss(secs)+'.'
+    + ((!prev||secs<prev)?'<br>Your quickest at this size.':'');
+  kkRender();
+}
+function kkRender(){
+  var P=kkState.p; if(!P) return;
+  var N=P.N, S=Math.min(58,Math.round(392/(N+1))), w=(N+1)*S;
+  var clash=kkClashes(), across={}, down={};
+  P.runs.forEach(function(run,i){
+    (run.dir==='h'?across:down)[run.head[0]+','+run.head[1]]=P.clue[i];
+  });
+  var o=['<svg class="board-svg" viewBox="0 0 '+w+' '+w+'">'];
+  for(var r=0;r<=N;r++) for(var c=0;c<=N;c++){
+    var x=c*S, y=r*S, k=r+','+c;
+    if(P.G[r][c]){
+      var sel=kkState.sel===k, v=kkState.vals[k];
+      o.push('<rect x="'+x+'" y="'+y+'" width="'+S+'" height="'+S+'" fill="'+(sel?'#22407A':'#12224A')
+        +'" stroke="#3159A0" stroke-width="1"/>');
+      if(v) o.push('<text x="'+(x+S/2)+'" y="'+(y+S*0.68)+'" text-anchor="middle" '
+        +'font-family="Montserrat,sans-serif" font-size="'+Math.round(S*0.5)+'" font-weight="700" fill="'
+        +(clash[k]?'#FF8E8E':'#FFFFFF')+'">'+v+'</text>');
+      o.push('<rect x="'+x+'" y="'+y+'" width="'+S+'" height="'+S+'" fill="transparent" onclick="kkPick('+r+','+c+')"/>');
+    } else {
+      var a=across[k], d=down[k];
+      o.push('<rect x="'+x+'" y="'+y+'" width="'+S+'" height="'+S+'" fill="#0A1530" stroke="#24467E" stroke-width="1"/>');
+      if(a!=null||d!=null)
+        o.push('<line x1="'+x+'" y1="'+y+'" x2="'+(x+S)+'" y2="'+(y+S)+'" stroke="#3159A0" stroke-width="1"/>');
+      if(a!=null) o.push('<text x="'+(x+S*0.74)+'" y="'+(y+S*0.40)+'" text-anchor="middle" '
+        +'font-family="Montserrat,sans-serif" font-size="'+Math.round(S*0.30)+'" font-weight="700" fill="#C4F000">'+a+'</text>');
+      if(d!=null) o.push('<text x="'+(x+S*0.28)+'" y="'+(y+S*0.86)+'" text-anchor="middle" '
+        +'font-family="Montserrat,sans-serif" font-size="'+Math.round(S*0.30)+'" font-weight="700" fill="#8FB4E8">'+d+'</text>');
+    }
+  }
+  o.push('</svg>');
+  document.getElementById('kkBoard').innerHTML=o.join('');
+}
+function kkPadRender(){
+  var o=[];
+  for(var d=1;d<=9;d++) o.push('<button onclick="kkPut('+d+')">'+d+'</button>');
+  o.push('<button class="wide" onclick="kkPut(0)">Erase</button>');
+  document.getElementById('kkPad').innerHTML=o.join('');
+}
+
+/* ══════════════ A HOOK FOR THE TESTS ══════════════
+   `R` and `views` are declared with let/const, and a top-level let or const in a classic script
+   does NOT become a property of window — only `var` and function declarations do. A test reaching
+   for window.R therefore gets undefined and reports the record as missing when it is right there.
+   That exact mistake produced three separate false negatives yesterday, so the things a test needs
+   are named here on purpose rather than assumed.
+   R is handed over through a FUNCTION, not as a value: resetRecord() reassigns it, and a snapshot
+   taken at load would quietly go stale the moment the record was cleared. */
+window.__parlour = {
+  R:      function(){ return R; },
+  views:  function(){ return views; },
+  mmss:   function(s){ return mmss(s); }
+};
+
 /* ================= navigation ================= */
-const views=['home','conundrum','hive','fives','sudoku','flip'];
+const views=['home','conundrum','hive','fives','sudoku','flip','loop','bridges','kakuro'];
 function go(id){
   views.forEach(v=>document.getElementById(v).classList.toggle('hidden',v!==id));
   window.scrollTo(0,0);
@@ -434,6 +1435,9 @@ function go(id){
   if(id==='fives'&&!fState.answer)fNew();
   if(id==='sudoku'&&!sState.grid)sNew();
   if(id==='flip'&&!flState.grid)flNew();
+  if(id==='loop'&&!lpState.p)lpNew();
+  if(id==='bridges'&&!brState.p)brNew();
+  if(id==='kakuro'&&!kkState.p)kkNew();
   if(id!=='hive'&&hState.puzzle)hRecord();
   if(id!=='conundrum')cStop();
   if(id!=='sudoku')sStop(); else sStart();
@@ -957,6 +1961,14 @@ document.addEventListener('keydown',e=>{
   }
 });
 renderRecord();
+
+/* ══════════════ THE SERVICE WORKER, added 23 Aug 2026 ══════════════
+   The Parlour was the ONLY estate app without one — Diversions, the Buttery and the Still Room
+   all have theirs. It meant the Parlour did not work offline: installed on the home screen, out
+   of signal, it showed nothing at all. Which is exactly the situation the Parlour is FOR — a
+   train, a waiting room, ten minutes with no bars. Every game here is generated on the phone and
+   needs no network whatsoever, so there was never a reason for it not to work. */
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(function(){});
 </script>
 </body>
 </html>
