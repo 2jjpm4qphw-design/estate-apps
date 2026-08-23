@@ -339,6 +339,7 @@ svg .target-txt{fill:var(--muted);font-family:var(--f-mono);font-size:13px;font-
 
   <section class="screen" id="s-today">
     <div class="card"><div class="meters" id="meters"></div></div>
+    <div class="section" id="mealCard"></div>
     <div class="section">
       <div class="section-head">
         <span class="eyebrow">The plan</span>
@@ -1174,7 +1175,10 @@ const ALL_FOODS = (function(){
 
 const KEY = 'fmr.v2';
 const BLANK = { profile:null, log:{}, measures:[], tab:'today', open:null, place:null, venue:null,
-                slotHint:null, topupOpen:false, taste:{}, tasteOrder:[], tasteReview:false, showHidden:{} };
+                slotHint:null, topupOpen:false, taste:{}, tasteOrder:[], tasteReview:false, showHidden:{},
+                /* phrase -> {id,g}: every correction he makes to a typed meal, so the same
+                   sentence comes out right next time without being touched. */
+                learned:{} };
 let S = load();
 
 function load(){
@@ -1422,6 +1426,12 @@ function gPull(cb){
         Object.keys(cloud.log).forEach(function(k){ if(!S.log[k]) S.log[k]=cloud.log[k]; });
       }
       if(cloud && cloud.taste && !Object.keys(S.taste||{}).length) S.taste=cloud.taste;
+      /* Merge the corrections rather than replacing: one fixed on the phone and one fixed on the
+         Mac must both survive, and local wins a clash because that is the more recent decision. */
+      if(cloud && cloud.learned){
+        if(!S.learned) S.learned={};
+        Object.keys(cloud.learned).forEach(function(k){ if(!S.learned[k]) S.learned[k]=cloud.learned[k]; });
+      }
       if(cloud && cloud.profile && !S.profile) S.profile=cloud.profile;
       saveLocal();
       if(cb) cb(true);
@@ -1443,6 +1453,9 @@ function gPush(){
     .then(function(raw){
       var doc=JSON.parse(raw||'{}'); var st=doc.state||doc;
       st.buttery = { log:S.log, taste:S.taste, tasteOrder:S.tasteOrder,
+                     /* The corrections travel with everything else. They are the part that would
+                        hurt most to lose — months of "no, a slice of MY bread is 45g". */
+                     learned:S.learned||{},
                      profile:S.profile, savedAt:new Date().toISOString() };
       if(doc.state) doc.state=st; else doc=st;
       var body={files:{}}; body.files[G_FILE]={content:JSON.stringify(doc)};
@@ -1553,6 +1566,775 @@ function targets(){
            waist:b.waist, weight:b.weight, height:b.height, age:b.age };
 }
 function bmi(w){ const b=body(); return b ? w / Math.pow(b.height/100,2) : 0; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   TYPE WHAT YOU ATE — 23 August 2026
+
+   Mark: "how can we find a way to manully enter what I've eaten so that you can then make an
+   educated guess on the macros... roast chicken breast, 8 mini roast new potatoes, steamed veg
+   (cauliflower, carrots, brocoli), home made chicken stock gravy, 3 x pigs in blankets from M&S,
+   and 2 mini slices of baklava. How on earth could I input that into the system and get a
+   measurement?"
+
+   THE HONEST POSITION FIRST. Turning that sentence into grams is a judgement call, and there is
+   no model inside this app — it is a static page on a phone. So it does not pretend to know. It
+   guesses from a table of typical values, and then SHOWS EVERY ASSUMPTION AS AN EDITABLE LINE:
+   which food it matched, how many grams it assumed, and how sure it is. When it is wrong you fix
+   the line in two taps, and the correction is remembered so the same phrase is right next time.
+
+   A number with its working shown is useful even when it is 15% out. A number with the working
+   hidden is worse than no number, because you cannot tell the good days from the arithmetic.
+
+   THE VALUES are typical composition figures per 100g — the sort of thing on a UK label or in a
+   food-composition table. They are NOT brand-exact, and anything carrying a real brand is marked
+   as such. Salt is in here for everything, because salt is the marker that matters most for him
+   right now.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Per 100g: k kcal · p protein · c carbs · sug sugars · f fat · s salt · fib fibre
+   u  = the name of one natural unit ("breast", "slice", "potato")
+   ug = what one of those weighs, in grams
+   d  = the default portion when he gives no quantity at all
+   a  = extra words to match on (cooking methods, synonyms, common misspellings) */
+function FD(id,n,a,k,p,c,sug,f,s,fib,u,ug,d){
+  return {id:id,n:n,a:a||'',k:k,p:p,c:c,sug:sug||0,f:f||0,s:s||0,fib:fib||0,
+          u:u||'',ug:ug||0,d:d||ug||100};
+}
+var FOODS=[
+  /* ── poultry and meat ── */
+  FD('chicken-breast','Chicken breast, roasted','roast roasted grilled baked skinless breasts chicken',165,31,0,0,3.6,0.15,0,'breast',130,130),
+  FD('chicken-breast-skin','Chicken breast with skin','roast roasted skin on',197,29,0,0,8.5,0.15,0,'breast',150,150),
+  FD('chicken-thigh','Chicken thigh, roasted','roast roasted thighs',209,26,0,0,11,0.2,0,'thigh',90,90),
+  FD('chicken-drumstick','Chicken drumstick','leg legs drumsticks roast',185,24,0,0,9,0.2,0,'drumstick',90,90),
+  FD('roast-chicken','Roast chicken','chicken roasted mixed carvery',190,27,0,0,9,0.2,0,'portion',120,120),
+  FD('turkey','Turkey breast, roast','roasted turkey',135,30,0,0,1.7,0.15,0,'slice',30,120),
+  FD('beef-roast','Beef, roast topside','roasted silverside brisket carvery',180,31,0,0,6,0.15,0,'slice',30,120),
+  FD('steak','Steak, grilled','sirloin rump ribeye fillet beef',210,30,0,0,10,0.15,0,'steak',200,200),
+  FD('beef-mince','Beef mince, cooked','minced ground bolognese',180,26,0,0,8,0.2,0,'portion',125,125),
+  FD('lamb-roast','Lamb, roast','roasted leg shoulder chops',235,28,0,0,13,0.2,0,'slice',30,120),
+  FD('pork-roast','Pork, roast loin','roasted joint',210,30,0,0,10,0.2,0,'slice',30,120),
+  FD('pork-belly','Pork belly','crackling roasted',400,23,0,0,34,0.5,0,'portion',120,120),
+  FD('gammon','Gammon, roast','ham joint boiled bacon',160,23,0.5,0.5,7,2.6,0,'slice',30,110),
+  FD('ham','Ham, sliced','deli cooked wafer honey roast',110,18,1,1,4,2.5,0,'slice',20,60),
+  FD('bacon','Bacon, back, grilled','rashers rasher smoked unsmoked',287,25,0,0,21,3.0,0,'rasher',25,50),
+  FD('bacon-streaky','Streaky bacon','rashers crispy',330,24,0,0,26,3.0,0,'rasher',15,45),
+  FD('sausage','Pork sausage','sausages bangers cumberland lincolnshire',290,14,10,1,22,1.8,0,'sausage',60,120),
+  FD('chipolata','Chipolata','chipolatas cocktail small sausages',300,14,9,1,23,1.9,0,'chipolata',25,75),
+  FD('pigs-blankets','Pigs in blankets','pig blanket sausage bacon wrapped',330,15,4,1,28,2.0,0,'unit',22,66),
+  FD('sausage-roll','Sausage roll','rolls pastry',330,8,26,2,22,1.2,1,'roll',60,60),
+  FD('burger','Beef burger','patty quarter pounder hamburger',250,20,3,1,18,1.0,0,'burger',110,110),
+  FD('chorizo','Chorizo','cured spicy sausage',450,24,2,1,38,3.5,0,'slice',8,40),
+  FD('salami','Salami','cured slices',400,22,1,1,34,4.0,0,'slice',6,30),
+  FD('black-pudding','Black pudding','blood sausage',300,10,22,1,20,2.0,1,'slice',25,50),
+  FD('mince-pie-meat','Steak pie','pie beef puff shortcrust',260,10,22,1,15,1.0,1,'pie',200,200),
+
+  /* ── fish ── */
+  FD('salmon','Salmon fillet, baked','grilled roasted poached',208,20,0,0,13,0.15,0,'fillet',130,130),
+  FD('smoked-salmon','Smoked salmon','lox cured',180,25,0,0,8,3.5,0,'slice',25,50),
+  FD('cod','Cod, baked','white fish grilled poached',82,18,0,0,0.7,0.3,0,'fillet',150,150),
+  FD('haddock','Haddock','smoked white fish',90,19,0,0,0.6,0.4,0,'fillet',150,150),
+  FD('sea-bass','Sea bass','bream fillet',124,23,0,0,3,0.2,0,'fillet',120,120),
+  FD('tuna-tin','Tuna, tinned in water','canned drained spring',116,26,0,0,1,0.9,0,'tin',110,110),
+  FD('tuna-steak','Tuna steak','seared grilled fresh',130,28,0,0,1,0.15,0,'steak',150,150),
+  FD('prawns','Prawns, cooked','shrimp king',99,24,0,0,0.3,1.0,0,'portion',90,90),
+  FD('mackerel','Mackerel','smoked oily fish',260,19,0,0,21,1.2,0,'fillet',100,100),
+  FD('fish-fingers','Fish fingers','breaded',220,12,20,1,10,1.0,1,'finger',28,84),
+  FD('battered-fish','Battered fish','fried chip shop cod haddock',230,14,15,0.5,13,1.0,1,'portion',200,200),
+  /* Named dishes earn their own row so they are not torn into cheap halves. "Fish and chips" split
+     on the "and" gave a plain baked haddock plus oven chips — 378 kcal for something nearer 900. */
+  FD('fish-and-chips','Fish and chips','chippy chip shop battered cod haddock takeaway fried',235,11,26,0.5,11,1.0,2.5,'portion',400,400),
+
+  /* ── eggs and dairy ── */
+  FD('egg','Egg, boiled or poached','eggs soft hard',143,13,0,0,10,0.35,0,'egg',58,116),
+  FD('egg-fried','Fried egg','eggs',190,14,0,0,15,0.4,0,'egg',60,60),
+  FD('scrambled-egg','Scrambled egg','eggs buttered',165,11,1,1,13,0.7,0,'egg',60,120),
+  FD('omelette','Omelette','eggs',155,11,1,1,12,0.7,0,'omelette',150,150),
+  FD('cheddar','Cheddar cheese','cheese grated mature',416,25,0.1,0.1,34,1.8,0,'slice',25,40),
+  FD('mozzarella','Mozzarella','cheese buffalo',280,22,1,1,21,0.6,0,'ball',125,60),
+  FD('parmesan','Parmesan','cheese grated pecorino',400,33,0,0,28,1.6,0,'tbsp',6,15),
+  FD('feta','Feta','cheese greek',265,14,1,1,21,2.8,0,'portion',40,40),
+  FD('cream-cheese','Cream cheese','philadelphia soft',250,6,4,4,24,0.8,0,'tbsp',20,30),
+  FD('butter','Butter','buttered spread',744,0.5,0.6,0.6,82,1.7,0,'knob',7,10),
+  FD('milk','Milk, semi-skimmed','dairy cows',50,3.6,4.8,4.8,1.8,0.1,0,'glass',200,200),
+  FD('milk-whole','Whole milk','full fat dairy',64,3.4,4.7,4.7,3.6,0.1,0,'glass',200,200),
+  FD('oat-milk','Oat milk','oatly barista dairy free',46,1,6.7,4,1.5,0.1,0.8,'glass',200,200),
+  FD('almond-milk','Almond milk','unsweetened dairy free',13,0.4,0.1,0.1,1.1,0.1,0,'glass',200,200),
+  FD('greek-yog','Greek yogurt, 0% fat','yoghurt fat free fage',57,10,4,4,0.4,0.1,0,'pot',150,150),
+  FD('greek-yog-full','Greek yogurt, full fat','yoghurt',133,9,4,4,9,0.1,0,'pot',150,150),
+  FD('skyr','Skyr','icelandic yogurt yoghurt',63,11,4,4,0.2,0.1,0,'pot',150,150),
+  FD('yogurt','Natural yogurt','yoghurt plain',79,5,7,7,3,0.15,0,'pot',150,150),
+  FD('cream','Double cream','pouring whipped',450,2,3,3,48,0.1,0,'tbsp',15,30),
+  FD('creme-fraiche','Creme fraiche','soured cream',300,2.5,3,3,31,0.1,0,'tbsp',15,30),
+  FD('ice-cream','Ice cream','vanilla scoop',200,3.5,24,22,11,0.15,0,'scoop',60,120),
+
+  /* ── potatoes and starch ── */
+  FD('new-potatoes','New potatoes, boiled','baby salad jersey',75,1.7,17,1,0.3,0.02,1.5,'potato',40,180),
+  FD('roast-potatoes','Roast potatoes','roasted crispy goose fat',150,2.6,26,1,4.5,0.1,2.2,'potato',55,180),
+  FD('roast-new-potatoes','Roast new potatoes','roasted baby small crispy',140,2.4,24,1,4,0.1,2,'potato',30,150),
+  FD('mash','Mashed potato','mash creamy buttery',105,2,15,1,4,0.3,1.2,'portion',180,180),
+  FD('jacket-potato','Jacket potato','baked potato',93,2.5,21,1,0.2,0.02,2.4,'potato',200,200),
+    /* Named 'Chips' rather than 'Oven chips' on purpose. With two name words it lost a bare
+     "chips" to "Fish and chips" on the unmatched-word penalty, and a side of chips came out as
+     940 kcal. The commonest thing a word means should carry the shortest name. */
+  FD('chips-oven','Chips','oven fries chip potato wedges home',162,3,26,0.5,5,0.4,2.5,'portion',150,150),
+  FD('chips-shop','Chip shop chips','fries chippy',240,3.5,34,0.5,10,0.5,3,'portion',250,250),
+  FD('rice-white','Rice, boiled','white basmati long grain steamed plain',130,2.7,28,0.1,0.3,0.01,0.6,'portion',180,180),
+  FD('rice-brown','Brown rice, boiled','wholegrain wholemeal',123,2.7,26,0.4,1,0.01,1.8,'portion',180,180),
+  FD('pasta','Pasta, boiled','spaghetti penne fusilli tagliatelle white',158,5.8,31,1,0.9,0.01,1.8,'portion',180,180),
+  FD('pasta-whole','Wholewheat pasta','wholemeal spaghetti brown',124,5,26,1,1.4,0.01,4,'portion',180,180),
+  FD('couscous','Couscous','cooked',112,3.8,23,0.1,0.2,0.01,1.4,'portion',150,150),
+  FD('quinoa','Quinoa','cooked',120,4.4,21,0.9,1.9,0.01,2.8,'portion',150,150),
+  FD('noodles','Egg noodles','noodle chow mein',138,4.5,25,1,2,0.3,1.5,'portion',180,180),
+
+  /* ── bread ── */
+  FD('white-bread','White bread','toast sliced loaf',265,9,49,4,3,1.0,2.5,'slice',36,72),
+  FD('brown-bread','Wholemeal bread','brown granary toast seeded wholegrain',247,10,42,3,2.5,1.0,7,'slice',36,72),
+  FD('sourdough','Sourdough','bread toast',270,9,52,2,1.5,1.1,3,'slice',50,100),
+  FD('bagel','Bagel','bagels plain sesame',280,11,53,5,1.5,1.1,2.5,'bagel',85,85),
+  FD('baguette','Baguette','french stick bread',270,9,53,3,1.5,1.2,2.5,'portion',100,100),
+  FD('ciabatta','Ciabatta roll','italian bread',270,9,50,2,4,1.2,2.5,'roll',90,90),
+  FD('roll','Bread roll','crusty bap barm cob rolls',265,9,50,3,2,1.1,2.5,'roll',60,60),
+  FD('pitta','Pitta bread','flatbread',265,9,53,2,1.2,1.1,2.8,'pitta',60,60),
+  FD('wrap','Tortilla wrap','wraps flour',300,8,47,2,8,1.2,3,'wrap',62,62),
+  FD('crumpet','Crumpet','crumpets',180,6,36,1,0.9,1.0,2,'crumpet',55,110),
+  FD('naan','Naan bread','peshwari garlic',320,8,50,4,9,1.2,2.5,'naan',90,90),
+  FD('croissant','Croissant','pastry',406,8,45,10,21,0.9,2.5,'croissant',60,60),
+  FD('crackers','Crackers','cream cracker crispbread ryvita',430,10,60,2,15,1.5,4,'cracker',8,32),
+
+  /* ── vegetables ── */
+  FD('broccoli','Broccoli','steamed boiled florets brocoli tenderstem',35,3,4,1.5,0.4,0.03,2.6,'portion',80,80),
+  FD('cauliflower','Cauliflower','steamed boiled florets cauli',28,2,3,2,0.5,0.03,2,'portion',80,80),
+  FD('carrots','Carrots','steamed boiled roasted carrot batons',35,0.6,7,5,0.3,0.05,2.5,'portion',80,80),
+  FD('peas','Peas','garden petits pois frozen',79,5.4,11,1.5,0.9,0.01,5,'portion',80,80),
+  FD('green-beans','Green beans','french runner steamed',31,1.8,4,1.5,0.2,0.01,3,'portion',80,80),
+  FD('sprouts','Brussels sprouts','sprout steamed boiled',43,3.4,5,2.5,1.4,0.02,4,'portion',80,80),
+  FD('cabbage','Cabbage','savoy red steamed boiled greens',25,1.3,4,3,0.2,0.02,2.5,'portion',80,80),
+  FD('spinach','Spinach','wilted steamed cooked leaf',23,3,1,0.4,0.4,0.2,2,'portion',80,80),
+  FD('kale','Kale','steamed cavolo',35,3,4,1.5,1.5,0.05,3,'portion',80,80),
+  FD('courgette','Courgette','zucchini griddled',17,1.2,2,2,0.3,0.01,1,'portion',80,80),
+  FD('aubergine','Aubergine','eggplant roasted',25,1,3,3,0.4,0.01,2.5,'portion',80,80),
+  FD('mushrooms','Mushrooms','button chestnut mushroom',22,3,0.3,0.2,0.5,0.01,1,'portion',80,80),
+  FD('mushrooms-fried','Fried mushrooms','sauteed buttered',80,2.5,0.4,0.2,7.5,0.2,1,'portion',80,80),
+  FD('leek','Leeks','leek braised',30,1.5,5,2,0.3,0.01,2,'portion',80,80),
+  FD('parsnip','Roast parsnips','parsnip honey roasted',110,1.5,18,6,3.5,0.05,4,'portion',80,80),
+  FD('swede','Swede','turnip mashed',24,0.7,4,4,0.2,0.02,2,'portion',80,80),
+  FD('sweetcorn','Sweetcorn','corn tinned cob',95,3,18,4,1.5,0.4,2.5,'portion',80,80),
+  FD('onion','Onion','onions fried red',38,1.2,8,5,0.2,0.01,1.5,'onion',110,60),
+  FD('med-veg','Roasted Mediterranean vegetables','roast veg peppers courgette red onion',70,1.5,7,5,4,0.1,2.5,'portion',120,120),
+  FD('mixed-veg','Mixed steamed vegetables','veg vegetables greens seasonal steamed boiled side',38,2.2,5,3,0.4,0.03,2.6,'portion',80,180),
+  FD('salad','Salad leaves','green side rocket lettuce mixed',17,1.4,1.5,1,0.3,0.02,1.5,'portion',40,60),
+  FD('tomato','Tomato','tomatoes cherry vine',18,0.9,3,2.6,0.2,0.01,1,'tomato',85,85),
+  FD('cucumber','Cucumber','sliced',15,0.6,2,1.5,0.1,0.01,0.6,'portion',40,60),
+  FD('pepper','Pepper','peppers red yellow bell capsicum',26,1,5,4,0.3,0.01,1.6,'pepper',150,80),
+  FD('avocado','Avocado','half smashed',160,2,2,0.7,15,0.02,7,'half',75,75),
+  FD('sweet-potato','Sweet potato','roasted mashed wedges',90,2,20,6,0.1,0.05,3,'potato',150,150),
+  FD('coleslaw','Coleslaw','slaw',250,1.5,8,6,23,0.7,1.5,'portion',60,60),
+
+  /* ── pulses ── */
+  FD('baked-beans','Baked beans','heinz beans tomato sauce',78,4.7,13,5,0.2,0.6,3.7,'portion',200,200),
+  FD('chickpeas','Chickpeas','garbanzo tinned',140,8,18,1,2.6,0.02,7,'portion',120,120),
+  FD('lentils','Lentils','puy red green cooked dhal',116,9,20,1,0.4,0.01,8,'portion',120,120),
+  FD('kidney-beans','Kidney beans','red tinned chilli',100,8,15,1,0.5,0.02,6,'portion',120,120),
+  FD('hummus','Hummus','houmous dip',300,7,12,1,25,1.2,5,'tbsp',30,60),
+
+  /* ── sauces, fats and the salty extras ── */
+  FD('gravy-home','Gravy, homemade from stock','home made homemade own roasting juices thin chicken beef stock jus',18,1,2,0.5,0.5,0.6,0,'portion',80,80),
+  FD('gravy-granules','Gravy from granules','bisto instant powder thick',35,0.7,5.5,0.5,1,2.6,0,'portion',80,80),
+  FD('stuffing','Stuffing','sage onion paxo balls',230,5,30,3,10,1.5,2,'portion',50,50),
+  FD('yorkshire','Yorkshire pudding','yorkshires puddings',250,8,30,2,11,0.9,1.5,'unit',25,50),
+  FD('bread-sauce','Bread sauce','',120,4,15,3,5,0.8,0.5,'portion',50,50),
+  FD('cranberry','Cranberry sauce','jelly',160,0.2,40,38,0.1,0.1,1,'tbsp',20,20),
+  FD('apple-sauce','Apple sauce','bramley',80,0.2,19,18,0.1,0.05,1,'tbsp',20,20),
+  FD('mint-sauce','Mint sauce','',80,1,18,17,0.2,2.0,0,'tbsp',15,15),
+  FD('horseradish','Horseradish sauce','creamed',150,2,10,7,10,2.0,2,'tsp',10,10),
+  FD('ketchup','Tomato ketchup','tomato sauce',100,1,24,22,0.1,1.8,0.9,'tbsp',15,15),
+  FD('brown-sauce','Brown sauce','hp',110,0.8,25,20,0.1,2.4,1,'tbsp',15,15),
+  FD('mayo','Mayonnaise','mayo full fat',700,1,1.5,1.5,78,1.3,0,'tbsp',12,15),
+  FD('mustard','Mustard','dijon english wholegrain',160,8,6,3,9,5.5,3,'tsp',5,5),
+  FD('soy-sauce','Soy sauce','tamari kikkoman',60,6,5,1,0.1,17,0,'tbsp',15,15),
+  FD('olive-oil','Olive oil','extra virgin drizzle',824,0,0,0,92,0.01,0,'tbsp',13,13),
+  FD('veg-oil','Vegetable oil','sunflower rapeseed frying',824,0,0,0,92,0.01,0,'tbsp',13,13),
+  FD('dressing','Salad dressing','vinaigrette french balsamic',400,1,6,5,42,2.0,0,'tbsp',15,15),
+  FD('pesto','Pesto','green basil',450,5,5,3,45,2.5,2,'tbsp',20,30),
+  FD('curry-sauce','Curry sauce','korma tikka masala jar',160,3,10,6,11,1.0,1.5,'portion',150,150),
+  FD('tomato-sauce-pasta','Tomato pasta sauce','passata arrabbiata bolognese jar',60,2,8,6,2,0.9,1.5,'portion',150,150),
+  FD('cheese-sauce','Cheese sauce','white bechamel',150,6,8,4,10,0.9,0.3,'portion',100,100),
+
+  /* ── snacks and sweet things ── */
+  FD('crisps','Crisps','ready salted chips packet walkers',530,6,50,0.5,34,1.3,4,'bag',25,25),
+  FD('peanuts','Salted peanuts','nuts dry roasted',600,26,8,4,50,0.9,7,'handful',30,30),
+  FD('almonds','Almonds','nuts raw',610,21,7,4,53,0.01,12,'handful',25,25),
+  FD('cashews','Cashews','nuts',580,18,22,6,44,0.02,3,'handful',30,30),
+  FD('chocolate','Milk chocolate','dairy milk bar',530,7,57,56,30,0.2,2,'square',8,45),
+  FD('dark-choc','Dark chocolate','70% plain',550,8,46,30,36,0.05,10,'square',8,30),
+  FD('digestive','Digestive biscuit','biscuits mcvities',480,6,63,17,21,1.0,3,'biscuit',15,30),
+  FD('choc-biscuit','Chocolate biscuit','biscuits club penguin bourbon',500,6,62,35,25,0.7,2.5,'biscuit',20,40),
+  FD('cake','Sponge cake','victoria slice birthday',370,5,50,32,17,0.6,1,'slice',70,70),
+  FD('baklava','Baklava','pastry filo honey pistachio walnut greek turkish',430,6,45,30,25,0.1,3,'slice',40,80),
+  FD('apple-pie','Apple pie','crumble tart',265,2.5,35,18,13,0.4,2,'slice',100,100),
+  FD('flapjack','Flapjack','oat bar',450,5,60,30,21,0.3,4,'unit',60,60),
+  FD('doughnut','Doughnut','donut jam ring',400,6,48,20,20,0.7,2,'unit',70,70),
+  FD('muffin','Muffin','blueberry chocolate',380,5,50,28,18,0.7,2,'unit',100,100),
+  FD('scone','Scone','fruit plain cream tea',360,7,54,12,13,1.1,2,'scone',60,60),
+  FD('sweets','Sweets','haribo jelly babies wine gums',340,4,80,60,0.1,0.1,0,'handful',30,30),
+  FD('popcorn','Popcorn','salted sweet',480,8,60,10,22,1.5,8,'portion',30,30),
+  FD('trifle','Trifle','custard dessert',180,3,22,18,9,0.2,0.5,'portion',150,150),
+  FD('cheesecake','Cheesecake','baked new york',330,5,32,24,20,0.5,1,'slice',110,110),
+
+  /* ── fruit ── */
+  FD('apple','Apple','apples braeburn gala',52,0.3,12,10,0.2,0.01,2.4,'apple',150,150),
+  FD('banana','Banana','bananas',89,1.1,21,12,0.3,0.01,2.6,'banana',100,100),
+  FD('orange','Orange','satsuma clementine',47,0.9,9,9,0.1,0.01,2.4,'orange',140,140),
+  FD('grapes','Grapes','seedless red green',67,0.6,16,16,0.2,0.01,0.9,'handful',80,80),
+  FD('berries','Mixed berries','blueberries raspberries blackberries',45,0.8,8,7,0.3,0.01,4,'portion',80,80),
+  FD('strawberries','Strawberries','strawberry',33,0.7,6,5,0.3,0.01,2,'portion',80,80),
+  FD('melon','Melon','honeydew cantaloupe watermelon',34,0.6,8,8,0.2,0.02,0.9,'portion',150,150),
+  FD('pineapple','Pineapple','fresh tinned',50,0.5,12,10,0.1,0.01,1.4,'portion',100,100),
+  FD('pear','Pear','pears conference',57,0.4,15,10,0.1,0.01,3.1,'pear',170,170),
+  FD('raisins','Raisins','sultanas dried fruit',300,3,75,65,0.5,0.05,4,'handful',30,30),
+  FD('orange-juice','Orange juice','oj fresh smooth',42,0.7,9,9,0.1,0.01,0.2,'glass',200,200),
+
+  /* ── breakfast ── */
+  FD('oats','Porridge oats, dry','oat rolled jumbo',370,11,60,1,8,0.01,9,'portion',40,40),
+  FD('porridge','Porridge made up','oats with milk',110,4.5,15,5,2.5,0.1,1.8,'bowl',300,300),
+  FD('granola','Granola','crunchy cereal clusters',450,9,65,20,16,0.1,6,'portion',45,45),
+  FD('weetabix','Weetabix','wheat biscuits',360,12,69,4,2,0.3,10,'biscuit',19,38),
+  FD('cornflakes','Cornflakes','cereal kelloggs',380,7,84,8,0.9,1.1,3,'portion',30,30),
+  FD('muesli','Muesli','swiss cereal',370,10,60,15,8,0.1,8,'portion',45,45),
+  FD('protein-shake','Protein shake','whey powder drink',60,10,3,2,1,0.2,0,'bottle',330,330),
+
+  /* ── drinks ── */
+  FD('coffee-black','Black coffee','americano espresso filter',2,0.2,0,0,0,0.01,0,'mug',250,250),
+  FD('flat-white-oat','Oat flat white','oat milk coffee latte cappuccino',48,1,6,4,1.6,0.1,0.6,'cup',230,230),
+  FD('latte','Latte, semi-skimmed','cappuccino coffee milk flat white',48,3.4,4.6,4.6,1.7,0.1,0,'cup',250,250),
+  FD('tea','Tea with milk','builders brew cuppa',10,0.5,1,1,0.3,0.02,0,'mug',250,250),
+  FD('beer','Beer or lager','pint ale bitter',38,0.3,2.5,0.1,0,0.01,0,'pint',568,568),
+  FD('red-wine','Red wine','glass',85,0.1,2.6,0.6,0,0.01,0,'glass',175,175),
+  FD('white-wine','White wine','glass dry',82,0.1,2.6,1,0,0.01,0,'glass',175,175),
+  FD('gin-tonic','Gin and tonic','g&t vodka',46,0,3.2,3.2,0,0.02,0,'glass',250,250),
+  FD('whisky','Whisky','whiskey spirit measure brandy rum',250,0,0,0,0,0.01,0,'measure',25,25),
+  FD('coke','Coca-Cola','coke fizzy pepsi',42,0,10.6,10.6,0,0.01,0,'can',330,330),
+  FD('diet-coke','Diet Coke','coke zero sugar free fizzy',0.4,0,0,0,0,0.02,0,'can',330,330),
+  FD('squash','Squash','cordial diluted',10,0,2,2,0,0.01,0,'glass',250,250),
+
+  /* ── ready meals and takeaway, all rough ── */
+  FD('pizza','Pizza','margherita pepperoni slice',250,11,30,3,9,1.2,2,'slice',100,300),
+  FD('tikka-masala','Chicken tikka masala','curry indian balti',160,11,6,4,10,0.9,1,'portion',350,350),
+  FD('chow-mein','Chicken chow mein','chinese takeaway noodles',150,9,17,3,5,1.2,1.5,'portion',350,350),
+  FD('sweet-sour','Sweet and sour','chinese takeaway battered',200,8,25,15,7,1.0,1,'portion',350,350),
+  FD('lasagne','Lasagne','italian ready meal',135,8,12,3,6,0.6,1,'portion',400,400),
+  FD('shepherds-pie','Shepherds pie','cottage ready meal',120,7,11,2,5,0.6,1.5,'portion',400,400),
+  FD('kebab','Doner kebab','takeaway lamb',215,15,5,1,15,1.5,1,'portion',250,250),
+  FD('sandwich','Sandwich, shop bought','sarnie bought meal deal',280,12,30,3,11,1.2,2,'sandwich',200,200),
+  FD('tuna-mayo-sandwich','Tuna sandwich','tuna mayo mayonnaise sweetcorn sarnie baguette roll bap wrap sub',270,13,28,3,11,1.1,2,'sandwich',200,200),
+  FD('bltsandwich','Bacon sandwich','bacon butty sarnie roll',300,15,28,3,14,2.0,2,'sandwich',180,180),
+  FD('soup','Vegetable soup','tomato minestrone carton',45,1.5,7,3,1,0.6,1.5,'bowl',300,300),
+  FD('soup-chicken','Chicken soup','broth',50,3,5,1,2,0.7,0.8,'bowl',300,300),
+  FD('roast-dinner','Roast dinner','sunday carvery full',145,9,14,3,5.5,0.8,2,'plate',450,450),
+  FD('full-english','Full English breakfast','fry up cooked breakfast',210,12,10,2,14,1.6,1.5,'plate',400,400),
+  FD('scotch-egg','Scotch egg','',280,13,15,1,19,1.3,1,'unit',115,115),
+  FD('pork-pie','Pork pie','',380,11,25,1,26,1.5,1,'pie',140,140),
+  FD('quiche','Quiche','lorraine flan',280,9,20,2,18,0.9,1,'slice',120,120)
+];
+
+/* ══════════════════════════ THE PARSER ══════════════════════════ */
+
+var STOP={'of':1,'the':1,'a':1,'an':1,'some':1,'my':1,'and':1,'x':1,'in':1,'on':1,'to':1,'for':1,
+          'from':1,'at':1,'with':1,'bit':1,'just':1,'about':1,'or':1,'plus':1,'it':1,'i':1,'had':1,
+          'ate':1,'was':1,'were':1,'that':1,'this':1,'lot':1,'lots':1,'more':1};
+var WORDNUM={'a':1,'an':1,'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,
+             'nine':9,'ten':10,'eleven':11,'twelve':12,'half':0.5,'couple':2,'few':3,'several':3,'dozen':12};
+/* Size words scale the portion. "Mini" is doing real work in "8 mini roast new potatoes" — it is
+   the difference between 300g of potato and 150g. */
+var SIZES={'mini':0.6,'small':0.65,'little':0.6,'tiny':0.5,'baby':0.6,'large':1.4,'big':1.4,
+           'huge':1.7,'jumbo':1.6,'giant':1.7,'thin':0.7,'thick':1.4,'generous':1.3,'heaped':1.4,
+           'level':1,'double':2,'triple':3,'massive':1.7,'decent':1.2};
+/* null means "use the food's own unit weight" — a slice of bread and a slice of cake are not
+   the same thing, and only the food knows which. */
+var UNITS={'slice':null,'slices':null,'piece':null,'pieces':null,'portion':null,'portions':null,
+           'serving':null,'servings':null,'pack':null,'packet':null,'bag':null,'bowl':300,
+           'plate':350,'handful':30,'handfuls':30,'spoon':15,'spoonful':15,'spoonfuls':15,
+           'tbsp':15,'tablespoon':15,'tablespoons':15,'tsp':5,'teaspoon':5,'teaspoons':5,
+           'glass':200,'glasses':200,'mug':250,'mugs':250,'cup':240,'cups':240,'pot':150,'pots':150,
+           'tin':200,'tins':200,'can':330,'cans':330,'bottle':330,'pint':568,'pints':568,
+           'scoop':60,'scoops':60,'knob':7,'splash':20,'drizzle':10,'square':null,'squares':null,
+           'bar':null,'bars':null,'rasher':null,'rashers':null,'breast':null,'breasts':null,
+           'fillet':null,'fillets':null,'thigh':null,'thighs':null,'egg':null,'eggs':null,
+           'sausage':null,'sausages':null,'biscuit':null,'biscuits':null,'roll':null,'rolls':null,
+           'bagel':null,'wrap':null,'potato':null,'potatoes':null,'measure':25,'measures':25};
+var BRANDS=/\b(m ?& ?s|marks ?(and|&) ?spencer|tesco|sainsbury'?s?|asda|aldi|lidl|waitrose|morrisons|co-?op|iceland|ocado|pret|greggs|costa|starbucks|nando'?s|mcdonald'?s|kfc|subway|wagamama|itsu|leon)\b/g;
+
+function normTok(t){
+  /* Collapse doubled letters so "brocoli" and "broccoli" land on the same key. This one line
+     handles most of the misspellings people actually type — broccoli, spaghetti, courgette,
+     cauliflower — without any dictionary. Mark's own example had "brocoli" in it. */
+  return t.replace(/(.)\1+/g,'$1');
+}
+function tokens(s){
+  return String(s||'').toLowerCase().replace(/[^a-z0-9& ]+/g,' ').split(/\s+/)
+    .filter(function(t){ return t && !STOP[t] && !/^\d+$/.test(t); });
+}
+/** Edit distance, but abandoned as soon as it exceeds `max` — we only ever care about 0 or 1. */
+function within(a,b,max){
+  if(a===b) return true;
+  if(Math.abs(a.length-b.length)>max) return false;
+  var m=a.length,n=b.length,prev=[],cur=[],i,j;
+  for(j=0;j<=n;j++) prev[j]=j;
+  for(i=1;i<=m;i++){
+    cur[0]=i; var best=i;
+    for(j=1;j<=n;j++){
+      cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a.charAt(i-1)===b.charAt(j-1)?0:1));
+      if(cur[j]<best) best=cur[j];
+    }
+    if(best>max) return false;
+    prev=cur.slice();
+  }
+  return prev[n]<=max;
+}
+function foodTokens(f){
+  if(!f._t) f._t=tokens(f.n+' '+f.a).map(normTok);
+  return f._t;
+}
+function nameTokens(f){
+  if(!f._nt) f._nt=tokens(f.n).map(normTok);
+  return f._nt;
+}
+/* Scoring. Three ideas, and the third is the one that stops nonsense:
+   1. a matched word is worth its length, so "cauliflower" counts for more than "red"
+   2. coverage — how much of what he typed was understood at all
+   3. a PENALTY for words in the food's name that he did not say, so plain "chicken" does not
+      get matched to "Chicken tikka masala" just because the word appears in it */
+function foodMatch(q){
+  var qt=tokens(q).map(normTok);
+  if(!qt.length) return null;
+  var best=null;
+  for(var i=0;i<FOODS.length;i++){
+    var f=FOODS[i], ft=foodTokens(f), score=0, hit=0;
+    for(var j=0;j<qt.length;j++){
+      var t=qt[j], got=0;
+      if(ft.indexOf(t)>-1) got=Math.max(2,t.length);
+      else {
+        var stem=t.replace(/(ies|es|s)$/,'');
+        for(var z=0;z<ft.length;z++){
+          if(stem.length>3 && ft[z].indexOf(stem)===0){ got=t.length*0.75; break; }
+          if(t.length>=5 && within(t,ft[z],1)){ got=t.length*0.6; break; }
+        }
+      }
+      if(got){ score+=got; hit++; }
+    }
+    if(!hit) continue;
+    var nt=nameTokens(f), named=0;
+    for(var y=0;y<nt.length;y++) if(qt.indexOf(nt[y])>-1) named++;
+    var cover=hit/qt.length;
+    var s=score*(0.5+0.5*cover)-(nt.length-named)*1.2;
+    if(!best||s>best.score) best={f:f,score:s,cover:cover};
+  }
+  return (best&&best.score>1.5)?best:null;
+}
+
+/** "steamed veg (cauliflower, carrots, brocoli)" → three items, each still steamed. */
+function expandBrackets(t){
+  return t.replace(/([a-z ]*?)\(([^)]+)\)/g,function(_,head,inner){
+    var m=head.match(/\b(steamed|boiled|roast|roasted|grilled|fried|baked|mashed|raw)\b/);
+    var method=m?m[0]+' ':'';
+    return inner.split(/,|\band\b|\s&\s/).map(function(x){
+      x=x.trim(); return x?(method+x):'';
+    }).filter(Boolean).join(', ');
+  });
+}
+/* NAMED mealSplit, NOT splitItems. The Buttery already had a splitItems(items) of its own,
+   further down the file, that sorts food options into shown and hidden. Two function
+   declarations with one name means the later one wins silently, so the parser was calling the
+   option sorter with a string and getting "items.forEach is not a function" from a line of code
+   it had never heard of. In a single-file app of this size, anything general enough to collide
+   gets a prefix.
+
+   TRY THE WHOLE THING BEFORE TAKING IT APART. Splitting on "and" is right for "chicken and
+   potatoes" and wrong for "fish and chips" — the second is one dish with a name, and torn in
+   half it came to 378 kcal instead of something nearer 900. So each comma-separated chunk is
+   offered to the food table intact first, and only broken up if nothing recognises it whole.
+   Same principle as the "with" test below: let the evidence settle the ambiguity.
+   A bare & is never a separator either — it tore "M&S" in two and the brand stripper, which
+   runs later, never got a look at it. */
+function mealSplit(text){
+  var t=String(text||'').toLowerCase().replace(/\s+/g,' ');
+  t=expandBrackets(t);
+  var out=[];
+  t.split(/,|;|\n|\+/).forEach(function(chunk){
+    chunk=chunk.trim().replace(/^(and|&|plus|then|also)\s+/,'').trim();
+    if(chunk.length<2) return;
+    /* Keeping a chunk whole needs BOTH a strong match and good coverage. Score alone was not
+       enough: "cream cheese and smoked salmon" scored 9 on Smoked salmon while explaining only
+       half the words, so it stayed whole and the cream cheese vanished. A real dish name accounts
+       for nearly everything you typed. */
+    var whole=foodMatch(chunk);
+    if(whole && whole.score>=8 && whole.cover>=0.8){ out.push(chunk); return; }
+    chunk.split(/\band\b|\s&\s/).forEach(function(x){
+      x=x.trim(); if(x.length>1) out.push(x);
+    });
+  });
+  return out;
+}
+/* "toast with butter" is two foods; "chicken with skin" is one. Rather than guess from a list of
+   exceptions, TRY IT BOTH WAYS and keep the reading that matches — if both halves are recognised
+   foods it was two things, and if they are not it was one. Parse ambiguity settled by evidence. */
+function maybeSplitWith(phrase){
+  var parts=phrase.split(/\btopped with\b|\bwith\b|\bon\b|\bside of\b/)
+                  .map(function(x){ return x.trim(); })
+                  .filter(function(x){ return x.length>1; });
+  if(parts.length<2) return [phrase];
+  /* Every part must be a REAL match, not a word that happens to appear somewhere in the table.
+     At the low threshold "chicken with skin" split in two, because "skin" scrapes a match off
+     "Chicken breast with skin" — and the two halves then counted the chicken twice. */
+  var ok=parts.every(function(x){ var m=foodMatch(x); return m && m.score>=4; });
+  return ok ? parts : [phrase];
+}
+
+function parseOne(raw){
+  var text=String(raw||'').trim();
+  if(!text) return null;
+  var orig=text, brand='';
+  var bm=text.match(BRANDS);
+  if(bm){ brand=bm[0]; text=text.replace(BRANDS,' '); }
+  text=text.replace(/\bfrom\b|\bat\b/g,' ').replace(/\s+/g,' ').trim();
+
+  var qty=null, grams=null, size=1, unit='';
+
+  // an explicit weight beats every other reading of the quantity
+  var g=text.match(/(\d+(?:\.\d+)?)\s*(kg|g|grams?|gs)\b/);
+  if(g){ grams=parseFloat(g[1])*(g[2]==='kg'?1000:1); text=text.replace(g[0],' '); }
+  if(grams==null){
+    var ml=text.match(/(\d+(?:\.\d+)?)\s*(ml|l|litres?)\b/);
+    if(ml){ grams=parseFloat(ml[1])*(ml[2]==='ml'?1:1000); text=text.replace(ml[0],' '); }
+  }
+  var n=text.match(/(^|\s)(\d+(?:\.\d+)?)\s*(x\s*)?/);
+  if(n){ qty=parseFloat(n[2]); text=text.replace(n[0],' '); }
+  if(qty==null){
+    var w=text.match(/(^|\s)(a|an|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|half|couple|few|several|dozen)(\s|$)/);
+    if(w && WORDNUM[w[2]]!=null){ qty=WORDNUM[w[2]]; text=text.replace(w[0],' '); }
+  }
+  Object.keys(SIZES).forEach(function(k){
+    var re=new RegExp('(^|\\s)'+k+'(\\s|$)');
+    if(re.test(text)){ size*=SIZES[k]; text=text.replace(re,' '); }
+  });
+  Object.keys(UNITS).forEach(function(k){
+    if(unit) return;
+    var re=new RegExp('(^|\\s)'+k+'(\\s|$)');
+    if(re.test(text)){ unit=k; /* the unit word stays in the text: it is often the food too,
+                                  as in "2 eggs" or "a bagel" */ }
+  });
+
+  var q=text.replace(/\s+/g,' ').trim();
+  var m=foodMatch(q);
+  return { raw:orig.trim(), query:q, brand:brand.trim(), qty:qty, size:size, unit:unit,
+           grams:grams, match:m };
+}
+
+/* How many grams. The order matters: an explicit weight wins, then the food's own idea of one
+   unit if he named that unit, then a generic unit measure, then the food's default portion. */
+function gramsFor(p){
+  var f=p.match&&p.match.f;
+  if(p.grams!=null) return {g:p.grams, why:'you said '+p.grams+'g', conf:'HIGH'};
+  if(!f) return {g:0, why:'', conf:'LOW'};
+  var per=null, why='';
+  if(p.unit && UNITS[p.unit]!=null){ per=UNITS[p.unit]; why='a '+p.unit; }
+  if(p.unit && f.u && (p.unit===f.u||p.unit===f.u+'s'||p.unit===f.u+'es')){ per=f.ug; why='one '+f.u; }
+  if(per==null && p.qty!=null && f.ug){ per=f.ug; why='one '+(f.u||'unit'); }
+  if(per==null){ per=f.d; why='a normal portion'; }
+  var qty=p.qty==null?1:p.qty;
+  var g=Math.round(per*qty*p.size);
+  var conf = p.grams!=null ? 'HIGH' : (p.qty!=null||p.unit) ? 'MED' : 'LOW';
+  if(p.size!==1) why=(p.size<1?'smaller than usual, ':'bigger than usual, ')+why;
+  if(qty!==1) why=qty+' × '+why;
+  return {g:g, why:why, conf:conf};
+}
+function macrosFor(f,g){
+  var r=g/100;
+  return { k:Math.round(f.k*r), p:+(f.p*r).toFixed(1), c:+(f.c*r).toFixed(1),
+           sug:+(f.sug*r).toFixed(1), f:+(f.f*r).toFixed(1),
+           s:+(f.s*r).toFixed(2), fib:+(f.fib*r).toFixed(1) };
+}
+
+/** The whole job: text in, a list of editable lines out. `learned` maps a phrase to a fix. */
+function mealRead(text, learned){
+  var out=[];
+  mealSplit(text).forEach(function(chunk){
+    maybeSplitWith(chunk).forEach(function(phrase){
+      var key=phrase.toLowerCase().replace(/\s+/g,' ').trim();
+      var fix=learned&&learned[key];
+      var p=parseOne(phrase);
+      if(!p) return;
+      if(fix){
+        /* A correction he has already made beats anything the parser thinks. This is the whole
+           reason it gets better: the second roast dinner is right without being touched. */
+        var ff=null;
+        for(var i=0;i<FOODS.length;i++) if(FOODS[i].id===fix.id){ ff=FOODS[i]; break; }
+        if(ff){
+          out.push({ raw:p.raw, food:ff, grams:fix.g, why:'you set this before', conf:'HIGH',
+                     macros:macrosFor(ff,fix.g), learned:true });
+          return;
+        }
+      }
+      if(!p.match){
+        out.push({ raw:p.raw, food:null, grams:0, why:'not recognised', conf:'NONE',
+                   macros:{k:0,p:0,c:0,sug:0,f:0,s:0,fib:0} });
+        return;
+      }
+      var gg=gramsFor(p);
+      out.push({ raw:p.raw, food:p.match.f, grams:gg.g, why:gg.why,
+                 conf: p.match.score<6 ? 'LOW' : gg.conf,
+                 macros:macrosFor(p.match.f,gg.g) });
+    });
+  });
+  return out;
+}
+function mealTotal(lines){
+  var t={k:0,p:0,c:0,sug:0,f:0,s:0,fib:0};
+  lines.forEach(function(l){
+    ['k','p','c','sug','f','s','fib'].forEach(function(x){ t[x]+=(l.macros[x]||0); });
+  });
+  ['p','c','sug','f','fib'].forEach(function(x){ t[x]=+t[x].toFixed(1); });
+  t.k=Math.round(t.k); t.s=+t.s.toFixed(2);
+  return t;
+}
+/* How wrong could it be? An honest range beats a false decimal place. LOW lines are a portion
+   guess and could easily be a third out; MED lines were counted but the unit weight is typical
+   rather than measured; HIGH lines were weighed or corrected by hand. */
+function mealSpread(lines){
+  var w={HIGH:0.05,MED:0.15,LOW:0.33,NONE:0}, k=0, err=0;
+  lines.forEach(function(l){ k+=l.macros.k; err+=l.macros.k*(w[l.conf]||0.2); });
+  return k>0 ? Math.round(err/k*100) : 0;
+}
+
+
+
+/* ══════════════════════════ TYPE WHAT YOU ATE — the screen ══════════════════════════
+   The parser above turns a sentence into lines. This turns those lines into something Mark can
+   argue with, which is the entire point: every assumption is on screen and every one of them is
+   two taps from being corrected. Corrections are remembered, so it gets better at HIS food
+   rather than at food in general.
+   ═════════════════════════════════════════════════════════════════════════════════ */
+
+var mealDraft = { text:'', lines:null, slot:'dinner', picking:-1, pickQuery:'' };
+
+function mealKey(raw){ return String(raw||'').toLowerCase().replace(/\s+/g,' ').trim(); }
+function foodById(id){ for(var i=0;i<FOODS.length;i++) if(FOODS[i].id===id) return FOODS[i]; return null; }
+
+/* Remember a correction against the exact phrase he typed. Deliberately keyed on the PHRASE and
+   not on the food, because "8 mini roast new potatoes" carries the portion as well as the food —
+   getting the same sentence right next Sunday means storing both. */
+function mealLearn(raw, foodId, grams){
+  if(!S.learned) S.learned={};
+  S.learned[mealKey(raw)] = { id:foodId, g:grams };
+  save();
+}
+
+function mealWorkOut(){
+  /* The box if it has something in it, otherwise whatever the draft is already holding. The
+     first version read ONLY the box, so it depended on the input event having fired and on the
+     card being on screen at that moment — true in a browser by luck, false anywhere else. */
+  var el=$('#mealText');
+  var t = (el && el.value) ? el.value : (mealDraft.text || '');
+  mealDraft.text = t;
+  mealDraft.lines = t.trim() ? mealRead(t, S.learned||{}) : [];
+  mealDraft.picking = -1;
+  renderMealCard();
+}
+function mealReset(){
+  mealDraft = { text:'', lines:null, slot:mealDraft.slot, picking:-1, pickQuery:'' };
+  renderMealCard();
+}
+function mealSetGrams(i,g){
+  var l=mealDraft.lines[i]; if(!l||!l.food) return;
+  g=Math.max(0,Math.round(g));
+  l.grams=g; l.macros=macrosFor(l.food,g); l.conf='HIGH'; l.why='you set this';
+  mealLearn(l.raw,l.food.id,g);
+  renderMealCard();
+}
+function mealNudge(i,by){
+  var l=mealDraft.lines[i]; if(!l||!l.food) return;
+  /* Step by something sensible for the size of the thing — 5g on a knob of butter and 5g on a
+     plate of chips are not the same gesture. */
+  var step = l.grams>=200 ? 25 : l.grams>=60 ? 10 : 5;
+  mealSetGrams(i, l.grams + by*step);
+}
+function mealPick(i){ mealDraft.picking = (mealDraft.picking===i?-1:i); mealDraft.pickQuery=''; renderMealCard(); }
+function mealChoose(i,id){
+  var f=foodById(id); if(!f) return;
+  var l=mealDraft.lines[i];
+  /* Keep the grams he already has where they make sense; otherwise fall back to this food's own
+     idea of a portion, because 130g of chicken is not 130g of butter. */
+  var g = l.grams>0 ? l.grams : f.d;
+  l.food=f; l.grams=g; l.macros=macrosFor(f,g); l.conf='HIGH'; l.why='you chose this';
+  mealLearn(l.raw,f.id,g);
+  mealDraft.picking=-1;
+  renderMealCard();
+}
+function mealDrop(i){ mealDraft.lines.splice(i,1); renderMealCard(); }
+function mealAddBlank(){
+  if(!mealDraft.lines) mealDraft.lines=[];
+  mealDraft.lines.push({ raw:'(something else)', food:null, grams:0, why:'pick a food',
+                         conf:'NONE', macros:{k:0,p:0,c:0,sug:0,f:0,s:0,fib:0} });
+  mealDraft.picking = mealDraft.lines.length-1;
+  renderMealCard();
+}
+function mealSetSlot(s){ mealDraft.slot=s; renderMealCard(); }
+
+/** Into the day. Fills the named slot if it is free, otherwise it joins the extras. */
+function mealCommit(){
+  var lines=(mealDraft.lines||[]).filter(function(l){ return l.food && l.grams>0; });
+  if(!lines.length) return;
+  var t=mealTotal(lines);
+  var name=(mealDraft.text||'').replace(/\s+/g,' ').trim();
+  if(name.length>70) name=name.slice(0,68)+'…';
+  var item={ id:'typed:'+Date.now().toString(36), n:name||'Typed meal',
+             k:t.k, p:t.p, c:t.c, s:t.s, sug:t.sug, fat:t.f, fib:t.fib, typed:true,
+             parts:lines.map(function(l){ return {n:l.food.n,g:l.grams}; }) };
+  var d=day();
+  if(!d.meals[mealDraft.slot]) d.meals[mealDraft.slot]=item;
+  else d.extras.push(item);
+  save();
+  mealReset();
+  render();
+}
+
+function confChip(c){
+  if(c==='HIGH') return '<span class="chip chip-go">certain</span>';
+  if(c==='MED')  return '<span class="chip chip-data">counted</span>';
+  if(c==='LOW')  return '<span class="chip chip-warn">a guess</span>';
+  return '<span class="chip chip-stop">not found</span>';
+}
+
+function renderMealCard(){
+  var host=$('#mealCard'); if(!host) return;
+  var esc=function(x){ return String(x==null?'':x).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  var h='';
+
+  if(!mealDraft.lines){
+    h+='<div class="card card-pad">'
+     + '<div class="eyebrow">Ate something else?</div>'
+     + '<p class="hint" style="margin:6px 0 10px">Type it the way you would say it out loud &mdash; '
+     + 'quantities, sizes, brands and all. It will show you every assumption it makes so you can put it right.</p>'
+     + '<textarea id="mealText" rows="3" placeholder="roast chicken breast, 8 mini roast new potatoes, steamed veg, gravy, 3 pigs in blankets"'
+     + ' style="width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;font-size:16px;color:var(--ink);resize:vertical">'
+     + esc(mealDraft.text)+'</textarea>'
+     + '<button class="btn btn-primary btn-block" id="mealGo" style="margin-top:10px">Work it out</button>'
+     + '</div>';
+    host.innerHTML=h;
+    return;
+  }
+
+  var lines=mealDraft.lines, t=mealTotal(lines), spread=mealSpread(lines);
+  var unknown=lines.filter(function(l){ return !l.food; }).length;
+
+  h+='<div class="card card-pad">'
+   + '<div class="row-between" style="align-items:flex-end">'
+   +   '<div><div class="eyebrow">About</div>'
+   +     '<div style="font-size:32px;font-weight:800;line-height:1;color:var(--go-ink)">'+t.k
+   +     '<span style="font-size:14px;font-weight:700;color:var(--muted);margin-left:4px">kcal</span></div></div>'
+   +   '<div style="text-align:right"><div class="hint" style="margin:0">give or take '+spread+'%</div></div>'
+   + '</div>'
+   /* The spread is not decoration. Some of these lines were weighed and some were guessed from a
+      word, and a single tidy number would hide which. */
+   + '<div class="divider"></div>'
+   + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center">'
+   +   mealStat('Protein', t.p+'g') + mealStat('Carbs', t.c+'g')
+   +   mealStat('Fat', t.f+'g')     + mealStat('Salt', t.s+'g')
+   + '</div>';
+  if(t.s>=2)
+    h+='<p class="hint" style="margin:10px 0 0;color:var(--warn)"><b>'+t.s+'g of salt in one meal.</b> '
+     + 'Your working limit is about 4g for the whole day, and your blood pressure is the reason it is that low.</p>';
+  h+='</div>';
+
+  if(unknown)
+    h+='<div class="card card-pad" style="border-color:var(--stop)"><p style="margin:0"><b>'
+     + unknown+(unknown===1?' thing was':' things were')+' not recognised.</b></p>'
+     + '<p class="hint" style="margin:6px 0 0">Tap <b>Change</b> on it and pick the nearest thing, or drop it. '
+     + 'Nothing unrecognised is counted &mdash; it is left at zero rather than guessed at.</p></div>';
+
+  h+='<div class="card">';
+  lines.forEach(function(l,i){
+    var m=l.macros;
+    h+='<div style="padding:13px 15px;border-top:1px solid var(--line)'+(i===0?';border-top:none':'')+'">'
+     + '<div class="row-between" style="align-items:flex-start">'
+     +   '<div class="grow"><div style="font-size:15.5px;font-weight:600">'+esc(l.food?l.food.n:l.raw)+'</div>'
+     +     '<div class="hint" style="margin:2px 0 0">'+esc(l.raw)+(l.why?' &middot; '+esc(l.why):'')+'</div></div>'
+     +   '<div style="flex:none;text-align:right">'+confChip(l.conf)+'</div>'
+     + '</div>';
+    if(l.food){
+      h+='<div class="row-between" style="margin-top:9px">'
+       +   '<div style="display:flex;align-items:center;gap:7px">'
+       +     '<button class="btn btn-sm btn-quiet" data-meal-minus="'+i+'">&minus;</button>'
+       +     '<input type="number" inputmode="numeric" data-meal-g="'+i+'" value="'+l.grams+'" '
+       +       'style="width:74px;text-align:center;background:var(--surface-2);border:1px solid var(--line);'
+       +       'border-radius:9px;padding:7px 4px;font:inherit;font-size:15px;color:var(--ink)">'
+       +     '<span class="hint" style="margin:0">g</span>'
+       +     '<button class="btn btn-sm btn-quiet" data-meal-plus="'+i+'">+</button>'
+       +   '</div>'
+       +   '<div class="hint" style="margin:0;text-align:right">'+m.k+' kcal &middot; '+m.p+'g P &middot; '+m.s+'g salt</div>'
+       + '</div>';
+    }
+    h+='<div style="display:flex;gap:7px;margin-top:9px">'
+     +   '<button class="btn btn-sm btn-quiet" data-meal-pick="'+i+'">Change</button>'
+     +   '<button class="btn btn-sm btn-quiet" data-meal-drop="'+i+'">Remove</button>'
+     + '</div>';
+    if(mealDraft.picking===i){
+      h+='<div style="margin-top:10px">'
+       + '<input type="text" id="mealSearch" placeholder="search the food list" value="'+esc(mealDraft.pickQuery)+'" '
+       +   'style="width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;'
+       +   'padding:9px 11px;font:inherit;font-size:15px;color:var(--ink)">'
+       + '<div style="max-height:230px;overflow:auto;margin-top:8px">';
+      var q=mealDraft.pickQuery.toLowerCase().trim();
+      var list=FOODS.filter(function(f){
+        if(!q) return false;
+        return (f.n+' '+f.a).toLowerCase().indexOf(q)>-1;
+      }).slice(0,25);
+      if(!q) h+='<p class="hint" style="margin:0">Start typing &mdash; '+FOODS.length+' foods in the list.</p>';
+      else if(!list.length) h+='<p class="hint" style="margin:0">Nothing matching. Try a plainer word: &ldquo;chicken&rdquo; rather than a brand.</p>';
+      list.forEach(function(f){
+        h+='<button class="btn btn-quiet btn-block" style="text-align:left;margin-bottom:6px;padding:9px 11px" '
+         + 'data-meal-choose="'+i+'|'+f.id+'"><b>'+esc(f.n)+'</b>'
+         + '<span class="hint" style="margin:0;display:block">'+f.k+' kcal, '+f.p+'g protein, '+f.s+'g salt per 100g</span></button>';
+      });
+      h+='</div></div>';
+    }
+    h+='</div>';
+  });
+  h+='</div>';
+
+  h+='<button class="btn btn-quiet btn-block" id="mealAdd" style="margin-top:10px">Add something it missed</button>';
+
+  h+='<div class="card card-pad" style="margin-top:12px">'
+   + '<div class="eyebrow">Log it as</div>'
+   + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:9px">';
+  SLOTS.forEach(function(s){
+    var on = mealDraft.slot===s.id, taken = !!day().meals[s.id];
+    h+='<button class="btn btn-sm '+(on?'btn-primary':'btn-quiet')+'" data-meal-slot="'+s.id+'">'
+     + s.label+(taken?' +':'')+'</button>';
+  });
+  h+='</div>';
+  if(day().meals[mealDraft.slot])
+    h+='<p class="hint" style="margin:9px 0 0">There is already something logged for '
+     + mealDraft.slot+', so this will go in alongside it rather than replacing it.</p>';
+  h+='<button class="btn btn-primary btn-block" id="mealSave" style="margin-top:11px">Add to today</button>'
+   + '<button class="btn btn-quiet btn-block" id="mealAgain" style="margin-top:7px">Start again</button>'
+   + '</div>';
+
+  host.innerHTML=h;
+  var srch=$('#mealSearch');
+  if(srch){ srch.focus(); srch.setSelectionRange(srch.value.length,srch.value.length); }
+}
+function mealStat(label,val){
+  return '<div><div class="hint" style="margin:0;font-size:12px">'+label+'</div>'
+       + '<div style="font-size:17px;font-weight:700;margin-top:2px">'+val+'</div></div>';
+}
+
+/* A HOOK FOR THE TESTS. `S` is declared with `let`, and a top-level let or const in a classic
+   script does NOT become a property of window — only `var` and function declarations do. A test
+   reaching for window.S gets undefined and reports the state as missing when it is right there.
+   Handed over through a function because load() and the gist merge can reassign it. */
+window.__buttery = { S:function(){ return S; } };
 
 /* ═════════════════════════════  DAY  ═════════════════════════════ */
 
@@ -2238,7 +3020,7 @@ function render(){
   const T = targets();
   if(tab==='today'){
     $('#topSub').textContent = new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
-    renderMeters(); renderTopUp(); renderMeals(); renderToggles();
+    renderMeters(); renderMealCard(); renderTopUp(); renderMeals(); renderToggles();
   }else if(tab==='where'){
     $('#topSub').textContent = S.place ? '' : 'pick a place';
     renderWhere();
@@ -2255,6 +3037,47 @@ function render(){
 }
 
 /* ═════════════════════════════  EVENTS  ═════════════════════════════ */
+
+/* ── the typed-meal card ──
+   Its own listener, ahead of the main one, because these controls are rebuilt by innerHTML on
+   every keystroke-worth of change and anything bound at render time would be detached the
+   moment the list redrew. */
+document.addEventListener('click', function(e){
+  const b = e.target.closest('button'); if(!b) return;
+  const d = b.dataset;
+  if(b.id==='mealGo')    { mealWorkOut(); return; }
+  if(b.id==='mealAgain') { mealReset();   return; }
+  if(b.id==='mealAdd')   { mealAddBlank();return; }
+  if(b.id==='mealSave')  { mealCommit();  return; }
+  if(d.mealMinus!=null)  { mealNudge(+d.mealMinus,-1); return; }
+  if(d.mealPlus!=null)   { mealNudge(+d.mealPlus, 1);  return; }
+  if(d.mealPick!=null)   { mealPick(+d.mealPick);      return; }
+  if(d.mealDrop!=null)   { mealDrop(+d.mealDrop);      return; }
+  if(d.mealSlot)         { mealSetSlot(d.mealSlot);    return; }
+  if(d.mealChoose){ const q=d.mealChoose.split('|'); mealChoose(+q[0],q[1]); return; }
+}, true);
+document.addEventListener('input', function(e){
+  const t=e.target; if(!t) return;
+  if(t.id==='mealText'){ mealDraft.text=t.value; return; }
+  if(t.id==='mealSearch'){ mealDraft.pickQuery=t.value; renderMealCard(); return; }
+  if(t.dataset && t.dataset.mealG!=null){
+    /* Redrawing the whole card on every keystroke would steal the caret, so the grams box is
+       committed on blur or Enter rather than as it is typed. */
+    return;
+  }
+});
+document.addEventListener('change', function(e){
+  const t=e.target;
+  if(t && t.dataset && t.dataset.mealG!=null){
+    const v=parseFloat(t.value);
+    if(isFinite(v)) mealSetGrams(+t.dataset.mealG, v); else renderMealCard();
+  }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key==='Enter' && e.target && e.target.dataset && e.target.dataset.mealG!=null){
+    e.target.blur();
+  }
+});
 
 document.addEventListener('click', function(e){
   const tabBtn = e.target.closest('.tab');

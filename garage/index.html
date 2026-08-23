@@ -193,12 +193,14 @@ details .body p:last-child{margin-bottom:0}
   <div class="card"><div class="pad">
     <div class="f">
       <div><label class="fl" for="fDate">Date</label><input id="fDate" type="date"></div>
-      <div><label class="fl" for="fOdo">Odometer (miles)</label><input id="fOdo" type="number" inputmode="numeric" step="1" placeholder="e.g. 24310"></div>
-      <div><label class="fl" for="fLit">Litres</label><input id="fLit" type="number" inputmode="decimal" step="0.01" placeholder="38.42"></div>
-      <div><label class="fl" for="fCost">Cost (&pound;)</label><input id="fCost" type="number" inputmode="decimal" step="0.01" placeholder="54.20"></div>
+      <div><label class="fl" for="fMiles">Miles since the last fill</label><input id="fMiles" type="number" inputmode="numeric" step="1" placeholder="e.g. 312"></div>
+      <div class="wide"><label class="fl" for="fLit">Litres</label><input id="fLit" type="number" inputmode="decimal" step="0.01" placeholder="38.42"></div>
       <div class="wide"><label class="toggle"><input id="fBrim" type="checkbox" checked> Filled right to the brim</label>
         <p class="hint" style="margin:0">This is the one that matters. Economy can only be worked out between two brimmed tanks &mdash; leave it unticked for a splash-and-dash and the maths simply skips over it rather than reporting a wrong figure.</p></div>
       <div class="wide"><label class="fl" for="fNote">Note</label><input id="fNote" type="text" placeholder="optional &mdash; motorway run, Shell V-Power, towing"></div>
+      <div class="wide"><label class="toggle" style="padding-bottom:0"><input id="fWantCost" type="checkbox"> Add what it cost</label></div>
+      <div class="wide" id="fCostWrap" hidden><label class="fl" for="fCost">Cost (&pound;)</label><input id="fCost" type="number" inputmode="decimal" step="0.01" placeholder="54.20">
+        <p class="hint" style="margin:6px 0 0">Optional, and off by default because you asked for it that way. Fill it in and the app can tell you what a mile costs and what the car costs you a year; leave it and everything else works exactly the same.</p></div>
       <div class="wide"><button class="btn" id="fAdd">Save this fill</button></div>
     </div>
     <p class="hint" id="fErr" hidden style="color:var(--stop);margin-top:10px"></p>
@@ -216,7 +218,7 @@ details .body p:last-child{margin-bottom:0}
   <div class="card"><div class="pad">
     <div class="f">
       <div><label class="fl" for="tDate">Date</label><input id="tDate" type="date"></div>
-      <div><label class="fl" for="tOdo">Odometer</label><input id="tOdo" type="number" inputmode="numeric" step="1"></div>
+      <div><label class="fl" for="tOdo">Odometer <span style="text-transform:none;letter-spacing:0;font-weight:400">&mdash; optional</span></label><input id="tOdo" type="number" inputmode="numeric" step="1"></div>
     </div>
     <p class="eyebrow" style="margin:14px 0 8px">Pressures, cold, in psi</p>
     <div class="corners">
@@ -317,8 +319,8 @@ var PSI_BAR = 0.0689476;
 /* ─────────────────────── STATE ─────────────────────── */
 var LS = 'garage:v1';
 var S = {
-  car:   { name:'Fiat 124 Spider', reg:'', tank:45 },
-  fills: [],      // {id,date,odo,litres,cost,brim,note}
+  car:   { name:'Fiat 124 Spider', reg:'', tank:45, odoBase:null, odoBaseDate:'' },
+  fills: [],      // {id,date,miles,litres,cost,brim,note} — miles = TRIP since the last fill
   tyres: [],      // {id,date,odo,p:{fl,fr,rl,rr},d:{fl,fr,rl,rr}}
   targets:{ front:null, rear:null },
   done:  [],      // {id,care,date,odo,cost,note}
@@ -372,26 +374,66 @@ function relDays(n){
 }
 
 /* ═══════════════════════ THE ODOMETER ═══════════════════════
-   Deliberately DERIVED rather than a field of its own. Every fill, every tyre check and every
-   job done already carries a reading, so asking for it separately would be asking twice and
-   giving two numbers the chance to disagree. The highest one ever entered is the odometer. */
+   23 Aug 2026 — Mark: "on the petrol loading page i dont want to know the amount i paid for the
+   petrol rather then number of miles since the last fill up."
+
+   So a fill now records the TRIP METER, not the odometer. Which is the better field to ask for:
+   it is the number already sitting in front of him on the dashboard when he stops, it needs no
+   arithmetic, and it is exactly the quantity the economy calculation wants. An odometer had to
+   be subtracted from the previous one before it meant anything.
+
+   THE COST OF THAT CHANGE, and how it is paid. The mileage-based care intervals — oil at 8,000,
+   service at 10,000 — need a running total, and trip miles alone never give one. So the app
+   keeps a BASE reading (`car.odoBase`, set whenever he glances at the dash) and adds up every
+   trip since. Set it once and it stays right; set it again in six months and it re-anchors.
+   Without a base there is simply no mileage clock, and the Care tab says so rather than
+   inventing one. */
+function tripSince(iso){
+  var n=0;
+  S.fills.forEach(function(f){
+    if(!iso || String(f.date) > iso) n += (num(f.miles)||0);
+  });
+  return n;
+}
 function odoNow(){
-  var m=0;
-  S.fills.forEach(function(f){ if(f.odo>m) m=f.odo; });
-  S.tyres.forEach(function(t){ if(t.odo>m) m=t.odo; });
-  S.done .forEach(function(d){ if(d.odo>m) m=d.odo; });
-  return m||null;
+  var base=num(S.car.odoBase), o=null;
+  if(base!=null) o = base + tripSince(S.car.odoBaseDate||'');
+  /* Tyre checks and jobs done can carry an explicit reading. Take the highest of everything —
+     an odometer only counts up, so the largest number seen is the truthful one. */
+  S.tyres.forEach(function(t){ var v=num(t.odo); if(v!=null && (o==null||v>o)) o=v; });
+  S.done .forEach(function(d){ var v=num(d.odo); if(v!=null && (o==null||v>o)) o=v; });
+  return o;
 }
 /** Miles a day, from the fill history — used to turn "due in 2,000 miles" into a date. */
 function milesPerDay(){
-  var f=S.fills.slice().sort(byOdo);
+  var f=S.fills.slice().sort(byDate);
   if(f.length<2) return null;
-  var first=f[0], last=f[f.length-1];
-  var d=daysBetween(first.date, last.date), mi=last.odo-first.odo;
+  var d=daysBetween(f[0].date, f[f.length-1].date), mi=0;
+  /* The FIRST fill's trip miles belong to the stretch before this record starts, so they are
+     not counted — only the miles that fall inside the window being measured. */
+  for(var i=1;i<f.length;i++) mi += (num(f[i].miles)||0);
   if(!(d>13) || !(mi>0)) return null;      // under a fortnight of history says nothing
   return mi/d;
 }
-function byOdo(a,b){ return (a.odo-b.odo) || String(a.date).localeCompare(String(b.date)); }
+/* Order is by DATE now, not by odometer, because there is no odometer on a fill any more.
+   The id carries a base-36 timestamp, so it breaks ties in the order things were entered. */
+function byDate(a,b){
+  return String(a.date).localeCompare(String(b.date)) || String(a.id).localeCompare(String(b.id));
+}
+/* Anything logged before 23 Aug 2026 carries an odometer instead of a trip. Convert once, on
+   load, rather than carrying two shapes around for ever and testing for both everywhere. */
+function migrateFills(){
+  var withOdo=S.fills.filter(function(f){ return f.miles==null && f.odo!=null; });
+  if(!withOdo.length) return;
+  withOdo.sort(function(a,b){ return a.odo-b.odo; });
+  var top=withOdo[withOdo.length-1].odo;
+  for(var i=0;i<withOdo.length;i++){
+    // the earliest one has nothing before it, so its trip is genuinely unknown
+    withOdo[i].miles = i===0 ? null : (withOdo[i].odo - withOdo[i-1].odo);
+  }
+  if(S.car.odoBase==null){ S.car.odoBase=top; S.car.odoBaseDate=withOdo[withOdo.length-1].date; }
+  saveLocal();
+}
 
 /* ═══════════════════════ FUEL ═══════════════════════
    BRIM TO BRIM, and nothing else. A tank is only a known quantity when it is full, so the only
@@ -403,17 +445,20 @@ function byOdo(a,b){ return (a.odo-b.odo) || String(a.date).localeCompare(String
    which most fuel apps do, is to divide by whatever went in and print a figure that swings by
    fifteen per cent depending on how the nozzle cut off. */
 function segments(){
-  var f=S.fills.slice().sort(byOdo), out=[], anchor=null, litres=0, cost=0;
+  var f=S.fills.slice().sort(byDate), out=[], anchor=null, litres=0, cost=0, miles=0;
   for(var i=0;i<f.length;i++){
     var x=f[i];
-    if(anchor){ litres+=(num(x.litres)||0); cost+=(num(x.cost)||0); }
+    /* A fill's trip miles are the miles driven to REACH it, so they belong to the span that
+       ends here — which is why they are added before the brim test, not after. The anchor's own
+       trip miles were counted into the previous span and must not be counted twice. */
+    if(anchor){ litres+=(num(x.litres)||0); cost+=(num(x.cost)||0); miles+=(num(x.miles)||0); }
     if(x.brim){
-      if(anchor && x.odo>anchor.odo && litres>0){
-        var miles=x.odo-anchor.odo;
+      if(anchor && miles>0 && litres>0){
         out.push({ from:anchor, to:x, miles:miles, litres:litres, cost:cost,
-                   mpg: miles*GAL/litres, ppm: cost>0 ? cost/miles : null });
+                   mpg: miles*GAL/litres, mpl: miles/litres,
+                   ppm: cost>0 ? cost/miles : null });
       }
-      anchor=x; litres=0; cost=0;
+      anchor=x; litres=0; cost=0; miles=0;
     }
   }
   return out;
@@ -565,8 +610,34 @@ function careStatus(c){
   }
   if(!parts.length) return { band:'flat', head:'No interval set', sub:'', sort:1e9 };
 
-  /* Rank by days where we know them; a miles-only job with no mileage history has no days, so
-     it falls back to the miles remaining rather than pretending to a date. */
+  /* OVERDUE BEATS EVERYTHING, and it took a test to see why this needs saying separately.
+     Ranking was done purely on days-remaining, and a miles part only HAS a days figure once
+     there is enough fill history to work out a miles-per-day. So a job 500 miles past its oil
+     change, on a car with one fill logged, fell back to the calendar clock and reported
+     cheerfully as "due in 4 months". The miles were negative the whole time; nobody asked.
+
+     A job past either clock is past it. Whether the app can convert the overshoot into a date
+     is a question about the app's evidence, not about the car. */
+  var over = parts.filter(function(p){
+    return (p.days!=null && p.days<0) || (p.miles!=null && p.miles<0);
+  });
+  if(over.length){
+    over.sort(function(a,b){
+      var ax = a.days!=null ? a.days : -Math.abs(a.miles)/20;
+      var bx = b.days!=null ? b.days : -Math.abs(b.miles)/20;
+      return ax-bx;
+    });
+    var w=over[0];
+    return { band:'stop',
+             head: w.days!=null ? 'Overdue — '+relDays(w.days).replace('ago','late') : w.why,
+             sub: parts.map(function(p){ return p.why; }).join(' · ')
+                  + ' · last done '+niceDate(last.date)+(last.odo?' at '+comma(last.odo)+' miles':''),
+             sort: w.days!=null ? w.days : -Math.abs(w.miles)/20,
+             last:last };
+  }
+
+  /* Nothing overdue: rank by days where we know them. A miles-only job with no mileage history
+     still has no date, so it falls back to the miles remaining rather than inventing one. */
   var dated = parts.filter(function(p){ return p.days!=null; });
   var lead  = dated.length ? dated.sort(function(a,b){ return a.days-b.days; })[0] : parts[0];
   var d = lead.days;
@@ -699,9 +770,18 @@ function renderFuel(){
      + (S.fills.length? 'You have '+S.fills.length+' fill'+(S.fills.length>1?'s':'')+' logged; ':'')
      + 'the first brimmed fill is only a starting line — the second one is what produces a number.</p>';
   } else {
+    /* mpg is the headline and miles-per-litre the small print, even though litres are what goes
+       into the form. Two reasons, and only the first is about arithmetic. The car's own trip
+       computer reads in mpg, as does every published figure for it, so mpg is the only version
+       of this number you can check against anything. And 42 falling to 35 is a drop you notice;
+       the identical drop in miles per litre is 9.2 to 7.7, which needs a decimal place before it
+       is even visible. Same information, worse resolution in the head. Both are shown because
+       the conversion is one constant and nothing is lost by printing it. */
     h+='<div class="rowb" style="align-items:flex-end">'
-     + '<div><div class="eyebrow">Last tank</div><div class="big">'+r1(last.mpg)+'<span class="unit">mpg</span></div></div>'
-     + '<div style="text-align:right"><div class="eyebrow">All time</div><div class="big plain" style="font-size:26px">'+r1(avg)+'<span class="unit">mpg</span></div></div>'
+     + '<div><div class="eyebrow">Last tank</div><div class="big">'+r1(last.mpg)+'<span class="unit">mpg</span></div>'
+     +   '<div class="hint" style="margin:3px 0 0">'+r2(last.mpl)+' miles per litre</div></div>'
+     + '<div style="text-align:right"><div class="eyebrow">All time</div><div class="big plain" style="font-size:26px">'+r1(avg)+'<span class="unit">mpg</span></div>'
+     +   '<div class="hint" style="margin:3px 0 0">'+r2(avg/GAL)+' per litre</div></div>'
      + '</div>';
     var diff=last.mpg-avg;
     if(segs.length>2 && Math.abs(diff)>=2)
@@ -717,7 +797,7 @@ function renderFuel(){
   h+='</div></div>';
   $('#fuelBody').innerHTML=h;
 
-  var f=S.fills.slice().sort(byOdo).reverse(), l='';
+  var f=S.fills.slice().sort(byDate).reverse(), l='';
   if(!f.length) l='<div class="card"><div class="pad"><p class="hint" style="margin:0">Nothing logged yet.</p></div></div>';
   else {
     var segByTo={}; segs.forEach(function(s){ segByTo[s.to.id]=s; });
@@ -727,7 +807,8 @@ function renderFuel(){
       l+='<div class="item"><div class="grow">'
        + '<div class="t">'+niceDate(x.date)+' · '+r1(x.litres)+'L'
        + (x.cost? ' · &pound;'+r2(x.cost):'')+(x.brim?'':' <span class="pill flat">part</span>')+'</div>'
-       + '<div class="s">'+comma(x.odo)+' miles'+(s? ' · '+comma(s.miles)+' miles on that tank':'')
+       + '<div class="s">'+(x.miles!=null? comma(x.miles)+' miles since the last one':'miles not recorded')
+       + (s && s.miles!==x.miles ? ' · '+comma(s.miles)+' on that tank':'')
        + (x.note? ' · '+esc(x.note):'')+'</div></div>'
        + '<div class="r">'+(s? '<b style="font-size:17px">'+r1(s.mpg)+'</b><div class="s">mpg</div>'
                              : '<span class="s muted">'+(x.brim?'—':'part fill')+'</span>')
@@ -888,6 +969,31 @@ function renderCare(){
    + '<p><b>Anything you do not want, switch off.</b> Eighteen reminders that all shout equally is a '
    + 'list you stop reading, and then the two that mattered go with it.</p></div></details>';
 
+  /* THE MILEAGE CLOCK NEEDS A STARTING POINT, and this is where it is set. A fill records the
+     trip meter, which says how far since last time but never how far in total — so without one
+     reading of the real odometer, "due in 2,000 miles" has nothing to count from. Given first,
+     before the car's name and tank, because everything mileage-based on the Care tab is dead
+     until it is filled in. */
+  var odo=odoNow();
+  h+='<h2>The odometer</h2><div class="card"><div class="pad">';
+  if(odo!=null){
+    h+='<div class="rowb" style="align-items:flex-end"><div><div class="eyebrow">Reading now</div>'
+     + '<div class="big plain">'+comma(odo)+'<span class="unit">miles</span></div></div></div>';
+    if(S.car.odoBase!=null)
+      h+='<p class="hint" style="margin:10px 0 0">You told it '+comma(S.car.odoBase)+' on '+niceDate(S.car.odoBaseDate)
+       + ', and it has added '+comma(tripSince(S.car.odoBaseDate||''))+' miles of fills since. '
+       + 'If that has drifted from the dash, put the real figure in below and it re-anchors.</p>';
+  } else {
+    h+='<p style="margin:0"><b>Not set, and the mileage reminders cannot count without it.</b></p>'
+     + '<p class="hint" style="margin:6px 0 0">A fill records the trip meter, which tells you how far since last time but never how far in total. '
+     + 'Read the odometer off the dash once and every mileage-based job — oil, service, plugs — starts counting from there.</p>';
+  }
+  h+='<div class="f" style="margin-top:12px">'
+   + '<div><label class="fl">Odometer now</label><input type="number" inputmode="numeric" step="1" id="odoNowIn" placeholder="'+(odo!=null?comma(odo):'e.g. 24310')+'"></div>'
+   + '<div><label class="fl">Read on</label><input type="date" id="odoNowDate" value="'+todayIso()+'"></div>'
+   + '<div class="wide"><button class="btn'+(odo==null?'':' ghost')+'" id="odoSave">'+(odo==null?'Set it':'Re-anchor')+'</button></div>'
+   + '</div></div></div>';
+
   h+='<h2>The car</h2><div class="card"><div class="pad"><div class="f">'
    + '<div class="wide"><label class="fl">Name</label><input type="text" id="carName" value="'+esc(S.car.name)+'"></div>'
    + '<div><label class="fl">Registration</label><input type="text" id="carReg" value="'+esc(S.car.reg)+'"></div>'
@@ -966,6 +1072,13 @@ document.addEventListener('click', function(e){
   if(t.id==='tgtSave') return saveTargets();
   if(t.id==='xAdd')    return addFault();
   if(t.id==='carSave') return saveCar();
+  if(t.id==='odoSave') return saveOdo();
+});
+/* The cost field is hidden behind its tick, so this is a change event, not a click. */
+document.addEventListener('change', function(e){
+  if(e.target && e.target.id==='fWantCost'){
+    var wrap=$('#fCostWrap'); if(wrap) wrap.hidden=!e.target.checked;
+  }
 });
 
 function fail(id,msg){ var el=$(id); if(el){ el.textContent=msg; el.hidden=false; } }
@@ -973,19 +1086,26 @@ function clearFail(id){ var el=$(id); if(el) el.hidden=true; }
 
 function addFill(){
   clearFail('#fErr');
-  var odo=num($('#fOdo').value), lit=num($('#fLit').value);
-  if(odo==null) return fail('#fErr','The odometer reading is the one thing this cannot work without.');
+  var mi=num($('#fMiles').value), lit=num($('#fLit').value);
+  if(mi==null||mi<=0) return fail('#fErr','How many miles since the last fill? It is the trip meter on the dash.');
   if(lit==null||lit<=0) return fail('#fErr','How many litres went in?');
-  /* Refuse a reading that goes BACKWARDS. An odometer only counts up, so a lower number is a
-     typo — and a typo here does not just look wrong, it silently produces a negative distance
-     and a nonsense mpg for the tank on either side of it. Better to stop at the gate. */
-  var hi=odoNow();
-  if(hi!=null && odo<hi) return fail('#fErr','That is below the '+comma(hi)+' miles already recorded. An odometer only goes up — check the digits.');
   var tank=num(S.car.tank);
-  if(tank && lit>tank*1.08) return fail('#fErr',r1(lit)+' litres into a '+tank+'-litre tank. Check the pump receipt — that will not fit.');
-  S.fills.push({ id:uid(), date:$('#fDate').value||todayIso(), odo:odo, litres:lit,
-                 cost:num($('#fCost').value), brim:$('#fBrim').checked, note:$('#fNote').value||'' });
-  $('#fOdo').value=''; $('#fLit').value=''; $('#fCost').value=''; $('#fNote').value='';
+  if(tank && lit>tank*1.08)
+    return fail('#fErr',r1(lit)+' litres into a '+tank+'-litre tank. Check the pump receipt — that will not fit.');
+  /* SANITY, NOT CERTAINTY. A trip meter cannot be checked against anything the way an odometer
+     could, so the only defence against a fat-fingered digit is arithmetic: a full tank cannot go
+     further than the tank size at an implausibly good economy. 70 mpg in a 1.4 turbo Spider is
+     not a good tank, it is a typo. Warned rather than blocked when there is no tank size set. */
+  if(tank && $('#fBrim').checked && lit>tank*0.5){
+    var impliedMpg = mi*GAL/lit;
+    if(impliedMpg>70) return fail('#fErr',comma(mi)+' miles on '+r1(lit)+' litres works out at '+Math.round(impliedMpg)
+      +' mpg, which this car cannot do. Check the miles — is that the trip or the odometer?');
+  }
+  S.fills.push({ id:uid(), date:$('#fDate').value||todayIso(), miles:mi, litres:lit,
+                 cost:num($('#fCost') && $('#fCost').value), brim:$('#fBrim').checked,
+                 note:$('#fNote').value||'' });
+  $('#fMiles').value=''; $('#fLit').value=''; $('#fNote').value='';
+  if($('#fCost')) $('#fCost').value='';
   $('#fBrim').checked=true; $('#fDate').value=todayIso();
   save();
 }
@@ -1013,6 +1133,15 @@ function addFault(){
   S.faults.push({ id:uid(), text:txt, date:$('#xDate').value||todayIso(),
                   sev:$('#xSev').value, note:$('#xNote').value||'', fixed:false });
   $('#xText').value=''; $('#xNote').value=''; $('#xDate').value=todayIso();
+  save();
+}
+function saveOdo(){
+  var v=num($('#odoNowIn').value);
+  if(v==null||v<=0) return;
+  S.car.odoBase=v;
+  S.car.odoBaseDate=$('#odoNowDate').value||todayIso();
+  /* Re-anchoring means "the dash says this NOW", so only fills logged AFTER this date should be
+     added on top. Fills on the same day are already inside the reading he just read. */
   save();
 }
 function saveCar(){
@@ -1117,6 +1246,7 @@ function wireConnect(){
 /* ═══════════════════════ BOOT ═══════════════════════ */
 function boot(){
   loadLocal();
+  migrateFills();
   ['#fDate','#tDate','#xDate'].forEach(function(s){ var el=$(s); if(el&&!el.value) el.value=todayIso(); });
   if(S.targets.front!=null) $('#tgtF').value=S.targets.front;
   if(S.targets.rear !=null) $('#tgtR').value=S.targets.rear;
@@ -1135,6 +1265,7 @@ boot();
    re-entry, so the ones the tests reach for are named here explicitly. Three separate false
    negatives yesterday came from a test asking window for something that was never on it. */
 window.__garage = { S:S, CARE:CARE, segments:segments, avgMpg:avgMpg, avgPPM:avgPPM,
+                    byDate:byDate, tripSince:tripSince, migrateFills:migrateFills, saveOdo:saveOdo,
                     careStatus:careStatus, careRanked:careRanked, slowPuncture:slowPuncture,
                     cornerState:cornerState, addMonths:addMonths, odoNow:odoNow,
                     milesPerDay:milesPerDay, render:render, go:go, save:save,

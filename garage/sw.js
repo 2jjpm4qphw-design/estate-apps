@@ -4,7 +4,7 @@
  * (read-modify-write) is unchanged.
  * Bump CACHE on every shell change so phones pick up the new version.
  */
-var CACHE = 'garage-v1';   // 23 Aug 2026 — first build
+var CACHE = 'garage-v2';   // 23 Aug 2026 — trip miles instead of odometer, cost optional
 var SHELL = [
   './',
   './index.html',
