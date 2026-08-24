@@ -115,11 +115,45 @@ h3{font-size:15px;font-weight:700}
   backdrop-filter:saturate(180%) blur(14px); -webkit-backdrop-filter:saturate(180%) blur(14px);
   border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom,0px);
 }
-.tabbar-in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tabbar-in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
 .tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px 9px;color:var(--muted);font-size:13px;font-weight:700;letter-spacing:.04em}
 .tab .ti{font-size:18px;line-height:1}
 .tab[aria-current="page"]{color:var(--go)}
 
+
+/* ═══ v2 screens, 24 Aug 2026 ═══ */
+.v2-meters{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;text-align:center}
+.v2-m{background:var(--surface-2);border-radius:10px;padding:9px 4px}
+.v2-m.near{background:var(--warn-soft)} .v2-m.bad{background:var(--stop-soft)}
+.v2-mv{display:block;font-size:21px;font-weight:800;line-height:1.1}
+.v2-m.near .v2-mv{color:var(--warn)} .v2-m.bad .v2-mv{color:var(--stop)}
+.v2-ml{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+.v2-chips{display:flex;gap:8px;margin:14px 0 12px}
+.v2-chip{flex:1;font:inherit;font-size:14px;font-weight:700;padding:11px 4px;border-radius:11px;
+  border:1px solid var(--line);background:transparent;color:var(--ink-2);text-align:center;cursor:pointer}
+.v2-chip.on{background:var(--go);color:#0D1B3E;border-color:var(--go)}
+.v2-note{font-size:13.5px;color:var(--go-ink);background:var(--go-soft);border-radius:9px;
+  padding:8px 11px;margin-bottom:10px}
+.v2-opt{padding:13px 15px;border-top:1px solid var(--line)}
+.v2-opt:first-child{border-top:none}
+.v2-opt.dim{opacity:.5}
+.v2-opt-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.v2-opt-n{font-size:15.5px;font-weight:600;line-height:1.3}
+.v2-opt-s{font-size:13px;color:var(--muted);margin-top:3px}
+.v2-opt-w{font-size:13.5px;color:var(--ink-2);margin-top:5px;line-height:1.45}
+.v2-place{padding:14px 15px 10px}
+.v2-place-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.v2-place-n{font-size:17px;font-weight:700}
+.v2-place-t{font-size:11.5px;color:var(--go-ink);text-transform:uppercase;letter-spacing:.06em;flex:none}
+.v2-rule{font-size:13.5px;color:var(--ink-2);margin-top:6px;line-height:1.45}
+.v2-avoid{border:0;border-top:1px solid var(--line);border-radius:0;margin:0;padding:11px 15px;background:transparent}
+.v2-avoid summary{font-size:13px;color:var(--muted);font-weight:600}
+.v2-avoid .body p{font-size:13px;color:var(--muted);margin:0 0 6px}
+.v2-ate{display:flex;align-items:center;gap:10px;padding:12px 15px;border-top:1px solid var(--line)}
+.v2-ate:first-child{border-top:none}
+.v2-topup{display:flex;align-items:baseline;gap:8px;font-size:14px;padding:5px 0}
+.v2-topup b{color:var(--go-ink)}
+.v2-topup-k{margin-left:auto;font-size:12.5px;color:var(--muted)}
 /* ─────────────────────────────  CARDS  ───────────────────────────── */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
 .card + .card{margin-top:12px}
@@ -374,18 +408,19 @@ svg .target-txt{fill:var(--muted);font-family:var(--f-mono);font-size:13px;font-
     </div>
   </section>
 
-  <section class="screen" id="s-taste"></section>
-  <section class="screen" id="s-where"></section>
-  <section class="screen" id="s-numbers"></section>
-  <section class="screen" id="s-plan"></section>
+  <!-- 24 Aug 2026 — six screens became three. Taste, Where, Numbers and Plan are gone: the
+       first two were a whole screen to answer one question, and the last two were reference
+       material behind a tab, which is how reference material never gets read. -->
+  <section class="screen" id="s-eat"></section>
+  <section class="screen" id="s-ate"></section>
+  <section class="screen" id="s-fridge"></section>
 </div>
 
 <nav class="tabbar">
   <div class="tabbar-in">
-    <button class="tab" data-go="today"><span class="ti">◧</span>Today</button>
-    <button class="tab" data-go="where"><span class="ti">⌖</span>Where</button>
-    <button class="tab" data-go="numbers"><span class="ti">◔</span>Numbers</button>
-    <button class="tab" data-go="plan"><span class="ti">≡</span>Plan</button>
+    <button class="tab" data-go="eat"><span class="ti">◗</span>Eat</button>
+    <button class="tab" data-go="ate"><span class="ti">◧</span>Ate</button>
+    <button class="tab" data-go="fridge"><span class="ti">▤</span>Fridge</button>
   </div>
 </nav>
 
@@ -1174,11 +1209,14 @@ const ALL_FOODS = (function(){
 /* ═════════════════════════════  STATE  ═════════════════════════════ */
 
 const KEY = 'fmr.v2';
-const BLANK = { profile:null, log:{}, measures:[], tab:'today', open:null, place:null, venue:null,
+const BLANK = { profile:null, log:{}, measures:[], tab:'eat', open:null, place:null, venue:null,
                 slotHint:null, topupOpen:false, taste:{}, tasteOrder:[], tasteReview:false, showHidden:{},
                 /* phrase -> {id,g}: every correction he makes to a typed meal, so the same
                    sentence comes out right next time without being touched. */
-                learned:{} };
+                learned:{},
+                /* 24 Aug 2026 — what is actually in, and where he is standing. The two things
+                   the app could not work out for itself. */
+                fridge:[], where:'home' };
 let S = load();
 
 function load(){
@@ -2335,6 +2373,264 @@ function mealStat(label,val){
    reaching for window.S gets undefined and reports the state as missing when it is right there.
    Handed over through a function because load() and the gist merge can reassign it. */
 window.__buttery = { S:function(){ return S; } };
+/* v2 surfaces, exposed so the test can click every button and prove none is dead. */
+window.renderEat=renderEat; window.renderAte=renderAte; window.renderFridge=renderFridge;
+window.dinnersICanCook=dinnersICanCook; window.remaining=remaining; window.eatThis=eatThis;
+window.DINNERS=DINNERS; window.OUT=OUT; window.STAPLES=STAPLES; window.QUICK=QUICK;
+window.mealNow=mealNow; window.MEAL_LABEL=MEAL_LABEL; window.topUpCard=topUpCard;
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE BUTTERY, REBUILT — 24 August 2026
+
+   Mark: "the whole pwa/app needs restructuring as it's very complicated with lots of buttons to
+   press and sections to go through - my adhd brain is challenged... i suspect that there are two
+   sections: recommendations and suggestions / what I actually ate and drank."
+
+   HE WAS RIGHT, AND THE NUMBERS WERE WORSE THAN HE THOUGHT. Six screens, four tabs, 32 places,
+   130 items, and three taps to log a single thing. But the finding that actually explains it:
+   ONLY THREE OF THE THIRTY-TWO PLACES MENTIONED HOME. The words "cook" and "fridge" appeared
+   twice and three times in a 218KB app. It was built for a man in a car — garages, forecourts,
+   Pret, motorway services — and he has since started cooking roast dinners. So it was not merely
+   cluttered. It was mostly answering a question he had stopped asking.
+
+   THREE SCREENS NOW, and each has one job:
+     EAT    — what to have, now. One row of chips, then five options with the reason on each.
+     ATE    — what you had, and after 8pm it becomes the top-up check.
+     FRIDGE — what is actually in, which is what makes Home suggestions concrete.
+
+   ONE TAP TO LOG, down from three. That is the single biggest change and everything else serves
+   it: the app already knows the time, the day's running totals, and now what is in the fridge,
+   so the only thing it needs from him is where he is standing.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────── WHAT IS IN THE FRIDGE ───────────────────
+   His idea, and the one that unlocks home cooking: "would be good to have a 'whats in the fridge
+   right now' bit so you can see and advise. For example, I bought 2 packs of sainsbury
+   chargrilled chicken as per your lunch suggestion and have 1.5 packets in the fridge along with
+   a pack of jumbo prawns."
+
+   Each staple carries what a sensible portion is worth, so the app can say "that is 32g of
+   protein" rather than "you have chicken". Amount is deliberately vague — "1½ packs", "some" —
+   because making him weigh things is how the whole feature gets abandoned by Thursday. */
+var STAPLES=[
+  {id:'chicken-chargrill', n:'Chargrilled chicken pieces', unit:'pack', p:32, k:190, s:1.1, keeps:4,
+   note:'Sainsbury’s or similar. The single most useful thing in your fridge.'},
+  {id:'prawns-jumbo',  n:'Jumbo prawns',        unit:'pack', p:24, k:110, s:1.0, keeps:3},
+  {id:'chicken-breast',n:'Chicken breasts, raw',unit:'breast',p:39, k:200, s:0.2, keeps:3},
+  {id:'salmon',        n:'Salmon fillets',      unit:'fillet',p:26, k:270, s:0.2, keeps:3},
+  {id:'cod',           n:'White fish fillets',  unit:'fillet',p:27, k:125, s:0.5, keeps:2},
+  {id:'mince-beef',    n:'Beef mince, 5%',      unit:'pack', p:52, k:360, s:0.4, keeps:3},
+  {id:'eggs',          n:'Eggs',                unit:'egg',   p:6.4,k:78,  s:0.2, keeps:21},
+  {id:'skyr',          n:'Skyr or 0% Greek yogurt', unit:'pot', p:17, k:95, s:0.15, keeps:10},
+  {id:'halloumi',      n:'Halloumi',            unit:'pack', p:44, k:600, s:6.0, keeps:14,
+   note:'Enormous protein, enormous salt. A quarter pack, not half.'},
+  {id:'feta',          n:'Feta',                unit:'pack', p:28, k:530, s:5.6, keeps:14},
+  {id:'tuna-tin',      n:'Tinned tuna',         unit:'tin',  p:29, k:128, s:1.0, keeps:400},
+  {id:'beans-tin',     n:'Beans or chickpeas',  unit:'tin',  p:19, k:330, s:0.05,keeps:400},
+  {id:'lentils',       n:'Cooked lentils',      unit:'pouch',p:22, k:290, s:0.02,keeps:200},
+  {id:'veg-frozen',    n:'Frozen veg',          unit:'bag',  p:0,  k:0,   s:0,   keeps:200},
+  {id:'salad-bag',     n:'Salad or leaves',     unit:'bag',  p:0,  k:0,   s:0,   keeps:4},
+  {id:'new-potatoes',  n:'New potatoes',        unit:'bag',  p:0,  k:0,   s:0,   keeps:10},
+  {id:'sweet-potato',  n:'Sweet potatoes',      unit:'each', p:0,  k:0,   s:0,   keeps:14},
+  {id:'passata',       n:'Passata or chopped tomatoes', unit:'tin', p:0, k:0, s:0.1, keeps:400},
+  {id:'oat-milk',      n:'Oat milk',            unit:'carton',p:0, k:0,   s:0,   keeps:7}
+];
+function staple(id){ for(var i=0;i<STAPLES.length;i++) if(STAPLES[i].id===id) return STAPLES[i]; return null; }
+
+/* ─────────────────── DINNERS AT HOME ───────────────────
+   Mark: "home dinners need to be much better options."
+
+   Ten, and every one of them is buildable from the staples above. Each says what it NEEDS, so
+   the Eat screen can put the ones you can actually cook tonight at the top and grey the rest —
+   which is the difference between a recipe list and an answer.
+
+   THE BRIEF EVERY ONE OF THESE MEETS: 35g of protein or better, under 1.5g of salt, and nothing
+   that takes more than about 25 minutes on a weeknight. The salt ceiling is doing the most work
+   here — his blood pressure has been 144-149 over 94-98 for three months, and a jar of sauce or
+   a stock cube spends half a day's allowance in one go. Almost every "quick healthy dinner" you
+   find elsewhere fails on salt, not on calories. */
+/* Breakfast and lunch at home — the two-minute end of the repertoire. Ids so they can be
+   logged; macros so logging them means something. */
+var QUICK={
+  breakfast:[
+    {id:'q-skyr-nuts', n:'Skyr, berries and 20g of walnuts', p:22, k:290, c:24, s:0.15,
+     w:'Highest protein for the least effort on this list. Nothing to cook.'},
+    {id:'q-eggs3',     n:'Three eggs, any way',              p:19, k:230, c:1,  s:0.6,
+     w:'Under five minutes and almost no carbohydrate.'},
+    {id:'q-skyr-whey', n:'Skyr with a scoop of whey',        p:35, k:230, c:8,  s:0.2,
+     w:'For a long morning with no lunch booked.'}
+  ],
+  lunch:[
+    {id:'q-chick-salad', n:'Chargrilled chicken over a bag of salad', p:34, k:290, c:8, s:1.2,
+     w:'The pack in your fridge, a bag of leaves, olive oil and lemon. Two minutes.'},
+    {id:'q-tuna-beans',  n:'Two tins of tuna, beans, red onion',      p:38, k:410, c:30, s:1.2,
+     w:'Six minutes, thirteen grams of fibre, no heat at all.'},
+    {id:'q-omelette',    n:'Omelette with whatever needs using',      p:26, k:380, c:6, s:1.0,
+     w:'Uses up the eggs and the sad half a pepper.'}
+  ]
+};
+var DINNERS=[
+  {id:'d-chicken-trayb', n:'Chicken and Mediterranean tray bake',
+   needs:['chicken-chargrill'], also:['veg-frozen','sweet-potato'],
+   mins:25, p:42, k:520, c:38, s:1.2, fib:8,
+   how:'Peppers, courgette, red onion and sweet potato in the oven at 200 for 20, chargrilled chicken stirred through for the last five. Olive oil, black pepper, lemon at the end.',
+   why:'The chargrilled chicken does all the work, so this is assembly rather than cooking. Lemon instead of salt at the end is the whole trick.'},
+
+  {id:'d-prawn-garlic', n:'Garlic prawns with lentils and greens',
+   needs:['prawns-jumbo'], also:['lentils','salad-bag'],
+   mins:12, p:38, k:430, c:32, s:1.1, fib:11,
+   how:'Prawns in olive oil with a lot of garlic and chilli, three minutes. Warm lentils underneath, spinach wilted in at the end.',
+   why:'Twelve minutes and 11g of fibre. The lentils are what make it a dinner rather than a starter.'},
+
+  {id:'d-salmon-trayb', n:'Salmon with new potatoes and green veg',
+   needs:['salmon'], also:['new-potatoes','veg-frozen'],
+   mins:22, p:40, k:610, c:40, s:0.5, fib:7,
+   how:'Salmon skin-side up at 200 for 14. New potatoes boiled, crushed with olive oil and black pepper. Whatever green is in the freezer.',
+   why:'The lowest-salt dinner on this list by a distance. Worth choosing on a day you have eaten out.'},
+
+  {id:'d-chicken-roast', n:'A small roast, mid-week',
+   needs:['chicken-breast'], also:['new-potatoes','veg-frozen'],
+   mins:45, p:45, k:640, c:42, s:0.9, fib:8,
+   how:'Chicken breasts roasted with lemon and thyme, potatoes roasted alongside, steamed veg, and gravy from the roasting juices rather than granules.',
+   why:'Your own stock instead of granules is the difference between 0.5g of salt and 2.6g. That one swap is most of why a home roast beats a bought one.'},
+
+  {id:'d-fish-oven', n:'Baked white fish, tomato and beans',
+   needs:['cod'], also:['passata','beans-tin'],
+   mins:25, p:44, k:450, c:34, s:1.2, fib:12,
+   how:'Beans and passata in a dish with garlic and oregano, fish laid on top, 20 minutes at 190.',
+   why:'One dish, twelve grams of fibre, and it reheats. Double it and tomorrow’s lunch is done.'},
+
+  {id:'d-chilli', n:'Beef chilli with the beans doing the lifting',
+   needs:['mince-beef'], also:['beans-tin','passata'],
+   mins:30, p:48, k:560, c:44, s:1.3, fib:14,
+   how:'5% mince browned hard, cumin and smoked paprika, tinned tomatoes and two tins of beans. No stock cube — the paprika is what you were reaching for.',
+   why:'Fourteen grams of fibre, and it is better the next day. The stock cube you have left out is 2g of salt.'},
+
+  {id:'d-omelette', n:'A serious omelette',
+   needs:['eggs'], also:['veg-frozen','feta'],
+   mins:10, p:36, k:480, c:8, s:1.4, fib:4,
+   how:'Five eggs, whatever veg needs using, a small amount of feta. Big pan, low heat, do not rush it.',
+   why:'Ten minutes, almost no carbohydrate, and it uses the eggs before they turn. The feta is small on purpose — it is 5.6g of salt a pack.'},
+
+  {id:'d-tuna-beans', n:'Tuna, bean and red onion bowl',
+   needs:['tuna-tin'], also:['beans-tin','salad-bag'],
+   mins:6, p:38, k:410, c:30, s:1.2, fib:13,
+   how:'Two tins of tuna, a tin of beans, red onion, a lot of parsley, olive oil and vinegar.',
+   why:'Six minutes and no heat at all. This is the one for the night you were going to order something.'},
+
+  {id:'d-chicken-noodle', n:'Chicken and prawn noodle bowl',
+   needs:['chicken-chargrill','prawns-jumbo'], also:['veg-frozen'],
+   mins:15, p:46, k:540, c:48, s:1.4, fib:6,
+   how:'Noodles, hot stock made from ginger, garlic and chilli rather than a cube, chicken and prawns in at the end, greens on top.',
+   why:'Uses both of the things in your fridge tonight. Ginger and garlic instead of a stock cube is the whole difference.'},
+
+  {id:'d-halloumi-veg', n:'Roast veg with halloumi',
+   needs:['halloumi'], also:['veg-frozen','sweet-potato','beans-tin'],
+   mins:28, p:35, k:590, c:40, s:1.5, fib:11,
+   how:'Everything roasted together, a quarter block of halloumi cubed and added for the last ten minutes, chickpeas stirred through.',
+   why:'The one meat-free dinner here that still clears 35g. A QUARTER of the block — half is 3g of salt on its own.'}
+];
+
+/* ─────────────────── OUT AND ABOUT, PRUNED ───────────────────
+   Was 130 items across 32 places. Mark: prune hard, best three per place.
+
+   THE THING THAT SURVIVED THE CUT is the "walk past" line. The rejected items are not simply
+   deleted, because half the value was never the recommendation — it was knowing that the Miso
+   Salmon Super Plate is 761 calories and 3.16g of salt while looking like the healthy option.
+   A list of what to avoid, with the reason, is shorter and more useful than a list of also-rans.
+
+   conf: HIGH means the figures are from the company's own published data. MED means a typical
+   value for that kind of thing. It is on every row because "34g of protein" and "about 34g of
+   protein, probably" are different claims and he is entitled to know which he is reading. */
+var OUT=[
+  {id:'o-mands', place:'M&S', where:'out', tag:'Best overall',
+   rule:'The High Protein chilled range, and inside it the one whose carbs come from beans or vegetables rather than pasta or rice.',
+   best:[
+     {n:'High Protein Chicken & Bean Salad Bowl', k:274, p:34, c:7,  s:0.9, conf:'HIGH',
+      note:'The best single item found anywhere on the high street.'},
+     {n:'High Protein Chicken, Bean & Grain Pot',  k:330, p:32, c:24, s:1.1, conf:'HIGH',
+      note:'Eleven grams of fibre, and the carbs are beans.'},
+     {n:'Two egg pots plus a protein yogurt',      k:267, p:34, c:13, s:0.6, conf:'HIGH'}
+   ],
+   avoid:['High Protein Pasta & Meatballs Box — 472 kcal and 49g of carbs.',
+          'Anything from the hot counter: salt before you have looked at anything else.']},
+
+  {id:'o-pret', place:'Pret A Manger', where:'out', tag:'Buy protein by the pot',
+   rule:'Two protein pots beat any salad or Super Plate — more protein, fewer calories, about half the salt. The salt at Pret lives in the dressings and the grain bases.',
+   best:[
+     {n:'Two protein pots (egg / chicken)', k:290, p:36, c:6, s:1.0, conf:'HIGH',
+      note:'A straight swap for the tuna baguette: 240 fewer calories, twice the protein.'},
+     {n:'Chicken Caesar protein pot + boiled eggs', k:320, p:34, c:5, s:1.2, conf:'MED'},
+     {n:'Black filter coffee', k:2, p:0, c:0, s:0, conf:'HIGH'}
+   ],
+   avoid:['Miso Salmon Super Plate — 761 kcal, 3.16g salt. Health halo, worst item in the shop.',
+          'Tuna baguette and crisps — 515 kcal and 59g of carbs before the crisps.',
+          'Classic Super Club — 528 kcal, 2.75g salt.']},
+
+  /* NEW, 24 Aug 2026 — his local, and a genuinely good option once you know the ask.
+     Their own allergen page says they will make sandwiches, salads, wraps and rolls WITHOUT
+     BUTTER and with NON-DAIRY FILLINGS on request, and that salad boxes are a standing item.
+     Which turns a bakery — normally his worst possible stop — into a workable one.
+     Figures are ESTIMATES: Simmons publish allergen information but not per-item nutrition, so
+     these are typical values for that kind of item and are marked accordingly. */
+  {id:'o-simmons', place:'Simmons', where:'out', tag:'Herts local · ask for the salad box',
+   rule:'Ask for it AS A SALAD BOX rather than in bread — same filling, no baguette. They will also leave the butter out and use a non-dairy filling if you ask, which matters given what milk does to you. A bakery is otherwise the hardest place on this list.',
+   best:[
+     {n:'Chicken salad box, no butter, non-dairy filling', k:320, p:34, c:14, s:1.2, conf:'MED',
+      note:'The order to memorise. Their allergen page confirms they will make it this way.'},
+     {n:'Prawn salad box (no mayo, or ask for it light)',  k:280, p:26, c:12, s:1.4, conf:'MED',
+      note:'Prawn is the only shellfish they use, so cross-contact is limited.'},
+     {n:'Fruit pot and a black coffee',                    k:90,  p:1,  c:20, s:0,   conf:'MED',
+      note:'When you are there for the company rather than the food.'}
+   ],
+   avoid:['Anything in a baguette or ciabatta — this is a bakery, the bread is the point and it is the thing you are cutting.',
+          'The chocolate fudge and carrot cakes. Excellent, and not a lunch.',
+          'A sausage roll as "just something quick" — that is 330 kcal and 22g of fat standing up.']},
+
+  {id:'o-waitrose', place:'Waitrose', where:'out', tag:'Lowest salt on the high street',
+   rule:'Own-label High Protein, and treat anything branded Glo as a dessert in disguise.',
+   best:[
+     {n:'High Protein chicken salad bowl', k:310, p:33, c:12, s:0.82, conf:'HIGH',
+      note:'0.82g of salt — the lowest-salt lunch anywhere in this app.'},
+     {n:'Two egg and spinach pots',        k:250, p:26, c:4,  s:0.7,  conf:'MED'},
+     {n:'Skyr and a bag of almonds',       k:290, p:24, c:12, s:0.2,  conf:'MED'}
+   ],
+   avoid:['The third-party "healthy" salads — 16 to 25g of sugar in the dressing.']},
+
+  {id:'o-garage', place:'A garage or forecourt', where:'car', tag:'Where you actually stop',
+   rule:'Walk past every hot counter and go to the chiller. Almost all of them have skyr and eggs; the ones with an M&S or Waitrose franchise have a proper lunch.',
+   best:[
+     {n:'Two boiled egg pots + skyr', k:260, p:26, c:8, s:0.7, conf:'MED',
+      note:'Available in nearly every forecourt in the country.'},
+     {n:'M&S chicken and bean pot (BP sites)', k:274, p:34, c:7, s:0.9, conf:'HIGH'},
+     {n:'Black coffee and nothing else', k:2, p:0, c:0, s:0, conf:'HIGH',
+      note:'A real option when the alternative is a sausage roll at 3pm.'}
+   ],
+   avoid:['Biltong and jerky — a 40g bag is 1.8g of salt in ninety seconds. This whole category is out for you.',
+          'For Goodness Shakes RECOVERY — 50g of sugar, worse than a can of Coke. The ULTIMATE bottle beside it is 40g protein and 8g sugar. Read the label every time.',
+          'The bacon roll. 1.9g salt and 33g of white bread before eight in the morning.']},
+
+  {id:'o-services', place:'Motorway services', where:'car', tag:'The shop, never the counter',
+   rule:'Moto carries M&S Food, Welcome Break carries Waitrose. That is the same chilled fixture as a good supermarket, thirty feet from a queue you should not join.',
+   best:[
+     {n:'M&S or Waitrose chiller — protein pot plus yogurt', k:280, p:32, c:10, s:0.8, conf:'MED'},
+     {n:'Pret protein pots, where there is a Pret',          k:290, p:36, c:6,  s:1.0, conf:'HIGH'},
+     {n:'Skyr, almonds, black coffee',                       k:300, p:26, c:14, s:0.2, conf:'MED'}
+   ],
+   avoid:['Every hot counter, without exception. Out on salt before you look at the carbohydrate.',
+          'Burger King, KFC, and the all-day breakfast.']},
+
+  {id:'o-coffee', place:'Costa or Starbucks', where:'car', tag:'Drive-thru',
+   rule:'The coffee is fine. The food cabinet is a bakery with worse provenance.',
+   best:[
+     {n:'Flat white, oat',      k:110, p:2.5,c:14, s:0.1, conf:'MED'},
+     {n:'Americano, black',     k:5,   p:0,  c:0,  s:0,   conf:'HIGH'},
+     {n:'Latte, semi-skimmed',  k:120, p:8,  c:12, s:0.2, conf:'MED',
+      note:'Only if the milk is behaving. It usually is not.'}
+   ],
+   avoid:['Every single thing in the cabinet.']}
+];
 
 /* ═════════════════════════════  DAY  ═════════════════════════════ */
 
@@ -3002,7 +3298,8 @@ function planCard(title, paras){
 
 /* ═════════════════════════════  NAV  ═════════════════════════════ */
 
-const TITLES = {today:'Today', where:'Where are you?', numbers:'Numbers', plan:'The plan',
+const TITLES = {eat:'What to eat', ate:'What you ate', fridge:'In the fridge',
+                today:'Today', where:'Where are you?', numbers:'Numbers', plan:'The plan',
                 setup:'Set up', taste:'Your food list'};
 
 function go(tab){ S.tab = tab; save(); render(); window.scrollTo(0,0); }
@@ -3018,7 +3315,16 @@ function render(){
   if(setup){ $('#topSub').textContent=''; return; }
 
   const T = targets();
-  if(tab==='today'){
+  if(tab==='eat'){
+    $('#topSub').textContent = MEAL_LABEL[mealNow()];
+    renderEat();
+  }else if(tab==='ate'){
+    $('#topSub').textContent = new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+    renderAte();
+  }else if(tab==='fridge'){
+    $('#topSub').textContent = ((S.fridge||[]).length||'nothing')+' in';
+    renderFridge();
+  }else if(tab==='today'){
     $('#topSub').textContent = new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
     renderMeters(); renderMealCard(); renderTopUp(); renderMeals(); renderToggles();
   }else if(tab==='where'){
@@ -3036,7 +3342,335 @@ function render(){
   }
 }
 
+
+/* ═══════════════════ THE THREE SCREENS ═══════════════════ */
+
+var WHERE_CHIPS=[{id:'home',n:'At home'},{id:'out',n:'Out'},{id:'car',n:'In the car'}];
+function nowHour(){ return new Date().getHours(); }
+/* The app knows what time it is, so it should not ask. Late is its own state rather than a
+   fourth meal — after eight the question stops being "what shall I eat" and becomes "am I
+   short", which is a different screen entirely. */
+function mealNow(){
+  var h=nowHour();
+  if(h<10.5) return 'breakfast';
+  if(h<15)   return 'lunch';
+  if(h<20)   return 'dinner';
+  return 'late';
+}
+var MEAL_LABEL={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',late:'Before bed'};
+
+/* ONE place that copes with targets() being null, because I wrote the same crash twice: once in
+   remaining() and once in the fridge's "days' worth" line. A helper is cheaper than remembering. */
+function proteinTarget(){ var T=targets(); return (T&&T.protein)?T.protein:160; }
+function fridgeHas(id){
+  var f=(S.fridge||[]).filter(function(x){ return x.id===id && (x.qty===undefined || x.qty>0); });
+  return f.length?f[0]:null;
+}
+function dinnersICanCook(){
+  return DINNERS.map(function(d){
+    var missing=d.needs.filter(function(n){ return !fridgeHas(n); });
+    return {d:d, ready:missing.length===0, missing:missing};
+  }).sort(function(a,b){
+    if(a.ready!==b.ready) return a.ready?-1:1;
+    return a.missing.length-b.missing.length;
+  });
+}
+
+/* ── what is left of the day ──
+   Deliberately expressed as what REMAINS, not what has been eaten. "You have 68g of protein to
+   find" is a thing you can act on; "you have eaten 92g" is a thing you have to do arithmetic on
+   while hungry. */
+function remaining(){
+  /* targets() is null until the Still Room has a height and a weight. Without this guard the
+     Eat screen threw on first paint and the app showed a white page — which tells you nothing
+     and looks like it is broken rather than like it is waiting for a number. */
+  var T=targets()||{}, t=dayTotals()||{};
+  if(!T.protein) return {none:true, pLeft:0, kLeft:0, sUsed:+(t.s||0).toFixed(1), sMax:4,
+                          pHad:Math.round(t.p||0), kHad:Math.round(t.k||0)};
+  return { pLeft: Math.max(0, Math.round((T.protein||0)-(t.p||0))),
+           kLeft: Math.round((T.kcal||0)-(t.k||0)),
+           sUsed: +(t.s||0).toFixed(1), sMax: T.salt||4,
+           pHad: Math.round(t.p||0), kHad: Math.round(t.k||0) };
+}
+function meterRow(){
+  var r=remaining();
+  if(r.none) return '<div class="v2-note" style="background:var(--warn-soft);color:var(--warn)">'
+    + 'No targets yet &mdash; the Still Room has no height or weight, so there is nothing to count against. '
+    + 'Everything else here still works.</div>';
+  var saltBad=r.sUsed>r.sMax, saltNear=!saltBad && r.sUsed>r.sMax*0.75;
+  return '<div class="v2-meters">'
+    + '<div class="v2-m"><span class="v2-mv">'+r.pLeft+'g</span><span class="v2-ml">protein to find</span></div>'
+    + '<div class="v2-m"><span class="v2-mv">'+(r.kLeft>0?r.kLeft:0)+'</span><span class="v2-ml">kcal left</span></div>'
+    + '<div class="v2-m'+(saltBad?' bad':(saltNear?' near':''))+'"><span class="v2-mv">'+r.sUsed+'g</span>'
+    +   '<span class="v2-ml">salt of '+r.sMax+'g</span></div>'
+    + '</div>';
+}
+
+/* ═══════════════════ EAT ═══════════════════ */
+function renderEat(){
+  var el=$('#s-eat'); if(!el) return;
+  var meal=mealNow(), where=S.where||'home';
+  var h='';
+
+  h+='<div class="card card-pad">'
+   + '<div class="row-between" style="align-items:baseline">'
+   +   '<div><div class="eyebrow">'+MEAL_LABEL[meal]+'</div>'
+   +   '<div style="font-size:15px;color:var(--ink-2);margin-top:2px">'+eatLede(meal)+'</div></div>'
+   + '</div>'
+   + meterRow()
+   + '</div>';
+
+  /* One row of chips, not a screen of its own. Where he is standing is the only thing the app
+     cannot work out for itself, so it is the only thing it asks. */
+  h+='<div class="v2-chips">'+WHERE_CHIPS.map(function(c){
+      return '<button class="v2-chip'+(where===c.id?' on':'')+'" data-where="'+c.id+'">'+c.n+'</button>';
+    }).join('')+'</div>';
+
+  h+= (where==='home') ? eatHome(meal) : eatOut(where);
+
+  h+='<details style="margin-top:14px"><summary>Why these rules</summary><div class="body">'
+   + rulesProse()+'</div></details>';
+  el.innerHTML=h;
+}
+function eatLede(meal){
+  if(meal==='breakfast') return 'Twenty grams of protein before ten, or eleven o’clock is harder than it needs to be.';
+  if(meal==='lunch')     return 'The meal most likely to be decided by whatever is nearest.';
+  if(meal==='dinner')    return 'The one you control completely.';
+  return 'Not a meal — a check. See the Ate tab.';
+}
+function eatHome(meal){
+  if(meal==='late') return '<div class="card card-pad"><p style="margin:0"><b>It is late.</b></p>'
+    + '<p class="hint" style="margin:6px 0 0">The Ate tab will tell you whether you are actually short, '
+    + 'and what in the fridge closes the gap without keeping you up.</p></div>';
+
+  if(meal!=='dinner'){
+    /* The quick options are DATA with ids, like everything else. They were inline objects, so
+       eatThis() had nothing to look them up by and the "I had this" button silently did nothing
+       — the app looked fine and logged zero. Everything that can be eaten now logs by the same
+       route, which is the only way to be sure none of them is a dead button. */
+    var quick=QUICK[meal]||[];
+    var h='<div class="card">'+quick.map(function(o){
+      return optRow('quick:'+o.id, o.n, o.p, o.k, o.s, o.w, true);
+    }).join('')+'</div>';
+    /* Dinner ideas reachable at any hour. Locked to 3-8pm they were no use at eleven in the
+       morning when the useful question is what to buy on the way home. One line, not a control. */
+    h+='<details style="margin-top:12px"><summary>Thinking ahead to dinner?</summary>'
+     + '<div class="body" style="margin-top:10px">'+dinnerList()+'</div></details>';
+    return h;
+  }
+
+  return dinnerList();
+}
+/* DINNER — the part that was missing entirely. Sorted by what he can actually cook tonight. */
+function dinnerList(){
+  var rows=dinnersICanCook(), ready=rows.filter(function(r){return r.ready;});
+  var h='';
+  if(!(S.fridge||[]).length){
+    h+='<div class="card card-pad"><p style="margin:0"><b>Tell it what is in the fridge.</b></p>'
+     + '<p class="hint" style="margin:6px 0 0">Then this list stops being recipes and starts being '
+     + '<i>what you can cook tonight</i>. It takes about a minute on the Fridge tab.</p>'
+     + '<button class="btn btn-primary btn-block" style="margin-top:11px" data-go="fridge">Fill in the fridge</button></div>';
+  } else if(ready.length){
+    h+='<div class="v2-note">'+ready.length+' of these you can cook right now with what is in.</div>';
+  }
+  h+='<div class="card">'+rows.slice(0,7).map(function(r){
+      var d=r.d;
+      var sub=d.mins+' min · '+d.p+'g protein · '+d.s+'g salt'
+        + (r.ready?'' : ' · needs '+r.missing.map(function(m){ var st=staple(m); return st?st.n.toLowerCase():m; }).join(' and '));
+      return '<div class="v2-opt'+(r.ready?'':' dim')+'">'
+        + '<div class="v2-opt-h"><span class="v2-opt-n">'+esc(d.n)+'</span>'
+        +   (r.ready?'<span class="chip chip-go">tonight</span>':'')+'</div>'
+        + '<div class="v2-opt-s">'+esc(sub)+'</div>'
+        + '<div class="v2-opt-w">'+esc(d.how)+'</div>'
+        + '<div class="v2-opt-w" style="color:var(--go-ink);margin-top:5px">'+esc(d.why)+'</div>'
+        + '<button class="btn btn-sm" style="margin-top:9px" data-eat="dinner:'+d.id+'">I had this</button>'
+        + '</div>';
+    }).join('')+'</div>';
+  return h;
+}
+function eatOut(where){
+  var places=OUT.filter(function(p){ return p.where===where; });
+  return places.map(function(p){
+    return '<div class="card"><div class="v2-place">'
+      + '<div class="v2-place-h"><span class="v2-place-n">'+esc(p.place)+'</span>'
+      +   '<span class="v2-place-t">'+esc(p.tag)+'</span></div>'
+      + '<div class="v2-rule">'+esc(p.rule)+'</div></div>'
+      + p.best.map(function(o,i){
+          return optRow('out:'+p.id+':'+i, o.n, o.p, o.k, o.s, o.note||'', false, o.conf);
+        }).join('')
+      + '<details class="v2-avoid"><summary>Walk past ('+p.avoid.length+')</summary><div class="body">'
+      +   p.avoid.map(function(a){ return '<p>'+esc(a)+'</p>'; }).join('')
+      + '</div></details>'
+      + '</div>';
+  }).join('');
+}
+function optRow(key,n,p,k,s,why,plain,conf){
+  return '<div class="v2-opt">'
+    + '<div class="v2-opt-h"><span class="v2-opt-n">'+esc(n)+'</span>'
+    +   (conf==='MED'?'<span class="chip chip-neutral" title="A typical value, not the company\'s own figure">estimate</span>':'')+'</div>'
+    + '<div class="v2-opt-s">'+p+'g protein · '+k+' kcal · '+s+'g salt</div>'
+    + (why?'<div class="v2-opt-w">'+esc(why)+'</div>':'')
+    + '<button class="btn btn-sm" style="margin-top:9px" data-eat="'+esc(key)+'">I had this</button>'
+    + '</div>';
+}
+
+/* ═══════════════════ ATE ═══════════════════ */
+function renderAte(){
+  var el=$('#s-ate'); if(!el) return;
+  var d=day(), r=remaining(), meal=mealNow();
+  var items=[];
+  Object.keys(d.meals).forEach(function(k){ if(d.meals[k]) items.push({slot:k, m:d.meals[k]}); });
+  d.extras.forEach(function(m){ items.push({slot:'extra', m:m}); });
+
+  var h='<div class="card card-pad">'+meterRow()+'</div>';
+
+  /* ── THE BEFORE-BED CHECK ──
+     Mark: "at what point of the day do we get to review together as to whether I need to top up
+     before bed on anything?" This is that point, and the app picks it rather than him: after
+     eight, the top of this screen changes its question. */
+  if(meal==='late'){
+    h+=topUpCard(r);
+  }
+
+  h+='<h2 style="margin-top:18px">Today</h2>';
+  if(!items.length){
+    h+='<div class="card card-pad"><p class="hint" style="margin:0">Nothing logged yet today.</p></div>';
+  } else {
+    h+='<div class="card">'+items.map(function(x,i){
+      return '<div class="v2-ate"><div class="grow">'
+        + '<div class="v2-opt-n">'+esc(x.m.n)+'</div>'
+        + '<div class="v2-opt-s">'+(x.m.p||0)+'g protein · '+(x.m.k||0)+' kcal · '+(x.m.s||0)+'g salt</div>'
+        + '</div><button class="btn btn-sm btn-quiet" data-unate="'+x.slot+':'+i+'">&times;</button></div>';
+    }).join('')+'</div>';
+  }
+
+  h+='<h2>Something else?</h2><div id="mealCard"></div>';
+  el.innerHTML=h;
+  try{ renderMealCard(); }catch(_){}
+}
+function topUpCard(r){
+  /* What actually closes the gap, from what is in the fridge — not a generic list. And it says
+     when the honest answer is "nothing": eating at ten at night to hit a number is not the point
+     of the number. */
+  if(r.pLeft<=10){
+    return '<div class="card card-pad" style="border-color:var(--go)"><p style="margin:0">'
+      + '<b>You are there.</b></p><p class="hint" style="margin:6px 0 0">'+r.pHad+'g of protein today. '
+      + 'Nothing needed before bed.</p></div>';
+  }
+  var picks=(S.fridge||[]).map(function(f){ return staple(f.id); }).filter(function(s){ return s&&s.p>=15; })
+    .sort(function(a,b){ return (a.k/a.p)-(b.k/b.p); }).slice(0,3);
+  var h='<div class="card card-pad" style="border-color:var(--warn)">'
+    + '<div class="eyebrow">Before bed</div>'
+    + '<p style="margin:8px 0 0;font-size:17px"><b>'+r.pLeft+'g of protein short.</b></p>';
+  if(r.pLeft>45){
+    h+='<p class="hint" style="margin:6px 0 0">That is a big gap and it is late. Close some of it if '
+     + 'you fancy it, but eating 50g at eleven at night to hit a number is not what the number is for. '
+     + 'Tomorrow’s breakfast is the better answer.</p>';
+  }
+  if(picks.length){
+    h+='<p class="hint" style="margin:10px 0 6px">From what is in your fridge, cheapest in calories first:</p>'
+     + picks.map(function(s){
+        return '<div class="v2-topup"><span>'+esc(s.n)+'</span><b>'+s.p+'g</b>'
+          + '<span class="v2-topup-k">'+s.k+' kcal</span></div>';
+       }).join('');
+  } else {
+    h+='<p class="hint" style="margin:10px 0 0">Nothing in the fridge list to suggest from. '
+     + 'A pot of skyr is 17g for 95 calories and is the usual answer.</p>';
+  }
+  if(r.sUsed>r.sMax){
+    h+='<p class="hint" style="margin:10px 0 0;color:var(--stop)"><b>Salt is over for the day at '
+     + r.sUsed+'g.</b> Whatever you add, make it the plain version.</p>';
+  }
+  return h+'</div>';
+}
+
+/* ═══════════════════ FRIDGE ═══════════════════ */
+function renderFridge(){
+  var el=$('#s-fridge'); if(!el) return;
+  var have=S.fridge||[];
+  var h='<div class="card card-pad"><p style="margin:0"><b>What is in right now.</b></p>'
+   + '<p class="hint" style="margin:6px 0 0">Rough is fine &mdash; half a pack, a few. This is what turns '
+   + 'the dinner list from recipes into <i>what you can cook tonight</i>, and it is what the before-bed '
+   + 'check suggests from.</p></div>';
+
+  if(have.length){
+    var prot=have.reduce(function(n,f){ var s=staple(f.id); return n+(s?s.p*(f.qty||1):0); },0);
+    h+='<div class="v2-note">About '+Math.round(prot)+'g of protein in the fridge &mdash; '
+      + Math.round(prot/proteinTarget()*10)/10+' days’ worth.</div>';
+    h+='<div class="card">'+have.map(function(f){
+      var s=staple(f.id); if(!s) return '';
+      return '<div class="v2-ate"><div class="grow">'
+        + '<div class="v2-opt-n">'+esc(s.n)+'</div>'
+        + '<div class="v2-opt-s">'+(f.qty||1)+' '+esc(s.unit)+(f.qty>1?'s':'')+' · '+Math.round(s.p*(f.qty||1))+'g protein'
+        + (s.note?' · '+esc(s.note):'')+'</div></div>'
+        + '<div style="flex:none;display:flex;gap:6px;align-items:center">'
+        +   '<button class="btn btn-sm btn-quiet" data-fq="'+s.id+':-0.5">&minus;</button>'
+        +   '<button class="btn btn-sm btn-quiet" data-fq="'+s.id+':0.5">+</button>'
+        +   '<button class="btn btn-sm btn-quiet" data-fdel="'+s.id+'">&times;</button>'
+        + '</div></div>';
+    }).join('')+'</div>';
+  } else {
+    h+='<div class="card card-pad"><p class="hint" style="margin:0">Empty. Tap things below as you put them in.</p></div>';
+  }
+
+  h+='<h2>Put something in</h2><div class="card">'
+   + STAPLES.filter(function(s){ return !fridgeHas(s.id); }).map(function(s){
+      return '<div class="v2-ate"><div class="grow">'
+        + '<div class="v2-opt-n">'+esc(s.n)+'</div>'
+        + '<div class="v2-opt-s">'+(s.p?s.p+'g protein a '+esc(s.unit):'no protein to speak of')+'</div></div>'
+        + '<button class="btn btn-sm" data-fadd="'+s.id+'">Add</button></div>';
+     }).join('')+'</div>';
+  el.innerHTML=h;
+}
+
+function rulesProse(){
+  return RULES.map(function(r){
+    return '<p><b>'+esc(r.head)+'</b> '+esc(r.why||r.from||'')+'</p>';
+  }).join('') || '<p>The rules came from your own blood results — 154 panels over eight years.</p>';
+}
+
+/* ═══════════════════ logging, in one tap ═══════════════════ */
+function eatThis(key){
+  var parts=key.split(':'), kind=parts[0], item=null, name='', mac=null;
+  if(kind==='dinner'){
+    var d=DINNERS.filter(function(x){ return x.id===parts[1]; })[0]; if(!d) return;
+    name=d.n; mac={k:d.k,p:d.p,c:d.c,s:d.s};
+  } else if(kind==='out'){
+    var p=OUT.filter(function(x){ return x.id===parts[1]; })[0]; if(!p) return;
+    var o=p.best[+parts[2]]; if(!o) return;
+    name=p.place+' — '+o.n; mac={k:o.k,p:o.p,c:o.c,s:o.s};
+  } else if(kind==='quick'){
+    var q=null;
+    Object.keys(QUICK).forEach(function(m){ QUICK[m].forEach(function(x){ if(x.id===parts[1]) q=x; }); });
+    if(!q) return;
+    name=q.n; mac={k:q.k,p:q.p,c:q.c||0,s:q.s};
+  } else { return; }
+  var slot=mealNow(); if(slot==='late') slot='snack';
+  var rec={id:'v2:'+Date.now().toString(36), n:name, k:mac.k, p:mac.p, c:mac.c||0, s:mac.s};
+  var dd=day();
+  if(!dd.meals[slot]) dd.meals[slot]=rec; else dd.extras.push(rec);
+  save(); toast('Logged'); render();
+}
+
 /* ═════════════════════════════  EVENTS  ═════════════════════════════ */
+document.addEventListener('click', function(e){
+  var b=e.target.closest?e.target.closest('button'):null; if(!b) return;
+  var d=b.dataset;
+  if(d.where){ S.where=d.where; save(); renderEat(); return; }
+  if(d.eat){ eatThis(d.eat); return; }
+  if(d.go && /^(eat|ate|fridge)$/.test(d.go)){ go(d.go); return; }
+  if(d.fadd){ if(!S.fridge) S.fridge=[]; S.fridge.push({id:d.fadd, qty:1}); save(); renderFridge(); return; }
+  if(d.fdel){ S.fridge=(S.fridge||[]).filter(function(x){return x.id!==d.fdel;}); save(); renderFridge(); return; }
+  if(d.fq){ var q=d.fq.split(':'); (S.fridge||[]).forEach(function(x){
+      if(x.id===q[0]){ x.qty=Math.max(0,Math.round((( x.qty||1)+parseFloat(q[1]))*2)/2); } });
+    S.fridge=(S.fridge||[]).filter(function(x){ return (x.qty||0)>0; });
+    save(); renderFridge(); return; }
+  if(d.unate){ var u=d.unate.split(':'), dd=day();
+    if(u[0]==='extra') dd.extras.splice(+u[1],1); else delete dd.meals[u[0]];
+    save(); renderAte(); return; }
+}, true);
+
+
 
 /* ── the typed-meal card ──
    Its own listener, ahead of the main one, because these controls are rebuilt by innerHTML on
