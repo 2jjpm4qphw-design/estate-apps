@@ -14,6 +14,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* [hidden] loses to any author display rule — the user-agent's display:none has the lowest
+   weight of anything. Same fault that locked Mark out of the Muniments on day one. */
+.add[hidden]{display:none}
+.iconbtn[hidden]{display:none}
+
 :root{
   --ink:#0D1B3E;
   --panel:#1A3A6B;

@@ -15,6 +15,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
+/* [hidden] loses to any author display rule — the user-agent's display:none has the lowest
+   weight of anything. Same fault that locked Mark out of the Muniments on day one. */
+.btn[hidden]{display:none}
+
 /* ============ palette: sampled from the House canon ============ */
 :root{
   --navy:#0D1B3E;
@@ -134,9 +138,17 @@ input[type=color]{width:52px;height:34px;border:1px solid var(--rule);border-rad
 #drive{padding:0}
 #drive.on{display:flex;flex-direction:column}
 #driveInner{flex:1;display:flex;flex-direction:column;padding:14px 16px 16px}
-.gpshelp{margin:8px 0 2px;padding:10px 12px;border-radius:10px;background:rgba(224,85,63,.12);border:1px solid rgba(224,85,63,.4);font-size:12.5px;line-height:1.45;color:#F2D9D4;text-transform:none;letter-spacing:0;font-weight:400}
+/* Themed with the app's own variables. The first version hard-coded pale pink text for a dark
+   background — on the light theme it was nearly invisible, which is the washed-out box in Mark's
+   screenshot. Never hard-code a colour in an app that has two themes. */
+.gpshelp{margin:8px 0 2px;padding:12px 14px;border-radius:10px;background:var(--surface);
+  border:1px solid var(--bad);font-size:13px;line-height:1.5;color:var(--ink);
+  text-transform:none;letter-spacing:0;font-weight:400}
+.gpshelp b{color:var(--bad)}
 .gpshelp[hidden]{display:none}
-.gpsdiag{margin-top:10px;padding:10px;border-radius:8px;background:rgba(0,0,0,.35);font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.5;color:#DCE3EE;white-space:pre-wrap;word-break:break-word;text-transform:none;letter-spacing:0;font-weight:400}
+.gpsdiag{margin-top:10px;padding:11px;border-radius:8px;background:var(--surface-2);
+  font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:1.55;color:var(--ink);
+  white-space:pre-wrap;word-break:break-word;text-transform:none;letter-spacing:0;font-weight:400}
 .gpsdiag[hidden]{display:none}
 .status{display:flex;gap:14px;align-items:center;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-bottom:4px}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--bad);display:inline-block;margin-right:5px;vertical-align:middle}
@@ -631,8 +643,38 @@ function _rcGH(c){return{'Authorization':'Bearer '+c.token,'Accept':'application
 function rcGistGet(c){return fetch('https://api.github.com/gists/'+c.id,{headers:_rcGH(c)}).then(function(r){if(!r.ok)throw new Error('gist '+r.status);return r.json();}).then(function(g){var f=g.files&&g.files['roadcraft.json'];if(!f)return null;if(f.truncated&&f.raw_url)return fetch(f.raw_url,{headers:{'Authorization':'Bearer '+c.token}}).then(function(r){return r.text();});return f.content;});}
 function rcPush(){var c=rcCreds();if(!c)return Promise.resolve();var body={files:{'roadcraft.json':{content:JSON.stringify({app:'Roadcraft',savedAt:Date.now(),drives:_rcSlim(drives),cals:cals,cfg:cfg})}}};return fetch('https://api.github.com/gists/'+c.id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json'},_rcGH(c)),body:JSON.stringify(body)}).then(function(r){var el=document.getElementById('hubMsg');if(el)el.textContent=r&&r.ok?'Backed up to the Hub.':'Backup failed — check the ID/token.';}).catch(function(){var el=document.getElementById('hubMsg');if(el)el.textContent='Backup offline — will retry.';});}
 var _rcTimer=null;function rcSchedulePush(){if(!rcCreds())return;if(_rcTimer)clearTimeout(_rcTimer);_rcTimer=setTimeout(rcPush,1500);}
-function rcPullIfEmpty(){var c=rcCreds();if(!c)return Promise.resolve();return rcGistGet(c).then(function(text){if(!text)return;var p;try{p=JSON.parse(text);}catch(e){return;}if(p&&Array.isArray(p.drives)&&p.drives.length&&(!drives||!drives.length)){_rcPulling=true;drives=p.drives;save('drives',drives);if(p.cals)cals=p.cals;_rcPulling=false;try{paintHistory();paintSetup();}catch(_){}}}).catch(function(){_rcPulling=false;});}
-function rcConnect(){var id=document.getElementById('hubId').value.trim().replace(/^.*\/(?=[0-9a-f]{8,})/i,'');var tk=document.getElementById('hubToken').value.trim();var msg=document.getElementById('hubMsg');if(!id||!tk){msg.textContent='Enter both the Gist ID and a token.';return;}try{localStorage.setItem('connolly-sync:gist-id',id);localStorage.setItem('connolly-sync:token',tk);}catch(e){}msg.textContent='Connecting…';rcPullIfEmpty().then(function(){return rcPush();}).then(function(){msg.textContent='Connected — drives backed up to the Hub.';});}
+/* Returns true only if the backup was genuinely READ. If the read fails, the caller must NOT
+   push: pushing an empty local list over a good backup destroys it. That is a live risk exactly
+   when it hurts most — Mark cleared Safari data on 16 Aug 2026 to reset a stuck location
+   permission, which wipes localStorage, so the drives AND the credentials went with it. The
+   next reconnect is the one chance to get the drives back. */
+function rcPullIfEmpty(){
+  var c=rcCreds(); if(!c) return Promise.resolve(false);
+  return rcGistGet(c).then(function(text){
+    if(!text) return true;                       // read fine, backup is simply empty
+    var p; try{ p=JSON.parse(text); }catch(e){ return false; }
+    if(p&&Array.isArray(p.drives)&&p.drives.length&&(!drives||!drives.length)){
+      _rcPulling=true; drives=p.drives; save('drives',drives);
+      if(p.cals){ cals=p.cals; save('cals',cals); }
+      _rcPulling=false;
+      try{ paintHistory(); paintSetup(); }catch(_){}
+    }
+    return true;
+  }).catch(function(){ _rcPulling=false; return false; });
+}
+function rcConnect(){var id=document.getElementById('hubId').value.trim().replace(/^.*\/(?=[0-9a-f]{8,})/i,'');var tk=document.getElementById('hubToken').value.trim();var msg=document.getElementById('hubMsg');if(!id||!tk){msg.textContent='Enter both the Gist ID and a token.';return;}try{localStorage.setItem('connolly-sync:gist-id',id);localStorage.setItem('connolly-sync:token',tk);}catch(e){}msg.textContent='Connecting\u2026';
+  rcPullIfEmpty().then(function(read){
+    if(!read){
+      // Never push over a backup we could not read.
+      msg.textContent='Could not read the backup \u2014 check the ID and token. Nothing has been overwritten.';
+      return;
+    }
+    var n=(drives&&drives.length)||0;
+    return rcPush().then(function(){
+      msg.textContent = n ? ('Connected \u2014 '+n+' drive'+(n===1?'':'s')+' restored and backed up.')
+                          : 'Connected \u2014 drives will back up to the Hub.';
+    });
+  });}
 
 /* ================= constants ================= */
 var G=9.80665;
@@ -1747,7 +1789,7 @@ var gpsErr=null, gpsCoarse=false, gpsRetry=null, gpsAsked=0, gpsSilent=false, gp
    The app now reports its own state in plain English. Anything I cannot see on Mark's phone,
    the phone says out loud. BUILD is bumped on every change so we can both tell, instantly,
    whether the copy running on the phone is the copy I changed. */
-var BUILD='2026-08-16-e';
+var BUILD='2026-08-16-g';
 var gpsLog=[];
 function gpsNote(s){ gpsLog.push(new Date().toLocaleTimeString('en-GB')+' \u2014 '+s); if(gpsLog.length>12) gpsLog.shift(); }
 function gpsDiagText(){
@@ -1802,6 +1844,21 @@ function gpsSay(e){
   if(e.code===3) return 'Location timed out';
   return 'Location unavailable';
 }
+var _gpsHelpHtml='', _diagOpen=false;
+function paintDiagPanel(){
+  var o=document.getElementById('gpsDiagOut'), b=document.getElementById('gpsDiagBtn');
+  if(!o) return;
+  o.hidden=!_diagOpen;
+  if(_diagOpen) o.textContent=gpsDiagText();      // refresh live while it is open
+  if(b) b.textContent=_diagOpen?'Hide':'What is it doing?';
+}
+function gpsHelpBtnTap(){
+  // Must run inside the tap: iOS only shows the prompt from a user gesture.
+  try{ if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; } }catch(_){}
+  gpsErr=null; gpsSilent=false; gpsCoarse=false; _gpsHelpHtml='';
+  this.textContent='Asking\u2026'; startGPS(); gpsCheckPerm();
+  var b=this; setTimeout(function(){ try{ b.textContent = gpsOK?'GPS running':'Start GPS'; }catch(e){} }, 4000);
+}
 function gpsHelp(){
   if(gpsErr && gpsErr.code===-1) return gpsErr.msg;
   if(gpsSilent && !gpsErr) return 'Your phone has not answered the location request at all \u2014 no position and no error. '
@@ -1809,6 +1866,12 @@ function gpsHelp(){
     + 'If no prompt appears when you tap, location is already off for this app \u2014 Settings \u203a Privacy & Security \u203a Location Services, find Roadcraft, set it to "While Using the App".'
     + (gpsPerm?(' <br><span style="opacity:.75">Permission currently reads: '+gpsPerm+'.</span>'):'');
   if(!gpsErr) return '';
+  if(gpsErr.code===1 && gpsPerm==='prompt') return '<b>Safari is refusing without asking.</b> '
+    + 'The permission still reads &ldquo;prompt&rdquo;, but the request is being denied the instant it is made \u2014 '
+    + 'which means a <b>&ldquo;Don\u2019t Allow&rdquo; from earlier has been remembered</b> for this app. Reinstalling does not clear it. '
+    + 'Fix it in <b>Settings \u203a Privacy &amp; Security \u203a Location Services</b>: turn Location Services on, then find '
+    + '<b>Roadcraft</b> in the list and set it to <b>While Using the App</b>. If Roadcraft is not listed, look under <b>Safari Websites</b> '
+    + 'and set that to &ldquo;Ask&rdquo;. Then force-close Roadcraft and reopen it.';
   if(gpsErr.code===1) return 'Roadcraft cannot see your location. On the phone: Settings \u203a Privacy & Security \u203a Location Services \u2014 make sure it is on, then find Roadcraft (or Safari) in the list and set it to "While Using the App". Then reopen Roadcraft.';
   if(gpsErr.code===2) return 'Your phone cannot get a fix. This is usually indoors, in a garage or in a tunnel. Step outside and give it a few seconds.';
   if(gpsErr.code===3) return 'Your phone did not return a position in time. Still trying with a coarser fix \u2014 outdoors this normally clears within a minute.';
@@ -2026,26 +2089,25 @@ function render(){
     :(gpsSay(gpsErr)||'Waiting for GPS');
   (function(){
     var hb=document.getElementById('gpsHelp'); if(!hb) return;
-    if(gpsOK||(!gpsErr && !gpsSilent)){ hb.hidden=true; return; }
+    if(gpsOK||(!gpsErr && !gpsSilent)){ hb.hidden=true; _gpsHelpHtml=''; return; }
     hb.hidden=false;
-    hb.innerHTML = gpsHelp()
-      + '<button class="btn ghost" id="gpsHelpBtn" style="margin-top:10px">Start GPS</button>'
-      + '<button class="btn ghost" id="gpsDiagBtn" style="margin-top:8px">What is it doing?</button>'
-      + '<pre class="gpsdiag" id="gpsDiagOut" hidden></pre>';
-    var hbtn=document.getElementById('gpsHelpBtn');
-    var dbtn=document.getElementById('gpsDiagBtn');
-    if(dbtn) dbtn.onclick=function(){
-      var o=document.getElementById('gpsDiagOut');
-      o.textContent=gpsDiagText(); o.hidden=!o.hidden;
-      this.textContent=o.hidden?'What is it doing?':'Hide';
-    };
-    if(hbtn) hbtn.onclick=function(){
-      // Must run inside the tap: iOS only shows the prompt from a user gesture.
-      try{ if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; } }catch(_){}
-      gpsErr=null; gpsSilent=false; gpsCoarse=false;
-      this.textContent='Asking\u2026'; startGPS(); gpsCheckPerm();
-      var b=this; setTimeout(function(){ b.textContent = gpsOK?'GPS running':'Start GPS'; }, 4000);
-    };
+    /* render() runs every 250ms on the drive tab. Rebuilding this box each time destroyed the
+       diagnostics panel a quarter-second after it opened \u2014 Mark saw it appear under his finger
+       and vanish when he let go, and reported "there's a loop". He was right. Rebuild ONLY when
+       the message changes, and re-apply whether the panel was open. */
+    var want = gpsHelp();
+    if(want !== _gpsHelpHtml){
+      _gpsHelpHtml = want;
+      hb.innerHTML = want
+        + '<button class="btn ghost" id="gpsHelpBtn" style="margin-top:10px">Start GPS</button>'
+        + '<button class="btn ghost" id="gpsDiagBtn" style="margin-top:8px">What is it doing?</button>'
+        + '<pre class="gpsdiag" id="gpsDiagOut" hidden></pre>';
+      var dbtn=document.getElementById('gpsDiagBtn');
+      if(dbtn) dbtn.onclick=function(){ _diagOpen=!_diagOpen; paintDiagPanel(); };
+      var hbtn=document.getElementById('gpsHelpBtn');
+      if(hbtn) hbtn.onclick=gpsHelpBtnTap;
+    }
+    paintDiagPanel();
   })();
   var cal=cals[cfg.veh];
   document.getElementById('dMot').className='dot '+(motionOK?(cal&&cal.fwd?'ok':'warn'):'');

@@ -4,7 +4,7 @@
  * (read-modify-write) is unchanged.
  * Bump CACHE on every shell change so phones pick up the new version.
  */
-var CACHE = 'muniments-v1';   // 24 Aug 2026 — first build
+var CACHE = 'muniments-v2';   // 24 Aug 2026 — the lock screen showed with no PIN set
 var SHELL = [
   './',
   './index.html',

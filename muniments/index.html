@@ -101,6 +101,14 @@ textarea{min-height:64px;resize:vertical;font-size:15.5px}
 .scan-full .close{flex:none;padding:14px;text-align:center;color:#fff;font-weight:700;
   background:#0D1B3E;border-top:1px solid var(--line)}
 /* the lock screen */
+/* THE [hidden] ATTRIBUTE LOSES TO ANY display RULE, and this locked Mark out of his own app on
+   day one. `hidden` works by a user-agent rule setting display:none, which has the lowest
+   possible weight — so the author rule below beat it, the lock screen showed permanently
+   regardless of whether a PIN existed, and he was asked for a key to a door that was never
+   locked. The .view rule two dozen lines up has always carried its own [hidden] guard; this one
+   did not, and I did not notice because the test drove the app through its functions and never
+   asked whether the lock screen was actually on screen. */
+.lock[hidden]{display:none}
 .lock{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;flex-direction:column;
   align-items:center;justify-content:center;padding:28px;text-align:center}
 .lock .pin{width:190px;text-align:center;letter-spacing:.5em;font-size:22px;margin-top:16px}

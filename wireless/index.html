@@ -14,6 +14,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* [hidden] loses to any author display rule — the user-agent's display:none has the lowest
+   weight of anything. Same fault that locked Mark out of the Muniments on day one. */
+.btn[hidden]{display:none}
+.link[hidden]{display:none}
+
   :root{
     --navy:#0D1B3E; --mid:#1A3A6B; --lime:#C4F000; --mist:#C4CCDD;
     --hair:#24467E; --on-dark:#F4F6FA; --on-dark-muted:#AEB9CF;
