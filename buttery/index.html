@@ -150,6 +150,35 @@ h3{font-size:15px;font-weight:700}
 .v2-avoid summary{font-size:13px;color:var(--muted);font-weight:600}
 .v2-avoid .body p{font-size:13px;color:var(--muted);margin:0 0 6px}
 .v2-ate{display:flex;align-items:center;gap:10px;padding:12px 15px;border-top:1px solid var(--line)}
+
+/* ── 24 Aug 2026: meals, drinks and the day close ──────────────────────────
+   PORTRAIT PHONE, NO HORIZONTAL SCROLL — the estate rule. Every grid below is fixed-column
+   with minmax(0,1fr), because a grid track's default minimum is min-content, not zero, and a
+   long drink name would otherwise push the row wider than the screen. */
+.v2-slot-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding:12px 15px 10px;border-bottom:1px solid var(--line)}
+.v2-slot-n{font-size:15px;font-weight:800;letter-spacing:.02em}
+.v2-slot-t{font-size:12.5px;color:var(--muted);font-weight:600;text-align:right;min-width:0}
+
+.v2-drinkgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:13px}
+.v2-drinkbtn{font:inherit;font-size:13.5px;font-weight:700;padding:11px 8px;border-radius:10px;
+  background:var(--surface-2);border:1px solid var(--line);color:var(--ink);cursor:pointer;
+  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v2-drinkbtn.on{background:var(--accent);border-color:transparent;color:var(--accent-ink)}
+
+.v2-vesselgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.v2-vessel{display:flex;flex-direction:column;align-items:flex-start;gap:2px;font:inherit;
+  padding:11px 12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);
+  color:var(--ink);cursor:pointer;min-width:0;text-align:left}
+.v2-vessel:active{background:var(--go-soft);border-color:var(--go)}
+.v2-vessel-n{font-size:14px;font-weight:700}
+.v2-vessel-m{font-size:11.5px;color:var(--muted);font-weight:600}
+
+/* The open-day prompt on launch. Full screen because he asked to be prompted rather than
+   nudged, but it takes an answer and goes — it is not a lock. */
+.dayask[hidden]{display:none}
+.dayask{position:fixed;inset:0;z-index:70;background:var(--bg);display:flex;flex-direction:column;
+  justify-content:center;padding:30px 22px;gap:6px}
 .v2-ate:first-child{border-top:none}
 .v2-topup{display:flex;align-items:baseline;gap:8px;font-size:14px;padding:5px 0}
 .v2-topup b{color:var(--go-ink)}
@@ -371,46 +400,44 @@ svg .target-txt{fill:var(--muted);font-family:var(--f-mono);font-size:13px;font-
     </div>
   </section>
 
-  <section class="screen" id="s-today">
-    <div class="card"><div class="meters" id="meters"></div></div>
-    <div class="section" id="mealCard"></div>
-    <div class="section">
-      <div class="section-head">
-        <span class="eyebrow">The plan</span>
-        <button class="btn btn-sm btn-quiet" id="planAll">Decide it for me</button>
-      </div>
-      <div id="meals"></div>
-    </div>
-    <div id="topup"></div>
-    <div class="section">
-      <span class="eyebrow">Movement</span>
-      <div class="card card-pad" style="margin-top:9px">
-        <div class="row-between">
-          <div class="grow">
-            <div style="font-weight:600;font-size:16px">Walk after lunch</div>
-            <div class="hint" style="margin-top:2px">10–15 minutes, within half an hour of eating. Blunts the glucose spike far more than the same walk done later.</div>
-          </div>
-          <button class="btn btn-sm" id="walkBtn">No</button>
-        </div>
-        <div class="divider"></div>
-        <div class="row-between">
-          <div class="grow">
-            <div style="font-weight:600;font-size:16px">Resistance work</div>
-            <div class="hint" style="margin-top:2px">Twice a week. Protects muscle while you are in a deficit — that matters more at 56 than at 36.</div>
-          </div>
-          <button class="btn btn-sm" id="liftBtn">No</button>
-        </div>
-      </div>
-    </div>
-    <div class="section">
-      <button class="btn btn-quiet btn-block" id="wipeDay">Clear today and start over</button>
-      <p class="hint" style="margin-top:11px;text-align:center">A bad day is one day. There is no streak here to break.</p>
-    </div>
-  </section>
-
+  <!-- THE DEAD "TODAY" SCREEN, REMOVED 24 August 2026 — and it was not merely dead.
+       When six screens became three I left this markup in place, unreachable from the tab bar
+       but still in the document. It contained <div id="mealCard">, and so does the Ate screen
+       that replaced it. Two elements, one id: querySelector returns the FIRST in document
+       order, and this one came first. So renderMealCard() has been drawing the whole
+       type-what-you-ate feature into a hidden screen ever since.
+       Mark: "in the old set up there was the ability to type in real language what i'd eaten.
+       Is that still an option?" It was never removed. It was being rendered somewhere he could
+       not see, which from where he sits is the same thing.
+       LESSON: deleting a screen means deleting its MARKUP, not just its tab. Leftover markup
+       does not sit there harmlessly — it competes for ids.
+       Gone with it: the meters block, the "Decide it for me" planner, the walk/lift toggles and
+       "Clear today", all of which spoke the old d.meals / d.extras shape that no longer exists.
+  -->
   <!-- 24 Aug 2026 — six screens became three. Taste, Where, Numbers and Plan are gone: the
        first two were a whole screen to answer one question, and the last two were reference
        material behind a tab, which is how reference material never gets read. -->
+  <!-- THE OPEN-DAY PROMPT. Mark chose "prompt me, never close it itself" over a 48-hour
+       auto-close, so this is the prompt: it is shown once per launch, it takes an answer, and
+       then it goes. It is deliberately NOT a lock — being unable to log breakfast because
+       Saturday is unsigned would punish exactly the forgetfulness the feature exists to allow
+       for. The amber strip on the Ate screen carries on until it is dealt with.
+       Note the [hidden] guard in the stylesheet: .dayask sets display:flex, which beats the
+       user-agent rule that makes `hidden` work. That trap locked Mark out of the Muniments on
+       its first day; it is not being repeated here. -->
+  <div class="dayask" id="dayAsk" hidden>
+    <div class="eyebrow" style="color:var(--warn)">Before you carry on</div>
+    <h1 style="font-size:26px;margin:8px 0 0;line-height:1.2" id="dayAskWhen">Yesterday is still open</h1>
+    <p class="hint" style="margin:10px 0 0;font-size:15px" id="dayAskWhat"></p>
+    <p class="hint" style="margin:10px 0 0">Nothing counts towards your week until a day is closed,
+      so leaving it open costs you nothing except the record.</p>
+    <div style="margin-top:22px;display:grid;gap:8px">
+      <button class="btn btn-primary btn-block" id="dayAskFix">Let me finish it</button>
+      <button class="btn btn-block" id="dayAskClose">Close it as it stands</button>
+      <button class="btn btn-quiet btn-block" id="dayAskLater">Not now</button>
+    </div>
+  </div>
+
   <section class="screen" id="s-eat"></section>
   <section class="screen" id="s-ate"></section>
   <section class="screen" id="s-fridge"></section>
@@ -1216,7 +1243,13 @@ const BLANK = { profile:null, log:{}, measures:[], tab:'eat', open:null, place:n
                 learned:{},
                 /* 24 Aug 2026 — what is actually in, and where he is standing. The two things
                    the app could not work out for itself. */
-                fridge:[], where:'home' };
+                fridge:[], where:'home',
+                /* 24 Aug 2026 — the drinks tracker and the deliberate day close.
+                   `drink` is only which button is highlighted; `viewDay` is null on today and a
+                   date key when he is back-filling an unclosed day. Everything that reads or
+                   writes a day goes through dayKey(), so back-filling is not a special case
+                   anywhere else in the app. */
+                drink:'squash', viewDay:null };
 let S = load();
 
 function load(){
@@ -1562,10 +1595,45 @@ function renderSetupBody(){
     + (b.waist? ', waist <b>'+b.waist+'cm</b>' : '')
     + (b.targetWeight? ' \u00b7 your target <b>'+b.targetWeight+'kg</b>' : '') + '.';
 }
+/* ── the open-day prompt, once per launch ──
+   It waits for the pull, because a day he closed on the Mac an hour ago must not be presented
+   as outstanding on the phone. Asked once and then not again this session: a prompt that
+   reappears every time you change tab stops being a prompt and starts being an obstacle. */
+var _asked=false;
+function askAboutOpenDays(){
+  if(_asked || !S.profile) return;
+  var el=$('#dayAsk'); if(!el) return;
+  var op=openDays(); if(!op.length) return;
+  _asked=true;
+  var k=op[0], t=dayTotals(k), miss=missingMeals(k);
+  $('#dayAskWhen').textContent = longDate(k)+' is still open';
+  $('#dayAskWhat').innerHTML =
+      '<b>'+Math.round(t.p)+'g protein, '+Math.round(t.k)+' kcal, '+t.ml+'ml</b> logged'
+    + (miss.length ? ', and nothing down for '+miss.join(' or ')+'.' : '.')
+    + (op.length>1 ? ' <b>'+op.length+' days</b> are waiting.' : '');
+  el.hidden=false;
+  el.dataset.key=k;
+}
+function closeAsk(){ var el=$('#dayAsk'); if(el) el.hidden=true; }
+document.addEventListener('click', function(e){
+  var b=e.target.closest?e.target.closest('button'):null; if(!b) return;
+  var el=$('#dayAsk'); if(!el || el.hidden) return;
+  var k=el.dataset.key;
+  if(b.id==='dayAskFix')  { closeAsk(); S.viewDay=k; save(); go('ate'); return; }
+  if(b.id==='dayAskClose'){ var sm=closeDay(k); closeAsk(); render();
+                            toast('Closed — '+sm.p+'g protein'); return; }
+  if(b.id==='dayAskLater'){ closeAsk(); return; }
+}, true);
+
 function boot(){
   try{ wireConnect(); }catch(_){}
-  gPull(function(){ try{ render(); renderSetupBody(); }catch(e){ console.error(e); } });
+  gPull(function(){
+    try{ render(); renderSetupBody(); askAboutOpenDays(); }catch(e){ console.error(e); }
+  });
   try{ render(); }catch(e){ console.error(e); }
+  /* If there are no credentials the pull never calls back, so the prompt would never appear.
+     Belt and braces, after a beat, and _asked stops it being shown twice. */
+  setTimeout(function(){ try{ askAboutOpenDays(); }catch(_){} }, 1500);
 }
 document.addEventListener('visibilitychange', function(){
   if(!document.hidden) gPull(function(){ try{ render(); }catch(_){ } });
@@ -2228,12 +2296,13 @@ function mealCommit(){
   var item={ id:'typed:'+Date.now().toString(36), n:name||'Typed meal',
              k:t.k, p:t.p, c:t.c, s:t.s, sug:t.sug, fat:t.f, fib:t.fib, typed:true,
              parts:lines.map(function(l){ return {n:l.food.n,g:l.grams}; }) };
-  var d=day();
-  if(!d.meals[mealDraft.slot]) d.meals[mealDraft.slot]=item;
-  else d.extras.push(item);
+  item.slot = mealDraft.slot;
+  item.at   = new Date().toISOString();
+  day().items.push(item);
   save();
   mealReset();
   render();
+  toast('Added to '+(SLOT_LABEL[item.slot]||item.slot).toLowerCase().replace(' & drinks',''));
 }
 
 function confChip(c){
@@ -2347,15 +2416,13 @@ function renderMealCard(){
    + '<div class="eyebrow">Log it as</div>'
    + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:9px">';
   SLOTS.forEach(function(s){
-    var on = mealDraft.slot===s.id, taken = !!day().meals[s.id];
+    var on = mealDraft.slot===s.id, n = itemsIn(s.id).length;
     h+='<button class="btn btn-sm '+(on?'btn-primary':'btn-quiet')+'" data-meal-slot="'+s.id+'">'
-     + s.label+(taken?' +':'')+'</button>';
+     + s.label+(n?' ('+n+')':'')+'</button>';
   });
   h+='</div>';
-  if(day().meals[mealDraft.slot])
-    h+='<p class="hint" style="margin:9px 0 0">There is already something logged for '
-     + mealDraft.slot+', so this will go in alongside it rather than replacing it.</p>';
-  h+='<button class="btn btn-primary btn-block" id="mealSave" style="margin-top:11px">Add to today</button>'
+  h+='<button class="btn btn-primary btn-block" id="mealSave" style="margin-top:11px">'
+   + (isToday()?'Add to today':'Add to '+shortDate(dayKey()))+'</button>'
    + '<button class="btn btn-quiet btn-block" id="mealAgain" style="margin-top:7px">Start again</button>'
    + '</div>';
 
@@ -2634,29 +2701,84 @@ var OUT=[
 
 /* ═════════════════════════════  DAY  ═════════════════════════════ */
 
-function day(k){
-  const key = k || todayKey();
-  if(!S.log[key]) S.log[key] = { meals:{}, extras:[], walk:false, lift:false };
-  const d = S.log[key];
-  if(!d.meals) d.meals = {};
-  if(!d.extras) d.extras = [];
+/* ── ONE FLAT LIST, EVERY ITEM CARRYING ITS MEAL ──────────────────────────────
+   Mark, 24 Aug: "i need to be able to log by meal (breakfats, lucnh, dionner, snack) so that
+   we can track where the gaps are."
+
+   The old shape could not answer that. `meals` held exactly ONE item per slot and everything
+   after it fell into `extras`, which carried no slot at all — so a breakfast of yoghurt AND a
+   coffee put the coffee in an untagged bin, and by the end of the day roughly half of what he
+   had eaten had no meal attached to it. You cannot see a gap in a structure where most of the
+   entries are homeless.
+
+   So: `items`, flat, every one carrying `slot`. Slots become countable, movable and re-orderable
+   for free, and "you have logged nothing for lunch" becomes a thing the app can actually say.
+
+   dayNorm() migrates the old shape in place and is idempotent, so it can run on every read.
+   It has to: gPull() merges whole days straight off the gist, and any of them may be old. */
+function dayNorm(d){
+  if(!d || typeof d!=='object') return d;
+  if(!Array.isArray(d.items)){
+    var items=[];
+    if(d.meals && typeof d.meals==='object'){
+      SLOT_ORDER.forEach(function(s){
+        var m=d.meals[s];
+        if(m) items.push(Object.assign({}, m, {slot:s}));
+      });
+    }
+    if(Array.isArray(d.extras)){
+      /* The homeless ones. They were logged at SOME point in the day but the old shape threw
+         that away, so there is nothing honest to infer — 'snack' is the least wrong guess and
+         it is visibly a guess, which is better than silently calling it lunch. */
+      d.extras.forEach(function(m){ if(m) items.push(Object.assign({}, m, {slot:'snack', guessedSlot:true})); });
+    }
+    d.items=items;
+    delete d.meals; delete d.extras;
+  }
+  d.items.forEach(function(it,i){
+    if(!it.slot) it.slot='snack';
+    if(!it.id) it.id='mig:'+i+':'+Math.random().toString(36).slice(2,7);
+  });
+  if(!Array.isArray(d.drinks)) d.drinks=[];
+  if(!('closed' in d)) d.closed=null;
   return d;
 }
-function dayTotals(){
-  const d = day(), t = {k:0,p:0,c:0,s:0};
-  Object.keys(d.meals).forEach(function(slot){
-    const m = d.meals[slot];
-    if(!m) return;
+function day(k){
+  const key = k || dayKey();
+  if(!S.log[key]) S.log[key] = { items:[], drinks:[], closed:null, walk:false, lift:false };
+  return dayNorm(S.log[key]);
+}
+/* The day being LOOKED AT, which is today unless he is back-filling an unclosed one. Every
+   render and every log path goes through this, so fixing Saturday writes to Saturday. */
+function dayKey(){ return S.viewDay || todayKey(); }
+function isToday(){ return dayKey()===todayKey(); }
+
+function dayTotals(k){
+  const d = k ? dayNorm(S.log[k]||{}) : day(), t = {k:0,p:0,c:0,s:0,ml:0};
+  (d.items||[]).forEach(function(m){
     t.k += m.k||0; t.p += m.p||0; t.c += m.c||0; t.s += m.s||0;
   });
-  d.extras.forEach(function(m){
-    t.k += m.k||0; t.p += m.p||0; t.c += m.c||0; t.s += m.s||0;
+  /* Drinks carry calories and salt too — a 200ml glass of milk is 70 kcal and squash is not
+     quite zero. Counting the fluid but not the calories would make the totals quietly wrong. */
+  (d.drinks||[]).forEach(function(m){
+    t.k += m.k||0; t.p += m.p||0; t.c += m.c||0; t.s += m.s||0; t.ml += m.ml||0;
   });
   return t;
 }
-function mealsLogged(){
-  const d = day();
-  return Object.keys(d.meals).filter(function(s){ return d.meals[s]; }).length;
+function itemsIn(slot, k){
+  const d = k ? dayNorm(S.log[k]||{}) : day();
+  return (d.items||[]).filter(function(x){ return x.slot===slot; });
+}
+function mealsLogged(k){
+  return SLOT_ORDER.filter(function(s){ return itemsIn(s,k).length; }).length;
+}
+/* The gaps, named. Snack is deliberately NOT in here: a day with no snack is a fine day, a day
+   with no lunch is the thing worth saying out loud. */
+function missingMeals(k){
+  const d = k ? dayNorm(S.log[k]||{}) : day();
+  return ['breakfast','lunch','dinner'].filter(function(s){
+    return !(d.items||[]).some(function(x){ return x.slot===s; });
+  });
 }
 
 const SLOTS = [
@@ -2665,6 +2787,83 @@ const SLOTS = [
   {id:'dinner',    label:'Dinner',    icon:'◗'},
   {id:'snack',     label:'Snack',     icon:'◦'}
 ];
+/* Declared with `var` and hoisted deliberately: dayNorm() reads it and dayNorm() is called from
+   day(), which older code paths can reach before this line is evaluated. A `const` here would
+   throw on those paths and only on those paths, which is the worst kind of bug to find. */
+var SLOT_ORDER = ['breakfast','lunch','dinner','snack'];
+var SLOT_LABEL = {breakfast:'Breakfast', lunch:'Lunch', dinner:'Dinner', snack:'Snacks & drinks'};
+
+/* ═════════════════════════ DRINKS ═════════════════════════
+   Mark, 24 Aug: "i often forget to drink and dont have a litre let alone more that I'm supposed
+   to have... squash (low cal / sugar free) is the most likely drink so best to have approproate
+   size options to log."
+
+   NO TARGET, and he chose that knowingly. The app's own drinks note already says the randomised
+   evidence for drinking-more-water is null, and putting a 2-litre bar on the screen would have
+   contradicted the page next to it. What is real in what he described is not missing a number —
+   it is going from breakfast to mid-afternoon having had nothing at all. So this counts, shows
+   the running total, and only speaks up when the count is genuinely near zero.
+
+   SIZES ARE VESSELS, NOT MILLILITRES. Nobody knows what 350ml looks like. Everybody knows what
+   a pint glass looks like. Making him convert is how a tracker gets abandoned by Thursday. */
+var VESSELS = [
+  {id:'tumbler', n:'Glass',        ml:250, tag:'an ordinary tumbler'},
+  {id:'pint',    n:'Pint glass',   ml:568, tag:'the big one'},
+  {id:'bottle',  n:'Bottle',       ml:500, tag:'a shop bottle or a sports bottle'},
+  {id:'jug',     n:'Big bottle',   ml:750, tag:'the desk bottle'},
+  {id:'mug',     n:'Mug',          ml:300, tag:'tea, coffee'}
+];
+/* kcal/salt are per 100ml where it matters and per serving where the serving IS the unit.
+   Squash: ~1 kcal per 100ml made up, which is not zero but is close enough that rounding it to
+   zero would be the only dishonest number on the screen. */
+var DRINKS = [
+  {id:'squash', n:'Sugar-free squash', per100:{k:1, s:0},        star:true,
+   vessels:['pint','tumbler','bottle','jug'],
+   note:'Your default. About 1 calorie per 100ml made up, and gentler on your teeth than cola.'},
+  {id:'water',  n:'Water',             per100:{k:0, s:0},        star:true,
+   vessels:['pint','tumbler','bottle','jug'],
+   note:'Slice of lemon in the glass rather than a lemon-flavoured water — the flavoured ones are acidic.'},
+  {id:'tea',    n:'Tea, splash of milk', per100:{k:5, s:0.01},
+   vessels:['mug'],
+   note:'Counts as fluid. The diuretic story does not hold at habitual intakes.'},
+  {id:'coffee', n:'Coffee, black',     per100:{k:1, s:0},
+   vessels:['mug'],
+   note:'Also counts. Milky coffee is a different entry because the milk is the calories.'},
+  {id:'cola',   n:'Diet cola',         per100:{k:0.3, s:0.01},
+   vessels:['tumbler','bottle','pint'],
+   note:'Fine as fluid. The teeth are the real cost — with a meal, not sipped for two hours.'},
+  {id:'milk',   n:'Milk, semi-skimmed', per100:{k:35, p:3.6, c:4.8, s:0.07},
+   vessels:['tumbler','mug'],
+   note:'7g of protein in a 200ml glass, and it counts as fluid.'}
+];
+function drinkDef(id){ for(var i=0;i<DRINKS.length;i++) if(DRINKS[i].id===id) return DRINKS[i]; return null; }
+function vesselDef(id){ for(var i=0;i<VESSELS.length;i++) if(VESSELS[i].id===id) return VESSELS[i]; return null; }
+
+function fluidToday(k){ return dayTotals(k).ml; }
+/* WHEN TO SPEAK UP. Not "you are behind on a target" — there is no target — but "it is four in
+   the afternoon and you have had a mug of tea", which is a fact about today and worth saying.
+   Thresholds are deliberately low so it stays rare enough to be worth reading. */
+function fluidNudge(){
+  if(!isToday()) return null;
+  var ml=fluidToday(), h=nowHour();
+  if(h<11)  return null;
+  if(h<15)  return ml<500  ? {ml:ml, say:'It is past eleven and you have had '+(ml?ml+'ml':'nothing to drink')+'.'} : null;
+  if(h<19)  return ml<900  ? {ml:ml, say:'Mid-afternoon and you are on '+(ml?ml+'ml':'nothing')+' — that is the stretch you usually lose.'} : null;
+  return ml<1100 ? {ml:ml, say:'A short day for drinking: '+(ml?ml+'ml':'nothing')+' logged.'} : null;
+}
+function logDrink(drinkId, vesselId, slot){
+  var dr=drinkDef(drinkId), v=vesselDef(vesselId);
+  if(!dr || !v) return false;
+  var f=v.ml/100, per=dr.per100||{};
+  var rec={ id:'dk:'+Date.now().toString(36)+':'+Math.random().toString(36).slice(2,6),
+            drink:dr.id, vessel:v.id, n:dr.n+', '+v.n.toLowerCase(), ml:v.ml,
+            k:Math.round((per.k||0)*f), p:+(((per.p||0)*f).toFixed(1)),
+            c:+(((per.c||0)*f).toFixed(1)), s:+(((per.s||0)*f).toFixed(2)),
+            slot: slot || slotNow(), at:new Date().toISOString() };
+  day().drinks.push(rec);
+  save();
+  return true;
+}
 
 function placesFor(slot){ return PLACES.filter(function(p){ return p.slot === slot; }); }
 
@@ -2726,113 +2925,9 @@ function autoPick(slot, key){
 
 /* ═════════════════════════════  TODAY  ═════════════════════════════ */
 
-function renderMeters(){
-  const T = targets(); if(!T) return;
-  const t = dayTotals();
-  $('#meters').innerHTML =
-      meter('Protein', Math.round(t.p), 'of '+T.protein+'g', clamp(t.p/T.protein*100,0,100), 'go')
-    + meter('Calories', Math.round(t.k), 'of '+T.kcal, clamp(t.k/T.kcal*100,0,100), t.k<=T.kcal?'data':'warn')
-    + meter('Salt', r1(t.s), 'of '+T.salt+'g', clamp(t.s/T.salt*100,0,100), t.s<=T.salt*0.7?'go':(t.s<=T.salt?'warn':'stop'));
-}
-function meter(label,val,of,pct,band){
-  return '<div class="meter"><div class="meter-label">'+label+'</div><div class="meter-val">'+val+'</div>'
-    + '<div class="meter-of">'+of+'</div><div class="bar bar-'+band+'"><i style="width:'+pct.toFixed(1)+'%"></i></div></div>';
-}
 
-function renderMeals(){
-  const d = day();
-  $('#meals').innerHTML = SLOTS.map(function(slot){
-    const picked = d.meals[slot.id];
-    const isOff = picked && picked.off;
-    const open = S.open === slot.id;
-    const cls = 'card meal-card' + (picked && !isOff ? ' done':'') + (isOff?' off':'') + (open?' open':'');
-    const title = picked ? picked.n : 'Not decided yet';
 
-    let body = '';
-    if(open){
-      const places = placesFor(slot.id);
-      body = '<p class="hint" style="margin:0 0 11px">Where are you?</p>'
-        + places.map(function(p){
-            return '<button class="place" data-act="place" data-id="'+p.id+'" data-slot="'+slot.id+'">'
-              + '<span class="place-icon">'+p.icon+'</span>'
-              + '<span class="grow"><span class="place-name">'+esc(p.name)+'</span>'
-              + '<span class="place-tag">'+esc(p.tag)+'</span></span>'
-              + '<span class="place-arrow">›</span></button>';
-          }).join('')
-        + '<button class="btn btn-quiet btn-block" style="margin-top:11px" data-act="off" data-slot="'+slot.id+'">I went off plan</button>';
-    }
-    return '<div class="'+cls+'">'
-      + '<button class="meal-head" data-act="toggle" data-slot="'+slot.id+'" aria-expanded="'+(open?'true':'false')+'">'
-        + '<span class="meal-slot">'+(picked && !isOff ? '✓' : slot.icon)+'</span>'
-        + '<span class="grow"><span class="meal-title">'+slot.label+'</span>'
-        + '<span class="meal-pick'+(picked?'':' empty')+'">'+esc(title)+'</span></span>'
-        + '<span class="caret">›</span></button>'
-      + '<div class="meal-body">'+body+'</div></div>';
-  }).join('');
-}
 
-function renderTopUp(){
-  const T = targets(), t = dayTotals(), d = day();
-  const host = $('#topup');
-  const gapK = T.kcal - t.k, gapP = T.protein - t.p;
-  const logged = mealsLogged();
-  const short = logged >= 1 && (gapK > 350 || gapP > 20);
-
-  let html = '';
-
-  if(!tasteAnswered()){
-    html += '<div class="section"><span class="eyebrow">Worth four minutes</span>'
-      + '<div class="card card-pad" style="margin-top:9px">'
-      + '<h3>Tell it what you actually eat</h3>'
-      + '<p class="prose small" style="margin-top:7px">'+ALL_FOODS.length+' foods, one at a time, three buttons. '
-      + 'Anything you say you never eat disappears from every list; anything you love floats to the top. Stop whenever you like.</p>'
-      + '<button class="btn btn-primary btn-block" style="margin-top:12px" data-act="tastestart">Start the food list</button>'
-      + '</div></div>';
-  }
-
-  if(d.extras.length){
-    html += '<div class="section"><span class="eyebrow">Added on top</span><div class="card" style="margin-top:9px">'
-      + d.extras.map(function(x,i){
-          return '<div class="extra-row"><span class="grow"><span style="font-weight:600;font-size:14px">'+esc(x.n)+'</span>'
-            + '<span class="chips" style="margin-top:5px"><span class="chip chip-data">'+Math.round(x.k)+' kcal</span>'
-            + '<span class="chip chip-go">'+r1(x.p)+'g protein</span></span></span>'
-            + '<button class="btn btn-sm btn-quiet" data-act="rmextra" data-i="'+i+'" aria-label="Remove">✕</button></div>';
-        }).join('')
-      + '</div></div>';
-  }
-
-  if(short || S.topupOpen){
-    const headline = short
-      ? (gapK > 700 ? 'That is not enough food' : 'Still a bit short')
-      : 'Add something';
-    html += '<div class="section"><span class="eyebrow">'+headline+'</span>'
-      + '<div class="card card-pad" style="margin-top:9px;border-color:'+(gapK>700?'var(--warn)':'var(--line)')+'">';
-    if(short){
-      html += '<div class="chips" style="margin-bottom:10px">'
-        + (gapK>0 ? '<span class="chip chip-warn">'+Math.round(gapK)+' kcal short</span>' : '')
-        + (gapP>0 ? '<span class="chip chip-warn">'+Math.round(gapP)+'g protein short</span>' : '')
-        + '</div>'
-        + '<p class="prose small" style="margin-bottom:12px">The options in this app are lean on purpose, and three of them do not add up to a day for a man your size. '
-        + 'Eating '+Math.round(t.k)+' calories is not discipline — it is how nine o’clock goes wrong. Close the gap now, with protein, on purpose.</p>';
-    }
-    html += EXTRAS.map(function(x){ return optionHTML(x, 'extra'); }).join('')
-      + '<button class="btn btn-sm btn-quiet btn-block" style="margin-top:10px" data-act="closetopup">Not now</button>'
-      + '</div></div>';
-  }else if(logged >= 1){
-    html += '<div class="section"><button class="btn btn-quiet btn-block" data-act="opentopup">Still hungry — add something</button></div>';
-  }
-
-  host.innerHTML = html;
-}
-
-function renderToggles(){
-  const d = day();
-  const w = $('#walkBtn'), l = $('#liftBtn');
-  w.textContent = d.walk ? 'Done' : 'No';
-  w.className = 'btn btn-sm' + (d.walk ? ' btn-primary':' btn-quiet');
-  l.textContent = d.lift ? 'Done' : 'No';
-  l.className = 'btn btn-sm' + (d.lift ? ' btn-primary':' btn-quiet');
-}
 
 /* ═════════════════════════════  WHERE  ═════════════════════════════ */
 
@@ -2888,79 +2983,6 @@ function itemsBox(items, slot, key){
     + '<div style="margin-top:9px">'+inner+'</div></div>';
 }
 
-function renderWhere(){
-  const host = $('#s-where');
-
-  /* Level 0 — all the places */
-  if(!S.place){
-    const groups = [
-      ['Breakfast', placesFor('breakfast')],
-      ['Lunch',     placesFor('lunch')],
-      ['Dinner',    placesFor('dinner')],
-      ['Anytime',   PLACES.filter(function(p){ return p.slot==='snack' || p.slot===null; })]
-    ];
-    host.innerHTML =
-      '<p class="hint" style="margin:0 0 16px">Tell it where you are. You get one rule and a short list — nothing to work out, nothing to search.</p>'
-      + groups.map(function(g){
-          return '<div class="section" style="margin-top:0;margin-bottom:20px"><span class="eyebrow">'+g[0]+'</span>'
-            + '<div style="margin-top:9px">'
-            + g[1].map(function(p){
-                return '<button class="place" data-act="place" data-id="'+p.id+'">'
-                  + '<span class="place-icon">'+p.icon+'</span>'
-                  + '<span class="grow"><span class="place-name">'+esc(p.name)+'</span>'
-                  + '<span class="place-tag">'+esc(p.tag)+'</span></span>'
-                  + '<span class="place-arrow">›</span></button>';
-              }).join('')
-            + '</div></div>';
-        }).join('')
-      + '<div class="card card-pad"><span class="eyebrow">Somewhere not on the list</span>'
-      + '<h3 style="margin-top:7px">The 30-second rule</h3>'
-      + '<div class="prose small" style="margin-top:8px">'
-      + '<p><strong>One:</strong> find the protein — a whole named animal, egg or bean, not a mince or a paste. '
-      + '<strong>Two:</strong> refuse the carrier — no bread, wrap, rice, chips or crisps. '
-      + '<strong>Three:</strong> add something green.</p>'
-      + '<p>If you cannot do all three, buy just the protein and eat properly when you get home.</p>'
-      + '</div></div>';
-    return;
-  }
-
-  const place = PLACES.filter(function(p){ return p.id===S.place; })[0];
-  if(!place){ S.place=null; renderWhere(); return; }
-
-  /* Level 2 — a venue inside a place */
-  if(S.venue){
-    const v = (place.venues||[]).filter(function(x){ return x.id===S.venue; })[0];
-    if(!v){ S.venue=null; renderWhere(); return; }
-    host.innerHTML =
-      '<button class="btn btn-sm btn-quiet" data-act="backvenue" style="margin-bottom:14px">‹ '+esc(place.name)+'</button>'
-      + '<h2 style="margin-bottom:12px">'+esc(v.name)+'</h2>'
-      + ruleBox(v.rule)
-      + (v.brief ? briefBox(v.brief) : '')
-      + (v.caveat ? caveatBox(v.caveat) : '')
-      + itemsBox(v.items, place.logAs || place.slot, v.id)
-      + avoidBox(v.avoid);
-    return;
-  }
-
-  /* Level 1 — a place: either venues, or items directly */
-  let html = '<button class="btn btn-sm btn-quiet" data-act="backplace" style="margin-bottom:14px">‹ Everywhere</button>'
-    + '<h2 style="margin-bottom:12px">'+esc(place.name)+'</h2>'
-    + ruleBox(place.rule);
-
-  if(place.venues){
-    html += '<div class="section"><span class="eyebrow">Which one</span>'
-      + '<div class="venue-grid" style="margin-top:9px">'
-      + place.venues.map(function(v){
-          return '<button class="venue-btn" data-act="venue" data-id="'+v.id+'">'
-            + '<span class="vn">'+esc(v.name)+'</span><span class="vt">'+esc(v.tag)+'</span></button>';
-        }).join('')
-      + '</div></div>';
-  }else{
-    html += itemsBox(place.items, place.logAs || place.slot, place.id);
-    if(place.avoid) html += avoidBox(place.avoid);
-  }
-  host.innerHTML = html;
-}
 
 /* ═════════════════════════════  FOOD LIST  ═════════════════════════════ */
 
@@ -2969,75 +2991,6 @@ function nextFoodIndex(){
   return -1;
 }
 
-function renderTaste(){
-  const host = $('#s-taste');
-  const done = tasteAnswered(), total = ALL_FOODS.length;
-
-  /* Review and edit everything already answered */
-  if(S.tasteReview){
-    host.innerHTML =
-      '<button class="btn btn-sm btn-quiet" data-act="tastereviewoff" style="margin-bottom:14px">‹ Back</button>'
-      + '<h2 style="margin-bottom:6px">Your food list</h2>'
-      + '<p class="hint" style="margin:0 0 16px">Change anything. Blank means you have not said, and the app will keep showing it.</p>'
-      + FOOD_CATS.map(function(c){
-          return '<div class="section" style="margin-top:0;margin-bottom:18px"><span class="eyebrow">'+esc(c.n)+'</span>'
-            + '<div class="card" style="margin-top:9px">'
-            + c.foods.map(function(f){
-                const v = S.taste[f[0]];
-                return '<div class="taste-row"><span class="grow">'+esc(f[1])+'</span><span class="taste-mini">'
-                  + miniBtn(f[0],'no','✕',v) + miniBtn(f[0],'ok','✓',v) + miniBtn(f[0],'love','★',v)
-                  + '</span></div>';
-              }).join('')
-            + '</div></div>';
-        }).join('')
-      + '<div class="section"><button class="btn btn-quiet btn-block" data-act="tastereset">Clear my whole food list</button></div>';
-    return;
-  }
-
-  const idx = nextFoodIndex();
-
-  /* Finished */
-  if(idx === -1){
-    host.innerHTML =
-      '<div class="card card-pad" style="text-align:center">'
-        + '<span class="eyebrow">Done</span>'
-        + '<h2 style="margin-top:8px">All '+total+' answered</h2>'
-        + '<p class="prose small" style="margin-top:10px">Every list in the app is now filtered and reordered around this. '
-        + 'Things you love float to the top; things you never eat are hidden, with a count so you can always see what was taken out.</p>'
-        + '<button class="btn btn-primary btn-block" style="margin-top:14px" data-act="tastedone">Back to the app</button>'
-        + '<button class="btn btn-quiet btn-block" style="margin-top:8px" data-act="tastereview">Review and change answers</button>'
-      + '</div>';
-    return;
-  }
-
-  const f = ALL_FOODS[idx];
-  const pct = (done/total*100).toFixed(1);
-  const catFoods = ALL_FOODS.filter(function(x){ return x.catId===f.catId; });
-  const catDone = catFoods.filter(function(x){ return S.taste[x.id]; }).length;
-
-  host.innerHTML =
-      '<div class="taste-prog"><i style="width:'+pct+'%"></i></div>'
-    + '<div style="margin:10px 0 20px">'
-      + '<span class="eyebrow">'+esc(f.cat)+' · '+(catDone+1)+' of '+catFoods.length+'</span></div>'
-
-    + '<div class="taste-card"><span class="taste-food">'+esc(f.n)+'</span></div>'
-
-    + '<div class="taste-btns">'
-      + '<button class="tbtn tbtn-no" data-act="taste" data-id="'+f.id+'" data-v="no"><span class="tb-i">✕</span>Never</button>'
-      + '<button class="tbtn tbtn-ok" data-act="taste" data-id="'+f.id+'" data-v="ok"><span class="tb-i">✓</span>Fine</button>'
-      + '<button class="tbtn tbtn-love" data-act="taste" data-id="'+f.id+'" data-v="love"><span class="tb-i">★</span>Love it</button>'
-    + '</div>'
-
-    + '<div class="section" style="margin-top:20px">'
-      + '<button class="btn btn-quiet btn-block" data-act="tasteskipcat" data-cat="'+f.catId+'">Mark the rest of "'+esc(f.cat)+'" as fine</button>'
-      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'
-        + '<button class="btn btn-quiet" data-act="tasteback"'+(done?'':' disabled style="opacity:.4"')+'>‹ Undo last</button>'
-        + '<button class="btn btn-quiet" data-act="tastedone">Stop for now</button>'
-      + '</div>'
-      + '<p class="hint" style="margin-top:13px;text-align:center">Stop whenever you like — the app uses whatever you have answered so far. '
-      + 'Nothing breaks if you only get through twenty.</p>'
-    + '</div>';
-}
 
 function miniBtn(food, val, glyph, cur){
   const on = cur===val;
@@ -3047,66 +3000,6 @@ function miniBtn(food, val, glyph, cur){
 
 /* ═════════════════════════════  NUMBERS  ═════════════════════════════ */
 
-function renderNumbers(){
-  const T = targets();
-  /* Read from the Still Room, never from a local copy. Its shape is {date, weight, waist, ...}
-     with every field optional, so the chart builders below filter for what they need. */
-  const ms = SR.readings.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; });
-  const weights = ms.filter(function(m){ return m.weight != null; });
-  const waists  = ms.filter(function(m){ return m.waist  != null; });
-  const bps     = ms.filter(function(m){ return m.sys != null && m.dia != null; });
-  const first = weights[0], last = weights[weights.length-1];
-  const wFirst = waists[0], wLast = waists[waists.length-1];
-
-  let head = '';
-  if(last){
-    const dW = last.weight - (first ? first.weight : last.weight);
-    head = '<div class="card"><div class="meters">'
-      + meterPlain('Weight', r1(last.weight)+'kg', dW===0 ? 'starting point' : (dW<0?'':'+')+r1(dW)+'kg since start')
-      + meterPlain('BMI', bmi(last.weight).toFixed(1), 'goal 25 = '+T.goalW+'kg')
-      + meterPlain('Waist', wLast ? Math.round(wLast.waist)+'cm' : '—',
-          (wFirst && wLast && wFirst!==wLast) ? ((wLast.waist-wFirst.waist)<=0?'':'+')+r1(wLast.waist-wFirst.waist)+'cm' : 'goal under 94cm')
-      + '</div></div>';
-  }
-
-  $('#s-numbers').innerHTML = head
-    + '<div class="card card-pad" style="margin-top:'+(head?'12px':'0')+'">'
-      + '<span class="eyebrow">Log a reading</span>'
-      + '<p class="hint" style="margin:6px 0 13px">Fill in whatever you have; blanks are skipped. Once a week for weight and waist is plenty — daily weighing mostly shows you water.</p>'
-      + '<div class="stack">'
-        + '<div class="field-row">'
-          + '<div class="field"><label for="n-weight">Weight (kg)</label><input id="n-weight" type="number" inputmode="decimal" step="0.1"></div>'
-          + '<div class="field"><label for="n-waist">Waist (cm)</label><input id="n-waist" type="number" inputmode="decimal" step="0.5"></div>'
-        + '</div>'
-        + '<div class="field-row-3">'
-          + '<div class="field"><label for="n-sys">Systolic</label><input id="n-sys" type="number" inputmode="numeric"></div>'
-          + '<div class="field"><label for="n-dia">Diastolic</label><input id="n-dia" type="number" inputmode="numeric"></div>'
-          + '<div class="field"><label for="n-pulse">Pulse</label><input id="n-pulse" type="number" inputmode="numeric"></div>'
-        + '</div>'
-        + '<button class="btn btn-primary btn-block" data-act="savemeasure">Save reading</button>'
-      + '</div></div>'
-
-    + sectionCard('Waist', 'The number that tracks visceral fat',
-        waists.length >= 2
-          ? lineChart(waists.map(function(m){ return {x:m.date,y:m.waist}; }), {unit:'cm', target:94, targetLabel:'94cm'})
-          : emptyState('Log your waist twice, a week or two apart, and the trend appears here. Waist moves before the scale does when you are losing visceral fat, which is why it is first on this page.'))
-
-    + sectionCard('Weight', weights.length===0 ? 'No readings yet' : weights.length===1 ? 'One reading so far'
-        : (first.weight-last.weight>0 ? 'Down '+r1(first.weight-last.weight)+'kg' : 'Holding steady'),
-        weights.length >= 2
-          ? lineChart(weights.map(function(m){ return {x:m.date,y:m.weight}; }), {unit:'kg', target:T.goalW, targetLabel:'BMI 25'})
-          : emptyState('Two weigh-ins and this becomes a trend line. Expect it to zigzag — that is water, not fat.'))
-
-    + sectionCard('Blood pressure', 'Home readings · target under 135/85',
-        (bps.length >= 1 ? bpChart(bps)
-          : emptyState('Each reading shows as a bar from diastolic to systolic against the target band.'))
-        + '<div style="padding:13px 15px;border-top:1px solid var(--line)"><div class="prose small">'
-        + '<p style="margin:0"><strong>Before you measure:</strong> sit still for five minutes, arm supported at heart height, and record the second of two readings. '
-        + 'And no coffee in the previous half hour — caffeine causes a short-lived rise of a couple of mmHg in anyone not fully habituated, which is enough to make a fine reading look bad.</p>'
-        + '</div></div>')
-
-    + (ms.length ? '<div class="section"><button class="btn btn-quiet btn-block" data-act="undomeasure">Delete my most recent reading</button></div>' : '');
-}
 
 function meterPlain(label,val,sub){
   return '<div class="meter"><div class="meter-label">'+label+'</div><div class="meter-val">'+val+'</div>'
@@ -3206,64 +3099,6 @@ function rulesCard(){
     + '</div>';
 }
 
-function renderPlan(){
-  const T = targets();
-  $('#s-plan').innerHTML =
-    rulesCard() +
-    '<div class="card card-pad"><span class="eyebrow">Your targets</span>'
-      + '<div class="chips" style="margin-top:10px">'
-        + '<span class="chip chip-data">'+T.kcal+' kcal a day</span>'
-        + '<span class="chip chip-go">'+T.protein+'g protein</span>'
-        + '<span class="chip chip-warn">under '+T.salt+'g salt</span>'
-        + '<span class="chip chip-neutral">'+T.fibre+'g fibre</span></div>'
-      + '<div class="prose small" style="margin-top:13px">'
-        + '<p>Worked out from your height, weight and age: roughly <strong>'+T.tdee+' kcal</strong> to hold steady, minus 550 to lose about <strong>half a kilo a week</strong>. '
-        + 'Protein is set at 1.6g per kg of your target weight — deliberately high, because at 56 in a calorie deficit you lose muscle unless you defend it. '
-        + 'Salt is 5g rather than the UK 6g limit, because of your blood pressure.</p></div></div>'
-
-    + tasteCard()
-
-    + planCard('How this works', [
-        '<strong>You are not counting anything.</strong> The numbers on each item are there if you want them and ignorable if you do not. Your whole job is: open the app, tap where you are, tap the thing at the top, eat it.',
-        '<strong>The app is organised by place, not by food.</strong> That is deliberate. "What should I eat?" is an impossible question standing in a garage at seven in the morning. "I am at a BP garage" has one answer.',
-        '<strong>There is no streak.</strong> Streaks are the worst possible mechanic for an ADHD brain — they work brilliantly right up until the day you miss, and then the structure becomes evidence against you. A bad day here is a bad day. Tomorrow the app looks identical.',
-        '<strong>Off plan is a button, not a failure.</strong> Pressing it is more useful than closing the app, because it keeps you in the loop.',
-        '<strong>Every list is short and pre-sorted.</strong> The one marked <em>Best pick</em> is genuinely the best one. You do not have to read the rest.'
-      ])
-
-    + planCard('Why these rules and not others', [
-      '<strong>Rewritten 22 August 2026 from 154 of your own blood results.</strong> The version that stood here before was reasoning from a previous chat that had never seen a number of yours. Most of it turned out to be right, but it was right by luck rather than by evidence, so it has been redone against the panels themselves. Where a claim below is general rather than about you, it says so.',
-      '<strong>Salt is your first-order problem, and that is not a general statement.</strong> Your last seven blood-pressure readings were 149/86, 148/81, 109/92, 144/97, 124/87, 148/98 and 147/94. Four of seven at or above 144 systolic, diastolic repeatedly in the mid-nineties. Meanwhile the high-street "healthy" options are consistently salty — several Pret items carry 2.5 to 3.1g in one box, which against your 4g target is most of the day. So salt has its own colour on every item, its own meter, and the protein-per-gram-of-salt sum is done for you.',
-      '<strong>Refined carbohydrate, not carbohydrate — and your lipids are why.</strong> Your triglyceride-to-HDL ratio was 4.3 in March. That specific pattern, high trig with low HDL, is the insulin-resistance signature, and it answers to fast starch and sugar far more than to fat. Nothing here bans carbohydrate. It demotes the <em>carrier</em> — the bread, the wrap, the crisps — because that is where the fast starch is and none of it fills you up.',
-      '<strong>Fat is not your enemy, which is the opposite of standard advice.</strong> Your LDL is 2.3 and controlled by a statin. Your HDL is 0.93 and falling — the one marker still going the wrong way. Olive oil, oily fish, avocado and nuts raise HDL and make a meal hold you until the evening. A generic plan would tell you to cut them. Your panel says otherwise.',
-      '<strong>Visceral fat responds first.</strong> This is general rather than personal, but it is well established: the fat around the organs is metabolically active and shifts on a deficit earlier than the fat under the skin. Your own record supports it — waist 114cm in March 2025 to 105cm in May 2026, and ALT down from 46 to 31 over the same stretch, which is a liver getting less fatty.',
-      '<strong>Protein does three jobs — with one caveat I am not going to bury.</strong> It holds muscle while you lose fat, it is the most filling macronutrient per calorie, and it barely moves blood glucose. But your eGFR has gone 90 to 90 to 85 to 79 across two years while creatinine rose 76 to 93. At 79 that is still normal and 160g is not contraindicated. It is worth your GP knowing that you are on a deliberately high-protein plan, rather than an app deciding that quietly on your behalf.',
-      '<strong>And what is NOT here.</strong> No elimination diet: your eosinophilic oesophagitis is in remission on Tezepelumab, so it is controlled by the drug and wheat, egg, soy and nuts are not restricted. Dairy is flagged but never hidden, because your symptoms are real whatever the blood tests said. No potassium salt substitute, ever, without your GP checking first \u2014 with a falling eGFR and potassium that has run 5.3 and 5.4, you are precisely the person NICE warns off them.'
-    ])
-
-    + planCard('What I am not sure about', [
-        'Straight answer on data quality, because you will notice if I fudge it.',
-        '<strong>Pret, M&S, Waitrose, Sainsbury’s and Tesco figures are solid</strong> — read off the retailers’ own current UK product pages. A few are worked out from a per-100g table and are marked <em>approx</em>.',
-        '<strong>McDonald’s is half-solid.</strong> They publish calories in the UK but not full macros, so protein, carbs and salt come from a nutrition database.',
-        '<strong>Subway is the weak one.</strong> Their official UK nutrition PDF is blocked and the menu was renamed in the 2025–26 refresh, so some item names may be stale. Use the rule, check in store.',
-        '<strong>Street food has no data and I did not invent any.</strong> Those figures are reasoned estimates from typical portions and are labelled as estimates.',
-        '<strong>Home meals are estimates too.</strong> Portions vary. Treat them as the right ballpark, not a measurement.',
-        'Menus change constantly. When something here is wrong or gone, tell me and I will update the app.'
-      ])
-
-    + planCard('Before you start', [
-        'I am not a doctor and this is not medical advice. Two things worth raising with your GP or practice nurse — not because they are likely problems, but because they are the ones that actually matter:',
-        '<strong>If you take blood pressure medication</strong>, losing weight and cutting salt will lower your blood pressure on top of what the tablets are already doing. That is the goal, but it can overshoot. Dizziness on standing is the sign, and doses sometimes need reducing.',
-        '<strong>If you take anything for blood glucose</strong>, the same logic applies in the other direction.',
-        'Worth asking for: a repeat HbA1c in three months, and today’s weight and waist noted in your records so there is a baseline that is not just this app.'
-      ])
-
-    + '<div class="section">'
-      + '<button class="btn btn-quiet btn-block" data-act="export">Export my data</button>'
-      + '<button class="btn btn-quiet btn-block" style="margin-top:8px" data-act="editprofile">Change my height, weight or age</button>'
-      + '<p class="hint" style="margin-top:12px;text-align:center">Your data is stored on this device only and never leaves your phone. Export it now and then, so a cleared browser cannot take your history with it.</p>'
-    + '</div>';
-}
 function tasteCard(){
   const done = tasteAnswered(), total = ALL_FOODS.length;
   const nos = Object.keys(S.taste).filter(function(k){ return S.taste[k]==='no'; }).length;
@@ -3298,14 +3133,17 @@ function planCard(title, paras){
 
 /* ═════════════════════════════  NAV  ═════════════════════════════ */
 
-const TITLES = {eat:'What to eat', ate:'What you ate', fridge:'In the fridge',
-                today:'Today', where:'Where are you?', numbers:'Numbers', plan:'The plan',
-                setup:'Set up', taste:'Your food list'};
+const TITLES = {eat:'What to eat', ate:'What you ate', fridge:'In the fridge', setup:'Set up'};
 
 function go(tab){ S.tab = tab; save(); render(); window.scrollTo(0,0); }
 
 function render(){
   const setup = !S.profile;
+  /* A saved S.tab of 'today', 'where', 'numbers', 'plan' or 'taste' is entirely possible — it
+     is sitting in localStorage on his phone right now from before those screens were removed,
+     and the app would have opened on a blank page with a dead tab bar. Anything unrecognised
+     falls back to Eat rather than to nothing. */
+  if(!setup && !/^(eat|ate|fridge)$/.test(S.tab||'')){ S.tab='eat'; saveLocal(); }
   const tab = setup ? 'setup' : S.tab;
   $$('.screen').forEach(function(el){ el.classList.remove('active'); });
   const el = $('#s-'+tab); if(el) el.classList.add('active');
@@ -3319,27 +3157,20 @@ function render(){
     $('#topSub').textContent = MEAL_LABEL[mealNow()];
     renderEat();
   }else if(tab==='ate'){
-    $('#topSub').textContent = new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+    var op=openDays();
+    $('#topSub').textContent = !isToday()
+      ? 'filling in '+shortDate(dayKey())
+      : (op.length ? op.length+(op.length===1?' day still open':' days still open')
+                   : keyToDate(dayKey()).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})
+                     + (day().closed?' · closed':''));
     renderAte();
   }else if(tab==='fridge'){
     $('#topSub').textContent = ((S.fridge||[]).length||'nothing')+' in';
     renderFridge();
-  }else if(tab==='today'){
-    $('#topSub').textContent = new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
-    renderMeters(); renderMealCard(); renderTopUp(); renderMeals(); renderToggles();
-  }else if(tab==='where'){
-    $('#topSub').textContent = S.place ? '' : 'pick a place';
-    renderWhere();
-  }else if(tab==='numbers'){
-    $('#topSub').textContent = SR.readings.length + (SR.readings.length===1?' reading':' readings') + ' \u00b7 from the Still Room';
-    renderNumbers();
-  }else if(tab==='plan'){
-    $('#topSub').textContent = T.kcal+' kcal · '+T.protein+'g protein';
-    renderPlan();
-  }else if(tab==='taste'){
-    $('#topSub').textContent = tasteAnswered()+' of '+ALL_FOODS.length;
-    renderTaste();
   }
+  /* The today / where / numbers / plan / taste branches went with their markup on 24 August
+     2026. go() can no longer be handed those names: the tab bar offers three, and the two
+     remaining go('ate') calls (after setup, and after an import) now say 'ate'. */
 }
 
 
@@ -3356,6 +3187,82 @@ function mealNow(){
   if(h<15)   return 'lunch';
   if(h<20)   return 'dinner';
   return 'late';
+}
+/* mealNow() has a fifth value, 'late', which is a MOOD rather than a meal — it is what makes the
+   Ate screen turn into the before-bed check. It is not a place to file food, and anything logged
+   at half past ten at night is a snack. Keeping the two apart stops 'late' leaking into the day
+   record, where it would sit as a fifth slot nothing else knows how to draw.
+   And when he is back-filling Saturday there is no sensible "now" at all, so it defaults to the
+   meal he is most likely to have forgotten. */
+function slotNow(){
+  if(!isToday()) return 'dinner';
+  var m=mealNow();
+  return m==='late' ? 'snack' : m;
+}
+
+/* ═════════════════════ CLOSING THE DAY ═════════════════════
+   Mark, 24 Aug: "we need to be able to close down a day so you log all the nutrients, macros,
+   etc and store in the gist - ie not automatically roll over at midnigth in case I haven't
+   updated the info."
+
+   The old app had no such thing. A day ended because the clock said so, which meant a dinner
+   logged at ten past midnight landed on the wrong day, and a day he simply had not got round to
+   filling in was indistinguishable from a day he barely ate — both read as a low day, for ever.
+
+   So a day is OPEN until he closes it, and closing is the only thing that freezes the totals.
+   The frozen summary is what the weekly view and the Hub card read; nothing open is ever counted
+   as evidence about how he ate. He chose "prompt me, never close it itself", and the app holds
+   to that literally: there is no timer anywhere in here.
+
+   WHY THE SUMMARY IS STORED RATHER THAN RECOMPUTED. It is a record of what was true when he
+   signed it off. If a food's figures are corrected next month, a closed Tuesday must not quietly
+   change — it was already read, already acted on, and a number that moves after the fact is not
+   a record of anything. */
+function daySummary(k){
+  var key=k||dayKey(), d=dayNorm(S.log[key]||{}), t=dayTotals(key), T=targets()||{};
+  return { date:key,
+           k:Math.round(t.k), p:Math.round(t.p), c:Math.round(t.c), s:+t.s.toFixed(1), ml:t.ml,
+           meals:mealsLogged(key), missing:missingMeals(key),
+           items:(d.items||[]).length, drinks:(d.drinks||[]).length,
+           /* The targets ride along, because they move as his weight does and a summary read a
+              year later has to know what it was being judged against at the time. */
+           tP:T.protein||null, tK:T.kcal||null, tS:T.salt||4,
+           closedAt:new Date().toISOString() };
+}
+function dayIsEmpty(k){
+  var d=dayNorm(S.log[k]||{});
+  return !(d.items||[]).length && !(d.drinks||[]).length;
+}
+function closeDay(k){
+  var key=k||dayKey();
+  var d=day(key);
+  d.closed=new Date().toISOString();
+  d.summary=daySummary(key);
+  save();
+  return d.summary;
+}
+function reopenDay(k){
+  var d=day(k||dayKey());
+  d.closed=null; delete d.summary;
+  save();
+}
+/* Days before today that have something in them and have not been signed off. Empty ones are
+   not "open" — a day he did not use the app at all is not an outstanding job, and treating it
+   as one would mean the prompt appeared for ever after any holiday. */
+function openDays(){
+  var t=todayKey();
+  return Object.keys(S.log||{}).filter(function(k){
+    return k<t && !dayIsEmpty(k) && !dayNorm(S.log[k]).closed;
+  }).sort();
+}
+function closedDays(n){
+  var t=todayKey();
+  return Object.keys(S.log||{}).filter(function(k){
+    return k<=t && dayNorm(S.log[k]).closed;
+  }).sort().slice(-(n||7));
+}
+function longDate(k){
+  return keyToDate(k).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
 }
 var MEAL_LABEL={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',late:'Before bed'};
 
@@ -3514,40 +3421,182 @@ function optRow(key,n,p,k,s,why,plain,conf){
     + '</div>';
 }
 
-/* ═══════════════════ ATE ═══════════════════ */
+/* ═══════════════════ ATE ═══════════════════
+   Rebuilt 24 August 2026 around the three things Mark asked for on the same day: log by meal so
+   the gaps show, track what he drinks, and close the day deliberately. All three needed the same
+   screen, because all three are answers to "what did today actually look like". */
 function renderAte(){
   var el=$('#s-ate'); if(!el) return;
-  var d=day(), r=remaining(), meal=mealNow();
-  var items=[];
-  Object.keys(d.meals).forEach(function(k){ if(d.meals[k]) items.push({slot:k, m:d.meals[k]}); });
-  d.extras.forEach(function(m){ items.push({slot:'extra', m:m}); });
+  var d=day(), r=remaining(), meal=mealNow(), t=dayTotals();
+  var h='';
 
-  var h='<div class="card card-pad">'+meterRow()+'</div>';
-
-  /* ── THE BEFORE-BED CHECK ──
-     Mark: "at what point of the day do we get to review together as to whether I need to top up
-     before bed on anything?" This is that point, and the app picks it rather than him: after
-     eight, the top of this screen changes its question. */
-  if(meal==='late'){
-    h+=topUpCard(r);
+  /* ── AN EARLIER DAY IS STILL OPEN ──
+     He asked for "prompt me, never close it itself", so this strip stays until he deals with it.
+     It does NOT block the app: refusing to let him log breakfast because Saturday is unsigned
+     would punish him for the exact forgetfulness the feature exists to accommodate. */
+  var op=openDays();
+  if(op.length && isToday()){
+    h+='<div class="card card-pad" style="border-color:var(--warn);margin-bottom:14px">'
+     + '<div class="eyebrow" style="color:var(--warn)">Still open</div>'
+     + '<p style="margin:7px 0 0;font-size:16px"><b>'+longDate(op[0])+'</b> was never closed.</p>'
+     + '<p class="hint" style="margin:6px 0 0">Nothing counts towards your week until you sign it '
+     + 'off &mdash; so an unfinished day never quietly drags the averages down.'
+     + (op.length>1?' There are '+op.length+' of them.':'')+'</p>'
+     + '<div style="display:flex;gap:8px;margin-top:11px">'
+     +   '<button class="btn btn-primary grow" data-viewday="'+op[0]+'">Finish it</button>'
+     +   '<button class="btn btn-quiet grow" data-closeday="'+op[0]+'">Close as is</button>'
+     + '</div></div>';
   }
 
-  h+='<h2 style="margin-top:18px">Today</h2>';
-  if(!items.length){
-    h+='<div class="card card-pad"><p class="hint" style="margin:0">Nothing logged yet today.</p></div>';
-  } else {
-    h+='<div class="card">'+items.map(function(x,i){
-      return '<div class="v2-ate"><div class="grow">'
-        + '<div class="v2-opt-n">'+esc(x.m.n)+'</div>'
-        + '<div class="v2-opt-s">'+(x.m.p||0)+'g protein · '+(x.m.k||0)+' kcal · '+(x.m.s||0)+'g salt</div>'
-        + '</div><button class="btn btn-sm btn-quiet" data-unate="'+x.slot+':'+i+'">&times;</button></div>';
-    }).join('')+'</div>';
+  /* ── WHICH DAY AM I LOOKING AT ── */
+  if(!isToday()){
+    h+='<div class="card card-pad" style="border-color:var(--accent);margin-bottom:14px">'
+     + '<div class="row-between"><div class="grow"><div class="eyebrow">Filling in</div>'
+     + '<div style="font-size:17px;font-weight:700;margin-top:2px">'+longDate(dayKey())+'</div></div>'
+     + '<button class="btn btn-sm btn-quiet" data-viewday="today">Back to today</button></div></div>';
   }
 
-  h+='<h2>Something else?</h2><div id="mealCard"></div>';
+  h+='<div class="card card-pad">'+meterRow()+'</div>';
+
+  /* ── FLUID ──
+     A count and a total, with NO bar to fill. Mark chose that over a 2-litre target, and the app
+     already argues on its own drinks page that the evidence for chasing one is null. What is on
+     screen is what is true: how much, in what, and whether today is unusually light. */
+  h+=fluidCard();
+
+  /* ── THE BEFORE-BED CHECK ── */
+  if(meal==='late' && isToday()) h+=topUpCard(r);
+
+  /* ── THE DAY, BY MEAL ──
+     The gaps are the point. An empty lunch is drawn as loudly as a full one, because the whole
+     reason for slotting things was to make "you have not eaten since breakfast" visible. */
+  h+='<h2 style="margin-top:18px">'+(isToday()?'Today':shortDate(dayKey()))+', meal by meal</h2>';
+  var miss=missingMeals();
+  if(miss.length && (t.k>0))
+    h+='<div class="v2-note" style="background:var(--warn-soft);color:var(--warn)">Nothing logged for '
+     + miss.map(function(m){ return m; }).join(' or ')+'.</div>';
+
+  h+=SLOT_ORDER.map(function(sl){ return slotBlock(sl, d); }).join('');
+
+  /* ── TYPE IT IN PLAIN ENGLISH ──
+     This has existed since 23 August and he could not find it, because the dead Today screen
+     held a second <div id="mealCard"> earlier in the document and querySelector kept handing
+     renderMealCard() that one instead. The heading now says what it does rather than
+     "Something else?", which told him nothing about what the box was for. */
+  h+='<h2>Type in what you ate</h2>'
+   + '<p class="hint" style="margin:-4px 0 10px">Plain English, the way you would say it out loud. '
+   + 'It works out the macros and shows you every assumption so you can correct it.</p>'
+   + '<div id="mealCard"></div>';
+
+  /* ── CLOSING ── */
+  h+=closeCard(d, t);
+
   el.innerHTML=h;
   try{ renderMealCard(); }catch(_){}
 }
+
+/* One meal. Its contents, its subtotal, and a way to add to it directly. */
+function slotBlock(sl, d){
+  var items=(d.items||[]).filter(function(x){ return x.slot===sl; });
+  var drinks=(d.drinks||[]).filter(function(x){ return x.slot===sl; });
+  var sub={k:0,p:0,s:0};
+  items.concat(drinks).forEach(function(m){ sub.k+=m.k||0; sub.p+=m.p||0; sub.s+=m.s||0; });
+  var label=SLOT_LABEL[sl], empty=!items.length && !drinks.length;
+
+  var h='<div class="card" style="margin-bottom:10px'+(empty?';border-style:dashed':'')+'">'
+   + '<div class="v2-slot-h">'
+   +   '<span class="v2-slot-n">'+esc(label)+'</span>'
+   +   (empty ? '<span class="v2-slot-t">nothing logged</span>'
+             : '<span class="v2-slot-t">'+Math.round(sub.p)+'g protein &middot; '+Math.round(sub.k)+' kcal</span>')
+   + '</div>';
+
+  items.concat(drinks).forEach(function(m){
+    h+='<div class="v2-ate"><div class="grow">'
+     + '<div class="v2-opt-n">'+esc(m.n)+(m.guessedSlot?' <span class="chip chip-neutral" title="Logged before meals were tracked — the meal is a guess">meal guessed</span>':'')+'</div>'
+     + '<div class="v2-opt-s">'
+     +   (m.ml ? m.ml+'ml' : (m.p||0)+'g protein &middot; '+Math.round(m.k||0)+' kcal &middot; '+(m.s||0)+'g salt')
+     + '</div></div>'
+     + '<div style="flex:none;display:flex;gap:5px;align-items:center">'
+     +   '<button class="btn btn-sm btn-quiet" data-moveitem="'+esc(m.id)+'" title="Move to another meal">&#8646;</button>'
+     +   '<button class="btn btn-sm btn-quiet" data-unate="'+esc(m.id)+'">&times;</button>'
+     + '</div></div>';
+  });
+
+  if(empty)
+    h+='<div style="padding:13px 15px"><p class="hint" style="margin:0">'
+     + (sl==='snack' ? 'Nothing on top today, which is fine.'
+                     : 'If you had something, add it below or type it in.')+'</p></div>';
+  return h+'</div>';
+}
+
+/* ═══════════════════ FLUID ═══════════════════ */
+function fluidCard(){
+  var d=day(), ml=dayTotals().ml, n=(d.drinks||[]).length, nudge=fluidNudge();
+  var h='<div class="card card-pad" style="margin-top:12px'+(nudge?';border-color:var(--warn)':'')+'">'
+   + '<div class="row-between" style="align-items:flex-end">'
+   +   '<div><div class="eyebrow">Drunk today</div>'
+   +   '<div style="font-size:32px;font-weight:800;line-height:1;margin-top:3px">'+ml
+   +     '<span style="font-size:14px;font-weight:700;color:var(--muted);margin-left:4px">ml</span></div></div>'
+   +   '<div class="hint" style="margin:0;text-align:right">'+(n?n+(n===1?' drink':' drinks'):'nothing yet')+'</div>'
+   + '</div>';
+
+  if(nudge)
+    h+='<p class="hint" style="margin:10px 0 0;color:var(--warn)"><b>'+esc(nudge.say)+'</b> '
+     + 'No target to hit &mdash; the evidence for chasing two litres is thin, and it is on the '
+     + 'drinks page. This is just the app noticing you have gone a long stretch without one.</p>';
+
+  h+='<div class="v2-drinkgrid">'+DRINKS.map(function(dr){
+      return '<button class="v2-drinkbtn'+(S.drink===dr.id?' on':'')+'" data-drink="'+dr.id+'">'+esc(dr.n)+'</button>';
+    }).join('')+'</div>';
+
+  /* SIZES ARE VESSELS. He is not going to estimate 568ml; he is going to recognise a pint glass. */
+  var cur=drinkDef(S.drink||'squash') || DRINKS[0];
+  h+='<div class="hint" style="margin:12px 0 6px">'+esc(cur.n)+' &mdash; how big?</div>'
+   + '<div class="v2-vesselgrid">'+cur.vessels.map(function(v){
+        var ves=vesselDef(v); if(!ves) return '';
+        return '<button class="v2-vessel" data-pour="'+cur.id+':'+ves.id+'">'
+          + '<span class="v2-vessel-n">'+esc(ves.n)+'</span>'
+          + '<span class="v2-vessel-m">'+ves.ml+'ml</span></button>';
+      }).join('')+'</div>'
+   + '<p class="hint" style="margin:9px 0 0">'+esc(cur.note)+'</p>';
+  return h+'</div>';
+}
+
+/* ═══════════════════ CLOSING THE DAY ═══════════════════ */
+function closeCard(d, t){
+  if(d.closed){
+    var sm=d.summary||{};
+    return '<div class="card card-pad" style="margin-top:16px;border-color:var(--go)">'
+      + '<div class="eyebrow" style="color:var(--go-ink)">Closed</div>'
+      + '<p style="margin:7px 0 0;font-size:16px"><b>'+longDate(dayKey())+' is signed off.</b></p>'
+      + '<p class="hint" style="margin:6px 0 0">'+sm.p+'g protein &middot; '+sm.k+' kcal &middot; '
+      + sm.s+'g salt &middot; '+sm.ml+'ml. Saved to the cloud and counted in your week.</p>'
+      + '<button class="btn btn-quiet btn-block" style="margin-top:11px" data-reopen="1">Reopen it</button>'
+      + '</div>';
+  }
+  var miss=missingMeals(), empty=dayIsEmpty(dayKey());
+  var h='<div class="card card-pad" style="margin-top:16px">'
+   + '<div class="eyebrow">Finished for the day?</div>'
+   + '<p class="hint" style="margin:7px 0 0">Closing freezes these totals and saves them. '
+   + '<b>Nothing rolls over at midnight</b> &mdash; a day stays open until you say so, so a dinner '
+   + 'you log at half past twelve still lands on the right day.</p>';
+  if(empty){
+    h+='<p class="hint" style="margin:9px 0 0">Nothing logged, so there is nothing to close yet.</p>';
+    return h+'</div>';
+  }
+  if(miss.length)
+    h+='<p class="hint" style="margin:9px 0 0;color:var(--warn)">You have nothing down for '
+     + miss.join(' or ')+'. Close it anyway if you genuinely skipped '
+     + (miss.length>1?'them':'it')+' &mdash; that is real data. If you just have not got to it, leave it open.</p>';
+  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px 0 4px;text-align:center">'
+   +   mealStat('Protein', Math.round(t.p)+'g') + mealStat('Kcal', Math.round(t.k))
+   +   mealStat('Salt', (+t.s.toFixed(1))+'g')  + mealStat('Fluid', t.ml+'ml')
+   + '</div>'
+   + '<button class="btn btn-primary btn-block" style="margin-top:9px" data-closeday="'+dayKey()+'">'
+   +   'Close '+(isToday()?'today':shortDate(dayKey()))+'</button>';
+  return h+'</div>';
+}
+
 function topUpCard(r){
   /* What actually closes the gap, from what is in the fridge — not a generic list. And it says
      when the honest answer is "nothing": eating at ten at night to hit a number is not the point
@@ -3645,11 +3694,14 @@ function eatThis(key){
     if(!q) return;
     name=q.n; mac={k:q.k,p:q.p,c:q.c||0,s:q.s};
   } else { return; }
-  var slot=mealNow(); if(slot==='late') slot='snack';
-  var rec={id:'v2:'+Date.now().toString(36), n:name, k:mac.k, p:mac.p, c:mac.c||0, s:mac.s};
-  var dd=day();
-  if(!dd.meals[slot]) dd.meals[slot]=rec; else dd.extras.push(rec);
-  save(); toast('Logged'); render();
+  /* The hour picks the meal, not a button. It is right almost every time, and when it is not he
+     can move the item with one tap on the Ate screen — which is cheaper than making him answer
+     "which meal is this?" on every single log for the sake of the few it gets wrong. */
+  var slot=slotNow();
+  var rec={id:'v2:'+Date.now().toString(36)+':'+Math.random().toString(36).slice(2,6),
+           n:name, k:mac.k, p:mac.p, c:mac.c||0, s:mac.s, slot:slot, at:new Date().toISOString()};
+  day().items.push(rec);
+  save(); toast('Logged to '+SLOT_LABEL[slot].toLowerCase().replace(' & drinks','')); render();
 }
 
 /* ═════════════════════════════  EVENTS  ═════════════════════════════ */
@@ -3665,9 +3717,47 @@ document.addEventListener('click', function(e){
       if(x.id===q[0]){ x.qty=Math.max(0,Math.round((( x.qty||1)+parseFloat(q[1]))*2)/2); } });
     S.fridge=(S.fridge||[]).filter(function(x){ return (x.qty||0)>0; });
     save(); renderFridge(); return; }
-  if(d.unate){ var u=d.unate.split(':'), dd=day();
-    if(u[0]==='extra') dd.extras.splice(+u[1],1); else delete dd.meals[u[0]];
+  /* Removing by ID rather than by index. The old handler spliced by position in a list that was
+     built by concatenating two different collections, so deleting the second item could remove
+     the third — and it was silent, because something did disappear. */
+  if(d.unate){ var dd=day();
+    dd.items =(dd.items ||[]).filter(function(x){ return x.id!==d.unate; });
+    dd.drinks=(dd.drinks||[]).filter(function(x){ return x.id!==d.unate; });
     save(); renderAte(); return; }
+
+  /* Move an item to the next meal, cycling. One button rather than a picker: the hour gets the
+     meal right nearly every time, and when it does not, the correction is usually one step. */
+  if(d.moveitem){ var dm=day(), all=(dm.items||[]).concat(dm.drinks||[]);
+    all.forEach(function(x){
+      if(x.id===d.moveitem){
+        var i=SLOT_ORDER.indexOf(x.slot);
+        x.slot=SLOT_ORDER[(i+1)%SLOT_ORDER.length];
+        delete x.guessedSlot;
+      }
+    });
+    save(); renderAte(); return; }
+
+  /* ── drinks ── */
+  if(d.drink){ S.drink=d.drink; save(); renderAte(); return; }
+  if(d.pour){ var q=d.pour.split(':');
+    if(logDrink(q[0], q[1])){ var v=vesselDef(q[1]); toast(v.n+' — '+v.ml+'ml'); }
+    renderAte(); return; }
+
+  /* ── closing, reopening, and moving between days ── */
+  if(d.closeday){
+    var sm=closeDay(d.closeday);
+    if(S.viewDay===d.closeday) S.viewDay=null;
+    save(); render();
+    toast('Closed — '+sm.p+'g protein, '+sm.ml+'ml');
+    return; }
+  if(d.reopen){ reopenDay(); save(); renderAte(); toast('Open again'); return; }
+  if(d.viewday){
+    S.viewDay = (d.viewday==='today') ? null : d.viewday;
+    /* The typed-meal draft belongs to the day it was started on. Carrying it across would put
+       Saturday's dinner into Monday, which is the exact class of mistake this whole feature is
+       here to prevent. */
+    try{ mealReset(); }catch(_){}
+    save(); go('ate'); return; }
 }, true);
 
 
@@ -3721,105 +3811,11 @@ document.addEventListener('click', function(e){
   if(!a) return;
   const act = a.dataset.act;
 
-  if(act==='toggle'){
-    S.open = (S.open === a.dataset.slot) ? null : a.dataset.slot;
-    save(); renderMeals(); return;
-  }
-
-  if(act==='place'){
-    S.place = a.dataset.id; S.venue = null;
-    S.slotHint = a.dataset.slot || null;
-    S.open = null; save(); go('where'); return;
-  }
-  if(act==='venue'){ S.venue = a.dataset.id; save(); renderWhere(); window.scrollTo(0,0); return; }
-  if(act==='backvenue'){ S.venue = null; save(); renderWhere(); window.scrollTo(0,0); return; }
-  if(act==='backplace'){ S.place = null; S.venue = null; S.slotHint = null; save(); render(); window.scrollTo(0,0); return; }
-
-  if(act==='pick'){
-    const item = findItem(a.dataset.id);
-    if(!item) return;
-
-    if(a.dataset.slot === 'extra'){
-      day().extras.push({id:item.id, n:item.n, k:item.k, p:item.p, c:item.c||0, s:item.s});
-      save(); render(); toast('Added');
-      return;
-    }
-
-    const slot = S.slotHint || a.dataset.slot;
-    if(!slot){
-      toast('That one is a drink — nothing to log');
-      return;
-    }
-    const d = day();
-    d.meals[slot] = {id:item.id, n:item.n, k:item.k, p:item.p, c:item.c||0, s:item.s};
-    S.open = null; S.place = null; S.venue = null; S.slotHint = null;
-    save(); go('today');
-    toast(slot.charAt(0).toUpperCase()+slot.slice(1)+' logged');
-    return;
-  }
-
-  if(act==='off'){
-    day().meals[a.dataset.slot] = {id:'off', n:'Off plan — noted, moving on', off:true, k:0,p:0,c:0,s:0};
-    S.open = null; save(); render();
-    toast('Noted. Next meal is a clean slate.');
-    return;
-  }
-
-  /* ── the food list ── */
-  if(act==='taste'){
-    const id = a.dataset.id;
-    if(!S.taste[id]) S.tasteOrder.push(id);
-    S.taste[id] = a.dataset.v;
-    save(); renderTaste();
-    $('#topSub').textContent = tasteAnswered()+' of '+ALL_FOODS.length;
-    return;
-  }
-  if(act==='tasteset'){
-    const id = a.dataset.id, v = a.dataset.v;
-    if(S.taste[id] === v){
-      delete S.taste[id];
-      S.tasteOrder = S.tasteOrder.filter(function(x){ return x!==id; });
-    }else{
-      if(!S.taste[id]) S.tasteOrder.push(id);
-      S.taste[id] = v;
-    }
-    save(); renderTaste(); return;
-  }
-  if(act==='tasteskipcat'){
-    ALL_FOODS.forEach(function(f){
-      if(f.catId===a.dataset.cat && !S.taste[f.id]){ S.taste[f.id]='ok'; S.tasteOrder.push(f.id); }
-    });
-    save(); renderTaste();
-    $('#topSub').textContent = tasteAnswered()+' of '+ALL_FOODS.length;
-    return;
-  }
-  if(act==='tasteback'){
-    const last = S.tasteOrder.pop();
-    if(last) delete S.taste[last];
-    save(); renderTaste();
-    $('#topSub').textContent = tasteAnswered()+' of '+ALL_FOODS.length;
-    return;
-  }
-  if(act==='tastereview'){ S.tasteReview = true; save(); renderTaste(); window.scrollTo(0,0); return; }
-  if(act==='tastereviewoff'){ S.tasteReview = false; save(); renderTaste(); window.scrollTo(0,0); return; }
-  if(act==='tastereset'){
-    S.taste = {}; S.tasteOrder = []; S.tasteReview = false; save(); renderTaste();
-    toast('Food list cleared'); return;
-  }
-  if(act==='tastestart'){ S.tasteReview = false; go('taste'); return; }
-  if(act==='tastedone'){
-    S.tasteReview = false;
-    const n = tasteAnswered();
-    go('today');
-    toast(n ? n+' answered — lists are filtered' : 'Nothing saved yet');
-    return;
-  }
-  if(act==='showhidden'){ S.showHidden[a.dataset.key] = true; save(); renderWhere(); return; }
-  if(act==='hidefew'){ S.showHidden[a.dataset.key] = false; save(); renderWhere(); return; }
-
-  if(act==='rmextra'){ day().extras.splice(Number(a.dataset.i),1); save(); render(); return; }
-  if(act==='opentopup'){ S.topupOpen = true; save(); render(); return; }
-  if(act==='closetopup'){ S.topupOpen = false; save(); render(); return; }
+  /* REMOVED 24 August 2026, with the screens they drove: toggle, place, venue, backvenue,
+     backplace, off, the whole taste block, showhidden, hidefew, rmextra, opentopup, closetopup.
+     Several of them still wrote to d.meals and d.extras — a shape that no longer exists — so
+     they were not merely unreachable, they were unreachable AND wrong, which is the pair that
+     turns into a mystery bug the day something makes one of them reachable again. */
 
   if(act==='savemeasure'){
     const g = function(id){ const v = parseFloat($('#'+id).value); return isNaN(v) ? null : v; };
@@ -3845,23 +3841,12 @@ $('#setupGo').addEventListener('click', function(){
   S.tab='today'; save(); render();
 });
 
-$('#walkBtn').addEventListener('click', function(){ const d=day(); d.walk=!d.walk; save(); renderToggles(); });
-$('#liftBtn').addEventListener('click', function(){ const d=day(); d.lift=!d.lift; save(); renderToggles(); });
-$('#wipeDay').addEventListener('click', function(){
-  S.log[todayKey()] = {meals:{}, extras:[], walk:false, lift:false};
-  S.open=null; S.topupOpen=false; save(); render(); toast('Today reset');
-});
-$('#planAll').addEventListener('click', function(){
-  const key = todayKey(), d = day();
-  let filled = 0;
-  ['breakfast','lunch','dinner','snack'].forEach(function(slot){
-    if(d.meals[slot]) return;
-    const o = autoPick(slot, key);
-    if(o){ d.meals[slot] = {id:o.id, n:o.n, k:o.k, p:o.p, c:o.c||0, s:o.s}; filled++; }
-  });
-  save(); render();
-  toast(filled ? 'Decided. Change any of it by tapping.' : 'Already decided');
-});
+/* The walk / lift / clear-today / decide-for-me listeners were removed here on 24 August 2026
+   along with the buttons they were bound to.
+   THIS IS THE DANGEROUS HALF OF DELETING MARKUP: $('#walkBtn') returns null the moment the
+   element goes, and null.addEventListener throws AT LOAD — which does not break one button, it
+   stops the rest of the script from running at all. Markup and its listeners have to leave in
+   the same commit, and the way to be sure is to boot the app afterwards, which the test does. */
 
 /* ═════════════════════════════  EXPORT  ═════════════════════════════ */
 

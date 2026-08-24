@@ -4,7 +4,7 @@
  * (read-modify-write) is unchanged.
  * Bump CACHE on every shell change so phones pick up the new version.
  */
-var CACHE = 'buttery-v8';   // 24 Aug 2026 — restructured: three screens, home dinners, the fridge
+var CACHE = 'buttery-v9';   // 24 Aug 2026 — meal slots, drinks, and closing the day deliberately
 var SHELL = [
   './',
   './index.html',
