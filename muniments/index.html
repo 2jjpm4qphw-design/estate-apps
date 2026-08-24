@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Muniments">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0D1B3E">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>The Muniments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap">
+</head>
+<body>
+<style>
+.estate-strip{display:flex;align-items:center;gap:9px;padding:9px 16px 8px;background:#0D1B3E}
+.estate-strip .em-house{height:13px;width:auto;flex:none;opacity:1}
+.estate-strip .em-dept{font-family:Montserrat,-apple-system,Helvetica,Arial,sans-serif;font-size:9px;
+  font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C4F000;line-height:1}
+:root{
+  --bg:#0D1B3E; --surface:#12224A; --surface-2:#172954;
+  --ink:#FFFFFF; --ink-2:#D6DEEE; --muted:#9FB0CE;
+  --line:#24467e; --line-strong:#3159A0;
+  --go:#C4F000; --go-soft:#1B3418; --go-ink:#DCF95E;
+  --warn:#F2B23C; --warn-soft:#3A2C10;
+  --stop:#FF7A6E; --stop-soft:#3D1B18;
+  --data:#7FB6F0;
+  --shadow:0 1px 2px rgba(0,0,0,.45), 0 6px 20px -12px rgba(0,0,0,.8);
+  --radius:14px; --f:"Montserrat","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:16px;
+  line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
+  padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none;text-align:left}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--data);outline-offset:2px;border-radius:6px}
+.wrap{max-width:540px;margin:0 auto;padding:0 16px}
+h1{font-size:20px;font-weight:800;margin:0}
+h2{font-size:19px;font-weight:700;margin:22px 0 10px}
+p{margin:0 0 .8em}
+.hint{font-size:14.5px;line-height:1.5;color:var(--muted)}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 90%,transparent);
+  backdrop-filter:saturate(160%) blur(12px);-webkit-backdrop-filter:saturate(160%) blur(12px);
+  border-bottom:1px solid var(--line)}
+.topbar-in{max-width:540px;margin:0 auto;padding:6px 16px 10px;display:flex;align-items:baseline;
+  justify-content:space-between;gap:12px}
+.topbar .sub{font-size:13.5px;color:var(--muted);font-weight:600;flex:none}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;
+  background:color-mix(in srgb,var(--surface) 96%,transparent);
+  backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabbar-in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 8px;
+  color:var(--muted);font-size:11.5px;font-weight:700}
+.tab .ti{font-size:17px;line-height:1}
+.tab[aria-current="page"]{color:var(--go)}
+.view[hidden]{display:none}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden}
+.card+.card{margin-top:12px}
+.pad{padding:15px 16px}
+.rowb{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.grow{flex:1;min-width:0}
+.item{padding:13px 16px;border-top:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
+.item:first-child{border-top:none}
+.item .t{font-size:15.5px;font-weight:600;line-height:1.35}
+.item .s{font-size:13.5px;color:var(--muted);margin-top:2px}
+.item .r{flex:none;text-align:right}
+.pill{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.04em;padding:3px 9px;
+  border-radius:999px;text-transform:uppercase}
+.pill.go{background:var(--go-soft);color:var(--go-ink)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.stop{background:var(--stop-soft);color:var(--stop)}
+.pill.flat{background:var(--surface-2);color:var(--muted)}
+.f{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f .wide{grid-column:1/-1}
+label.fl{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 4px}
+input[type=text],input[type=date],input[type=password],select,textarea{
+  width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
+  padding:11px 12px;font-size:16px;color:var(--ink);-webkit-appearance:none;appearance:none}
+textarea{min-height:64px;resize:vertical;font-size:15.5px}
+.btn{display:inline-block;background:var(--go);color:#0D1B3E;font-weight:800;font-size:15px;
+  padding:12px 16px;border-radius:11px;text-align:center;width:100%}
+.btn.ghost{background:transparent;color:var(--ink-2);border:1px solid var(--line-strong);font-weight:700}
+.btn.danger{background:transparent;color:var(--stop);border:1px solid var(--stop);font-weight:700}
+.btn.sm{padding:8px 12px;font-size:13.5px;width:auto;border-radius:9px}
+.row2{display:flex;gap:8px}
+.row2 .btn{flex:1}
+/* the scan viewer */
+.scan-wrap{background:#000;border-radius:10px;overflow:hidden;margin-top:10px}
+.scan-wrap img{width:100%;height:auto;display:block}
+.scan-full{position:fixed;inset:0;z-index:60;background:#000;display:flex;flex-direction:column}
+.scan-full img{flex:1;width:100%;object-fit:contain;min-height:0}
+.scan-full .close{flex:none;padding:14px;text-align:center;color:#fff;font-weight:700;
+  background:#0D1B3E;border-top:1px solid var(--line)}
+/* the lock screen */
+.lock{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:28px;text-align:center}
+.lock .pin{width:190px;text-align:center;letter-spacing:.5em;font-size:22px;margin-top:16px}
+.chip{display:inline-block;font-size:12px;padding:3px 9px;border-radius:8px;background:var(--surface-2);
+  color:var(--muted);margin:0 5px 5px 0}
+</style>
+
+<div class="estate-strip" aria-hidden="true"><img class="em-house" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAABGCAMAAAAdMRrrAAADAFBMVEUAAAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABnduxjAAAAAXRSTlMAQObYZgAAAmlJREFUeNrtmtt2hCAMRU/+/6fbNZ2qQLgkBARNXuoqKrDnkAsIzDAikPgZ1VPLGn1MA4FeD4EcgkN4FASyMUewNwYyNUewGQYaA+CLYRMYNN4cwpNSh0cbkUvh4xivTowuYD7FZIgqxHZxrVmegPuETZTgEBzCCQGJR0D6j8N3INeSe9smEMAMuzbV9pbdlECIE19kLriW8O9VNG9RAh6nBKBHCdhRCR4d9ofAdSHqdikI/M3VVzwLQmbocyEc5RSCQBeGPYpuOc6e4rdgTwivVsIyeQJ/b+UVJuzt8gT05gkaMRk55GWUoFlTFgsx+9vNV4LGs9i4o3WUoPGvRk45O4/ZEBRhRh+a6NwcpXkhMupVG6pV0T2YOhEyB2WjIRShiLIVVYYTbqvTPRCqU5I/Ixx4LfLMF0LYkBkeci0D8tx7lTCvNh/Q/f27DfQwgwabso9vdfL/iu/lvHkGfV99QQeEwgXFJyh0hMggOKWJTz1ZCvZ6BMnS2eG17z8a3KFPevoTtKHOLz07qEGg1pMVtOSS1AABAQTZKhmrhLbjJU1CXYHQqwTGSyTLbXkI7HcNBfcGVRSyWg40bTmYRgdbx6ht2QCCMLVRV5EO4WkQsAgE0xDZmtgqc/f2EFmaFRcimaBZhaDOepHRoYwhQyYuqJMfksoQZEpgqnXBl44o4Omp/sZBSLTFVKxCIaCmEU3VHFdX8uXQVbOLV4MRBHYg86IDy6B1OZQhyNYBc/o4ZT8BXQxqELopTIHQyUB1MiShcAcE8dae2R5hbURjdyXHfOOFV5pDYFTrEByCQ3gzhMVClUNwCL/2A4cGHxiWr8/FAAAAAElFTkSuQmCC"><span class="em-dept">Of the Estate</span></div>
+
+<header class="topbar"><div class="topbar-in">
+  <h1>The Muniments</h1><span class="sub" id="hSub">&mdash;</span>
+</div></header>
+
+<div class="lock" id="lockScreen" hidden>
+  <div class="eyebrow">The Muniments</div>
+  <p style="margin-top:10px;font-size:17px"><b>Locked.</b></p>
+  <p class="hint" style="max-width:300px">Everything in here is encrypted on this phone. Nothing is stored anywhere else.</p>
+  <input class="pin" id="lockPin" type="password" inputmode="numeric" autocomplete="off" placeholder="••••">
+  <div style="width:200px;margin-top:12px"><button class="btn" id="lockGo">Unlock</button></div>
+  <p class="hint" id="lockErr" hidden style="color:var(--stop);margin-top:10px"></p>
+</div>
+
+<main class="wrap" id="main">
+
+<!-- ───────────── PAPERS ───────────── -->
+<section class="view" id="v-papers">
+  <div id="papersBody"></div>
+  <h2>Add a paper</h2>
+  <div class="card"><div class="pad">
+    <div class="f">
+      <div class="wide"><label class="fl" for="pTitle">What it is</label>
+        <input id="pTitle" type="text" placeholder="NHS pre-paid certificate"></div>
+      <div><label class="fl" for="pCat">Which part of the estate</label>
+        <select id="pCat">
+          <option value="person">Of the Person</option>
+          <option value="house">Of the House</option>
+          <option value="estate">Of the Estate</option>
+          <option value="succession">Of Succession</option>
+        </select></div>
+      <div><label class="fl" for="pExp">Runs out</label><input id="pExp" type="date"></div>
+      <div class="wide"><label class="fl" for="pWhere">Where it lives</label>
+        <input id="pWhere" type="text" placeholder="the blue folder, top drawer of the bureau"></div>
+      <div class="wide"><label class="fl" for="pNotes">Docket</label>
+        <input id="pNotes" type="text" placeholder="a sentence, never the numbers"></div>
+      <div class="wide"><label class="fl" for="pScan">A scan or photo <span style="text-transform:none;letter-spacing:0;font-weight:400">&mdash; optional, stays on this phone</span></label>
+        <input id="pScan" type="file" accept="image/*,application/pdf" style="font-size:14px;padding:9px 0"></div>
+      <div class="wide"><button class="btn" id="pAdd">Save it</button></div>
+    </div>
+    <p class="hint" id="pErr" hidden style="color:var(--stop);margin-top:10px"></p>
+  </div></div>
+</section>
+
+<!-- ───────────── HINTS ───────────── -->
+<section class="view" id="v-hints" hidden>
+  <div class="card"><div class="pad">
+    <p style="margin:0"><b>Hints, never passwords.</b></p>
+    <p class="hint" style="margin:6px 0 0">You change them regularly, so a stored password would be wrong
+    within a month &mdash; and a copy of your Apple password sitting in a homemade app is a bad idea
+    whoever built it. <b>Your passwords belong in the Passwords app</b>, which is end-to-end encrypted
+    and already on this phone. What goes here is the nudge that gets you there.</p>
+  </div></div>
+  <div id="hintsBody"></div>
+  <h2>Add a hint</h2>
+  <div class="card"><div class="pad">
+    <div class="f">
+      <div class="wide"><label class="fl" for="hWhat">What it opens</label>
+        <input id="hWhat" type="text" placeholder="iCloud"></div>
+      <div class="wide"><label class="fl" for="hHint">The nudge</label>
+        <input id="hHint" type="text" placeholder="the road we lived on + the year, capital first"></div>
+      <div class="wide"><label class="fl" for="hWhere">Where the real one is kept</label>
+        <input id="hWhere" type="text" placeholder="Apple Passwords" value="Apple Passwords"></div>
+      <div class="wide"><button class="btn" id="hAdd">Save the hint</button></div>
+    </div>
+    <p class="hint" style="margin-top:10px"><b>Write the nudge for you in six months, not for you today.</b>
+    &ldquo;the usual&rdquo; is not a hint. Nor is anything that would tell a stranger the answer.</p>
+  </div></div>
+</section>
+
+<!-- ───────────── EMERGENCY ───────────── -->
+<section class="view" id="v-ice" hidden>
+  <div class="card"><div class="pad">
+    <p style="margin:0"><b>What somebody else might need to find.</b></p>
+    <p class="hint" style="margin:6px 0 0">This is the one page here worth being findable in a hurry.
+    Consider also putting the same few facts in the iPhone&rsquo;s own Medical ID, which shows on the
+    lock screen without anyone needing to get into the phone at all.</p>
+  </div></div>
+  <div class="card"><div class="pad"><div class="f">
+    <div><label class="fl" for="iBlood">Blood group</label><input id="iBlood" type="text"></div>
+    <div><label class="fl" for="iNhs">NHS number</label><input id="iNhs" type="text"></div>
+    <div class="wide"><label class="fl" for="iAllerg">Allergies</label><textarea id="iAllerg"></textarea></div>
+    <div class="wide"><label class="fl" for="iMeds">Medication</label><textarea id="iMeds" placeholder="what you take, and what for"></textarea></div>
+    <div class="wide"><label class="fl" for="iCond">Conditions worth knowing</label><textarea id="iCond"></textarea></div>
+    <div class="wide"><label class="fl" for="iKin">Next of kin</label><input id="iKin" type="text" placeholder="name and number"></div>
+    <div class="wide"><label class="fl" for="iGp">GP surgery</label><input id="iGp" type="text" placeholder="name, number, out of hours"></div>
+    <div class="wide"><button class="btn" id="iSave">Save</button></div>
+  </div></div></div>
+</section>
+
+<!-- ───────────── KEEPING ───────────── -->
+<section class="view" id="v-keep" hidden>
+  <div id="keepBody"></div>
+</section>
+
+</main>
+
+<nav class="tabbar"><div class="tabbar-in">
+  <button class="tab" data-go="papers" aria-current="page"><span class="ti">&#9744;</span>Papers</button>
+  <button class="tab" data-go="hints"><span class="ti">&#9906;</span>Hints</button>
+  <button class="tab" data-go="ice"><span class="ti">&#9829;</span>In case</button>
+  <button class="tab" data-go="keep"><span class="ti">&#9881;</span>Keeping</button>
+</div></nav>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE MUNIMENTS — 24 August 2026
+
+   Mark: "I need a PWA phone app for a place to stash information — a scan copy of my annual NHS
+   pre paid certificate, password for my icloud, ie doc and important info."
+   Then, on the password: "I'd like to provide a hint to it rather than the actual password. I
+   change them regularly and so a hint reminder would be great."
+
+   THE ONE RULE THIS APP IS BUILT AROUND: NOTHING LEAVES THE PHONE.
+   Every other app in the estate syncs through a GitHub gist. A gist is not encrypted — a
+   "secret" one is just an unguessable URL, and the token that opens it sits in localStorage on
+   an address all fifteen apps share. That is a fine arrangement for wine bottles and puzzle
+   scores and a bad one for a scan of an NHS certificate.
+   So there is NO SYNC CODE IN THIS FILE AT ALL. Not disabled, not behind a flag — absent. You
+   cannot accidentally re-enable something that was never written, and the next person to read
+   this (me, in three months) cannot talk themselves into it.
+
+   HINTS, NEVER PASSWORDS. His own instinct, and the right one twice over: a stored password
+   would be stale within a month given how often he rotates them, and the Passwords app is
+   end-to-end encrypted and already on the phone. Anything here would be strictly worse.
+
+   ENCRYPTED AT REST, with a PIN, using WebCrypto — PBKDF2 to derive the key, AES-GCM to seal
+   each record. The PIN never leaves the device and is never stored; only a verifier is, so a
+   wrong PIN is refused without the app ever holding the right one.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+var BUILD='2026-08-24a';
+
+/* ───────────────── storage ─────────────────
+   IndexedDB, because a scan is a blob and localStorage holds only strings and only 5MB.
+   Falls back to memory when indexedDB is missing, which is what lets the test harness drive
+   the whole app without a browser. */
+var DB_NAME='muniments', DB_VER=1, _db=null, _mem={recs:{},blobs:{}};
+function dbOpen(){
+  return new Promise(function(res){
+    if(typeof indexedDB==='undefined'||!indexedDB){ res(null); return; }
+    var rq=indexedDB.open(DB_NAME,DB_VER);
+    rq.onupgradeneeded=function(){
+      var db=rq.result;
+      if(!db.objectStoreNames.contains('recs'))  db.createObjectStore('recs',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('blobs')) db.createObjectStore('blobs');
+    };
+    rq.onsuccess=function(){ _db=rq.result; res(_db); };
+    rq.onerror=function(){ res(null); };
+  });
+}
+function dbPut(store,val,key){
+  if(!_db){ if(store==='recs') _mem.recs[val.id]=val; else _mem.blobs[key]=val; return Promise.resolve(); }
+  return new Promise(function(res,rej){
+    var tx=_db.transaction(store,'readwrite');
+    var rq=key===undefined ? tx.objectStore(store).put(val) : tx.objectStore(store).put(val,key);
+    rq.onsuccess=function(){ res(); }; rq.onerror=function(){ rej(rq.error); };
+  });
+}
+function dbAll(store){
+  if(!_db) return Promise.resolve(store==='recs'?Object.keys(_mem.recs).map(function(k){return _mem.recs[k];}):[]);
+  return new Promise(function(res){
+    var out=[], tx=_db.transaction(store,'readonly'), rq=tx.objectStore(store).openCursor();
+    rq.onsuccess=function(){ var c=rq.result; if(c){ out.push(c.value); c.continue(); } else res(out); };
+    rq.onerror=function(){ res([]); };
+  });
+}
+function dbGet(store,key){
+  if(!_db) return Promise.resolve(store==='recs'?_mem.recs[key]:_mem.blobs[key]);
+  return new Promise(function(res){
+    var tx=_db.transaction(store,'readonly'), rq=tx.objectStore(store).get(key);
+    rq.onsuccess=function(){ res(rq.result); }; rq.onerror=function(){ res(undefined); };
+  });
+}
+function dbDel(store,key){
+  if(!_db){ if(store==='recs') delete _mem.recs[key]; else delete _mem.blobs[key]; return Promise.resolve(); }
+  return new Promise(function(res){
+    var tx=_db.transaction(store,'readwrite'), rq=tx.objectStore(store).delete(key);
+    rq.onsuccess=function(){ res(); }; rq.onerror=function(){ res(); };
+  });
+}
+
+/* ───────────────── the lock ─────────────────
+   PBKDF2 with 250,000 rounds turns a four-digit PIN into a key that is expensive to guess. It
+   is still a four-digit PIN — the real defence is that the data never leaves a phone which is
+   itself locked. This stops a borrowed phone, not a determined adversary with the device.
+
+   THE PIN IS NEVER STORED. What is stored is a verifier: a known phrase sealed with the key.
+   If it unseals, the PIN was right. If it does not, the app cannot tell you what the PIN was,
+   because it does not know. Which is also why a forgotten PIN means the encrypted export is
+   the only way back, and why the app nags about making one. */
+var LK='muniments:lock', KEY=null;
+function subtle(){ return (typeof crypto!=='undefined' && crypto.subtle) ? crypto.subtle : null; }
+function rand(n){ var a=new Uint8Array(n); crypto.getRandomValues(a); return a; }
+function b64(buf){ var b=new Uint8Array(buf), s=''; for(var i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
+function unb64(s){ var bin=atob(s), a=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return a; }
+function lockCfg(){ try{ return JSON.parse(localStorage.getItem(LK)||'null'); }catch(_){ return null; } }
+function lockSet(c){ try{ localStorage.setItem(LK, JSON.stringify(c)); }catch(_){} }
+function hasLock(){ return !!lockCfg(); }
+
+function deriveKey(pin, saltB64){
+  var s=subtle(); if(!s) return Promise.resolve(null);
+  var enc=new TextEncoder();
+  return s.importKey('raw', enc.encode(String(pin)), 'PBKDF2', false, ['deriveKey'])
+    .then(function(base){
+      return s.deriveKey(
+        {name:'PBKDF2', salt:unb64(saltB64), iterations:250000, hash:'SHA-256'},
+        base, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+    });
+}
+/* IT REFUSES RATHER THAN DEGRADING, and finding this was the whole point of writing the test.
+   The first version fell back to `{plain:obj}` whenever WebCrypto was missing — so with a PIN
+   set and crypto unavailable, the app would show a lock screen, accept the PIN, behave perfectly
+   and write every scan and hint to disk IN THE CLEAR. A vault that looks locked and is not is
+   worse than an obviously open drawer, because you put things in it.
+
+   `crypto.subtle` exists only in a secure context: HTTPS or localhost. On GitHub Pages it is
+   always there. Over plain http, or from a file:// URL, it is not — and that is precisely when
+   silence would have been most expensive.
+
+   No PIN set is a different thing entirely: then plain storage is the honest state, and the
+   Keeping tab says so. */
+function seal(key, obj){
+  if(!key) return Promise.resolve({plain:obj});            // no PIN — plainly stored, by choice
+  var s=subtle();
+  if(!s) return Promise.reject(new Error('no-crypto'));    // PIN set but cannot encrypt: refuse
+  var iv=rand(12), data=new TextEncoder().encode(JSON.stringify(obj));
+  return s.encrypt({name:'AES-GCM', iv:iv}, key, data)
+    .then(function(ct){ return {iv:b64(iv), ct:b64(ct)}; });
+}
+function unseal(key, box){
+  if(box && box.plain!==undefined) return Promise.resolve(box.plain);
+  var s=subtle(); if(!s||!key||!box) return Promise.resolve(null);
+  return s.decrypt({name:'AES-GCM', iv:unb64(box.iv)}, key, unb64(box.ct))
+    .then(function(pt){ return JSON.parse(new TextDecoder().decode(pt)); })
+    .catch(function(){ return null; });
+}
+var VERIFY='the muniment room';
+function setPin(pin){
+  /* Refuse to offer a lock this browser cannot actually provide, rather than pretending. */
+  if(!subtle()) return Promise.reject(new Error('no-crypto'));
+  var salt=b64(rand(16));
+  return deriveKey(pin, salt).then(function(k){
+    KEY=k;
+    return seal(k, VERIFY).then(function(box){
+      lockCfg();
+      lockSet({salt:salt, check:box, at:new Date().toISOString()});
+      return true;
+    });
+  });
+}
+function tryPin(pin){
+  var c=lockCfg(); if(!c) return Promise.resolve(false);
+  return deriveKey(pin, c.salt).then(function(k){
+    return unseal(k, c.check).then(function(v){
+      if(v===VERIFY){ KEY=k; return true; }
+      return false;
+    });
+  });
+}
+
+/* ───────────────── records ─────────────────
+   Field names match the Hub's Muniments register exactly — title, category, where, expiry,
+   notes — so the two are the same idea in two places rather than two half-ideas. The Hub's
+   copy syncs and never holds numbers; this one holds the scan and stays put. */
+var RECS=[], ICE={};
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function todayIso(){ var d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+function niceDate(iso){
+  if(!iso) return '';
+  var d=new Date(iso+'T12:00:00'); if(isNaN(d)) return iso;
+  return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear();
+}
+function daysTo(iso){ return Math.round((Date.parse(iso+'T12:00:00')-Date.parse(todayIso()+'T12:00:00'))/86400000); }
+function expiryPill(iso){
+  if(!iso) return '';
+  var n=daysTo(iso);
+  if(n<0)   return '<span class="pill stop">ran out</span>';
+  if(n<=30) return '<span class="pill warn">'+n+' days</span>';
+  if(n<=90) return '<span class="pill flat">'+Math.round(n/30)+' months</span>';
+  return '';
+}
+var CATS={person:'Of the Person',house:'Of the House',estate:'Of the Estate',succession:'Of Succession'};
+
+function loadAll(){
+  return dbAll('recs').then(function(rows){
+    return Promise.all(rows.map(function(r){
+      return unseal(KEY, r.box).then(function(data){
+        return data ? {id:r.id, kind:r.kind, hasScan:!!r.scan, data:data} : null;
+      });
+    }));
+  }).then(function(list){
+    RECS=list.filter(Boolean);
+    var ice=RECS.filter(function(r){ return r.kind==='ice'; })[0];
+    ICE = ice ? ice.data : {};
+    return RECS;
+  });
+}
+function saveRec(kind, data, id, scanKey){
+  var rid=id||uid();
+  return seal(KEY, data).then(function(box){
+    return dbPut('recs', {id:rid, kind:kind, box:box, scan:scanKey||null, at:new Date().toISOString()});
+  }).then(function(){ return rid; });
+}
+function delRec(id){
+  return dbGet('recs',id).then(function(r){
+    var p=r&&r.scan ? dbDel('blobs', r.scan) : Promise.resolve();
+    return p.then(function(){ return dbDel('recs', id); });
+  });
+}
+/* A scan is sealed too, as bytes. An encrypted record next to a plainly readable photo of the
+   thing it describes would be a lock on the door of a house with no walls. */
+function putScan(file){
+  var key=uid();
+  return file.arrayBuffer().then(function(buf){
+    var s=subtle();
+    if(!s||!KEY) return dbPut('blobs', {type:file.type, plain:buf}, key).then(function(){ return key; });
+    var iv=rand(12);
+    return s.encrypt({name:'AES-GCM', iv:iv}, KEY, buf).then(function(ct){
+      return dbPut('blobs', {type:file.type, iv:b64(iv), ct:ct}, key);
+    }).then(function(){ return key; });
+  });
+}
+function getScan(key){
+  return dbGet('blobs', key).then(function(rec){
+    if(!rec) return null;
+    if(rec.plain!==undefined) return new Blob([rec.plain], {type:rec.type});
+    var s=subtle(); if(!s||!KEY) return null;
+    return s.decrypt({name:'AES-GCM', iv:unb64(rec.iv)}, KEY, rec.ct)
+      .then(function(buf){ return new Blob([buf], {type:rec.type}); })
+      .catch(function(){ return null; });
+  });
+}
+
+/* ───────────────── render ───────────────── */
+var view='papers';
+function $(s){ return document.querySelector(s); }
+function go(v){
+  view=v;
+  ['papers','hints','ice','keep'].forEach(function(k){ var el=$('#v-'+k); if(el) el.hidden=(k!==v); });
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(b){
+    if(b.dataset.go===v) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  window.scrollTo(0,0); render();
+}
+function render(){
+  var papers=RECS.filter(function(r){ return r.kind==='paper'; });
+  $('#hSub').textContent = papers.length ? papers.length+' papers' : 'nothing filed yet';
+  if(view==='papers') renderPapers();
+  if(view==='hints')  renderHints();
+  if(view==='ice')    renderIce();
+  if(view==='keep')   renderKeep();
+}
+function renderPapers(){
+  var rows=RECS.filter(function(r){ return r.kind==='paper'; })
+    .sort(function(a,b){
+      var ax=a.data.expiry||'9999', bx=b.data.expiry||'9999';
+      return ax.localeCompare(bx) || String(a.data.title).localeCompare(String(b.data.title));
+    });
+  var h='';
+  var soon=rows.filter(function(r){ return r.data.expiry && daysTo(r.data.expiry)<=30; });
+  if(soon.length){
+    h+='<div class="card" style="border-color:var(--warn)"><div class="pad">'
+     + '<p style="margin:0"><b>'+soon.length+' needs renewing.</b></p>'
+     + '<p class="hint" style="margin:6px 0 0">'+soon.map(function(r){
+         return esc(r.data.title)+' &mdash; '+(daysTo(r.data.expiry)<0?'ran out '+niceDate(r.data.expiry):'in '+daysTo(r.data.expiry)+' days');
+       }).join('<br>')+'</p></div></div>';
+  }
+  if(!rows.length){
+    h+='<div class="card"><div class="pad"><p style="margin:0"><b>Nothing filed yet.</b></p>'
+     + '<p class="hint" style="margin:6px 0 0">Start with the one you actually get asked for &mdash; '
+     + 'the NHS pre-paid certificate. Photograph it, give it its renewal date, and it will tell you '
+     + 'before it runs out.</p></div></div>';
+  } else {
+    h+='<div class="card">';
+    rows.forEach(function(r){
+      h+='<div class="item"><div class="grow">'
+       + '<div class="t">'+esc(r.data.title)+'</div>'
+       + '<div class="s">'+esc(CATS[r.data.category]||'')
+       + (r.data.where? ' &middot; '+esc(r.data.where):'')
+       + (r.data.expiry? ' &middot; runs out '+niceDate(r.data.expiry):'')+'</div>'
+       + (r.data.notes? '<div class="s" style="margin-top:4px">'+esc(r.data.notes)+'</div>':'')
+       + '<div style="margin-top:8px;display:flex;gap:7px;flex-wrap:wrap">'
+       +   (r.hasScan?'<button class="btn ghost sm" data-show="'+r.id+'">Show it</button>':'')
+       +   '<button class="btn ghost sm" data-del="'+r.id+'">Delete</button>'
+       + '</div></div>'
+       + '<div class="r">'+expiryPill(r.data.expiry)+'</div></div>';
+    });
+    h+='</div>';
+  }
+  $('#papersBody').innerHTML=h;
+}
+function renderHints(){
+  var rows=RECS.filter(function(r){ return r.kind==='hint'; });
+  var h='';
+  if(!rows.length){
+    h='<div class="card"><div class="pad"><p class="hint" style="margin:0">No hints yet.</p></div></div>';
+  } else {
+    h='<div class="card">';
+    rows.forEach(function(r){
+      h+='<div class="item"><div class="grow">'
+       + '<div class="t">'+esc(r.data.what)+'</div>'
+       + '<div class="s" style="color:var(--ink-2);font-size:15px;margin-top:4px">'+esc(r.data.hint)+'</div>'
+       + (r.data.where? '<div class="s" style="margin-top:4px">kept in '+esc(r.data.where)+'</div>':'')
+       + '<div style="margin-top:8px"><button class="btn ghost sm" data-del="'+r.id+'">Delete</button></div>'
+       + '</div></div>';
+    });
+    h+='</div>';
+  }
+  $('#hintsBody').innerHTML=h;
+}
+function renderIce(){
+  ['iBlood','iNhs','iAllerg','iMeds','iCond','iKin','iGp'].forEach(function(id){
+    var el=$('#'+id); if(el) el.value=ICE[id]||'';
+  });
+}
+function renderKeep(){
+  var c=lockCfg(), papers=RECS.filter(function(r){return r.kind==='paper';});
+  var scans=papers.filter(function(r){return r.hasScan;}).length;
+  var last=null; try{ last=localStorage.getItem('muniments:lastExport'); }catch(_){}
+  var age=last? Math.round((Date.now()-Date.parse(last))/86400000) : null;
+  var h='';
+
+  h+='<h2 style="margin-top:16px">What is in here</h2><div class="card"><div class="pad">'
+   + '<div class="rowb"><span class="hint" style="margin:0">Papers</span><b>'+papers.length+'</b></div>'
+   + '<div class="rowb"><span class="hint" style="margin:0">With a scan attached</span><b>'+scans+'</b></div>'
+   + '<div class="rowb"><span class="hint" style="margin:0">Hints</span><b>'+RECS.filter(function(r){return r.kind==='hint';}).length+'</b></div>'
+   + '</div></div>';
+
+  h+='<h2>The lock</h2><div class="card"><div class="pad">';
+  if(!subtle()){
+    /* Says so instead of offering a lock it cannot honour. Only reachable over plain http or
+       from a file:// URL — on the real address this never shows. */
+    h+='<p style="margin:0;color:var(--stop)"><b>This browser cannot encrypt.</b></p>'
+     + '<p class="hint" style="margin:6px 0 0">Encryption needs a secure connection, and this page '
+     + 'was not opened over one. Nothing here is locked, and the app will not pretend otherwise. '
+     + 'Open it from the estate address rather than from a file and the option comes back.</p>';
+  } else if(c){
+    h+='<p style="margin:0"><b>Locked with a PIN.</b></p>'
+     + '<p class="hint" style="margin:6px 0 0">Everything is encrypted on this phone. The PIN itself is '
+     + 'not stored anywhere &mdash; which is why nobody, me included, can recover it for you. If you '
+     + 'forget it, an encrypted backup is the only way back.</p>'
+     + '<div style="margin-top:12px"><button class="btn ghost" id="pinChange">Change the PIN</button></div>';
+  } else {
+    h+='<p style="margin:0"><b>No PIN set.</b></p>'
+     + '<p class="hint" style="margin:6px 0 0">The contents are on this phone only and cannot be reached '
+     + 'over the internet &mdash; but they are readable by anyone holding your unlocked phone. A PIN '
+     + 'encrypts the lot. <b>Set one and it cannot be recovered</b>, so make a backup in the same sitting.</p>'
+     + '<div class="f" style="margin-top:12px">'
+     + '<div><label class="fl" for="pinNew">New PIN</label><input id="pinNew" type="password" inputmode="numeric" autocomplete="off"></div>'
+     + '<div><label class="fl" for="pinNew2">Again</label><input id="pinNew2" type="password" inputmode="numeric" autocomplete="off"></div>'
+     + '<div class="wide"><button class="btn" id="pinSet">Lock it</button></div></div>'
+     + '<p class="hint" id="pinErr" hidden style="color:var(--stop);margin-top:8px"></p>';
+  }
+  h+='</div></div>';
+
+  h+='<h2>Backup</h2><div class="card"><div class="pad">'
+   + '<p style="margin:0">'+(age===null
+      ? '<b>Never backed up.</b>'
+      : (age>60 ? '<b>Last backup was '+age+' days ago.</b>' : 'Last backup '+age+' days ago.'))+'</p>'
+   + '<p class="hint" style="margin:6px 0 0">One file, encrypted with your PIN, useless to anyone without it. '
+   + 'Save it to Files or iCloud Drive. This is the <b>only</b> copy that survives a lost phone, because '
+   + 'nothing here is stored anywhere but here.</p>'
+   + '<div class="row2" style="margin-top:12px">'
+   +   '<button class="btn" id="expBtn">Make a backup</button>'
+   +   '<button class="btn ghost" id="impBtn">Restore</button>'
+   + '</div>'
+   + '<input id="impFile" type="file" accept="application/json" hidden>'
+   + '</div></div>';
+
+  h+='<h2>Why this one does not sync</h2><div class="card"><div class="pad">'
+   + '<p class="hint" style="margin:0">Every other app on the estate keeps its data in a shared GitHub '
+   + 'gist, which is how the Hub and your phone stay in step. A gist is not encrypted, and the token that '
+   + 'opens it sits on a web address all fifteen apps share. That is fine for wine and puzzle scores. '
+   + 'It is not fine for a scan of an NHS certificate, so <b>this app has no sync code in it at all</b> '
+   + '&mdash; not switched off, absent.</p>'
+   + '<p class="hint" style="margin:10px 0 0">Build '+BUILD+'.</p></div></div>';
+
+  $('#keepBody').innerHTML=h;
+}
+
+/* ───────────────── events ───────────────── */
+document.addEventListener('click', function(e){
+  var t=e.target.closest?e.target.closest('button'):null; if(!t) return;
+  var d=t.dataset;
+  if(d.go){ go(d.go); return; }
+  if(d.del){ if(confirm('Delete this for good?')) delRec(d.del).then(loadAll).then(render); return; }
+  if(d.show){ showScan(d.show); return; }
+  if(t.id==='pAdd')  return addPaper();
+  if(t.id==='hAdd')  return addHint();
+  if(t.id==='iSave') return saveIce();
+  if(t.id==='pinSet')    return doSetPin();
+  if(t.id==='pinChange') return changePin();
+  if(t.id==='expBtn')    return doExport();
+  if(t.id==='impBtn')    { $('#impFile').click(); return; }
+  if(t.id==='lockGo')    return doUnlock();
+});
+document.addEventListener('change', function(e){
+  if(e.target && e.target.id==='impFile' && e.target.files && e.target.files[0]) doImport(e.target.files[0]);
+});
+document.addEventListener('keydown', function(e){
+  if(e.key==='Enter' && e.target && e.target.id==='lockPin') doUnlock();
+});
+
+function fail(sel,msg){ var el=$(sel); if(el){ el.textContent=msg; el.hidden=false; } }
+function addPaper(){
+  var title=($('#pTitle').value||'').trim();
+  if(!title) return fail('#pErr','It needs a name — what would you call it when hunting for it?');
+  var data={ title:title, category:$('#pCat').value, where:($('#pWhere').value||'').trim(),
+             expiry:$('#pExp').value||'', notes:($('#pNotes').value||'').trim() };
+  var f=$('#pScan').files && $('#pScan').files[0];
+  var p = f ? putScan(f) : Promise.resolve(null);
+  p.then(function(key){ return saveRec('paper', data, null, key); })
+   .then(loadAll).then(function(){
+     $('#pTitle').value=''; $('#pWhere').value=''; $('#pExp').value=''; $('#pNotes').value='';
+     $('#pScan').value=''; var el=$('#pErr'); if(el) el.hidden=true;
+     render();
+   });
+}
+function addHint(){
+  var what=($('#hWhat').value||'').trim(), hint=($('#hHint').value||'').trim();
+  if(!what||!hint) return;
+  saveRec('hint', {what:what, hint:hint, where:($('#hWhere').value||'').trim()})
+    .then(loadAll).then(function(){ $('#hWhat').value=''; $('#hHint').value=''; render(); });
+}
+function saveIce(){
+  var data={};
+  ['iBlood','iNhs','iAllerg','iMeds','iCond','iKin','iGp'].forEach(function(id){ data[id]=$('#'+id).value||''; });
+  var ex=RECS.filter(function(r){ return r.kind==='ice'; })[0];
+  saveRec('ice', data, ex?ex.id:null).then(loadAll).then(function(){
+    ICE=data; render(); alert('Saved.');
+  });
+}
+function showScan(id){
+  var r=RECS.filter(function(x){ return x.id===id; })[0]; if(!r) return;
+  dbGet('recs',id).then(function(raw){ return raw && raw.scan ? getScan(raw.scan) : null; })
+  .then(function(blob){
+    if(!blob){ alert('That scan could not be opened.'); return; }
+    var url=URL.createObjectURL(blob);
+    var wrap=document.createElement('div');
+    wrap.className='scan-full';
+    wrap.innerHTML = (blob.type==='application/pdf')
+      ? '<iframe src="'+url+'" style="flex:1;border:0;width:100%"></iframe><button class="close">Close</button>'
+      : '<img src="'+url+'" alt=""><button class="close">Close</button>';
+    wrap.querySelector('.close').addEventListener('click', function(){
+      URL.revokeObjectURL(url); wrap.remove();
+    });
+    document.body.appendChild(wrap);
+  });
+}
+
+/* ───────────────── the PIN, and the backup ───────────────── */
+function doSetPin(){
+  var a=$('#pinNew').value||'', b=$('#pinNew2').value||'';
+  if(a.length<4)  return fail('#pinErr','Four digits at least.');
+  if(a!==b)       return fail('#pinErr','Those two do not match.');
+  /* Everything already filed has to be RE-SEALED under the new key, or the app would lock the
+     door and leave yesterday's papers outside it. */
+  var plain=RECS.map(function(r){ return {id:r.id, kind:r.kind, data:r.data}; });
+  setPin(a).then(function(){
+    return Promise.all(plain.map(function(r){ return saveRec(r.kind, r.data, r.id); }));
+  }).then(loadAll).then(function(){
+    alert('Locked. Make a backup now — a forgotten PIN cannot be recovered, by me or by anyone.');
+    render();
+  }).catch(function(){
+    fail('#pinErr','This browser cannot encrypt, so a PIN here would be decoration. Open the app from the estate address.');
+  });
+}
+function changePin(){
+  var a=prompt('New PIN (four digits or more)'); if(!a||a.length<4) return;
+  var plain=RECS.map(function(r){ return {id:r.id, kind:r.kind, data:r.data}; });
+  setPin(a).then(function(){
+    return Promise.all(plain.map(function(r){ return saveRec(r.kind, r.data, r.id); }));
+  }).then(loadAll).then(function(){ alert('PIN changed. Make a fresh backup.'); render(); });
+}
+function doUnlock(){
+  var pin=$('#lockPin').value||'';
+  tryPin(pin).then(function(ok){
+    if(!ok){ fail('#lockErr','That is not the PIN.'); return; }
+    $('#lockScreen').hidden=true; $('#lockPin').value='';
+    loadAll().then(render);
+  });
+}
+/* The backup carries the SEALED records exactly as stored. It is decrypted by the same PIN and
+   by nothing else, so it is safe to leave in iCloud Drive — and worthless if you forget the PIN,
+   which is the honest trade and why the Keeping tab says so twice. */
+function doExport(){
+  Promise.all([dbAll('recs')]).then(function(r){
+    var recs=r[0];
+    return Promise.all(recs.map(function(x){
+      if(!x.scan) return Promise.resolve({rec:x, blob:null});
+      return dbGet('blobs', x.scan).then(function(b){
+        if(b && b.ct) b={type:b.type, iv:b.iv, ct:b64(b.ct)};
+        else if(b && b.plain) b={type:b.type, plain:b64(b.plain)};
+        return {rec:x, blob:b};
+      });
+    })).then(function(rows){
+      var doc={app:'muniments', build:BUILD, at:new Date().toISOString(),
+               lock:lockCfg(), rows:rows};
+      var blob=new Blob([JSON.stringify(doc)], {type:'application/json'});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url; a.download='muniments-backup-'+todayIso()+'.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+      try{ localStorage.setItem('muniments:lastExport', new Date().toISOString()); }catch(_){}
+      render();
+    });
+  });
+}
+function doImport(file){
+  if(!confirm('Restore from this backup? Anything currently in the app is replaced.')) return;
+  file.text().then(function(txt){
+    var doc=JSON.parse(txt);
+    if(doc.app!=='muniments') { alert('That is not a Muniments backup.'); return; }
+    if(doc.lock) lockSet(doc.lock);
+    return Promise.all((doc.rows||[]).map(function(row){
+      var p=Promise.resolve();
+      if(row.blob){
+        var b=row.blob.ct!==undefined ? {type:row.blob.type, iv:row.blob.iv, ct:unb64(row.blob.ct).buffer}
+                                      : {type:row.blob.type, plain:unb64(row.blob.plain).buffer};
+        p=dbPut('blobs', b, row.rec.scan);
+      }
+      return p.then(function(){ return dbPut('recs', row.rec); });
+    })).then(function(){
+      alert('Restored. Unlock with the PIN that made this backup.');
+      location.reload();
+    });
+  }).catch(function(){ alert('That file could not be read.'); });
+}
+
+/* ───────────────── boot ───────────────── */
+function boot(){
+  dbOpen().then(function(){
+    if(hasLock()){
+      $('#lockScreen').hidden=false;
+      var el=$('#lockPin'); if(el) el.focus();
+      return;
+    }
+    return loadAll().then(render);
+  });
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(function(){});
+}
+boot();
+
+window.__mun={ dbOpen:dbOpen, dbAll:dbAll, dbGet:dbGet, dbPut:dbPut, delRec:delRec,
+               loadAll:loadAll, saveRec:saveRec, render:render, go:go,
+               setPin:setPin, tryPin:tryPin, hasLock:hasLock, lockCfg:lockCfg,
+               seal:function(o){return seal(KEY,o);}, unseal:function(b){return unseal(KEY,b);},
+               recs:function(){return RECS;}, key:function(){return KEY;},
+               addPaper:addPaper, addHint:addHint, saveIce:saveIce, doExport:doExport,
+               expiryPill:expiryPill, daysTo:daysTo, BUILD:BUILD };
+</script>
+</body>
+</html>
