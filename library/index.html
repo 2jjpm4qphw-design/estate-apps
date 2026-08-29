@@ -11,9 +11,14 @@
 <link rel="apple-touch-icon" href="./icon-192.png">
 <title>Library</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<!-- LIBRE CASLON, 29 Aug 2026, matching the Hub. Caslon is the English bookface — London,
+     1720s, revived right through the Victorian period, and the default of English printing
+     for two centuries. Replaces EB Garamond, which is French and 16th century. Display cut
+     for the title, Text cut for reading. Montserrat stays for the app chrome: the estate
+     strip and the nav are not part of the book. -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-  :root{ --navy:#0D1B3E; --mid:#1A3A6B; --lime:#C4F000; --mist:#C4CCDD; --white:#FFFFFF; --line:#24467e; --gilt:#c8a84e; --serif:'EB Garamond',Georgia,serif; }
+  :root{ --navy:#0D1B3E; --mid:#1A3A6B; --lime:#C4F000; --mist:#C4CCDD; --white:#FFFFFF; --line:#24467e; --gilt:#c8a84e; --serif:'Libre Caslon Text',Georgia,serif; --serif-disp:'Libre Caslon Display',Georgia,serif; }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   body{font-family:Montserrat,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--mist);-webkit-font-smoothing:antialiased;padding:0 0 90px}
@@ -29,9 +34,9 @@
   .count{font-size:11px;color:var(--mist);opacity:.6;margin:0 2px 8px}
   /* book row */
   .book{display:flex;gap:12px;align-items:flex-start;background:var(--mid);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:9px;cursor:pointer}
-  .book .rom{flex:0 0 auto;font-family:var(--serif);font-size:15px;font-weight:600;color:var(--gilt);min-width:34px;text-align:center;padding-top:2px}
+  .book .rom{flex:0 0 auto;font-family:var(--serif-disp);font-size:14px;font-weight:600;color:var(--gilt);min-width:34px;text-align:center;padding-top:2px}
   .book .bmain{flex:1;min-width:0}
-  .book .btitle{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--white);line-height:1.25}
+  .book .btitle{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--white);line-height:1.25}
   .book .bmeta{font-size:12px;color:var(--mist);opacity:.85;margin-top:3px}
   .book .lent{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:#3a2a10;color:var(--gilt);border:1px solid #6b5320;margin-top:7px}
   /* sheet */
@@ -40,8 +45,8 @@
   .sheet{background:var(--navy);border-top:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:660px;margin:0 auto;max-height:92vh;overflow:auto;padding:16px 18px calc(24px + env(safe-area-inset-bottom))}
   .sheet-close{float:right;background:none;border:0;color:var(--mist);font-size:22px;line-height:1;cursor:pointer}
   .d-rom{font-family:var(--serif);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gilt)}
-  .d-title{font-family:var(--serif);font-size:23px;font-weight:600;color:var(--white);line-height:1.2;margin:4px 0 2px}
-  .d-sub{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--mist);opacity:.9;line-height:1.35;margin-bottom:8px}
+  .d-title{font-family:var(--serif-disp);font-size:20px;font-weight:600;color:var(--white);line-height:1.2;margin:4px 0 2px}
+  .d-sub{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--mist);opacity:.9;line-height:1.35;margin-bottom:8px}
   .d-byline{font-size:12.5px;color:var(--mist);opacity:.9;margin-bottom:2px}
   .d-imprint{font-size:12px;color:var(--mist);opacity:.7;line-height:1.5;margin:8px 0}
   .d-rule{height:1px;background:var(--line);margin:14px 0}
@@ -64,7 +69,7 @@
 .book.read .rom{opacity:.5}
 .d-read{display:flex;align-items:center;gap:10px;background:var(--mid);border:1px solid var(--line);
   border-radius:12px;padding:11px 14px;margin:12px 0 0}
-.d-read .lbl{font-family:var(--serif);font-size:15px;color:var(--fg)}
+.d-read .lbl{font-family:var(--serif);font-size:14.5px;color:var(--fg)}
 .d-read .when{font-size:12px;color:var(--dim);margin-left:auto}
   .d-essay p{font-family:var(--serif);font-size:15.5px;line-height:1.6;color:var(--mist);margin:0 0 12px}
   .d-clabel{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);margin:6px 0 8px}
