@@ -45,6 +45,27 @@
   .d-byline{font-size:12.5px;color:var(--mist);opacity:.9;margin-bottom:2px}
   .d-imprint{font-size:12px;color:var(--mist);opacity:.7;line-height:1.5;margin:8px 0}
   .d-rule{height:1px;background:var(--line);margin:14px 0}
+.readbar{display:flex;align-items:center;gap:12px;margin:2px 0 8px;flex-wrap:wrap}
+.rfilter{font:inherit;font-size:12px;letter-spacing:.04em;background:var(--mid);color:var(--dim);
+  border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer}
+.rfilter.on{background:var(--gilt);border-color:var(--gilt);color:#1b1409;font-weight:600}
+.rprog{font-size:12px;color:var(--dim);font-family:var(--serif)}
+.rprog b{color:var(--gilt);font-weight:600}
+/* The tick: a gilt-stamped square, sized for a thumb (44px hit area, 20px mark). A form
+   checkbox in an app dressed as a leather catalogue reads as a bug. */
+.tick{flex:0 0 auto;width:44px;height:44px;margin:-11px -8px -11px -12px;padding:0;background:none;
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.tick i{display:block;width:20px;height:20px;border:1.5px solid var(--line);border-radius:4px;
+  background:var(--bg);position:relative}
+.tick[aria-pressed="true"] i{background:var(--gilt);border-color:var(--gilt)}
+.tick[aria-pressed="true"] i:after{content:"";position:absolute;left:6px;top:2px;width:5px;height:11px;
+  border:solid #1b1409;border-width:0 2px 2px 0;transform:rotate(42deg)}
+.book.read .btitle{color:var(--dim)}
+.book.read .rom{opacity:.5}
+.d-read{display:flex;align-items:center;gap:10px;background:var(--mid);border:1px solid var(--line);
+  border-radius:12px;padding:11px 14px;margin:12px 0 0}
+.d-read .lbl{font-family:var(--serif);font-size:15px;color:var(--fg)}
+.d-read .when{font-size:12px;color:var(--dim);margin-left:auto}
   .d-essay p{font-family:var(--serif);font-size:15.5px;line-height:1.6;color:var(--mist);margin:0 0 12px}
   .d-clabel{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);margin:6px 0 8px}
   .d-contents{list-style:none;margin:0;padding:0}
@@ -92,6 +113,11 @@
 
     <section class="view on" data-view="browse">
       <div class="ctl"><input data-search placeholder="Search title, author, year…"></div>
+      <!-- Added 29 Aug 2026. Mark: "I want to get through all of them so i at least have an
+           inkling on what each one is about." The filter is the feature — a progress number
+           alone tells you how far you have come; this hands you the next one to read. -->
+      <div class="readbar"><button class="rfilter" data-unread>Unread only</button>
+        <span class="rprog" data-readprog></span></div>
       <div class="count" data-count></div>
       <div data-list></div>
     </section>
@@ -136,12 +162,19 @@
   function setStatus(t){ var el=$('[data-status]'); if(el) el.textContent=t||''; }
 
   var ID_KEY='connolly-sync:gist-id', TOK_KEY='connolly-sync:token', LEND_CACHE='connolly-library:lending', BOOKS_CACHE='connolly-library:books';
+  var READ_CACHE='connolly-library:read';
+  /* READ TICKS. state.library.read = { "<roman>": "<ISO date>" } — beside .lending, in the
+     same gist, so the Hub and this app show the same progress with no new plumbing.
+     UNLIKE LENDING, THIS WORKS OFFLINE AND WITHOUT CREDENTIALS. Reading a summary in bed
+     with no signal is the entire use case; refusing the tick until he connects would kill
+     the feature. It writes locally first, always, and pushes when it can. */
+  var READ={}; try{ READ=JSON.parse(lsGet(READ_CACHE)||'{}')||{}; }catch(_){ READ={}; }
   var creds=null; (function(){ var id=lsGet(ID_KEY), tk=lsGet(TOK_KEY); if(id&&tk) creds={id:id,token:tk}; })();
   function saveCreds(id,tk){ lsSet(ID_KEY,id); lsSet(TOK_KEY,tk); creds={id:id,token:tk}; }
   function clearCreds(){ lsDel(ID_KEY); lsDel(TOK_KEY); creds=null; }
   function headers(){ return { 'Authorization':'Bearer '+creds.token, 'Accept':'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' }; }
 
-  var BOOKS=[]; var LENDING={}; var STATEP=null; var filt={q:''};
+  var BOOKS=[]; var LENDING={}; var STATEP=null; var filt={q:'',unread:false};
   try{ LENDING=JSON.parse(lsGet(LEND_CACHE)||'{}')||{}; }catch(_){ LENDING={}; }
   try{ var cb=JSON.parse(lsGet(BOOKS_CACHE)||'null'); if(cb&&cb.length) BOOKS=cb; }catch(_){ }
 
@@ -150,7 +183,41 @@
   // ---- gist (lending only) ----
   function gistGetRaw(){ return fetch('https://api.github.com/gists/'+creds.id,{headers:headers()}).then(function(r){ if(!r.ok) throw new Error('gist '+r.status); return r.json(); }).then(function(g){ var f=g.files&&g.files['life-twoweek.json']; if(!f) throw new Error('no file'); if(f.truncated&&f.raw_url) return fetch(f.raw_url,{headers:{'Authorization':'Bearer '+creds.token}}).then(function(r){return r.text();}); return f.content; }); }
   function parseP(t){ var p; try{ p=JSON.parse(t||'{}'); }catch(_){ p={}; } return { payload:p, state:(p.state||p||{}) }; }
-  function pullLending(){ if(!creds) return Promise.resolve(); setStatus('syncing…'); return gistGetRaw().then(function(t){ var ps=parseP(t); STATEP=ps; var lib=ps.state&&ps.state.library; LENDING=(lib&&lib.lending&&typeof lib.lending==='object')?lib.lending:{}; try{ lsSet(LEND_CACHE, JSON.stringify(LENDING)); }catch(_){ } setStatus(''); }).catch(function(){ setStatus('offline'); }); }
+  function pullLending(){ if(!creds) return Promise.resolve(); setStatus('syncing…'); return gistGetRaw().then(function(t){ var ps=parseP(t); STATEP=ps; var lib=ps.state&&ps.state.library; LENDING=(lib&&lib.lending&&typeof lib.lending==='object')?lib.lending:{};
+    /* MERGE, never replace. Lending is replaced because the Hub is its authority; READ is
+       merged because this app can create ticks while offline and a straight replace would
+       silently wipe an evening's reading. The trade-off, stated rather than hidden: a tick can
+       never be lost, and an UN-tick made offline can be undone by the next pull. Losing a tick
+       is the expensive failure; re-clicking a box is not. */
+    var remote=(lib&&lib.read&&typeof lib.read==='object')?lib.read:{};
+    Object.keys(remote).forEach(function(k){ if(!READ[k]) READ[k]=remote[k]; });
+    try{ lsSet(READ_CACHE, JSON.stringify(READ)); }catch(_){ }
+    try{ lsSet(LEND_CACHE, JSON.stringify(LENDING)); }catch(_){ } setStatus(''); }).catch(function(){ setStatus('offline'); }); }
+
+  /* Push the whole READ map. Small (72 short keys) and idempotent, so there is no case for
+     anything cleverer. Silently does nothing when disconnected — the local copy is already
+     correct, and the next pull will merge it up. */
+  function pushRead(){
+    if(!creds) return;
+    chain = chain.then(function(){ setStatus('saving…'); return gistGetRaw().then(function(t){
+      var ps=parseP(t), st=ps.state;
+      if(!st.library||typeof st.library!=='object') st.library={};
+      var merged=st.library.read&&typeof st.library.read==='object'?st.library.read:{};
+      Object.keys(READ).forEach(function(k){ merged[k]=READ[k]; });
+      Object.keys(merged).forEach(function(k){ if(!READ[k]) delete merged[k]; });
+      st.library.read=merged;
+      var payload=ps.payload; payload.state=st; payload.savedAt=new Date().toISOString();
+      payload.writer={id:'library',label:'The Library',at:payload.savedAt};
+      var body={files:{}}; body.files['life-twoweek.json']={content:JSON.stringify(payload)};
+      return fetch('https://api.github.com/gists/'+creds.id,{method:'PATCH',headers:Object.assign({'Content-Type':'application/json'},headers()),body:JSON.stringify(body)})
+        .then(function(r){ setStatus(r.ok?'':'save failed'); });
+    }).catch(function(){ setStatus('offline'); }); });
+  }
+  function toggleRead(roman){
+    if(READ[roman]) delete READ[roman]; else READ[roman]=new Date().toISOString();
+    try{ lsSet(READ_CACHE, JSON.stringify(READ)); }catch(_){ }
+    renderCurrent(); pushRead();
+  }
   var chain=Promise.resolve();
   function commitLending(mutator){
     try{ mutator(LENDING); }catch(_){ } try{ lsSet(LEND_CACHE, JSON.stringify(LENDING)); }catch(_){ } renderCurrent();
@@ -160,9 +227,21 @@
 
   // ---- render ----
   function bTitle(b){ return (b.title_lines&&b.title_lines.join(' ')) || b.index_title || 'Untitled'; }
-  function matches(b){ if(!filt.q) return true; var hay=[b.index_title,(b.title_lines||[]).join(' '),b.author,b.date].join(' ').toLowerCase(); return hay.indexOf(filt.q.toLowerCase())>=0; }
-  function bookRow(b){ var l=LENDING[b.roman]; return '<div class="book" data-book="'+esc(b.roman)+'"><div class="rom">'+esc(b.roman||'')+'</div><div class="bmain"><div class="btitle">'+esc(bTitle(b))+'</div><div class="bmeta">'+esc([b.author,b.date].filter(Boolean).join(' · '))+'</div>'+(l?'<span class="lent">On loan — '+esc(l.to||'')+'</span>':'')+'</div></div>'; }
-  function renderBrowse(){ var list=$('[data-list]'); if(!list) return; var items=BOOKS.filter(matches); $('[data-count]').textContent = BOOKS.length? (items.length+' of '+BOOKS.length+' volumes') : ''; if(!BOOKS.length){ list.innerHTML='<div class="muted">Loading the catalogue…</div>'; return; } if(!items.length){ list.innerHTML='<div class="muted">No volumes match.</div>'; return; } list.innerHTML=items.map(bookRow).join(''); }
+  function matches(b){
+    if(filt.unread && READ[b.roman]) return false;
+    if(!filt.q) return true; var hay=[b.index_title,(b.title_lines||[]).join(' '),b.author,b.date].join(' ').toLowerCase(); return hay.indexOf(filt.q.toLowerCase())>=0; }
+  function renderProgress(){
+    var el=$('[data-readprog]'); if(!el) return;
+    var done=BOOKS.filter(function(b){ return READ[b.roman]; }).length, tot=BOOKS.length;
+    el.innerHTML = tot ? ('<b>'+done+'</b> of '+tot+' read') : '';
+    var f=$('[data-unread]'); if(f) f.classList.toggle('on', !!filt.unread);
+  }
+  function bookRow(b){ var l=LENDING[b.roman], rd=!!READ[b.roman];
+    return '<div class="book'+(rd?' read':'')+'" data-book="'+esc(b.roman)+'">'
+      + '<button class="tick" data-read="'+esc(b.roman)+'" aria-pressed="'+(rd?'true':'false')+'" aria-label="Mark as read"><i></i></button>'
+      + '<div class="rom">'+esc(b.roman||'')+'</div><div class="bmain"><div class="btitle">'+esc(bTitle(b))+'</div><div class="bmeta">'+esc([b.author,b.date].filter(Boolean).join(' · '))+'</div>'
+      + (l?'<span class="lent">On loan — '+esc(l.to||'')+'</span>':'')+'</div></div>'; }
+  function renderBrowse(){ var list=$('[data-list]'); if(!list) return; renderProgress(); var items=BOOKS.filter(matches); $('[data-count]').textContent = BOOKS.length? (items.length+' of '+BOOKS.length+' volumes') : ''; if(!BOOKS.length){ list.innerHTML='<div class="muted">Loading the catalogue…</div>'; return; } if(!items.length){ list.innerHTML='<div class="muted">'+(filt.unread?'Every one read. All '+BOOKS.length+' of them.':'No volumes match.')+'</div>'; return; } list.innerHTML=items.map(bookRow).join(''); }
   function renderLending(){ var list=$('[data-lend-list]'); if(!list) return; var out=BOOKS.filter(function(b){ return LENDING[b.roman]; }); $('[data-lend-count]').textContent = out.length? (out.length+' on loan') : ''; if(!out.length){ list.innerHTML='<div class="muted">Nothing is out on loan. Open a volume and tap “Lend out” to record one.</div>'; return; } list.innerHTML=out.map(function(b){ var l=LENDING[b.roman]; return '<div class="book" data-book="'+esc(b.roman)+'"><div class="rom">'+esc(b.roman)+'</div><div class="bmain"><div class="btitle">'+esc(bTitle(b))+'</div><div class="bmeta">to <b style="color:var(--gilt)">'+esc(l.to||'')+'</b>'+(l.on?(' · since '+new Date(l.on+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})):'')+'</div></div></div>'; }).join(''); }
   function renderCurrent(){ var v=$('[data-view="lending"]').classList.contains('on')?'lending':'browse'; if(v==='lending') renderLending(); else renderBrowse(); }
 
@@ -180,7 +259,14 @@
       +'<div class="d-byline">'+esc([b.author,b.date].filter(Boolean).join(' · '))+'</div>'+edition
       +(b.imprint?'<div class="d-imprint">'+esc(b.imprint)+'</div>':'')
       +lendBox
-      +'<div class="d-rule"></div><div class="d-essay">'+essay+'</div>'+contents;
+      +'<div class="d-rule"></div><div class="d-essay">'+essay+'</div>'+contents
+      /* The tick sits AFTER the essay, not before it. This is the moment he has just finished
+         reading — putting it at the top would invite ticking things unread, which would make the
+         count a lie and the whole exercise pointless. */
+      +'<div class="d-read"><button class="tick" data-read="'+esc(roman)+'" aria-pressed="'+(READ[roman]?'true':'false')+'" aria-label="Mark as read"><i></i></button>'
+      +'<span class="lbl">'+(READ[roman]?'You have read this one.':'Read it? Tick here.')+'</span>'
+      +(READ[roman]?'<span class="when">'+new Date(READ[roman]).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'</span>':'')
+      +'</div>';
     $('[data-sheet-bg]').classList.add('on');
   }
   function closeSheet(){ $('[data-sheet-bg]').classList.remove('on'); }
@@ -191,9 +277,18 @@
     var nav=t.closest && t.closest('[data-nav]'); if(nav){ navTo(nav.getAttribute('data-nav')); return; }
     if(t.closest && t.closest('[data-sheet-close]')){ closeSheet(); return; }
     if(t===$('[data-sheet-bg]')){ closeSheet(); return; }
+    /* MUST come before the [data-book] test: the tick sits inside the row, so checking the row
+       first would open the detail sheet and never see the tick at all. */
+    var rd=t.closest && t.closest('[data-read]');
+    if(rd){ e.preventDefault(); e.stopPropagation(); var rr=rd.getAttribute('data-read');
+      toggleRead(rr);
+      if($('[data-sheet-bg]').classList.contains('on')) detail(rr);
+      return; }
     var bk=t.closest && t.closest('[data-book]'); if(bk){ detail(bk.getAttribute('data-book')); return; }
     var ln=t.closest && t.closest('[data-lend]'); if(ln){ var roman=ln.getAttribute('data-lend'); if(!creds){ alert('Connect to your Hub in Setup to record lending.'); navTo('setup'); return; } var who=prompt('Lent to whom?'); if(who && who.trim()){ commitLending(function(L){ L[roman]={to:who.trim(),on:todayISO()}; }); detail(roman); } return; }
     var rt=t.closest && t.closest('[data-return]'); if(rt){ var r2=rt.getAttribute('data-return'); commitLending(function(L){ delete L[r2]; }); detail(r2); return; }
+    var uf=t.closest && t.closest('[data-unread]');
+    if(uf){ filt.unread=!filt.unread; renderBrowse(); return; }
     if(t.closest && t.closest('[data-cfg-save]')){ doConnect(); return; }
     if(t.closest && t.closest('[data-cfg-signout]')){ if(confirm('Disconnect this device? Your Hub data is untouched.')){ clearCreds(); $('[data-cfg-signout]').hidden=true; setStatus(''); alert('Disconnected. Browsing still works; lending is read-only until you reconnect.'); } return; }
   });
