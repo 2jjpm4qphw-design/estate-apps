@@ -8,7 +8,7 @@
  *  online load even without a bump — the bump just guarantees old caches are
  *  cleared.)
  */
-var CACHE = 'hub-pocket-v12';
+var CACHE = 'hub-pocket-v13';   /* v13, 3 Sep 2026 — The list, read from the Drive web app. */
 var SHELL = [
   './',
   './index.html',

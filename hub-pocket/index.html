@@ -188,6 +188,11 @@
         <button type="submit">Add</button>
       </form>
       <button class="hwtoggle" data-hidework hidden></button>
+      <div class="card" data-list-card hidden>
+        <div class="h">The list <span class="ct" data-list-ct></span></div>
+        <div class="note" data-list-note></div>
+        <div data-list-body></div>
+      </div>
       <div class="card">
         <div class="h">To do today <span class="ct" data-today-ct>0</span></div>
         <div data-today-list></div>
@@ -247,6 +252,11 @@
   <label>Work token</label>
   <input type="password" data-cfg-wtoken autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="ghp_… or github_pat_…">
   <div class="hint">Your <b>private</b> work gist — the same one the Master site uses for the Daybook. Adding it shows your work tasks here too, labelled <b>work</b>. This is not the shared gist the CEO reads.</div>
+  <label style="margin-top:18px">The list — web app address <span style="font-weight:400;opacity:.6">— optional</span></label>
+  <input type="text" data-cfg-listurl autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec">
+  <label>List token</label>
+  <input type="password" data-cfg-listtok autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="the long random string from the script">
+  <div class="hint">Shows the prioritised list the to-do chat writes, straight from Google Drive &mdash; so something typed into that chat in a meeting is on this phone within a minute. Both of these are stored <b>on this device only</b>: this app is served from a public repository, so the token can never live in its code. Leave blank and the app works exactly as it did before.</div>
   <button class="go" data-cfg-save>Connect</button>
   <div class="err" data-cfg-err hidden></div>
   <button class="signout" data-reset-tags hidden style="color:#a23a2a">Reset all work/personal tags</button>
@@ -341,7 +351,7 @@
   function savePending(){ lsSet(PEND_KEY, JSON.stringify(pending)); }
   function loadCache(){ try{ var c=JSON.parse(lsGet(CACHE_KEY)||'null'); if(c&&typeof c==='object') cached=c; }catch(_){ } }
   function saveCache(){ try{ lsSet(CACHE_KEY, JSON.stringify(cached)); }catch(_){ } }
-  function ensureShape(st){ if(!st||typeof st!=='object') return st; if(!st.focus||typeof st.focus!=='object') st.focus={items:[]}; if(!Array.isArray(st.focus.items)) st.focus.items=[]; if(!Array.isArray(st.todos)) st.todos=[]; if(!Array.isArray(st.events)) st.events=[]; if(st.scratchDump===undefined) st.scratchDump=(typeof st.brainDump==='string'?st.brainDump:''); if(typeof st.scratchDump!=='string') st.scratchDump=''; if(!Array.isArray(st.changeIdeas)) st.changeIdeas=[]; if(!st.dailyChecks||typeof st.dailyChecks!=='object') st.dailyChecks={}; if(!st.deletions||typeof st.deletions!=='object') st.deletions={};
+  function ensureShape(st){ if(!st||typeof st!=='object') return st; if(!st.focus||typeof st.focus!=='object') st.focus={items:[]}; if(!Array.isArray(st.focus.items)) st.focus.items=[]; if(!Array.isArray(st.todos)) st.todos=[]; if(!Array.isArray(st.events)) st.events=[]; if(st.scratchDump===undefined) st.scratchDump=(typeof st.brainDump==='string'?st.brainDump:''); if(typeof st.scratchDump!=='string') st.scratchDump=''; if(!Array.isArray(st.changeIdeas)) st.changeIdeas=[]; if(!st.dailyChecks||typeof st.dailyChecks!=='object') st.dailyChecks={}; if(!st.todoFileDone||typeof st.todoFileDone!=='object') st.todoFileDone={}; if(!st.deletions||typeof st.deletions!=='object') st.deletions={};
     var _del=st.deletions; if(_del){ st.focus.items=st.focus.items.filter(function(x){return !(x&&_del[x.id]);}); st.changeIdeas=st.changeIdeas.filter(function(x){return !(x&&_del[x.id]);}); st.todos=st.todos.filter(function(x){return !(x&&_del[x.id]);}); }
     return st; }
   function applyOp(st, op){ ensureShape(st); var t=today();
@@ -360,6 +370,11 @@
     else if(op.t==='pind'){ var _ex=st.focus.items.find(function(x){return x&&x.dueKey===op.key&&!x.done;}); if(_ex){ _ex.pinnedAt=op.ms; } else if(!st.focus.items.some(function(x){return x.id===op.id;})){ st.focus.items.push({id:op.id,text:op.text,bucket:'today',pinnedAt:op.ms,created:op.at,dueKey:op.key,realm:op.realm||''}); } }
     else if(op.t==='rl'){ var _ri=st.focus.items.find(function(x){return x.id===op.id;}); if(_ri){ _ri.realm=op.realm; } }
     else if(op.t==='rlreset'){ (st.focus.items||[]).forEach(function(x){ if(x) x.realm=''; }); }
+    /* THE LIST. The words and the order live in Drive and are read-only here; the only thing
+       this app may write about them is whether Mark has done one, and that goes in the same
+       place the Hub keeps it — st.todoFileDone, keyed by the item's id. That is why the to-do
+       chat is forbidden from ever changing an id: change it and this tick points at nothing. */
+    else if(op.t==='tfd'){ if(!st.todoFileDone||typeof st.todoFileDone!=='object') st.todoFileDone={}; st.todoFileDone[op.id]=true; }
     return st;
   }
   function enqueue(op, opts){ opts=opts||{};
@@ -428,6 +443,13 @@
   }
   // test hooks — let the suite inspect the ACTUAL bytes bound for each gist
   window.__pkDiag={ stripWork:stripWork, spliceWork:spliceWork, workIds:workItemIds,
+    /* The list hooks. renderList and fetchList are closure-scoped like everything else here, and
+       poking at them from outside without a hook is the orphan trap that made two earlier tests
+       pass while proving nothing. applyOp is exposed so the tick can be asserted on the STORE
+       rather than on the rendered HTML — the HTML is the symptom, the store is the contract. */
+    applyOp:applyOp, fetchList:fetchList, renderList:renderList,
+    setList:function(j){ listData=j; listFetchedAt=new Date().toISOString(); },
+    getList:function(){ return listData; }, getState:function(){ return cached; },
     personalPayload:function(st){ return { schema:1, app:'life-twoweek', state:stripWork(st) }; },
     setCache:function(st){ ensureShape(st); cached=st; return cached; },
     cache:function(){ return cached; }, pill:function(it){ return realmPill(it); } };
@@ -501,6 +523,15 @@
   });
   document.addEventListener('click',function(e){
     var tf=e.target.closest && e.target.closest('[data-tick-focus]'); if(tf){ tf.classList.add('on'); enqueue({t:'tf',id:tf.getAttribute('data-tick-focus'),at:new Date().toISOString()},{haptic:true}); return; }
+    /* THE LIST: tick, expand a band, expand the reason. The tick goes through the same op queue
+       as everything else, so it survives being offline and lands on the gist the Hub reads. */
+    var tl=e.target.closest && e.target.closest('[data-tick-list]'); if(tl){ tl.classList.add('on');
+      enqueue({t:'tfd',id:tl.getAttribute('data-tick-list'),at:new Date().toISOString()},{haptic:true});
+      setTimeout(renderList,120); return; }
+    var lb=e.target.closest && e.target.closest('[data-list-band]'); if(lb){ var bk=lb.getAttribute('data-list-band');
+      var cur=listOpen[bk]!==undefined?listOpen[bk]:(bk==='today'); listOpen[bk]=!cur; renderList(); return; }
+    var lm=e.target.closest && e.target.closest('[data-list-more]'); if(lm){ listOpen[lm.getAttribute('data-list-more')+':all']=true; renderList(); return; }
+    var lw=e.target.closest && e.target.closest('[data-list-why]'); if(lw){ var wk='why:'+lw.getAttribute('data-list-why'); listOpen[wk]=!listOpen[wk]; renderList(); return; }
     var tdb=e.target.closest && e.target.closest('[data-tick-due]'); if(tdb){ tdb.classList.add('on'); enqueue({t:'td',key:tdb.getAttribute('data-tick-due'),at:new Date().toISOString()},{haptic:true}); return; }
     var ptd=e.target.closest && e.target.closest('[data-promote-today]'); if(ptd){ enqueue({t:'bk',id:ptd.getAttribute('data-promote-today'),bucket:'today',at:new Date().toISOString()},{haptic:true}); return; }
     var ffd=e.target.closest && e.target.closest('[data-focus-del]'); if(ffd){ enqueue({t:'fdl',id:ffd.getAttribute('data-focus-del'),at:new Date().toISOString()}); return; }
@@ -516,6 +547,141 @@
 
 
   // ---- credentials ----
+  /* ================= THE LIST =================================================================
+     The prioritised list is written by the to-do chat into Google Drive, because that chat runs
+     on any device and cannot reach the iMac. This app cannot read Drive directly without hauling
+     a full Google sign-in into a public web app, so a small Apps Script web app sits between
+     them and serves the file as JSON to whoever knows the address and the token.
+
+     THREE THINGS THIS CODE IS CAREFUL ABOUT.
+
+     1. THE TOKEN IS NEVER IN THIS FILE. Hub Pocket is deployed to a public repository. The
+        address and the token are typed into Setup on the phone and live in that browser's
+        storage. There is a test that fails if either ever appears in the deployed bytes.
+     2. IT IS READ-ONLY. The words and the order belong to the to-do chat. The only thing this
+        app writes is a tick, and that goes to the gist, not back to Drive.
+     3. A FAILED FETCH SAYS SO. Silence is the failure mode that costs him most: a list that
+        quietly shows yesterday's items looks exactly like a list that is up to date. So the
+        card carries the age of what it is showing, and names the fault when it cannot refresh.
+        The last good copy is cached so the list still works on the Tube.                      */
+  var LIST_URL_KEY='connolly-pocket:listurl', LIST_TOK_KEY='connolly-pocket:listtok',
+      LIST_CACHE_KEY='connolly-pocket:listcache';
+  var listData=null, listFetchedAt=null, listErr=null, listBusy=false, listOpen={};
+
+  function listCfg(){ var u=lsGet(LIST_URL_KEY), t=lsGet(LIST_TOK_KEY); return (u&&t)?{url:u,token:t}:null; }
+  function saveListCfg(u,t){
+    if(u&&t){ lsSet(LIST_URL_KEY,String(u).trim()); lsSet(LIST_TOK_KEY,String(t).trim()); }
+    else { lsDel(LIST_URL_KEY); lsDel(LIST_TOK_KEY); listData=null; lsDel(LIST_CACHE_KEY); }
+  }
+  function loadListCache(){
+    try{ var c=JSON.parse(lsGet(LIST_CACHE_KEY)||'null');
+      if(c&&c.data){ listData=c.data; listFetchedAt=c.at||null; } }catch(_){ }
+  }
+  function saveListCache(){
+    try{ lsSet(LIST_CACHE_KEY, JSON.stringify({data:listData, at:listFetchedAt})); }catch(_){ }
+  }
+  function fetchList(){
+    var cfg=listCfg(); if(!cfg||listBusy) return Promise.resolve();
+    listBusy=true;
+    var u=cfg.url+(cfg.url.indexOf('?')<0?'?':'&')+'token='+encodeURIComponent(cfg.token);
+    return fetch(u,{cache:'no-store'}).then(function(r){
+      if(!r.ok) throw new Error('the script answered '+r.status);
+      return r.json();
+    }).then(function(j){
+      /* The script answers 200 with {"error":...} rather than an HTTP code, deliberately — a
+         404-shaped reply tells someone probing the URL nothing. So the error case is checked
+         here, not by r.ok. */
+      if(j&&j.error){ throw new Error(j.error==='unauthorised' ? 'the token was not accepted' : j.error); }
+      if(!j||!Array.isArray(j.items)) throw new Error('that address did not return a list');
+      listData=j; listFetchedAt=new Date().toISOString(); listErr=null; saveListCache();
+    }).catch(function(e){
+      /* A cross-origin block surfaces as a bare TypeError with no status, which is the one
+         failure a user cannot possibly diagnose from "Failed to fetch". Name it. */
+      var m=String(e&&e.message||e);
+      listErr=/Failed to fetch|NetworkError|Load failed/i.test(m)
+        ? 'could not reach the script — no signal, or the deployment is not set to “Anyone”'
+        : m;
+    }).then(function(){ listBusy=false; renderList(); });
+  }
+
+  var LIST_BANDS=[['today','Today'],['week','This week'],['later','Later'],['parked','Parked']];
+  var LIST_SHOW=6;   /* how many of a band to show before "show the rest" — the phone is not the
+                        printed sheet, and 70 items on a 6-inch screen is the overwhelm he asked
+                        to be rid of. Today opens; the rest are one tap away. */
+
+  function listDone(){ return (cached&&cached.todoFileDone)||{}; }
+  function listOpenItems(){
+    if(!listData||!Array.isArray(listData.items)) return [];
+    var done=listDone();
+    return listData.items.filter(function(i){ return i&&i.id&&!done[i.id]; });
+  }
+  function listAgeLabel(){
+    if(!listFetchedAt) return '';
+    var mins=Math.round((Date.now()-new Date(listFetchedAt).getTime())/60000);
+    if(mins<2) return 'just now';
+    if(mins<60) return mins+' minutes ago';
+    var h=Math.round(mins/60); if(h<24) return h+' hour'+(h===1?'':'s')+' ago';
+    return Math.round(h/24)+' days ago';
+  }
+  function listDueTag(due){
+    if(!due) return '';
+    var t=today();
+    if(due<t) return '<span class="tag over">overdue</span>';
+    if(due===t) return '<span class="tag over">today</span>';
+    if(due===addDays(t,1)) return '<span class="tag">tomorrow</span>';
+    return '<span class="tag">'+esc(new Date(due+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short'}))+'</span>';
+  }
+  function renderList(){
+    var card=$('[data-list-card]'), body=$('[data-list-body]'),
+        note=$('[data-list-note]'), ct=$('[data-list-ct]');
+    if(!card||!body) return;
+    if(!listCfg()){ card.hidden=true; body.innerHTML=''; return; }
+    card.hidden=false;
+
+    if(!listData){
+      ct.textContent='';
+      note.innerHTML = listErr ? 'Not loaded — '+esc(listErr)+'.'
+                               : 'Loading the list…';
+      body.innerHTML='';
+      return;
+    }
+    var items=listOpenItems();
+    ct.textContent=items.length?String(items.length):'';
+    var age=listAgeLabel();
+    note.innerHTML = listErr
+      ? '<b>Showing the copy from '+esc(age)+'</b> — could not refresh: '+esc(listErr)+'.'
+      : 'Written by the to-do chat, read '+esc(age)+'. Tick here or on the Hub; it is the same tick.';
+
+    var html='';
+    LIST_BANDS.forEach(function(b){
+      var key=b[0], rows=items.filter(function(i){ return (i.band||'later')===key; });
+      if(!rows.length) return;
+      var open = listOpen[key]!==undefined ? listOpen[key] : (key==='today');
+      html+='<div class="sechead" data-list-band="'+key+'">'+esc(b[1])+
+            ' <span style="opacity:.55;font-weight:400">'+rows.length+'</span>'+
+            '<span style="float:right;opacity:.55;font-weight:400">'+(open?'hide':'show')+'</span></div>';
+      if(!open) return;
+      var shown = rows.slice(0, listOpen[key+':all'] ? rows.length : LIST_SHOW);
+      html+=shown.map(function(i){
+        var chase = i.waitingOn
+          ? '<span class="tag">waiting on '+esc(i.waitingOn)+'</span>' : '';
+        var realm = (i.realm==='work') ? '<span class="tag work">work</span>' : '';
+        return '<div class="todo"><span class="box" data-tick-list="'+esc(i.id)+'"></span>'+
+               '<span class="tx" data-list-why="'+esc(i.id)+'">'+esc(i.text)+'</span>'+
+               realm+chase+listDueTag(i.due)+'</div>'+
+               (listOpen['why:'+i.id]
+                 ? '<div class="note" style="margin:-4px 0 8px 30px">'+esc(i.why||'')+
+                   ((i.steps&&i.steps.length)?'<br>· '+i.steps.map(esc).join('<br>· '):'')+'</div>'
+                 : '');
+      }).join('');
+      if(rows.length>shown.length)
+        html+='<div class="sechead" data-list-more="'+key+'" style="opacity:.6">Show the other '+
+              (rows.length-shown.length)+'</div>';
+    });
+    if(!html) html='<div class="empty">Nothing open on the list. Everything on it is ticked.</div>';
+    body.innerHTML=html;
+  }
+
   function loadCreds(){ var id=lsGet(ID_KEY), tk=lsGet(TOK_KEY); creds=(id&&tk)?{id:id,token:tk}:null; return creds; }
   function saveCreds(id,tk){ lsSet(ID_KEY,id); lsSet(TOK_KEY,tk); creds={id:id,token:tk}; }
   function clearCreds(){ lsDel(ID_KEY); lsDel(TOK_KEY); creds=null; }
@@ -686,7 +852,7 @@
     if(!cached) return;
     ensureShape(cached);
     var sub=$('[data-datesub]'); if(sub) sub.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-    renderRightNow(); renderToday(); renderHolding(); renderHideWork(); renderDiary(); renderNotes(); renderWeatherFlag(); renderSavedAt();
+    renderRightNow(); renderList(); renderToday(); renderHolding(); renderHideWork(); renderDiary(); renderNotes(); renderWeatherFlag(); renderSavedAt();
   }
 
   // (Removed: dead duplicate submit/click handlers that called an undefined
@@ -697,7 +863,7 @@
     document.querySelectorAll('[data-view]').forEach(function(s){ s.classList.toggle('on', s.getAttribute('data-view')===v); });
     document.querySelectorAll('[data-nav]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-nav')===v); });
     try{ window.scrollTo(0,0); }catch(_){ }   // start each tab at the top (e.g. Diary opens on today, not next week)
-    if(v==='today') refresh();
+    if(v==='today'){ refresh(); fetchList(); }
   }
 
   // ---- setup screen ----
@@ -705,6 +871,9 @@
     $('#app').hidden=true; $('#setup').hidden=false;
     $('[data-cfg-id]').value = creds?creds.id:'';
     $('[data-cfg-token]').value = creds?creds.token:'';
+    var _lc=listCfg();
+    $('[data-cfg-listurl]').value = _lc?_lc.url:'';
+    $('[data-cfg-listtok]').value = _lc?_lc.token:'';
     $('[data-cfg-signout]').hidden = !creds;
     $('[data-reset-tags]').hidden = !creds; $('[data-reset-tags-hint]').hidden = !creds;
     $('[data-cfg-err]').hidden=true;
@@ -713,8 +882,8 @@
     $('#setup').hidden=true; $('#app').hidden=false;
     document.querySelectorAll('[data-view]').forEach(function(s){ s.classList.toggle('on', s.getAttribute('data-view')==='today'); });
     document.querySelectorAll('[data-nav]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-nav')==='today'); });
-    if(cached) renderAll();
-    startPoll(); refresh(); fetchWeather();
+    loadListCache(); if(cached) renderAll();
+    startPoll(); refresh(); fetchList(); fetchWeather();
   }
   $('[data-cfg-save]').addEventListener('click',function(){
     var id=$('[data-cfg-id]').value.trim().replace(/^.*\/(?=[0-9a-f]{8,})/i,''); var tk=$('[data-cfg-token]').value.trim();
@@ -723,6 +892,8 @@
     saveCreds(id,tk);
     try{ var _wi=$('[data-cfg-wid]'), _wt=$('[data-cfg-wtoken]');
       saveWCreds(_wi&&_wi.value.trim(), _wt&&_wt.value.trim()); }catch(_){}
+    try{ var _lu=$('[data-cfg-listurl]'), _lt=$('[data-cfg-listtok]');
+      saveListCfg(_lu&&_lu.value.trim(), _lt&&_lt.value.trim()); listErr=null; listData=null; }catch(_){}
     err.hidden=true; err.textContent='';
     setStatus('loading','checking');
     fetchState().then(function(state){ cached=state; renderAll(); openApp(); })
@@ -731,8 +902,8 @@
   $('[data-cfg-signout]').addEventListener('click',function(){ if(confirm('Disconnect this device? Your Hub data is untouched.')){ clearCreds(); cached=null; openSetup(); } });
   $('[data-reset-tags]').addEventListener('click',function(){ if(confirm('Clear the work/personal tag on every task? You can re-tag them. Recurring work items keep their tags.')){ enqueue({t:'rlreset',at:new Date().toISOString()},{haptic:true}); alert('Done — task tags cleared. Re-tag from the To-do screen.'); } });
 
-  function startPoll(){ if(pollTimer) clearInterval(pollTimer); pollTimer=setInterval(function(){ if(!busy && document.visibilityState==='visible') refresh(); }, 45000); }
-  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible' && creds && !$('#app').hidden) refresh(); });
+  function startPoll(){ if(pollTimer) clearInterval(pollTimer); pollTimer=setInterval(function(){ if(!busy && document.visibilityState==='visible'){ refresh(); fetchList(); } }, 45000); }
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible' && creds && !$('#app').hidden){ refresh(); fetchList(); } });
 
   // ---- swipe-to-pin: drag a today task left to make it the Right Now ----
   function pinFocus(id){ if(!id) return; enqueue({t:'pin',id:id,ms:Date.now(),at:new Date().toISOString()},{haptic:true}); }
