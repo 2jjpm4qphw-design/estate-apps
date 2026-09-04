@@ -8,7 +8,7 @@
  *  online load even without a bump — the bump just guarantees old caches are
  *  cleared.)
  */
-var CACHE = 'hub-pocket-v13';   /* v13, 3 Sep 2026 — The list, read from the Drive web app. */
+var CACHE = 'hub-pocket-v14';   /* v14, 4 Sep 2026 — one list; to-dos moved to their diary day. */
 var SHELL = [
   './',
   './index.html',

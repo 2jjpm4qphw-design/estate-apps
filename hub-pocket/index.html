@@ -65,6 +65,17 @@
   .ev.kd .ti{color:var(--navy)}
   .ev.past{opacity:.45}
   .dayempty{color:#b6b6c2;font-size:13px;font-style:italic;padding:4px 2px}
+  /* A to-do sitting on its day. It gets a tick box where an event has a time, so the eye can tell
+     at a glance which rows are things to DO and which are things that simply happen. The box is
+     shrunk from the 26px used on the list — a diary row is denser, and a full-size box here made
+     the day blocks look like a second to-do list, which is the thing this replaced. */
+  /* A demoted (weekend) work row. Dimmed, NOT hidden — it must still be readable and tappable,
+     because the whole point of the change is that nothing disappears. .62 is deliberately above
+     the .45 used for a past event: this is deprioritised, not done with. */
+  .todo.dim{opacity:.62}
+  .ev.dtodo{align-items:center;gap:8px}
+  .ev.dtodo .box{width:20px;height:20px;border-radius:6px;margin-top:0}
+  .ev.dtodo .ti{font-weight:600}
   .moreweek{width:100%;border:1px solid var(--hair);background:#fff;color:var(--muted);border-radius:12px;padding:11px;font:inherit;font-size:14px;font-weight:600;margin-top:6px}
   .weekdiv{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--navy);margin:24px 2px 8px;padding-top:16px;border-top:2px solid var(--hair)}
   /* bottom nav */
@@ -183,23 +194,24 @@
       <div data-weatherflag></div>
       <div data-evening-nudge></div>
       <div class="rightnow" data-rightnow hidden></div>
-      <form class="cap" data-cap autocomplete="off">
-        <input type="text" data-cap-input placeholder="Capture a to-do — sort later…" enterkeyhint="done">
-        <button type="submit">Add</button>
-      </form>
+      <!-- 4 Sep 2026 — THREE CARDS AND A CAPTURE BOX BECAME ONE LIST.
+           The capture box went because Mark now types straight into the to-do chat, which
+           prioritises as it captures; a box here would only have created a second, unranked way in.
+           "To do today" went because it had become tautologous — the list IS today's to-dos, and
+           showing them twice invites him to tick one and leave the other. Dated and recurring
+           jobs (Sunday shopping, the Saturday council meeting) moved to the DIARY, onto the day
+           they are actually for, which is where he goes looking for them anyway.
+           What is left of the Hub's own stores drains through the remnant card below. -->
       <button class="hwtoggle" data-hidework hidden></button>
       <div class="card" data-list-card hidden>
         <div class="h">The list <span class="ct" data-list-ct></span></div>
         <div class="note" data-list-note></div>
         <div data-list-body></div>
       </div>
-      <div class="card">
-        <div class="h">To do today <span class="ct" data-today-ct>0</span></div>
-        <div data-today-list></div>
-      </div>
       <div class="card" data-holding-card hidden>
-        <div class="h">To sort <span class="ct" data-holding-ct></span></div>
-        <div class="note">Captured here — prioritise on the Hub, or send one straight to today.</div>
+        <div class="h">Still on the Hub <span class="ct" data-holding-ct></span></div>
+        <div class="note">Older items from the Hub's own task pile, from before the list. Nothing
+          adds to this any more — tick them off or clear them and the card goes for good.</div>
         <div data-holding-list></div>
       </div>
     </section>
@@ -356,8 +368,37 @@
     return st; }
   function applyOp(st, op){ ensureShape(st); var t=today();
     if(op.t==='cap'){ if(!st.focus.items.some(function(x){return x.id===op.id;})) st.focus.items.push({id:op.id,text:op.text,bucket:'unsorted',created:op.at}); }
-    else if(op.t==='tf'){ var it=st.focus.items.find(function(x){return x.id===op.id;}); if(it){ it.done=true; it.doneAt=op.at; if(it.dueKey){ var _t=today(); (st.todos||[]).forEach(function(td){ if(!td.checked && td.day && td.day<=_t && ((td.realm||'')+'|'+String(td.text||'').toLowerCase().trim())===it.dueKey) td.checked=true; }); } } }
+    else if(op.t==='tf'){ var it=st.focus.items.find(function(x){return x.id===op.id;}); if(it){ it.done=true; it.doneAt=op.at;
+      /* A shadow of a list item: ticking it here must tick the list item too, or he does the job,
+         sees it vanish from Right Now, and finds it still sitting on the list an hour later. */
+      if(it.listId){ if(!st.todoFileDone||typeof st.todoFileDone!=='object') st.todoFileDone={}; st.todoFileDone[it.listId]=true; }
+      if(it.dueKey){ var _t=today(); (st.todos||[]).forEach(function(td){ if(!td.checked && td.day && td.day<=_t && ((td.realm||'')+'|'+String(td.text||'').toLowerCase().trim())===it.dueKey) td.checked=true; }); } } }
     else if(op.t==='td'){ (st.todos||[]).forEach(function(td){ if(!td.checked && td.day && td.day<=t && ((td.realm||'')+'|'+String(td.text||'').toLowerCase().trim())===op.key) td.checked=true; }); }
+    /* TICKING A TO-DO ON ITS OWN DAY, which 'td' above cannot do.
+       'td' matches on the text key and only where day <= today, because it was written for the
+       "To do today" card where nothing future was ever on screen. The diary shows the whole week,
+       so two things break: a Sunday item ticked on Friday matches nothing and fails SILENTLY, and
+       a recurring job has the SAME text key on several days, so the key alone cannot say which
+       occurrence Mark meant. This carries the day and matches on both.
+       'td' is kept above and untouched: an op queued on his phone before this deploy will still
+       be sitting in the pending list, and dropping the handler would throw it away unapplied. */
+    /* Swipe a LIST item into Right Now. It makes a shadow focus item rather than moving the
+       list item, because the list belongs to the to-do chat and this app does not write it. */
+    else if(op.t==='pinl'){
+      var _tw=null;
+      (st.focus.items||[]).forEach(function(x){ if(x&&x.listId===op.listId&&!x.done) _tw=x; });
+      if(_tw){ _tw.pinnedAt=op.ms; }
+      else st.focus.items.push({ id:op.id, text:op.text, bucket:'today', pinnedAt:op.ms,
+                                 created:op.at, listId:op.listId, realm:op.realm||'' });
+    }
+    else if(op.t==='tdd'){
+      (st.todos||[]).forEach(function(td){
+        if(td.checked || !td.day) return;
+        if(td.day!==op.day) return;
+        if(((td.realm||'')+'|'+String(td.text||'').toLowerCase().trim())!==op.key) return;
+        td.checked=true;
+      });
+    }
     else if(op.t==='med'){ if(!st.dailyChecks[op.date]) st.dailyChecks[op.date]={}; st.dailyChecks[op.date][op.key]=op.val; }
     else if(op.t==='ia'){ if(!st.changeIdeas.some(function(x){return x.id===op.id;})) st.changeIdeas.push({id:op.id,text:op.text,done:false,created:op.at}); }
     else if(op.t==='it'){ var ci=st.changeIdeas.find(function(x){return x.id===op.id;}); if(ci){ ci.done=op.val; ci.doneAt=op.val?op.at:null; } }
@@ -374,7 +415,11 @@
        this app may write about them is whether Mark has done one, and that goes in the same
        place the Hub keeps it — st.todoFileDone, keyed by the item's id. That is why the to-do
        chat is forbidden from ever changing an id: change it and this tick points at nothing. */
-    else if(op.t==='tfd'){ if(!st.todoFileDone||typeof st.todoFileDone!=='object') st.todoFileDone={}; st.todoFileDone[op.id]=true; }
+    else if(op.t==='tfd'){ if(!st.todoFileDone||typeof st.todoFileDone!=='object') st.todoFileDone={}; st.todoFileDone[op.id]=true;
+      /* And the other direction: if this item had been swiped into Right Now, retire its shadow,
+         or the Right Now card goes on offering a job he has just ticked off the list. */
+      (st.focus.items||[]).forEach(function(x){ if(x&&x.listId===op.id&&!x.done){ x.done=true; x.doneAt=op.at; } });
+    }
     return st;
   }
   function enqueue(op, opts){ opts=opts||{};
@@ -447,7 +492,9 @@
        poking at them from outside without a hook is the orphan trap that made two earlier tests
        pass while proving nothing. applyOp is exposed so the tick can be asserted on the STORE
        rather than on the rendered HTML — the HTML is the symptom, the store is the contract. */
-    applyOp:applyOp, fetchList:fetchList, renderList:renderList,
+    applyOp:applyOp, fetchList:fetchList, renderList:renderList, renderDiary:renderDiary,
+    renderRightNow:renderRightNow, renderHolding:renderHolding, isDemoted:isDemoted,
+    renderHideWork:renderHideWork,
     setList:function(j){ listData=j; listFetchedAt=new Date().toISOString(); },
     getList:function(){ return listData; }, getState:function(){ return cached; },
     personalPayload:function(st){ return { schema:1, app:'life-twoweek', state:stripWork(st) }; },
@@ -465,12 +512,37 @@
   // pinnedAt is a NUMBER so the Hub's union-merge resolves clashes by taking the
   // later one — i.e. whatever was pinned most recently on either device wins.
   function focusOrder(a,b){ var pa=+(a&&a.pinnedAt)||0, pb=+(b&&b.pinnedAt)||0; if(pa!==pb) return pb-pa; return String((a&&a.created)||'').localeCompare(String((b&&b.created)||'')); }
-  // Weekend work-hiding: auto-on Sat/Sun; a one-tap override that lasts the day. Per-device (view pref, not synced).
-  var HW_KEY='connolly-pocket:hidework';
+  /* WEEKENDS: WORK IS DEMOTED, NEVER HIDDEN. Changed 4 Sep 2026 at Mark's instruction —
+     "the work tasks are deprioritised over the weekends unless explicitly said to counter that".
+
+     It used to HIDE them, and that had already caused real damage on the Hub: six client call
+     reports, overdue since the Thursday, were invisible on the Saturday he actually had time for
+     them. The feature meant to protect his weekend was manufacturing the lateness. Hiding also
+     breaks the one thing the list is for — being the single honest view — because a list that
+     silently omits things looks exactly like a list with nothing on it.
+
+     So now: at weekends work sinks to the bottom of its band under a divider, and it is still
+     there, still counted, still tickable. Two exemptions, and they are the whole point:
+     ANYTHING OVERDUE OR DUE TODAY IS NEVER DEMOTED, whatever day of the week it is. A deadline
+     does not care that it is Saturday.
+
+     One tap mixes work back in for the rest of the day. Per-device: this is a view preference,
+     not data, so it is not synced. */
+  var HW_KEY='connolly-pocket:hidework';   /* key name kept — changing it would silently reset his override */
   function isWeekend(){ var d=new Date().getDay(); return d===0||d===6; }
-  function hideWorkActive(){ try{ var o=JSON.parse(lsGet(HW_KEY)||'null'); if(o&&o.date===today()) return !!o.value; }catch(_){ } return isWeekend(); }
+  function workDemoted(){ try{ var o=JSON.parse(lsGet(HW_KEY)||'null'); if(o&&o.date===today()) return !!o.value; }catch(_){ } return isWeekend(); }
   function hwSet(v){ lsSet(HW_KEY, JSON.stringify({date:today(), value:!!v})); }
-  function showByRealm(realm){ return !(hideWorkActive() && realm==='work'); }
+  /* An item is demoted only if work AND the rule is on AND it is not already biting. */
+  function isDemoted(realm,due){
+    if(realm!=='work' || !workDemoted()) return false;
+    if(due && due<=today()) return false;          /* overdue or due today — never demoted */
+    return true;
+  }
+  /* KEPT AND NEUTERED rather than deleted. showByRealm was the hide; several call sites still
+     reference it, and quietly leaving one behind would reintroduce hiding in one view only —
+     which is worse than hiding everywhere, because it would be invisible. It now always says
+     yes, so nothing anywhere can disappear on account of being work. */
+  function showByRealm(){ return true; }
   // realm pill: untagged ('tag') -> work -> personal -> untagged. Untagged is neutral & always shown.
   function realmPill(it){ var w=it.realm==='work', p=it.realm==='personal';
     // An item pulled from the work gist is not a tag you can toggle — it IS work, and it
@@ -516,8 +588,11 @@
 
   // ===== handlers (replace the old pushChange-based ones) =====
   document.addEventListener('submit',function(e){
-    var f=e.target.closest && e.target.closest('[data-cap]');
-    if(f){ e.preventDefault(); var inp=$('[data-cap-input]'); var txt=(inp&&inp.value||'').trim(); if(!txt) return; inp.value=''; enqueue({t:'cap',id:uid('f'),text:txt,at:new Date().toISOString()},{haptic:true}); return; }
+    /* The capture form was removed 4 Sep 2026 — Mark types into the to-do chat instead, which
+       ranks as it captures, so a box here would only have made a second unranked way in.
+       The 'cap' op itself is deliberately still handled in applyOp: an op queued on his phone
+       before this deploy is sitting in the pending list, and removing the handler would throw
+       away a capture he had already made. Nothing produces new ones. */
     var cf=e.target.closest && e.target.closest('[data-ci-form]');
     if(cf){ e.preventDefault(); var ci=$('[data-ci-input]'); var ctx=(ci&&ci.value||'').trim(); if(!ctx) return; ci.value=''; enqueue({t:'ia',id:uid('ci'),text:ctx,at:new Date().toISOString()},{haptic:true}); return; }
   });
@@ -533,10 +608,13 @@
     var lm=e.target.closest && e.target.closest('[data-list-more]'); if(lm){ listOpen[lm.getAttribute('data-list-more')+':all']=true; renderList(); return; }
     var lw=e.target.closest && e.target.closest('[data-list-why]'); if(lw){ var wk='why:'+lw.getAttribute('data-list-why'); listOpen[wk]=!listOpen[wk]; renderList(); return; }
     var tdb=e.target.closest && e.target.closest('[data-tick-due]'); if(tdb){ tdb.classList.add('on'); enqueue({t:'td',key:tdb.getAttribute('data-tick-due'),at:new Date().toISOString()},{haptic:true}); return; }
+    var tdd=e.target.closest && e.target.closest('[data-tick-dated]'); if(tdd){ tdd.classList.add('on');
+      enqueue({t:'tdd',key:tdd.getAttribute('data-tick-dated'),day:tdd.getAttribute('data-day'),at:new Date().toISOString()},{haptic:true});
+      setTimeout(renderDiary,140); return; }
     var ptd=e.target.closest && e.target.closest('[data-promote-today]'); if(ptd){ enqueue({t:'bk',id:ptd.getAttribute('data-promote-today'),bucket:'today',at:new Date().toISOString()},{haptic:true}); return; }
     var ffd=e.target.closest && e.target.closest('[data-focus-del]'); if(ffd){ enqueue({t:'fdl',id:ffd.getAttribute('data-focus-del'),at:new Date().toISOString()}); return; }
     var rtg=e.target.closest && e.target.closest('[data-realm-toggle]'); if(rtg){ var _rid=rtg.getAttribute('data-realm-toggle'); var _rcur=(cached&&cached.focus&&cached.focus.items||[]).find(function(x){return x.id===_rid;}); var _cr=_rcur&&_rcur.realm; var _nr=_cr==='work'?'personal':(_cr==='personal'?'':'work'); enqueue({t:'rl',id:_rid,realm:_nr,at:new Date().toISOString()},{haptic:true}); return; }
-    var hwb=e.target.closest && e.target.closest('[data-hidework]'); if(hwb){ hwSet(!hideWorkActive()); renderAll(); return; }
+    var hwb=e.target.closest && e.target.closest('[data-hidework]'); if(hwb){ hwSet(!workDemoted()); renderAll(); return; }
     var itk=e.target.closest && e.target.closest('[data-ci-tick]'); if(itk){ var id=itk.getAttribute('data-ci-tick'); var cur=(cached&&cached.changeIdeas||[]).find(function(x){return x.id===id;}); enqueue({t:'it',id:id,val:!(cur&&cur.done),at:new Date().toISOString()},{haptic:true}); return; }
     var idl=e.target.closest && e.target.closest('[data-ci-del]'); if(idl){ enqueue({t:'idl',id:idl.getAttribute('data-ci-del'),at:new Date().toISOString()}); return; }
     var icd=e.target.closest && e.target.closest('[data-ci-clear-done]'); if(icd){ enqueue({t:'icd',at:new Date().toISOString()}); return; }
@@ -631,6 +709,36 @@
     if(due===addDays(t,1)) return '<span class="tag">tomorrow</span>';
     return '<span class="tag">'+esc(new Date(due+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short'}))+'</span>';
   }
+  /* A list item that has been swiped into Right Now gets a shadow in focus.items — the store the
+     Right Now card and Focus mode both read. It carries listId so the two can never disagree
+     about whether the job is done: ticking either one ticks the other (see the 'tf' op). */
+  function focusTwin(listId){
+    if(!cached||!cached.focus||!Array.isArray(cached.focus.items)) return null;
+    for(var i=0;i<cached.focus.items.length;i++){
+      var it=cached.focus.items[i];
+      if(it && it.listId===listId && !it.done) return it;
+    }
+    return null;
+  }
+  function listRow(i){
+    var chase = i.waitingOn ? '<span class="tag">waiting on '+esc(i.waitingOn)+'</span>' : '';
+    var realm = (i.realm==='work') ? '<span class="tag work">work</span>' : '';
+    var dim   = isDemoted(i.realm,i.due) ? ' dim' : '';
+    /* Swipeable so it can still become the Right Now. The card that used to carry that gesture
+       was deleted with "To do today"; without this, swipe-to-focus would have quietly died and
+       Focus mode would have had nothing to show. */
+    var twin  = focusTwin(i.id);
+    var flag  = (twin && (+twin.pinnedAt||0)>0 && currentFocus() && currentFocus().id===twin.id)
+                  ? '<span class="pinflag">now</span>' : '';
+    return '<div class="todo swipeable'+dim+'" data-list-id="'+esc(i.id)+'">'+
+           '<span class="box" data-tick-list="'+esc(i.id)+'"></span>'+
+           '<span class="tx" data-list-why="'+esc(i.id)+'">'+esc(i.text)+'</span>'+
+           realm+chase+listDueTag(i.due)+flag+'</div>'+
+           (listOpen['why:'+i.id]
+             ? '<div class="note" style="margin:-4px 0 8px 30px">'+esc(i.why||'')+
+               ((i.steps&&i.steps.length)?'<br>· '+i.steps.map(esc).join('<br>· '):'')+'</div>'
+             : '');
+  }
   function renderList(){
     var card=$('[data-list-card]'), body=$('[data-list-body]'),
         note=$('[data-list-note]'), ct=$('[data-list-ct]');
@@ -661,22 +769,21 @@
             ' <span style="opacity:.55;font-weight:400">'+rows.length+'</span>'+
             '<span style="float:right;opacity:.55;font-weight:400">'+(open?'hide':'show')+'</span></div>';
       if(!open) return;
-      var shown = rows.slice(0, listOpen[key+':all'] ? rows.length : LIST_SHOW);
-      html+=shown.map(function(i){
-        var chase = i.waitingOn
-          ? '<span class="tag">waiting on '+esc(i.waitingOn)+'</span>' : '';
-        var realm = (i.realm==='work') ? '<span class="tag work">work</span>' : '';
-        return '<div class="todo"><span class="box" data-tick-list="'+esc(i.id)+'"></span>'+
-               '<span class="tx" data-list-why="'+esc(i.id)+'">'+esc(i.text)+'</span>'+
-               realm+chase+listDueTag(i.due)+'</div>'+
-               (listOpen['why:'+i.id]
-                 ? '<div class="note" style="margin:-4px 0 8px 30px">'+esc(i.why||'')+
-                   ((i.steps&&i.steps.length)?'<br>· '+i.steps.map(esc).join('<br>· '):'')+'</div>'
-                 : '');
+      /* Demote, do not remove: work sinks below the personal items in its own band, keeping the
+         order the to-do chat wrote within each half. The count in the band header still counts
+         everything, because the header is what tells him how much there really is. */
+      var live=rows.filter(function(i){ return !isDemoted(i.realm,i.due); });
+      var late=rows.filter(function(i){ return  isDemoted(i.realm,i.due); });
+      var ordered=live.concat(late), firstDemoted=live.length;
+      var shown = ordered.slice(0, listOpen[key+':all'] ? ordered.length : LIST_SHOW);
+      html+=shown.map(function(i,n){
+        var divider=(late.length && n===firstDemoted && n<shown.length)
+          ? '<div class="sechead" style="opacity:.5;font-weight:400">Work — parked for the weekend</div>' : '';
+        return divider+listRow(i);
       }).join('');
-      if(rows.length>shown.length)
+      if(ordered.length>shown.length)
         html+='<div class="sechead" data-list-more="'+key+'" style="opacity:.6">Show the other '+
-              (rows.length-shown.length)+'</div>';
+              (ordered.length-shown.length)+'</div>';
     });
     if(!html) html='<div class="empty">Nothing open on the list. Everything on it is ticked.</div>';
     body.innerHTML=html;
@@ -763,14 +870,55 @@
   function dayLabel(iso){ var p=iso.split('-'); var d=new Date(+p[0],+p[1]-1,+p[2]); return DOW[d.getDay()]+' '+(+p[2])+' '+MON[+p[1]-1]; }
   function evTime(e){ return e.start==='all-day'?'All day':((e.start&&/^\d\d:\d\d$/.test(e.start))?e.start:(e.start||'—')); }
 
+  /* TO-DOS BELONG TO A DAY, NOT TO A SECOND LIST.
+     Added 4 Sep 2026, and it had to be built BEFORE the "To do today" card could be removed.
+     Until now dayBlock rendered calendar events only, so "Sunday shopping" and "Saturday council
+     meeting" existed on the phone in exactly one place: that card. Deleting the card first would
+     have deleted them from the phone — the same mistake as removing an input without checking
+     where its contents went. So they land here, on the day they are actually for.
+
+     Overdue items are the exception to "on their day": something due last Tuesday that is still
+     undone belongs on TODAY, because that is the day Mark can act on it. It is shown with how
+     late it is in words, which is the house style — never a red badge. */
+  function todosForDay(iso,state,isToday){
+    var t=today(), out=[];
+    (state.todos||[]).forEach(function(td){
+      if(!td||td.checked||!td.day) return;
+      if(td.day===iso) out.push({ td:td, late:0 });
+      /* an overdue item is pulled forward onto today, once */
+      else if(isToday && td.day<t) out.push({ td:td, late:daysBetween(td.day,t) });
+    });
+    return out;
+  }
+  function daysBetween(a,b){
+    var pa=a.split('-'), pb=b.split('-');
+    return Math.round((new Date(+pb[0],+pb[1]-1,+pb[2]) - new Date(+pa[0],+pa[1]-1,+pa[2]))/86400000);
+  }
+  function lateWords(n){
+    if(n<1) return '';
+    if(n===1) return 'a day late';
+    if(n<7) return n+' days late';
+    var w=Math.round(n/7); return w===1?'a week late':(w+' weeks late');
+  }
   function dayBlock(iso,state,isToday){
     var ev=eventsForDay(iso,state);
     var nowMin = isToday ? (new Date().getHours()*60+new Date().getMinutes()) : -1;
-    var rows = ev.length ? ev.map(function(e){
+    var rows = ev.map(function(e){
       var cls=(e.realm==='work'?' work':(e.realm==='keydate'?' kd':''));
       var past=''; if(isToday && /^\d\d:\d\d$/.test(e.start||'')){ var em=(e.end&&/^\d\d:\d\d$/.test(e.end))?(+e.end.slice(0,2)*60+ +e.end.slice(3)):(+e.start.slice(0,2)*60+ +e.start.slice(3)); if(em<=nowMin) past=' past'; }
       return '<div class="ev'+cls+past+'"><span class="t">'+esc(evTime(e))+'</span><span class="ti">'+esc(e.title||'')+'</span></div>';
-    }).join('') : '<div class="dayempty">Clear day.</div>';
+    }).join('');
+    var tds=todosForDay(iso,state,isToday);
+    if(tds.length){
+      rows+=tds.map(function(x){
+        var td=x.td, key=(td.realm||'')+'|'+String(td.text||'').toLowerCase().trim();
+        var tag=(td.realm==='work')?'<span class="tag work">work</span>':'';
+        var late=x.late?'<span class="tag over">'+esc(lateWords(x.late))+'</span>':'';
+        return '<div class="ev dtodo"><span class="box" data-tick-dated="'+esc(key)+'" data-day="'+esc(td.day)+'"></span>'+
+               '<span class="ti">'+esc(td.text||'')+'</span>'+tag+late+'</div>';
+      }).join('');
+    }
+    if(!rows) rows='<div class="dayempty">Clear day.</div>';
     return '<div class="day'+(isToday?' today':'')+'"><div class="dayhd">'+esc(dayLabel(iso))+(isToday?'<span class="dlabel">today</span>':'')+'</div>'+rows+'</div>';
   }
   function renderDiary(){
@@ -791,68 +939,54 @@
     el.innerHTML=html;
   }
 
-  // ---- today todos ----
-  function todayItems(state){
-    var t=today();
-    var focus=(state.focus&&Array.isArray(state.focus.items))?state.focus.items:[];
-    var chosen=focus.filter(function(it){ return it && it.bucket==='today' && !it.done && showByRealm(it.realm); }).sort(focusOrder);
-    var promoted={}; focus.forEach(function(it){ if(it&&it.dueKey&&!it.done) promoted[it.dueKey]=1; });
-    var seen={}, due=[];
-    (state.todos||[]).forEach(function(td){
-      if(td.checked||!td.day||td.day>t) return;
-      if(!showByRealm(td.realm)) return;
-      var k=(td.realm||'')+'|'+String(td.text||'').toLowerCase().trim();
-      if(promoted[k]) return;
-      if(seen[k]){ if(td.day<seen[k].day) seen[k].day=td.day; return; }
-      seen[k]={text:td.text,realm:td.realm,day:td.day,key:k}; due.push(seen[k]);
-    });
-    due.sort(function(a,b){ return (a.day||'').localeCompare(b.day||''); });
-    return { chosen:chosen, due:due };
-  }
-  function renderToday(){
-    var el=$('[data-today-list]'); if(!el||!cached) return;
-    var t=today(); var d=todayItems(cached);
-    var html='';
-    if((d.chosen.length+d.due.length)>1) html+='<div class="swipehint">Swipe any task left to make it your Right Now.</div>';
-    if(d.chosen.length){
-      html+=d.chosen.map(function(it,i){
-        var flag=(i===0 && (+it.pinnedAt||0)>0)?'<span class="pinflag">now</span>':'';
-        var rp=realmPill(it);
-        return '<div class="todo swipeable" data-todo-id="'+esc(it.id)+'"><span class="box" data-tick-focus="'+esc(it.id)+'"></span><span class="tx">'+esc(it.text)+'</span>'+rp+flag+'</div>';
-      }).join('');
-    }
-    if(d.due.length){
-      html+='<div class="sechead">Due today</div>'+d.due.map(function(td){
-        var over=(td.day<t);
-        var tag=(td.realm==='work')?'<span class="tag work">work</span>':'<span class="tag">diary</span>';
-        if(over) tag='<span class="tag over">overdue</span>'+tag;
-        return '<div class="todo swipeable" data-due-key="'+esc(td.key)+'" data-due-text="'+esc(td.text)+'" data-due-realm="'+esc(td.realm||'')+'"><span class="box" data-tick-due="'+esc(td.key)+'"></span><span class="tx">'+esc(td.text)+'</span>'+tag+'</div>';
-      }).join('');
-    }
-    if(!html) html='<div class="empty">Nothing for today. Add one above, or pick your focus items on The Hub.</div>';
-    var dn=doneTodayCount(); if(dn>0) html+='<div class="donetoday">✓ '+dn+' done today — nice work</div>';
-    el.innerHTML=html;
-    var ct=$('[data-today-ct]'); if(ct) ct.textContent=(d.chosen.length+d.due.length);
-  }
+  /* renderToday() and todayItems() were deleted on 4 Sep 2026 along with the card they drew.
+     WHERE EVERYTHING THEY SHOWED WENT, because deleting a view without answering that is how
+     things get silently lost:
+       · dated and recurring to-dos  -> the DIARY, on their own day (see todosForDay)
+       · overdue to-dos              -> the diary's TODAY block, with how late they are in words
+       · focus items bucket 'today'  -> the remnant card below, which drains and then disappears
+       · the "Right Now" pin         -> unaffected; it reads focus.items directly, above the list
+     Nothing it drew has been left without a home. */
 
+  /* THE REMNANT. Everything still sitting in the Hub's own task pile — both the unsorted
+     captures and anything he had chosen for today before the list existed. Nothing writes to it
+     from this app any more, so it can only shrink; when it empties the card hides itself and he
+     never sees it again. That is the honest way to retire a store: let it drain in the open
+     rather than orphaning it the moment the new thing works. */
   function renderHolding(){
     var card=$('[data-holding-card]'), list=$('[data-holding-list]'); if(!card||!list||!cached) return; ensureShape(cached);
-    var items=cached.focus.items.filter(function(it){return it&&it.bucket==='unsorted'&&!it.done;});
+    var items=cached.focus.items.filter(function(it){
+      return it && !it.done && (it.bucket==='unsorted' || it.bucket==='today');
+    }).sort(focusOrder);
     var ct=$('[data-holding-ct]'); if(ct) ct.textContent=items.length?(items.length+''):'';
     if(!items.length){ card.hidden=true; list.innerHTML=''; return; }
     card.hidden=false;
     list.innerHTML=items.map(function(it){
-      return '<div class="todo"><span class="tx">'+esc(it.text)+'</span>'+realmPill(it)+'<button class="totoday" data-promote-today="'+esc(it.id)+'">→ Today</button><button class="del" data-focus-del="'+esc(it.id)+'">✕</button></div>';
+      return '<div class="todo"><span class="box" data-tick-focus="'+esc(it.id)+'"></span>'+
+             '<span class="tx">'+esc(it.text)+'</span>'+realmPill(it)+
+             '<button class="del" data-focus-del="'+esc(it.id)+'">✕</button></div>';
     }).join('');
   }
   function doneTodayCount(){ if(!cached||!cached.focus||!Array.isArray(cached.focus.items)) return 0; var t=today(); return cached.focus.items.filter(function(it){ return it&&it.done&&it.doneAt&&isoOf(new Date(it.doneAt))===t; }).length; }
   function renderEveningNudge(){ var el=$('[data-evening-nudge]'); if(!el) return; if(!cached){ el.innerHTML=''; return; } var c=medsCountFor(today()); if(new Date().getHours()>=18 && c<MEDS.length){ el.innerHTML='<div class="nudge">🌙 Evening check — '+c+'/'+MEDS.length+' meds &amp; habits done</div>'; } else el.innerHTML=''; }
-  function renderHideWork(){ var b=$('[data-hidework]'); if(!b) return; var on=hideWorkActive(); b.hidden=false; b.setAttribute('data-on', on?'1':'0'); b.textContent = on ? '🚫 Hiding work — tap to show' : 'Showing all — tap to hide work'; }
+  /* The toggle now says what it actually does. It used to read "Hiding work — tap to show", which
+     was at least honest about hiding; saying that while merely demoting would be a lie, and the
+     count is what stops him wondering whether anything is missing. */
+  function renderHideWork(){
+    var b=$('[data-hidework]'); if(!b) return;
+    var on=workDemoted();
+    var n=0; try{ n=listOpenItems().filter(function(i){ return isDemoted(i.realm,i.due); }).length; }catch(_){ }
+    b.hidden=false; b.setAttribute('data-on', on?'1':'0');
+    b.textContent = on
+      ? (n ? '▾ Work parked below (' + n + ') — tap to mix back in'
+           : 'Work is parked for the weekend — tap to mix back in')
+      : 'Work mixed in — tap to park it for the weekend';
+  }
   function renderAll(){
     if(!cached) return;
     ensureShape(cached);
     var sub=$('[data-datesub]'); if(sub) sub.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-    renderRightNow(); renderList(); renderToday(); renderHolding(); renderHideWork(); renderDiary(); renderNotes(); renderWeatherFlag(); renderSavedAt();
+    renderRightNow(); renderList(); renderHolding(); renderHideWork(); renderDiary(); renderNotes(); renderWeatherFlag(); renderSavedAt();
   }
 
   // (Removed: dead duplicate submit/click handlers that called an undefined
@@ -907,13 +1041,21 @@
 
   // ---- swipe-to-pin: drag a today task left to make it the Right Now ----
   function pinFocus(id){ if(!id) return; enqueue({t:'pin',id:id,ms:Date.now(),at:new Date().toISOString()},{haptic:true}); }
+  function pinListItem(listId){
+    if(!listId||!listData) return;
+    var it=null; (listData.items||[]).forEach(function(x){ if(x&&x.id===listId) it=x; });
+    if(!it) return;
+    enqueue({t:'pinl',id:uid('f'),listId:listId,text:it.text||'',realm:it.realm||'',
+             ms:Date.now(),at:new Date().toISOString()},{haptic:true});
+    setTimeout(function(){ renderRightNow(); renderList(); },140);
+  }
   function promoteDue(key,text,realm){ if(!key) return; enqueue({t:'pind',id:uid('f'),key:key,text:text||'',realm:realm||'',ms:Date.now(),at:new Date().toISOString()},{haptic:true}); }
   function setupSwipe(){
-    var startX=0,startY=0,dragging=false,horiz=false,row=null,rid=null,rdk=null,rdt=null,rdr=null;
+    var startX=0,startY=0,dragging=false,horiz=false,row=null,rid=null,rdk=null,rdt=null,rdr=null,rlid=null;
     function pt(e){ return (e.touches&&e.touches[0])?e.touches[0]:e; }
     document.addEventListener('touchstart',function(e){
       var t=e.target.closest && e.target.closest('.todo.swipeable'); if(!t) return;
-      var p=pt(e); startX=p.clientX; startY=p.clientY; dragging=true; horiz=false; row=t; rid=t.getAttribute('data-todo-id'); rdk=t.getAttribute('data-due-key'); rdt=t.getAttribute('data-due-text'); rdr=t.getAttribute('data-due-realm');
+      var p=pt(e); startX=p.clientX; startY=p.clientY; dragging=true; horiz=false; row=t; rid=t.getAttribute('data-todo-id'); rdk=t.getAttribute('data-due-key'); rdt=t.getAttribute('data-due-text'); rdr=t.getAttribute('data-due-realm'); rlid=t.getAttribute('data-list-id');
     },{passive:true});
     document.addEventListener('touchmove',function(e){
       if(!dragging||!row) return; var p=pt(e); var dx=p.clientX-startX, dy=p.clientY-startY;
@@ -921,7 +1063,7 @@
       if(e.cancelable) e.preventDefault();
       var tx=Math.min(0,dx); row.style.transform='translateX('+tx+'px)'; row.classList.toggle('willpin', dx<=-70);
     },{passive:false});
-    function end(){ if(!dragging) return; var commit=!!(row&&row.classList.contains('willpin')); if(row){ row.style.transform=''; row.classList.remove('willpin'); } var id=rid, dk=rdk, dt=rdt, dr=rdr; dragging=false; horiz=false; row=null; rid=null; rdk=null; rdt=null; rdr=null; if(commit){ if(id) pinFocus(id); else if(dk) promoteDue(dk,dt,dr); } }
+    function end(){ if(!dragging) return; var commit=!!(row&&row.classList.contains('willpin')); if(row){ row.style.transform=''; row.classList.remove('willpin'); } var id=rid, dk=rdk, dt=rdt, dr=rdr, li=rlid; dragging=false; horiz=false; row=null; rid=null; rdk=null; rdt=null; rdr=null; rlid=null; if(commit){ if(id) pinFocus(id); else if(li) pinListItem(li); else if(dk) promoteDue(dk,dt,dr); } }
     document.addEventListener('touchend',end,{passive:true});
     document.addEventListener('touchcancel',end,{passive:true});
   }
