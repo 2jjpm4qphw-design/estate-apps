@@ -73,6 +73,12 @@
      because the whole point of the change is that nothing disappears. .62 is deliberately above
      the .45 used for a past event: this is deprioritised, not done with. */
   .todo.dim{opacity:.62}
+  /* A problem is the one thing on this card that must not be quiet. Red keyline, dark red text on
+     a pale ground — readable, and it does not rely on the reader noticing a colour alone. */
+  .listprob{margin-top:6px;padding:7px 9px;border-left:3px solid #b3261e;background:#fdf1f0;
+            border-radius:6px;color:#7d1a15;font-size:12.5px;line-height:1.45}
+  .listpend{margin-top:6px;padding:6px 9px;border-left:3px solid #8a94a1;background:#f4f5f7;
+            border-radius:6px;color:#4a5260;font-size:12.5px;line-height:1.45}
   .ev.dtodo{align-items:center;gap:8px}
   .ev.dtodo .box{width:20px;height:20px;border-radius:6px;margin-top:0}
   .ev.dtodo .ti{font-weight:600}
@@ -759,6 +765,26 @@
     note.innerHTML = listErr
       ? '<b>Showing the copy from '+esc(age)+'</b> — could not refresh: '+esc(listErr)+'.'
       : 'Written by the to-do chat, read '+esc(age)+'. Tick here or on the Hub; it is the same tick.';
+
+    /* SHOW WHAT COULD NOT BE APPLIED. Added 4 Sep 2026 at the to-do chat's insistence, and it put
+       it better than I would have: a problems line the phone RECEIVES and never SHOWS is worse
+       than no problems line at all, because it reads as clean. The server sends `problems` when
+       an op could not be applied and `pendingSeqs` when changes are written but not yet merged;
+       until this, both arrived and neither was drawn. */
+    var extra='';
+    if(listData.problems && listData.problems.length){
+      extra+='<div class="listprob"><b>'+listData.problems.length+' change'+
+             (listData.problems.length===1?'':'s')+' could not be applied.</b> '+
+             esc(String(listData.problems[0].why||'').slice(0,180))+
+             (listData.problems.length>1?' …and '+(listData.problems.length-1)+' more.':'')+
+             ' Tell the to-do chat — it knows what they were meant to do.</div>';
+    }
+    if(listData.pendingSeqs && listData.pendingSeqs.length){
+      extra+='<div class="listpend">'+listData.pendingSeqs.length+' change'+
+             (listData.pendingSeqs.length===1?'':'s')+' written but not merged yet — '+
+             'this list is a few minutes behind.</div>';
+    }
+    note.innerHTML += extra;
 
     var html='';
     LIST_BANDS.forEach(function(b){

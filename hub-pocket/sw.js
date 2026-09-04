@@ -8,7 +8,7 @@
  *  online load even without a bump — the bump just guarantees old caches are
  *  cleared.)
  */
-var CACHE = 'hub-pocket-v14';   /* v14, 4 Sep 2026 — one list; to-dos moved to their diary day. */
+var CACHE = 'hub-pocket-v15';   /* v15, 4 Sep 2026 — the problems line, shown not just received. */
 var SHELL = [
   './',
   './index.html',
