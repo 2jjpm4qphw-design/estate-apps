@@ -956,7 +956,15 @@
   function renderHolding(){
     var card=$('[data-holding-card]'), list=$('[data-holding-list]'); if(!card||!list||!cached) return; ensureShape(cached);
     var items=cached.focus.items.filter(function(it){
-      return it && !it.done && (it.bucket==='unsorted' || it.bucket==='today');
+      if(!it || it.done) return false;
+      /* A SHADOW IS NOT A LEGACY ITEM. Swiping a list row into Right Now creates a focus item
+         with bucket 'today' carrying listId — and without this line that shadow showed up here
+         too, so a job Mark had just focused appeared BOTH on the list and under "Still on the
+         Hub", looking like the duplication this card was meant to be draining away. Found 4 Sep
+         when he spotted the Halfords appointment in both places; it was never in the Hub pile at
+         all. The listId is what tells the two apart. */
+      if(it.listId) return false;
+      return it.bucket==='unsorted' || it.bucket==='today';
     }).sort(focusOrder);
     var ct=$('[data-holding-ct]'); if(ct) ct.textContent=items.length?(items.length+''):'';
     if(!items.length){ card.hidden=true; list.innerHTML=''; return; }
