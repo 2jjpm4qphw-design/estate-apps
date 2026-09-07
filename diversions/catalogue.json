@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-31T06:08:44.004Z",
+  "generatedAt": "2026-09-07T09:23:00.150Z",
   "source": "weekly curator",
-  "count": 192,
+  "count": 254,
   "catalogue": [
     {
       "id": "d-itv-70-up",
@@ -9,7 +9,7 @@
       "platform": "itv",
       "type": "tv",
       "date": "2026",
-      "blurb": "ITV autumn slate; Asif Kapadia closes the 7 Up documentary series after seven decades. Date to be confirmed."
+      "blurb": "Asif Kapadia directs the final instalment of the Up documentary project; date TBC."
     },
     {
       "id": "d-iplayer-a-tale-of-two-cities",
@@ -18,6 +18,22 @@
       "type": "tv",
       "date": "2026",
       "blurb": "Kit Harington as Sydney Carton in a new Dickens adaptation with Mirren Mack."
+    },
+    {
+      "id": "d-channel4-a-woman-of-substance",
+      "title": "A Woman of Substance",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Brenda Blethyn leads a reboot of the Barbara Taylor Bradford saga; date TBC."
+    },
+    {
+      "id": "d-itv-adultery",
+      "title": "Adultery",
+      "platform": "itv",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Dominic Cooper and Romola Garai in Danny Brocklehurst's drama about an affair between two families; date TBC."
     },
     {
       "id": "d-channel4-army-of-shadows",
@@ -44,6 +60,14 @@
       "blurb": "ITV autumn slate; AJ Odudu and Will Best host an extended eight-week run. Date to be confirmed."
     },
     {
+      "id": "d-iplayer-blue-lights-series-4",
+      "title": "Blue Lights - Series 4",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Belfast response officers face a volatile new threat; BBC One, autumn 2026, date to be confirmed."
+    },
+    {
       "id": "d-iplayer-blue-lights-season-4",
       "title": "Blue Lights — Season 4",
       "platform": "iplayer",
@@ -52,20 +76,20 @@
       "blurb": "Belfast police drama returns; trailer and first-look images released, autumn transmission."
     },
     {
-      "id": "d-iplayer-blue-lights-series-4",
-      "title": "Blue Lights — Series 4",
-      "platform": "iplayer",
+      "id": "d-channel4-careless",
+      "title": "Careless",
+      "platform": "channel4",
       "type": "tv",
       "date": "2026",
-      "blurb": "The Belfast police drama returns, with Richard Dormer back and old questions answered."
+      "blurb": "A Scottish backpacker becomes live-in carer to an ageing rock legend in Sydney; date TBC."
     },
     {
       "id": "d-itv-changing-ends-series-4",
-      "title": "Changing Ends — Series 4",
+      "title": "Changing Ends - Series 4",
       "platform": "itv",
       "type": "tv",
       "date": "2026",
-      "blurb": "Alan Carr's semi-autobiographical comedy moves into 1990."
+      "blurb": "Alan Carr's semi-autobiographical comedy moves into 1990; date TBC."
     },
     {
       "id": "d-skyatlantic-crystal-lake-season-1",
@@ -92,12 +116,28 @@
       "blurb": "1967-set Agatha Christie adaptation about a cursed house in the English countryside."
     },
     {
+      "id": "d-channel4-falling",
+      "title": "Falling",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Jack Thorne love story with Keeley Hawes as a nun and Paapa Essiedu as a priest; date TBC."
+    },
+    {
       "id": "d-disney-futurama-season-14",
       "title": "Futurama — Season 14",
       "platform": "disney",
       "type": "tv",
       "date": "2026",
       "blurb": "More from Planet Express."
+    },
+    {
+      "id": "d-skyatlantic-gangs-of-london-series-4",
+      "title": "Gangs of London - Series 4",
+      "platform": "skyatlantic",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "New power struggles in London's criminal underworld; date TBC."
     },
     {
       "id": "d-cinema-hamnet",
@@ -116,12 +156,20 @@
       "blurb": "U&Dave's first original drama: Howard Overman's six-parter on two detectives in a West London underworld."
     },
     {
+      "id": "d-channel4-hunting-alice-bell",
+      "title": "Hunting Alice Bell",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "A woman wrongly named online as a serial killer's accomplice bands together with other accused women; date TBC."
+    },
+    {
       "id": "d-itv-i-m-a-celebrity-get-me-out-of-here",
       "title": "I'm A Celebrity... Get Me Out Of Here!",
       "platform": "itv",
       "type": "tv",
       "date": "2026",
-      "blurb": "ITV autumn slate; the jungle returns, with Unpacked on ITV2. Date to be confirmed."
+      "blurb": "Ant and Dec back in Australia for the autumn run; date TBC."
     },
     {
       "id": "d-iplayer-ludwig-season-2",
@@ -153,7 +201,15 @@
       "platform": "channel4",
       "type": "tv",
       "date": "2026",
-      "blurb": "Witness-protection thriller with Bella Ramsey and Daisy Haggard."
+      "blurb": "Bella Ramsey as a teenager in witness protection in rural Scotland, pursued by two hitmen; date TBC."
+    },
+    {
+      "id": "d-channel4-pierre",
+      "title": "Pierre",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "David Harewood as a West London duty solicitor probing the suspicious death of a young black client; date TBC."
     },
     {
       "id": "d-skyatlantic-possession",
@@ -165,11 +221,11 @@
     },
     {
       "id": "d-itv-professor-t-series-4",
-      "title": "Professor T — Series 4",
+      "title": "Professor T - Series 4",
       "platform": "itv",
       "type": "tv",
       "date": "2026",
-      "blurb": "Jasper Tempest is avoiding the police six months on from the finale."
+      "blurb": "Jasper Tempest takes up avoiding the police as a hobby six months after the last finale; date TBC."
     },
     {
       "id": "d-prime-reacher-season-4",
@@ -228,6 +284,14 @@
       "blurb": "BBC autumn slate; Alison O'Donnell's final six-part run, centred on an historic murder. Date to be confirmed."
     },
     {
+      "id": "d-iplayer-shetland-series-11",
+      "title": "Shetland - Series 11",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Ruth Calder and Tosh investigate skeletal remains in a car pulled from the water; winter, date TBC."
+    },
+    {
       "id": "d-iplayer-shetland-season-10",
       "title": "Shetland — Season 10",
       "platform": "iplayer",
@@ -265,7 +329,7 @@
       "platform": "itv",
       "type": "tv",
       "date": "2026",
-      "blurb": "Will Forte and D'Arcy Carden run a spray tan business into Sydney's criminal underworld."
+      "blurb": "ITVX: Will Forte and D'Arcy Carden as siblings running a Sydney spray-tan van into the criminal underworld."
     },
     {
       "id": "d-skyatlantic-sweetpea-season-2",
@@ -274,6 +338,14 @@
       "type": "tv",
       "date": "2026",
       "blurb": "Ella Purnell returns as Rhiannon; autumn transmission, date to be confirmed."
+    },
+    {
+      "id": "d-itv-the-box",
+      "title": "The Box",
+      "platform": "itv",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Gary Lineker hosts ten celebrities transported inside yellow boxes to secret locations; date TBC."
     },
     {
       "id": "d-skyatlantic-the-good-daughter",
@@ -300,12 +372,20 @@
       "blurb": "Pamela Anderson as a veteran Vegas dancer."
     },
     {
+      "id": "d-itv-the-party",
+      "title": "The Party",
+      "platform": "itv",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Luke Evans as a journalist bound to politician Tom Cullen, cutting between a 40th and a police investigation; date TBC."
+    },
+    {
       "id": "d-itv-the-rainmaker",
       "title": "The Rainmaker",
       "platform": "itv",
       "type": "tv",
       "date": "2026",
-      "blurb": "John Grisham adaptation with a rookie lawyer against a courtroom veteran."
+      "blurb": "ITVX: John Grisham adaptation following rookie lawyer Rudy Baylor against Leo Drummond."
     },
     {
       "id": "d-iplayer-the-split-up",
@@ -316,20 +396,36 @@
       "blurb": "Spin-off of The Split, following a British-Asian family law firm in Manchester."
     },
     {
+      "id": "d-skyatlantic-the-terror-devil-in-silver",
+      "title": "The Terror: Devil in Silver",
+      "platform": "skyatlantic",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Dan Stevens leads the next Terror anthology season, acquired by Sky; date TBC."
+    },
+    {
+      "id": "d-itv-the-voice-uk",
+      "title": "The Voice UK",
+      "platform": "itv",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Kelly Rowland joins will.i.am, Tom Jones, Tom Fletcher and Danny Jones on the panel; date TBC."
+    },
+    {
+      "id": "d-iplayer-this-city-is-ours-series-2",
+      "title": "This City Is Ours - Series 2",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Michael and Diana are dragged back from Spain into Liverpool's gang war; autumn 2026, date TBC."
+    },
+    {
       "id": "d-iplayer-this-city-is-ours-season-2",
       "title": "This City Is Ours — Season 2",
       "platform": "iplayer",
       "type": "tv",
       "date": "2026",
       "blurb": "Michael and Diana are dragged back into the Liverpool firm over Ricardo's death."
-    },
-    {
-      "id": "d-iplayer-this-city-is-ours-series-2",
-      "title": "This City Is Ours — Series 2",
-      "platform": "iplayer",
-      "type": "tv",
-      "date": "2026",
-      "blurb": "Michael and Diana are dragged back over Ricardo's death; Shaun Evans and Álvaro Morte join."
     },
     {
       "id": "d-iplayer-time",
@@ -341,11 +437,27 @@
     },
     {
       "id": "d-iplayer-time-series-3",
-      "title": "Time (Series 3)",
+      "title": "Time - Series 3",
       "platform": "iplayer",
       "type": "tv",
       "date": "2026",
-      "blurb": "BBC autumn slate; set in a Young Offenders Institution, following a chaplain who has lost her faith. Date to be confirmed."
+      "blurb": "David Tennant and Siobhan Finneran in a story about locking up teenagers; autumn 2026, date TBC."
+    },
+    {
+      "id": "d-channel4-tip-toe",
+      "title": "Tip Toe",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Russell T Davies series with Alan Cumming and David Morrissey as warring neighbours; date TBC."
+    },
+    {
+      "id": "d-itv-trigger-point-series-4",
+      "title": "Trigger Point - Series 4",
+      "platform": "itv",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Vicky McClure returns as bomb disposal officer Lana Washington; date TBC."
     },
     {
       "id": "d-iplayer-vigil-season-3",
@@ -356,36 +468,20 @@
       "blurb": "Suranne Jones and Rose Leslie investigate a shooting at an Arctic research station."
     },
     {
-      "id": "d-iplayer-vigil-series-3",
-      "title": "Vigil — Series 3",
-      "platform": "iplayer",
+      "id": "d-itv-winter",
+      "title": "Winter",
+      "platform": "itv",
       "type": "tv",
       "date": "2026",
-      "blurb": "Suranne Jones and Rose Leslie investigate a shooting at an Arctic research station."
+      "blurb": "Richard Armitage as a Bristol forensic pathologist paired with Annabel Scholey's DI Lauren Bell; date TBC."
     },
     {
       "id": "d-skyatlantic-yaga",
-      "title": "Yaga",
+      "title": "YAGA",
       "platform": "skyatlantic",
       "type": "tv",
       "date": "2026",
-      "blurb": "Mystery thriller with Carrie-Anne Moss and Noah Reid."
-    },
-    {
-      "id": "d-itv-trigger-point-series-4",
-      "title": "Trigger Point — Series 4",
-      "platform": "itv",
-      "type": "tv",
-      "date": "2026-08",
-      "blurb": "Vicky McClure's bomb disposal officer Lana Washington returns."
-    },
-    {
-      "id": "d-cinema-flowervale-street",
-      "title": "Flowervale Street",
-      "platform": "cinema",
-      "type": "film",
-      "date": "2026-08-14",
-      "blurb": "Warner Bros release; David Robert Mitchell's 1980s-set suburban creature thriller."
+      "blurb": "PI Rapp investigates a missing heir in a coastal town with a supernatural edge; Carrie-Anne Moss stars. Date TBC."
     },
     {
       "id": "d-netflix-outer-banks-season-5",
@@ -476,12 +572,20 @@
       "blurb": "Netflix film adaptation of Alex North's crime thriller."
     },
     {
+      "id": "d-iplayer-vigil-series-3",
+      "title": "Vigil - Series 3",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026-08-30",
+      "blurb": "Amy Silva and Kirsten Longacre investigate a killing at an Arctic research station on Svalbard."
+    },
+    {
       "id": "d-channel4-apocalypse",
       "title": "Apocalypse",
       "platform": "channel4",
       "type": "tv",
       "date": "2026-09",
-      "blurb": "Social experiment: ordinary people survive 28 days in an abandoned town with no power or water."
+      "blurb": "Social experiment stranding ordinary people in an abandoned town for 28 days without power or water."
     },
     {
       "id": "d-channel4-bake-off-an-extra-slice",
@@ -505,7 +609,7 @@
       "platform": "channel4",
       "type": "tv",
       "date": "2026-09",
-      "blurb": "Fred Sirieix tours the Royal Mansour, Raffles Singapore and other landmark hotels."
+      "blurb": "Fred Sirieix tours iconic hotels from Marrakesh's Royal Mansour to Raffles Singapore."
     },
     {
       "id": "d-channel4-gogglebox",
@@ -513,7 +617,7 @@
       "platform": "channel4",
       "type": "tv",
       "date": "2026-09",
-      "blurb": "The households return to review the week's television."
+      "blurb": "The households return to review the week's television, with two new families joining."
     },
     {
       "id": "d-channel4-grand-designs",
@@ -521,7 +625,7 @@
       "platform": "channel4",
       "type": "tv",
       "date": "2026-09",
-      "blurb": "Kevin McCloud follows more ambitious self-builds."
+      "blurb": "Kevin McCloud follows more ambitious self-build projects."
     },
     {
       "id": "d-channel4-grand-designs-season-28",
@@ -548,12 +652,20 @@
       "blurb": "All five seasons land on ITVX from September."
     },
     {
+      "id": "d-itv-poldark-all-five-series",
+      "title": "Poldark (all five series)",
+      "platform": "itv",
+      "type": "tv",
+      "date": "2026-09",
+      "blurb": "The complete Poldark arrives on ITVX from September."
+    },
+    {
       "id": "d-skyone-saturday-night-live-uk-series-2",
-      "title": "Saturday Night Live UK — Series 2",
+      "title": "Saturday Night Live UK - Series 2",
       "platform": "skyone",
       "type": "tv",
       "date": "2026-09",
-      "blurb": "The British SNL returns with a new guest host and musical guest each week, live from London."
+      "blurb": "The UK version returns to Sky Max and NOW with a new run of guest hosts."
     },
     {
       "id": "d-alibi-shakespeare-hathaway-series-6",
@@ -564,12 +676,12 @@
       "blurb": "Jo Joyner and Mark Benton back on the Stratford-upon-Avon cosy-crime beat, exclusively on U&Alibi."
     },
     {
-      "id": "d-alibi-shakespeare-hathaway-private-investigato",
-      "title": "Shakespeare & Hathaway: Private Investigators (Series 6)",
-      "platform": "alibi",
+      "id": "d-iplayer-strictly-come-dancing-2026",
+      "title": "Strictly Come Dancing 2026",
+      "platform": "iplayer",
       "type": "tv",
       "date": "2026-09",
-      "blurb": "The Stratford-upon-Avon detective duo return; firm date not yet announced."
+      "blurb": "Returns with a revamped launch-night format."
     },
     {
       "id": "d-itv-the-blame",
@@ -577,15 +689,7 @@
       "platform": "itv",
       "type": "tv",
       "date": "2026-09",
-      "blurb": "Michelle Keegan and Douglas Booth as detectives on a murder that exposes institutional cover-ups."
-    },
-    {
-      "id": "d-itv-the-box",
-      "title": "The Box",
-      "platform": "itv",
-      "type": "tv",
-      "date": "2026-09",
-      "blurb": "Gary Lineker hosts ten celebrities locked in yellow boxes at secret locations."
+      "blurb": "Michelle Keegan and Douglas Booth as detectives on a Wakestead murder that opens into a cover-up."
     },
     {
       "id": "d-channel4-the-great-british-bake-off",
@@ -594,6 +698,14 @@
       "type": "tv",
       "date": "2026-09",
       "blurb": "Nigella Lawson joins Paul Hollywood as judge, replacing Prue Leith."
+    },
+    {
+      "id": "d-channel4-the-great-british-bake-off-2026",
+      "title": "The Great British Bake Off 2026",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026-09",
+      "blurb": "Nigella Lawson joins as judge, replacing Prue Leith; exact September date not yet announced."
     },
     {
       "id": "d-channel4-the-great-british-bake-off-season-17",
@@ -609,7 +721,7 @@
       "platform": "channel4",
       "type": "tv",
       "date": "2026-09",
-      "blurb": "A real murder trial recreated from original transcripts in front of a randomly selected jury."
+      "blurb": "A real murder trial is recreated from transcripts in front of a randomly selected jury."
     },
     {
       "id": "d-channel4-the-lycett-arms",
@@ -617,7 +729,7 @@
       "platform": "channel4",
       "type": "tv",
       "date": "2026-09",
-      "blurb": "Joe Lycett's live Friday-night show from his own East London pub, twinned each week with a local elsewhere."
+      "blurb": "Joe Lycett hosts live from his own East London pub, Fridays at 10pm."
     },
     {
       "id": "d-itv-the-voice-uk-season-14",
@@ -673,7 +785,7 @@
       "platform": "disney",
       "type": "tv",
       "date": "2026-09-02",
-      "blurb": "Comedic LEGO retelling of all three seasons of The Mandalorian."
+      "blurb": "Animated LEGO retelling of all three seasons of The Mandalorian."
     },
     {
       "id": "d-disney-star-wars-the-mandalorian-and-grogu",
@@ -682,6 +794,22 @@
       "type": "film",
       "date": "2026-09-02",
       "blurb": "Jon Favreau's feature lands on Disney+, with Pedro Pascal and Sigourney Weaver."
+    },
+    {
+      "id": "d-cinema-the-death-of-robin-hood",
+      "title": "The Death of Robin Hood",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-09-02",
+      "blurb": "Hugh Jackman, Jodie Comer and Bill Skarsgard in a bloody revisionist take on the Robin Hood legend."
+    },
+    {
+      "id": "d-disney-the-mandalorian-grogu",
+      "title": "The Mandalorian & Grogu",
+      "platform": "disney",
+      "type": "film",
+      "date": "2026-09-02",
+      "blurb": "Pedro Pascal's Din Djarin and Grogu are enlisted by the fledgling New Republic."
     },
     {
       "id": "d-prime-the-runner",
@@ -709,11 +837,11 @@
     },
     {
       "id": "d-disney-chad-powers-season-2",
-      "title": "Chad Powers — Season 2",
+      "title": "Chad Powers - Season 2",
       "platform": "disney",
       "type": "tv",
       "date": "2026-09-03",
-      "blurb": "Glen Powell's college-football imposter comedy returns, all episodes at once."
+      "blurb": "Glen Powell's football fake starts to unravel as the Catfish chase the College Football Playoff."
     },
     {
       "id": "d-channel4-taskmaster-season-22",
@@ -725,11 +853,11 @@
     },
     {
       "id": "d-netflix-the-gentlemen-season-2",
-      "title": "The Gentlemen — Season 2",
+      "title": "The Gentlemen - Season 2",
       "platform": "netflix",
       "type": "tv",
       "date": "2026-09-03",
-      "blurb": "Theo James returns as Eddie Horniman, taking the Halstead operation overseas in Guy Ritchie's crime comedy."
+      "blurb": "Theo James returns as Eddie Horniman, expanding the enterprise overseas with Susie Glass."
     },
     {
       "id": "d-cinema-bad-apples",
@@ -764,12 +892,12 @@
       "blurb": "New Black Bear release; UK cinemas 4 September."
     },
     {
-      "id": "d-cinema-the-death-of-robin-hood",
-      "title": "The Death of Robin Hood",
-      "platform": "cinema",
-      "type": "film",
+      "id": "d-channel4-the-demon-s-fall",
+      "title": "The Demon's Fall",
+      "platform": "channel4",
+      "type": "tv",
       "date": "2026-09-04",
-      "blurb": "A darker take on the legend."
+      "blurb": "Walter Presents: second season of Bulgarian thriller The Devil's Throat, now in Veliko Tarnovo."
     },
     {
       "id": "d-prime-the-grand-tour",
@@ -777,15 +905,31 @@
       "platform": "prime",
       "type": "tv",
       "date": "2026-09-04",
-      "blurb": "Returns with a new trio: Francis Bourgeois and Throttle House's James Engelsman and Thomas Holland."
+      "blurb": "Relaunched with Francis Bourgeois and Throttle House's James Engelsman and Thomas Holland."
+    },
+    {
+      "id": "d-disney-how-the-tudors-lost-their-heads",
+      "title": "How the Tudors Lost Their Heads",
+      "platform": "disney",
+      "type": "tv",
+      "date": "2026-09-06",
+      "blurb": "Dan Snow and Suzannah Lipscomb reinvestigate famous Tudor executions across six parts."
     },
     {
       "id": "d-iplayer-colin-from-accounts-season-3",
-      "title": "Colin From Accounts — Season 3",
+      "title": "Colin from Accounts - Season 3",
       "platform": "iplayer",
       "type": "tv",
       "date": "2026-09-07",
-      "blurb": "Final season of the Australian comedy, on BBC Two and iPlayer."
+      "blurb": "Third and final series of the Australian comedy, premiering on BBC Two."
+    },
+    {
+      "id": "d-netflix-dang",
+      "title": "Dang!",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-09-08",
+      "blurb": "Adult animated comedy about a brother and sister upended by their overachieving older sister."
     },
     {
       "id": "d-disney-fx-s-the-drop-a-snowfall-saga",
@@ -797,11 +941,11 @@
     },
     {
       "id": "d-netflix-fauda-season-5",
-      "title": "Fauda — Season 5",
+      "title": "Fauda - Season 5",
       "platform": "netflix",
       "type": "tv",
       "date": "2026-09-08",
-      "blurb": "Israeli action thriller returns with Doron undercover in Marseille."
+      "blurb": "Doron heads to Marseille undercover after an old friend goes off-book on a revenge mission."
     },
     {
       "id": "d-itv-national-television-awards-2026",
@@ -812,12 +956,20 @@
       "blurb": "Joel Dommett hosts the public-voted awards live from The O2, London."
     },
     {
+      "id": "d-itv-the-national-television-awards-2026",
+      "title": "The National Television Awards 2026",
+      "platform": "itv",
+      "type": "tv",
+      "date": "2026-09-08",
+      "blurb": "Live from The O2 in London."
+    },
+    {
       "id": "d-prime-drawn-together",
       "title": "Drawn Together",
       "platform": "prime",
-      "type": "tv",
+      "type": "film",
       "date": "2026-09-09",
-      "blurb": "Spanish romance: a tycoon's daughter and the bodyguard assigned to her after a kidnapping."
+      "blurb": "A tycoon's daughter and her enigmatic bodyguard are drawn together as threats close in."
     },
     {
       "id": "d-prime-in-the-grey",
@@ -825,15 +977,23 @@
       "platform": "prime",
       "type": "film",
       "date": "2026-09-09",
-      "blurb": "Guy Ritchie heist thriller about covert operatives sent to steal back a stolen fortune."
+      "blurb": "Elite covert operatives are sent to recover a billion-dollar fortune stolen by a despot."
     },
     {
       "id": "d-disney-made-in-korea-season-2",
-      "title": "Made in Korea — Season 2",
+      "title": "Made in Korea - Season 2",
       "platform": "disney",
       "type": "tv",
       "date": "2026-09-09",
-      "blurb": "Baek Kitae rises to KCIA deputy director as his old enemy returns for revenge."
+      "blurb": "Baek Kitae rises to KCIA deputy director as his old foe returns for revenge nine years on."
+    },
+    {
+      "id": "d-cinema-oasis-don-t-look-back-in-anger",
+      "title": "Oasis: Don't Look Back In Anger",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-09-09",
+      "blurb": "Disney-distributed Oasis documentary feature, in UK cinemas from 9 September."
     },
     {
       "id": "d-cinema-pressure",
@@ -841,7 +1001,23 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-09-09",
-      "blurb": "Studiocanal release opening midweek on 9 September."
+      "blurb": "Studiocanal release, out in UK cinemas from 9 September."
+    },
+    {
+      "id": "d-disney-psycho-killer",
+      "title": "Psycho Killer",
+      "platform": "disney",
+      "type": "film",
+      "date": "2026-09-09",
+      "blurb": "A motorway patrol officer hunts the sadistic killer who murdered her husband."
+    },
+    {
+      "id": "d-disney-the-drop-a-snowfall-saga",
+      "title": "The Drop: A Snowfall Saga",
+      "platform": "disney",
+      "type": "tv",
+      "date": "2026-09-09",
+      "blurb": "Snowfall spin-off following Wanda Bell and Leon Simmons through 1990s West Coast rap."
     },
     {
       "id": "d-netflix-the-real-unforgotten",
@@ -852,12 +1028,20 @@
       "blurb": "British crime documentary following detectives reopening a 40-year-old murder case."
     },
     {
+      "id": "d-netflix-why-did-i-get-married-again",
+      "title": "Why Did I Get Married Again",
+      "platform": "netflix",
+      "type": "film",
+      "date": "2026-09-09",
+      "blurb": "Tyler Perry comedy in which a looming wedding makes everyone question their own marriages."
+    },
+    {
       "id": "d-netflix-call-my-agent-the-movie",
       "title": "Call My Agent! The Movie",
       "platform": "netflix",
       "type": "film",
       "date": "2026-09-10",
-      "blurb": "Feature sequel to the French agency comedy, with a director turning to her old team days before shooting."
+      "blurb": "Feature sequel to the French hit: a director turns to her old agency to recast her lead days before shooting."
     },
     {
       "id": "d-netflix-crew-girl",
@@ -865,7 +1049,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-09-10",
-      "blurb": "Miku Martineau as a teenager starting again in a new town as the only female rower on her prep school's team."
+      "blurb": "Miku Martineau as a teenager starting over as the only female rower on her prep school team."
     },
     {
       "id": "d-netflix-crew-girl-season-1",
@@ -881,7 +1065,7 @@
       "platform": "netflix",
       "type": "film",
       "date": "2026-09-10",
-      "blurb": "Denis Villeneuve's second Dune instalment arrives on Netflix UK."
+      "blurb": "Denis Villeneuve's epic arrives on Netflix UK as a licensed title."
     },
     {
       "id": "d-skyone-the-paper-season-2",
@@ -897,7 +1081,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-09-10",
-      "blurb": "Dutch drama in which four seemingly perfect couples unravel after a death in a fire."
+      "blurb": "Dutch drama: four seemingly perfect couples unravel after one of them dies in a fire."
     },
     {
       "id": "d-netflix-the-perfect-lie-season-1",
@@ -908,12 +1092,52 @@
       "blurb": "Dutch drama in which four seemingly perfect couples unravel after one of them dies in a fire."
     },
     {
+      "id": "d-disney-the-secret-lives-of-mormon-wives-season",
+      "title": "The Secret Lives of Mormon Wives - Season 5",
+      "platform": "disney",
+      "type": "tv",
+      "date": "2026-09-10",
+      "blurb": "MomTok's fame, secrets and backlash push the sisterhood to breaking point."
+    },
+    {
       "id": "d-cinema-a-practical-magic-film",
       "title": "A Practical Magic Film",
       "platform": "cinema",
       "type": "film",
       "date": "2026-09-11",
       "blurb": "Warner Bros sequel to the 1998 cult witchcraft comedy Practical Magic."
+    },
+    {
+      "id": "d-cinema-a-practical-magic-film-practical-magic-2",
+      "title": "A Practical Magic Film (Practical Magic 2)",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-09-11",
+      "blurb": "Warner Bros sequel to the 1998 witch sisters comedy-drama."
+    },
+    {
+      "id": "d-channel4-de-twaalf-the-botox-murders",
+      "title": "De Twaalf: The Botox Murders",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026-09-11",
+      "blurb": "Walter Presents: an author and his pregnant wife are poisoned at a Liege gender-reveal party."
+    },
+    {
+      "id": "d-netflix-marching-powder",
+      "title": "Marching Powder",
+      "platform": "netflix",
+      "type": "film",
+      "date": "2026-09-11",
+      "blurb": "Danny Dyer as a cocaine-addicted father trying to stay out of jail through court-ordered therapy."
+    },
+    {
+      "id": "d-disney-oasis-don-t-look-back-in-anger",
+      "title": "Oasis: Don't Look Back In Anger",
+      "platform": "disney",
+      "type": "film",
+      "date": "2026-09-11",
+      "blurb": "The Oasis documentary feature arrives on Disney+ UK two days after its cinema release."
     },
     {
       "id": "d-netflix-physical-100-italy",
@@ -977,7 +1201,7 @@
       "platform": "disney",
       "type": "tv",
       "date": "2026-09-16",
-      "blurb": "German thriller: two sisters discover vampires run organised crime in a collapsing Berlin."
+      "blurb": "German drama: two estranged sisters discover vampires control organised crime in a collapsing Berlin."
     },
     {
       "id": "d-prime-neagley",
@@ -985,7 +1209,7 @@
       "platform": "prime",
       "type": "tv",
       "date": "2026-09-16",
-      "blurb": "Reacher spin-off with Maria Sten as Frances Neagley, hunting the truth behind a friend's death."
+      "blurb": "Reacher spin-off with Maria Sten as Chicago PI Frances Neagley, hunting a friend's killer."
     },
     {
       "id": "d-prime-neagley-season-1",
@@ -994,6 +1218,14 @@
       "type": "tv",
       "date": "2026-09-16",
       "blurb": "First Reacher spin-off, with Maria Sten leading as Frances Neagley."
+    },
+    {
+      "id": "d-prime-slow-horses-season-6",
+      "title": "Slow Horses - Season 6",
+      "platform": "prime",
+      "type": "tv",
+      "date": "2026-09-16",
+      "blurb": "Jackson Lamb and Slough House on the run; via the Apple TV add-on channel on Prime Video."
     },
     {
       "id": "d-prime-slow-horses-series-6",
@@ -1017,7 +1249,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-09-16",
-      "blurb": "Polish period drama about a man's obsession with an aristocrat, from the Bolesław Prus classic."
+      "blurb": "Polish period drama about a man's obsessive pursuit of an aristocrat and of high society."
     },
     {
       "id": "d-netflix-the-doll-season-1",
@@ -1033,15 +1265,15 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-09-17",
-      "blurb": "Fourth instalment of Ryan Murphy's Monster anthology, on the 1892 Fall River axe murders."
+      "blurb": "Fourth Ryan Murphy Monster instalment, on the prime suspect in the Fall River axe murders."
     },
     {
       "id": "d-netflix-stranger-things-tales-from-85-season-2",
-      "title": "Stranger Things: Tales From '85 — Season 2",
+      "title": "Stranger Things: Tales From '85 - Season 2",
       "platform": "netflix",
       "type": "tv",
       "date": "2026-09-17",
-      "blurb": "Second season of the animated Stranger Things spin-off."
+      "blurb": "Animated Stranger Things spin-off returns for a second run."
     },
     {
       "id": "d-netflix-best-of-the-best",
@@ -1049,7 +1281,15 @@
       "platform": "netflix",
       "type": "film",
       "date": "2026-09-18",
-      "blurb": "Maitreyi Ramakrishnan stars as a UCLA fresher competing on a Bollywood-fusion dance team."
+      "blurb": "Maitreyi Ramakrishnan as a UCLA fresher competing on a cut-throat Bollywood-fusion dance team."
+    },
+    {
+      "id": "d-channel4-coastal-unit",
+      "title": "Coastal Unit",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026-09-18",
+      "blurb": "More4: personalities clash in a colourful police precinct in the South of France."
     },
     {
       "id": "d-cinema-little-monsters-2",
@@ -1057,7 +1297,15 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-09-18",
-      "blurb": "Sequel released in the UK by Miracle/Dazzler."
+      "blurb": "Miracle/Dazzler release, in UK cinemas from 18 September."
+    },
+    {
+      "id": "d-prime-mobland-season-2",
+      "title": "MobLand - Season 2",
+      "platform": "prime",
+      "type": "tv",
+      "date": "2026-09-18",
+      "blurb": "The Harrigans' empire fractures as fixer Harry Da Souza walks a tightrope; via the Paramount+ add-on."
     },
     {
       "id": "d-prime-mobland-series-2",
@@ -1073,15 +1321,23 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-09-18",
-      "blurb": "Sony's new take on the survival-horror game franchise."
+      "blurb": "Zach Cregger's fresh spin on the video-game series, starring Austin Abrams."
     },
     {
       "id": "d-cinema-shaun-the-sheep-the-beast-of-mossy-botto",
-      "title": "Shaun The Sheep: The Beast Of Mossy Bottom",
+      "title": "Shaun the Sheep: The Beast of Mossy Bottom",
       "platform": "cinema",
       "type": "film",
       "date": "2026-09-18",
-      "blurb": "New Aardman Shaun the Sheep feature, distributed by Studiocanal."
+      "blurb": "New Aardman animated feature, released by Studiocanal."
+    },
+    {
+      "id": "d-netflix-the-scandal",
+      "title": "The Scandal",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-09-18",
+      "blurb": "Korean period romance starring Son Ye-jin as a madam who sets a rake on a chaste young widow."
     },
     {
       "id": "d-skyone-the-walking-dead-dead-city-season-3",
@@ -1095,9 +1351,17 @@
       "id": "d-prime-you-me-against-the-world",
       "title": "You + Me - Against the World",
       "platform": "prime",
-      "type": "tv",
+      "type": "film",
       "date": "2026-09-18",
-      "blurb": "Campus romance between a secret film student and a solitary rebel, with someone watching."
+      "blurb": "A secret film student and a solitary rebel fall in love while someone works to expose them."
+    },
+    {
+      "id": "d-prime-outlander-blood-of-my-blood-season-2",
+      "title": "Outlander: Blood of My Blood - Season 2",
+      "platform": "prime",
+      "type": "tv",
+      "date": "2026-09-19",
+      "blurb": "The Outlander prequel returns; via the MGM+ add-on channel on Prime Video."
     },
     {
       "id": "d-prime-outlander-blood-of-my-blood-series-2",
@@ -1108,12 +1372,52 @@
       "blurb": "The Outlander prequel returns — via the MGM+ add-on."
     },
     {
+      "id": "d-prime-american-hostage",
+      "title": "American Hostage",
+      "platform": "prime",
+      "type": "tv",
+      "date": "2026-09-20",
+      "blurb": "Jon Hamm as a 1970s Indianapolis radio reporter pulled into a hostage crisis; via MGM+."
+    },
+    {
+      "id": "d-netflix-wasteman",
+      "title": "Wasteman",
+      "platform": "netflix",
+      "type": "film",
+      "date": "2026-09-20",
+      "blurb": "British prison drama; a man weeks from release is dragged into a drug war by his new cellmate."
+    },
+    {
       "id": "d-prime-hair-fetish-killer",
       "title": "Hair Fetish Killer",
       "platform": "prime",
       "type": "tv",
       "date": "2026-09-22",
-      "blurb": "True crime on a 2002 Bournemouth murder whose trail leads to Potenza in Italy."
+      "blurb": "True-crime special on a Bournemouth murder with clues leading to Italy."
+    },
+    {
+      "id": "d-netflix-minerva-academy",
+      "title": "Minerva Academy",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-09-22",
+      "blurb": "Italian coming-of-age drama set at a Naples military school, where a cadet hunts a missing friend."
+    },
+    {
+      "id": "d-alibi-shakespeare-hathaway-private-investigato",
+      "title": "Shakespeare & Hathaway: Private Investigators - Series 6",
+      "platform": "alibi",
+      "type": "tv",
+      "date": "2026-09-23",
+      "blurb": "Jo Joyner and Mark Benton return for ten weekly episodes, with Aruhan Galieva as new assistant Bea Gardiner."
+    },
+    {
+      "id": "d-iplayer-the-celebrity-traitors-series-2",
+      "title": "The Celebrity Traitors - Series 2",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026-09-23",
+      "blurb": "Claudia Winkleman returns with a new castle full of famous faithful and traitors."
     },
     {
       "id": "d-netflix-the-golden-ticket",
@@ -1129,7 +1433,15 @@
       "platform": "prime",
       "type": "film",
       "date": "2026-09-23",
-      "blurb": "Lili Reinhart and Tom Bateman in the adaptation of Ali Hazelwood's fake-relationship romance."
+      "blurb": "Lili Reinhart and Tom Bateman in the Ali Hazelwood fake-relationship romance."
+    },
+    {
+      "id": "d-disney-toy-story-5",
+      "title": "Toy Story 5",
+      "platform": "disney",
+      "type": "film",
+      "date": "2026-09-23",
+      "blurb": "Woody, Buzz and Jessie face Lilypad, a tablet with her own ideas about what's best for Bonnie."
     },
     {
       "id": "d-netflix-wonka-s-the-golden-ticket",
@@ -1137,7 +1449,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-09-23",
-      "blurb": "Nine-part competition series set inside Willy Wonka's chocolate factory."
+      "blurb": "Nine-part competition series sending twelve golden-ticket winners into Willy Wonka's factory."
     },
     {
       "id": "d-netflix-a-different-world",
@@ -1145,7 +1457,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-09-24",
-      "blurb": "Sequel to the 1980s comedy, following a Hillman College freshman out of her parents' shadow."
+      "blurb": "Sequel to the 1980s comedy, following a Hillman College freshman escaping her parents' shadow."
     },
     {
       "id": "d-netflix-a-different-world-season-1",
@@ -1156,20 +1468,36 @@
       "blurb": "Sequel to the 1980s comedy, following a Hillman College freshman escaping her parents' shadow."
     },
     {
-      "id": "d-disney-american-horror-story-13",
-      "title": "American Horror Story: 13",
-      "platform": "disney",
-      "type": "tv",
-      "date": "2026-09-24",
-      "blurb": "Thirteenth instalment of the Murphy/Falchuk anthology, with returning fan-favourite cast."
-    },
-    {
       "id": "d-disney-fx-s-american-horror-story-13",
       "title": "FX's American Horror Story: 13",
       "platform": "disney",
       "type": "tv",
       "date": "2026-09-24",
       "blurb": "Murphy and Falchuk's anthology returns for a thirteenth instalment with returning fan-favourite cast."
+    },
+    {
+      "id": "d-disney-the-real-rooneys",
+      "title": "The Real Rooneys",
+      "platform": "disney",
+      "type": "tv",
+      "date": "2026-09-24",
+      "blurb": "Wayne and Coleen Rooney open up their home for a pivotal year with their four sons."
+    },
+    {
+      "id": "d-channel4-3pu-paris-police-psychological-unit",
+      "title": "3PU: Paris Police Psychological Unit",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026-09-25",
+      "blurb": "Walter Presents: an eccentric psychiatrist has 24 hours to assess patients off the Paris streets."
+    },
+    {
+      "id": "d-disney-american-horror-story-13",
+      "title": "American Horror Story: 13",
+      "platform": "disney",
+      "type": "tv",
+      "date": "2026-09-25",
+      "blurb": "Three-episode premiere launching the thirteenth AHS instalment."
     },
     {
       "id": "d-cinema-manhunter",
@@ -1181,11 +1509,19 @@
     },
     {
       "id": "d-cinema-sense-and-sensibility",
-      "title": "Sense And Sensibility",
+      "title": "Sense and Sensibility",
       "platform": "cinema",
       "type": "film",
       "date": "2026-09-25",
-      "blurb": "New Jane Austen adaptation for Universal starring Daisy Edgar-Jones."
+      "blurb": "Georgia Oakley's new take on Austen, with Daisy Edgar-Jones and George MacKay."
+    },
+    {
+      "id": "d-netflix-sonic-the-hedgehog-3",
+      "title": "Sonic the Hedgehog 3",
+      "platform": "netflix",
+      "type": "film",
+      "date": "2026-09-25",
+      "blurb": "Ben Schwartz's Sonic faces Shadow the Hedgehog; licensed to Netflix UK."
     },
     {
       "id": "d-netflix-the-final-problem",
@@ -1193,7 +1529,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-09-25",
-      "blurb": "Spanish limited series: thirteen people stranded on an island off Mallorca after a storm."
+      "blurb": "Spanish adaptation: thirteen people stranded on a Mallorcan island after a violent storm."
     },
     {
       "id": "d-netflix-unabomber",
@@ -1201,7 +1537,7 @@
       "platform": "netflix",
       "type": "film",
       "date": "2026-09-25",
-      "blurb": "Two-timeline biopic thriller on Ted Kaczynski and the FBI manhunt."
+      "blurb": "Two-timeline biopic thriller on Ted Kaczynski, from Harvard maths prodigy to the FBI manhunt."
     },
     {
       "id": "d-disney-the-simpsons-season-37",
@@ -1212,12 +1548,20 @@
       "blurb": "The latest season lands on Disney+."
     },
     {
+      "id": "d-netflix-outside",
+      "title": "Outside",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-09-28",
+      "blurb": "Sidemen reality series dropping content creators outdoors to compete for a share of 1m pounds."
+    },
+    {
       "id": "d-netflix-lego-one-piece",
       "title": "LEGO One Piece",
       "platform": "netflix",
       "type": "tv",
       "date": "2026-09-29",
-      "blurb": "LEGO retelling of the pirate adventure."
+      "blurb": "LEGO animated take on the One Piece world."
     },
     {
       "id": "d-netflix-lego-one-piece-season-1",
@@ -1228,12 +1572,20 @@
       "blurb": "The Straw Hat crew rebuilt in brick form."
     },
     {
-      "id": "d-itv-adultery",
-      "title": "Adultery",
-      "platform": "itv",
+      "id": "d-disney-somebody-knows-something",
+      "title": "Somebody Knows Something",
+      "platform": "disney",
       "type": "tv",
-      "date": "2026-10",
-      "blurb": "Dominic Cooper and Romola Garai in Danny Brocklehurst's drama about two families undone by an affair."
+      "date": "2026-09-30",
+      "blurb": "True-crime series arriving on Disney+ UK at the end of September."
+    },
+    {
+      "id": "d-netflix-the-arena",
+      "title": "The Arena",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-09-30",
+      "blurb": "French reality competition series built around MMA."
     },
     {
       "id": "d-u-anna-pigeon",
@@ -1244,20 +1596,44 @@
       "blurb": "National-park ranger mystery series acquired by UKTV for U&Drama."
     },
     {
+      "id": "d-skyatlantic-baby-doe",
+      "title": "Baby Doe",
+      "platform": "skyatlantic",
+      "type": "tv",
+      "date": "2026-10",
+      "blurb": "A mother of three is charged with murder when DNA links her to the Geauga's Child cold case."
+    },
+    {
       "id": "d-itv-blue-murder-motel",
       "title": "Blue Murder Motel",
       "platform": "itv",
       "type": "tv",
       "date": "2026-10",
-      "blurb": "New Zealand crime drama: retired Australian detectives find a body in Unit 3 of their new motel."
+      "blurb": "New Zealand crime drama on ITV3/ITVX: retired detectives running a motel find a body in Unit 3."
+    },
+    {
+      "id": "d-skyatlantic-crystal-lake",
+      "title": "Crystal Lake",
+      "platform": "skyatlantic",
+      "type": "tv",
+      "date": "2026-10",
+      "blurb": "Friday the 13th prequel with Linda Cardellini as Pam Voorhees, a year after Jason's drowning."
     },
     {
       "id": "d-disney-marvel-zombies-season-2",
-      "title": "Marvel Zombies (Season 2)",
+      "title": "Marvel Zombies - Season 2",
       "platform": "disney",
       "type": "tv",
       "date": "2026-10",
-      "blurb": "Second season of the animated undead-MCU series."
+      "blurb": "Second run of the animated Marvel horror anthology."
+    },
+    {
+      "id": "d-disney-murdaugh-death-in-the-family",
+      "title": "Murdaugh: Death in the Family",
+      "platform": "disney",
+      "type": "tv",
+      "date": "2026-10",
+      "blurb": "True-crime drama on the Murdaugh family killings, part of Disney+'s October crime slate."
     },
     {
       "id": "d-itv-pride-of-britain-awards",
@@ -1268,20 +1644,20 @@
       "blurb": "Carol Vorderman and Ashley Banjo host the annual ceremony from Grosvenor House."
     },
     {
-      "id": "d-itv-the-party",
-      "title": "The Party",
-      "platform": "itv",
+      "id": "d-skyone-rob-romesh-vs-series-9",
+      "title": "Rob & Romesh Vs - Series 9",
+      "platform": "skyone",
       "type": "tv",
       "date": "2026-10",
-      "blurb": "Luke Evans and Tom Cullen in a five-part adaptation of Elizabeth Day's novel about a corrosive friendship."
+      "blurb": "Four more episodes of Rob Beckett and Romesh Ranganathan failing at new things."
     },
     {
-      "id": "d-itv-winter",
-      "title": "Winter",
-      "platform": "itv",
+      "id": "d-disney-the-lost-station-girls",
+      "title": "The Lost Station Girls",
+      "platform": "disney",
       "type": "tv",
       "date": "2026-10",
-      "blurb": "Richard Armitage as a rule-breaking Bristol pathologist paired with Annabel Scholey's DI."
+      "blurb": "New true-crime drama in Disney+ UK's October line-up."
     },
     {
       "id": "d-netflix-east-of-eden",
@@ -1297,7 +1673,7 @@
       "platform": "disney",
       "type": "tv",
       "date": "2026-10-02",
-      "blurb": "New supernatural series, on Freeform 1 Oct and streaming the next day."
+      "blurb": "New Disney+ series launching 2 October."
     },
     {
       "id": "d-cinema-digger",
@@ -1305,7 +1681,23 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-10-02",
-      "blurb": "New Warner Bros release; UK cinemas 2 October."
+      "blurb": "Warner Bros release, in UK cinemas from 2 October."
+    },
+    {
+      "id": "d-prime-kill-jackie",
+      "title": "Kill Jackie",
+      "platform": "prime",
+      "type": "tv",
+      "date": "2026-10-02",
+      "blurb": "Catherine Zeta-Jones as an ex-dealer hunting the hit squad known as The Seven Demons."
+    },
+    {
+      "id": "d-channel4-prison-island",
+      "title": "Prison Island",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026-10-02",
+      "blurb": "Walter Presents: an isolated community is besieged by armed eco-activists targeting the oil industry."
     },
     {
       "id": "d-cinema-verity",
@@ -1313,7 +1705,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-10-02",
-      "blurb": "Sony adaptation of the Colleen Hoover thriller novel."
+      "blurb": "Sony release, in UK cinemas from 2 October."
     },
     {
       "id": "d-skyatlantic-war",
@@ -1321,7 +1713,7 @@
       "platform": "skyatlantic",
       "type": "tv",
       "date": "2026-10-02",
-      "blurb": "Sky/HBO legal thriller from George Kay; Dominic West and Sienna Miller in an explosive divorce that drags two London law firms into battle."
+      "blurb": "George Kay legal drama: rival London firms fight a billionaire divorce; Dominic West, Sienna Miller, Archie Renaux."
     },
     {
       "id": "d-skyatlantic-war-season-1",
@@ -1332,6 +1724,14 @@
       "blurb": "New series premiering on Sky Atlantic on 2 October."
     },
     {
+      "id": "d-netflix-blue-box-season-2",
+      "title": "Blue Box - Season 2",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-10-04",
+      "blurb": "The sports-romance anime returns with weekly episode drops."
+    },
+    {
       "id": "d-prime-carrie-season-1",
       "title": "Carrie — Season 1",
       "platform": "prime",
@@ -1340,12 +1740,20 @@
       "blurb": "Series adaptation of the Stephen King novel."
     },
     {
+      "id": "d-netflix-below",
+      "title": "Below",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-10-08",
+      "blurb": "Supernatural limited series with Josh Hartnett, Mackenzie Davis and Charlie Heaton."
+    },
+    {
       "id": "d-cinema-other-mommy",
       "title": "Other Mommy",
       "platform": "cinema",
       "type": "film",
       "date": "2026-10-09",
-      "blurb": "New Universal release; UK cinemas 9 October."
+      "blurb": "Universal release, in UK cinemas from 9 October."
     },
     {
       "id": "d-cinema-the-social-reckoning",
@@ -1353,7 +1761,23 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-10-09",
-      "blurb": "Sony's follow-up in the world of The Social Network."
+      "blurb": "Sony release, in UK cinemas from 9 October."
+    },
+    {
+      "id": "d-channel4-until-the-last-heartbeat",
+      "title": "Until The Last Heartbeat",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026-10-09",
+      "blurb": "Walter Presents: an Italian heart surgeon's desperate choice for his son pulls him into blackmail."
+    },
+    {
+      "id": "d-netflix-lupin-season-4",
+      "title": "Lupin - Season 4",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-10-13",
+      "blurb": "Omar Sy's Assane Diop plots new high-stakes cons in Paris."
     },
     {
       "id": "d-prime-helluva-boss-season-3",
@@ -1372,12 +1796,20 @@
       "blurb": "Romantic drama with Margaret Qualley and Gabriel Basso."
     },
     {
+      "id": "d-disney-the-lowdown-season-2",
+      "title": "The Lowdown - Season 2",
+      "platform": "disney",
+      "type": "tv",
+      "date": "2026-10-14",
+      "blurb": "Ethan Hawke's Lee Raybon digs into a new Oklahoma mystery; Tommy Lee Jones and Betty Gilpin join."
+    },
+    {
       "id": "d-disney-visionquest",
       "title": "VisionQuest",
       "platform": "disney",
       "type": "tv",
       "date": "2026-10-14",
-      "blurb": "Paul Bettany's Vision tries to recover his memory and his humanity."
+      "blurb": "Marvel series arriving on Disney+ in October."
     },
     {
       "id": "d-netflix-the-diplomat-season-4",
@@ -1393,7 +1825,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-10-16",
-      "blurb": "New Universal release; UK cinemas 16 October."
+      "blurb": "Universal release, in UK cinemas from 16 October."
     },
     {
       "id": "d-prime-masterplan",
@@ -1404,12 +1836,20 @@
       "blurb": "Heist film starring Stanley Tucci."
     },
     {
+      "id": "d-channel4-soviet-jeans",
+      "title": "Soviet Jeans",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026-10-16",
+      "blurb": "Walter Presents: 1979 Latvia, a tailor turns a psychiatric asylum into a counterfeit denim factory."
+    },
+    {
       "id": "d-cinema-street-fighter",
       "title": "Street Fighter",
       "platform": "cinema",
       "type": "film",
       "date": "2026-10-16",
-      "blurb": "Paramount's live-action adaptation of the Capcom fighting game."
+      "blurb": "Paramount's live-action take on the fighting-game franchise."
     },
     {
       "id": "d-cinema-whalefall",
@@ -1417,7 +1857,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-10-16",
-      "blurb": "Disney adaptation of Daniel Kraus's survival novel."
+      "blurb": "Disney release, in UK cinemas from 16 October."
     },
     {
       "id": "d-netflix-cyberpunk-edgerunners-2",
@@ -1441,7 +1881,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-10-23",
-      "blurb": "Warner Bros DC horror film centred on the Batman villain."
+      "blurb": "Warner Bros DC horror-tinged spin on the Batman villain."
     },
     {
       "id": "d-prime-last-one-laughing-halloween-special",
@@ -1453,11 +1893,19 @@
     },
     {
       "id": "d-cinema-tad-and-the-magic-lamp",
-      "title": "Tad And The Magic Lamp",
+      "title": "Tad and the Magic Lamp",
       "platform": "cinema",
       "type": "film",
       "date": "2026-10-23",
-      "blurb": "Animated family sequel released by Paramount for half term."
+      "blurb": "Paramount family animation, in UK cinemas from 23 October."
+    },
+    {
+      "id": "d-channel4-when-the-night-comes",
+      "title": "When The Night Comes",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026-10-23",
+      "blurb": "Walter Presents: French drama on an officer investigating an attacker with an identical MO."
     },
     {
       "id": "d-cinema-wife-dog",
@@ -1465,7 +1913,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-10-23",
-      "blurb": "New Black Bear release; UK cinemas 23 October."
+      "blurb": "Black Bear release, in UK cinemas from 23 October."
     },
     {
       "id": "d-cinema-predator-badlands",
@@ -1474,6 +1922,14 @@
       "type": "film",
       "date": "2026-11",
       "blurb": "New Predator film (cinema first)."
+    },
+    {
+      "id": "d-skyatlantic-sweetpea-series-2",
+      "title": "Sweetpea - Series 2",
+      "platform": "skyatlantic",
+      "type": "tv",
+      "date": "2026-11",
+      "blurb": "Rhiannon juggles a newspaper promotion and a copycat killer threatening to expose her."
     },
     {
       "id": "d-cinema-zootopia-2",
@@ -1493,11 +1949,11 @@
     },
     {
       "id": "d-cinema-the-cat-in-the-hat",
-      "title": "The Cat In The Hat",
+      "title": "The Cat in the Hat",
       "platform": "cinema",
       "type": "film",
       "date": "2026-11-06",
-      "blurb": "Warner Bros animated version of the Dr Seuss book."
+      "blurb": "Warner Bros animated Dr Seuss adaptation."
     },
     {
       "id": "d-cinema-ebenezer-a-christmas-carol",
@@ -1505,7 +1961,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-11-13",
-      "blurb": "Paramount's new take on the Dickens ghost story."
+      "blurb": "Paramount's new take on the Dickens Christmas story."
     },
     {
       "id": "d-cinema-the-great-beyond",
@@ -1513,15 +1969,31 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-11-13",
-      "blurb": "New Warner Bros release; UK cinemas 13 November."
+      "blurb": "Warner Bros release, in UK cinemas from 13 November."
+    },
+    {
+      "id": "d-netflix-the-law-of-beasts",
+      "title": "The Law of Beasts",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-11-18",
+      "blurb": "Polish drama across 1988 and 2014, splitting a detective and a psychiatrist over a child killer's sanity."
     },
     {
       "id": "d-cinema-the-hunger-games-sunrise-on-the-reaping",
-      "title": "The Hunger Games: Sunrise On The Reaping",
+      "title": "The Hunger Games: Sunrise on the Reaping",
       "platform": "cinema",
       "type": "film",
       "date": "2026-11-20",
-      "blurb": "Lionsgate adaptation of Suzanne Collins's Haymitch Abernathy prequel novel."
+      "blurb": "Lionsgate prequel adapting Suzanne Collins' Haymitch Abernathy novel."
+    },
+    {
+      "id": "d-prime-blade-runner-2099",
+      "title": "Blade Runner 2099",
+      "platform": "prime",
+      "type": "tv",
+      "date": "2026-11-25",
+      "blurb": "Fugitive Cora becomes a Blade Runner alongside a dying Replicant in a reborn Los Angeles."
     },
     {
       "id": "d-cinema-focker-in-law",
@@ -1538,6 +2010,30 @@
       "type": "film",
       "date": "2026-11-27",
       "blurb": "New Disney release opening the last weekend of November."
+    },
+    {
+      "id": "d-u-bookish-the-crown-destiny",
+      "title": "Bookish: The Crown Destiny",
+      "platform": "u",
+      "type": "tv",
+      "date": "2026-12",
+      "blurb": "Two-part festive special on U&Drama; bookseller Gabriel Book and wife Trottie face a mystery at the shop."
+    },
+    {
+      "id": "d-iplayer-ludwig-christmas-special",
+      "title": "Ludwig - Christmas Special",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026-12",
+      "blurb": "First festive special for the David Mitchell puzzle-setter mystery, with David Suchet guesting."
+    },
+    {
+      "id": "d-disney-only-murders-in-the-building-season-6",
+      "title": "Only Murders in the Building - Season 6",
+      "platform": "disney",
+      "type": "tv",
+      "date": "2026-12-08",
+      "blurb": "Charles, Oliver and Mabel head to London; David Tennant, Nicola Coughlan and Martin Freeman guest."
     }
   ]
 }
