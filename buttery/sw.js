@@ -1,10 +1,11 @@
-/* Diversions service worker.
+/* THE BUTTERY service worker.
+ * (Header said "Diversions" until 7 Sep 2026 — copied from that app and never renamed.)
  * Caches the app shell so the app LAUNCHES with no signal.
  * It never caches the gist — that always goes to the network, so sync
  * (read-modify-write) is unchanged.
  * Bump CACHE on every shell change so phones pick up the new version.
  */
-var CACHE = 'buttery-v9';   // 24 Aug 2026 — meal slots, drinks, and closing the day deliberately
+var CACHE = 'buttery-v10';  // 7 Sep 2026 — reads the logging chat's days; stated 1,900 target
 var SHELL = [
   './',
   './index.html',

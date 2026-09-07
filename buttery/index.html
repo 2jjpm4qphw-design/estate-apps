@@ -1547,11 +1547,26 @@ function gPush(){
     })
     .then(function(raw){
       var doc=JSON.parse(raw||'{}'); var st=doc.state||doc;
-      st.buttery = { log:S.log, taste:S.taste, tasteOrder:S.tasteOrder,
+      /* ══ MERGE, NEVER REPLACE (fixed 7 Sep 2026, and this was the bug) ══════════════════
+         This line used to be `st.buttery = { ... }`, which REPLACES the whole object — so every
+         save from this app silently deleted `chatLog`, the days the logging chat writes and the
+         hourly courier puts here. Mark logged a full day, opened the app, and the app wiped it.
+
+         I designed separate KEYS precisely to stop two writers fighting — the app owns `log`,
+         the courier owns `chatLog` — and then had the app blow away the whole object those keys
+         live in. Naming the halves is not the same as respecting them. The estate's oldest fault,
+         committed by the person who had just written a long comment about avoiding it.
+
+         So: keep everything that is already there, and overwrite only what this app owns. Any
+         key a future writer adds survives without anybody remembering to add it here, which is
+         the only version of this that stays true. */
+      var _keep = (st.buttery && typeof st.buttery === 'object') ? st.buttery : {};
+      st.buttery = Object.assign({}, _keep, {
+                     log:S.log, taste:S.taste, tasteOrder:S.tasteOrder,
                      /* The corrections travel with everything else. They are the part that would
                         hurt most to lose — months of "no, a slice of MY bread is 45g". */
                      learned:S.learned||{},
-                     profile:S.profile, savedAt:new Date().toISOString() };
+                     profile:S.profile, savedAt:new Date().toISOString() });
       if(doc.state) doc.state=st; else doc=st;
       var body={files:{}}; body.files[G_FILE]={content:JSON.stringify(doc)};
       return fetch('https://api.github.com/gists/'+c.id,
@@ -3597,7 +3612,27 @@ function esc_(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
 
 function chatCard(){
   var k=dayKey(), d=chatDay(k), ct=chatTotals(k), x=chatExercise(k);
-  if(!d && !x) return '';
+  /* ── AN ABSENCE THAT EXPLAINS ITSELF (7 Sep 2026) ────────────────────────────────────────
+     This used to `return ''` — the card simply was not there. So when the pipe broke, the app
+     looked exactly like a day Mark had not logged, and there was nothing on screen to tell the
+     two apart. That cost two rounds of "nothing is appearing" tonight, and both times the answer
+     was three systems away.
+     A silent nothing is the worst possible readout: it is indistinguishable from working. So
+     when the app is connected and has no day from the chat, it says so, and says the last time
+     anything came across and how many days it holds. */
+  if(!d && !x){
+    if(!gCreds()) return '';                     // not connected: the Setup screen owns that story
+    var _n=Object.keys(S.chat||{}).length;
+    return '<div class="card card-pad" style="margin-top:14px">'
+     + '<div class="eyebrow">Logged by talking</div>'
+     + '<p class="hint" style="margin:8px 0 0">Nothing has come across for '
+     +   (isToday()?'today':esc_(shortDate(k)))+' yet. '
+     + (_n ? ('The last time anything arrived was '
+             + (S.chatAt ? esc_(String(S.chatAt).slice(0,16).replace('T',' ')) : 'unknown')
+             + ', and this phone holds ' + _n + ' day' + (_n===1?'':'s') + '.')
+           : 'This phone has never received a day from the logging chat.')
+     + ' It arrives on the hour, and only after the chat has written the day.</p></div>';
+  }
   var T=targets()||{};
   var h='<div class="card card-pad" style="margin-top:14px">'
       + '<div class="eyebrow">Logged by talking</div>';
