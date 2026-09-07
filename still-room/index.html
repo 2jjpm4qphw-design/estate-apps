@@ -508,7 +508,14 @@
   }
   function ovBP(sys,dia){ if(sys<130&&dia<80) return 'good'; if(sys<140&&dia<90) return 'warn'; return 'bad'; }
   function ovRHR(v){ if(v>=40&&v<=70) return 'good'; if(v<=85) return 'warn'; return 'bad'; }
-  function ovBMI(){ var w=ovLatest('weight'); var h=(STATE.health&&STATE.health.profile&&STATE.health.profile.heightCm)||184; if(!w) return null; var m=h/100; return w.weight/(m*m); }
+  function ovBMI(){ var w=ovLatest('weight');
+  /* 7 Sep 2026 — the fallback of 184 was REMOVED. A default that looks exactly like a
+     measurement is how a guessed height became a fact: on screen there was no way to tell
+     whether the BMI was computed from something Mark entered or from a number in the code.
+     No height, no BMI, and the card says so. */
+  var p=(STATE.health&&STATE.health.profile)||{};
+  var h=(typeof p.heightCm==='number'&&p.heightCm>100)?p.heightCm:null;
+  if(!w || !h) return null; var m=h/100; return w.weight/(m*m); }
   function ovBMIStatus(bmi){ if(bmi<25) return 'good'; if(bmi<30) return 'warn'; return 'bad'; }
   function ovCard(l,v,u,m,cls){ return '<div class="ov-card'+(cls?' '+cls:'')+'"><div class="ov-l">'+l+'</div><div class="ov-v">'+v+(u?'<span class="ov-u">'+u+'</span>':'')+'</div>'+(m?'<div class="ov-m">'+m+'</div>':'')+'</div>'; }
 
@@ -570,7 +577,17 @@
     var w=ovLatest('weight');
     var start=(typeof p.startWeightKg==='number'&&p.startWeightKg)||null;
     var target=(typeof p.targetWeightKg==='number'&&p.targetWeightKg)||null;
-    var head='<button class="ov-btn" data-ov-edit-wl style="margin-top:0;margin-bottom:10px">Edit start / target</button>';
+    /* 7 Sep 2026 — height and date of birth shown and editable HERE, beside the weight, because
+       this is the card where they are actually used: BMI needs the height and every calorie
+       figure needs the age. Previously neither could be set anywhere at all. */
+    var _bA=bodyAge(), _bH=(p.heightCm||null);
+    var head='<div class="wl-body" style="font-size:12px;opacity:.85;margin-bottom:8px">'
+      + (_bH? _bH+'cm' : '<b>height not set</b>') + ' &middot; '
+      + (_bA? _bA+' years' : '<b>date of birth not set</b>')
+      + (_bH&&_bA? '' : ' &mdash; both are needed for BMI and calorie targets')
+      + '</div>'
+      + '<button class="ov-btn" data-ov-edit-body style="margin-top:0;margin-bottom:6px">Edit height / date of birth</button>'
+      + '<button class="ov-btn" data-ov-edit-wl style="margin-top:0;margin-bottom:10px">Edit start / target</button>';
     if(!w||start==null||target==null){ host.innerHTML=head+'<div class="cond-empty">Set a start and target weight, then log a weigh-in on the Log tab to track progress.</div>'; return; }
     var current=w.weight, totalToLose=Math.max(0.1,start-target), lost=start-current, toGo=current-target, pct=Math.max(0,Math.min(100,(lost/totalToLose)*100)), atOrBelow=current<=target;
     var d28=ovDelta('weight',28), rateWk=(d28!=null)?d28/4:null, proj='';
@@ -593,6 +610,58 @@
     var d=prompt('Target date (YYYY-MM-DD, optional)',p.weightTargetDate||'');
     commit(function(st){ if(!st.health||typeof st.health!=='object') st.health={}; if(!st.health.profile||typeof st.health.profile!=='object') st.health.profile={}; var pp=st.health.profile; if(sN!==undefined&&!isNaN(sN)) pp.startWeightKg=sN; if(tN!==undefined&&!isNaN(tN)) pp.targetWeightKg=tN; if(d!==null) pp.weightTargetDate=d.trim(); });
   }
+  /* ══════════════ YOUR BODY — height and date of birth (7 Sep 2026) ══════════════
+     THERE WAS NO WAY TO SET EITHER OF THESE. Mark asked "where in the Still Room do I add my
+     age?" and the honest answer was nowhere: nothing in this app, or in the Hub, ever wrote
+     health.profile.age or health.profile.heightCm. They had been set once by some route that no
+     longer exists, and there was no field to correct them — which is how a wrong height survived
+     long enough to be copied into four places.
+
+     AND IT STORES A DATE OF BIRTH, NOT AN AGE. An age is a number that silently becomes wrong
+     every year and never tells anybody. The stored 55 was already wrong — Mark turned 56 on
+     9 July — and nothing in the estate would ever have noticed, while every Mifflin-St Jeor
+     figure quietly drifted 5 kcal further out each birthday. A date of birth is a fact that
+     stays true; the age is derived from it on every read. Same principle as BMI: if it can be
+     computed, never store it. */
+  function ageFromDob(dob){
+    if(!dob || !/^\d{4}-\d{2}-\d{2}$/.test(dob)) return null;
+    var b=new Date(dob+'T12:00:00'), n=new Date();
+    var a=n.getFullYear()-b.getFullYear();
+    var m=n.getMonth()-b.getMonth();
+    if(m<0 || (m===0 && n.getDate()<b.getDate())) a--;
+    return (a>0 && a<120) ? a : null;
+  }
+  /* dob wins where it exists; the stored age is only a fallback for the years before there was
+     a date of birth to work from. */
+  function bodyAge(){
+    var p=(STATE&&STATE.health&&STATE.health.profile)||{};
+    return ageFromDob(p.dob) || ((typeof p.age==='number'&&p.age>0)?p.age:null);
+  }
+  function ovEditBody(){
+    var p=(STATE&&STATE.health&&STATE.health.profile)||{};
+    var h=prompt('Height in centimetres.\n\nMEASURE IT — do not work it back from a BMI. That is '
+               + 'how four different heights got into this estate.', p.heightCm||'');
+    var hN=(h===null)?undefined:parseFloat(h);
+    var d=prompt('Date of birth (YYYY-MM-DD).\n\nStored as a date, never as an age, so it cannot '
+               + 'go stale on your birthday.', p.dob||'');
+    commit(function(st){
+      if(!st.health||typeof st.health!=='object') st.health={};
+      if(!st.health.profile||typeof st.health.profile!=='object') st.health.profile={};
+      var pp=st.health.profile;
+      if(hN!==undefined && !isNaN(hN) && hN>100 && hN<230) pp.heightCm=hN;
+      if(d!==null){
+        d=String(d).trim();
+        if(/^\d{4}-\d{2}-\d{2}$/.test(d) && ageFromDob(d)!=null){
+          pp.dob=d;
+          /* The old numeric age is REMOVED rather than left beside the date. Two fields that can
+             disagree is the whole fault being fixed, and a stale 55 sitting next to a correct
+             date of birth would be read by something eventually. */
+          if('age' in pp) delete pp.age;
+        } else if(d!==''){ alert('That is not a date I can read. Use YYYY-MM-DD, e.g. 1970-07-09.'); }
+      }
+    });
+  }
+
   function renderOverview(){
     if(!STATE) return;
     var host=$('[data-ov-strip]'); if(!host) return;
@@ -710,6 +779,7 @@
     var pt=t.closest && t.closest('[data-plan-tick]'); if(pt){ planTick(pt.getAttribute('data-plan-tick')); return; }
     if(t.closest && t.closest('[data-ov-edit-wl]')){ ovEditWeightLoss(); return; }
     if(t.closest && t.closest('[data-ov-edit-em]')){ ovEditEmergency(); return; }
+    if(t.closest && t.closest('[data-ov-edit-body]')){ ovEditBody(); return; }
     if(t.closest && t.closest('[data-ov-cond-add]')){ ovAddCondition(); return; }
     var ce=t.closest && t.closest('[data-ov-cond-edit]'); if(ce){ ovEditCondition(parseInt(ce.getAttribute('data-ov-cond-edit'),10)); return; }
     var cd=t.closest && t.closest('[data-ov-cond-del]'); if(cd){ ovDelCondition(parseInt(cd.getAttribute('data-ov-cond-del'),10)); return; }
