@@ -385,15 +385,25 @@ svg .target-txt{fill:var(--muted);font-family:var(--f-mono);font-size:13px;font-
           <button class="btn btn-primary" id="cfgSave" style="margin-top:12px;width:100%">Connect</button>
           <div id="cfgErr" class="prose small" style="margin-top:8px;color:var(--stop)" hidden></div>
         </div>
+        <!-- 7 Sep 2026 — THE ACTIVITY DROPDOWN IS GONE, and removing it is the fix rather than a
+             tidy-up. It fed a multiplier into this app's own calorie calculation, defaulting to
+             1.45 ("desk job but I walk a fair bit"), which produced a target about 575 kcal a day
+             higher than the one the logging chat was advising. A control that quietly changes what
+             you are told to eat, set to a flattering default nobody chose, is worse than no
+             control. The daily target is now stated once in _data/food-targets.json and read by
+             both surfaces. Leaving a dead dropdown on the page would have been an invitation to
+             wire it back up — REMOVE SURFACES, NEVER ADD ONE. -->
         <div class="field">
-          <label for="f-act">Typical day</label>
-          <select id="f-act">
-            <option value="1.3">Mostly desk-based, little walking</option>
-            <option value="1.45" selected>Desk job but I walk a fair bit</option>
-            <option value="1.6">On my feet or training most days</option>
-          </select>
+          <div class="hint" style="margin:0">Your daily target is <b>1,900 kcal</b> and <b>140g protein</b>, agreed with the food chat rather than worked out here. It is the same number this app and the Hub both show. It changes when the four-week weigh-in recalibration says it should &mdash; not by picking a different multiplier.</div>
         </div>
-        <p class="hint">Height is worked back from 113kg at BMI 32, so correct it if it is wrong — everything else depends on it.</p>
+        <!-- 7 Sep 2026 — this line used to read "Height is worked back from 113kg at BMI 32, so
+             correct it if it is wrong". THAT SENTENCE IS THE ROOT OF THE WHOLE MESS. A height
+             back-solved out of a stated BMI is not a measurement, and once one existed it got
+             copied: 1.88m, then 1.85m, then 1.83m, against the real 1.84m — and a BMI of 32, then
+             32.9, then 33.8, against the real 33.4. BMI IS AN OUTPUT. It is computed from height
+             and weight and is never entered, never inferred from, and never a source for either.
+             The instruction now asks for a measurement and says what to do if he has not got one. -->
+        <p class="hint">Height comes from the Still Room, where you entered it. If it is wrong, change it there and everything that reads it moves at once. <b>Measure it rather than working it back from a BMI</b> — a BMI is only ever an answer, never a starting point, and every wrong height this estate has held came from treating it as one.</p>
         <p class="hint">Measure your waist at the belly button, standing, breathing out normally — not where your trousers sit. It is the number that tracks visceral fat best, and the one this app cares most about. If you have not got a tape measure to hand, skip it and add it later.</p>
         <button class="btn btn-primary btn-block" id="setupGo">Build my plan</button>
       </div>
@@ -1504,6 +1514,20 @@ function gPull(cb){
         Object.keys(cloud.learned).forEach(function(k){ if(!S.learned[k]) S.learned[k]=cloud.learned[k]; });
       }
       if(cloud && cloud.profile && !S.profile) S.profile=cloud.profile;
+      /* ── THE LOGGING CHAT'S DAYS (7 Sep 2026) ──────────────────────────────────────────
+         Mark now logs food AND exercise by talking to a separate chat. That chat writes one
+         file a day to Drive; the hourly bridge carries it here into state.buttery.chatLog.
+
+         IT IS READ ONLY, AND IT LIVES IN ITS OWN KEY. This app never writes chatLog and the
+         bridge never writes S.log. That is not tidiness, it is the fix: Drive has no
+         update-content operation, so a rewrite is create-then-trash and two writers on one day
+         means last-writer-wins with entries lost. Separate keys remove the contention instead
+         of mitigating it. Both are shown, each marked, so Mark can always see which is which.
+
+         REPLACED wholesale rather than merged, because unlike S.log this device is not a
+         writer of it — there is no local edit here that a cloud copy could destroy. */
+      S.chat = (cloud && cloud.chatLog && typeof cloud.chatLog==='object') ? cloud.chatLog : (S.chat||{});
+      S.chatAt = (cloud && cloud.chatLogAt) || S.chatAt || null;
       saveLocal();
       if(cb) cb(true);
     })
@@ -1654,21 +1678,45 @@ function body(){
   return { height:+p.heightCm, weight:+w, age:+(p.age||0), sex:(p.sex||'male'),
            waist:srLatest('waist'), targetWeight:+(p.targetWeightKg||0) };
 }
+/* ══════════════════ THE STATED TARGET (7 Sep 2026) ══════════════════
+   FOOD-TARGETS:START — build_sites.py replaces this block from _data/food-targets.json on every
+   build, and does the same to the Hub. Do not edit it here; edit the JSON. The whole reason it
+   is generated rather than typed is that it must be impossible for the two surfaces to disagree.
+
+   WHAT IT REPLACED, AND WHY. This function used to compute its own daily calories from an
+   activity-factor dropdown that defaulted to 1.45 — "desk job but I walk a fair bit" — giving
+   about 2,375 kcal, while the logging chat was advising 1,800 from a sedentary 1.2-1.25. Two
+   surfaces, both confident, 575 kcal a day apart. Mark then has to decide which of his own tools
+   to believe, which is worse than having one.
+     A better multiplier would not have fixed that; another multiplier is another guess. A daily
+   target is a DECISION, taken once. So it is stated, in one file, and read.
+   The activity dropdown is gone from this path entirely — leaving it in is exactly how the two
+   numbers would drift apart again. */
+var FOOD_TARGETS = { kcal:1900, protein:140, salt:4, freeSugars:30, setOn:'2026-09-07' };
+/* FOOD-TARGETS:END */
+
 function targets(){
   const b = body();
-  if(!b) return null;
-  const act = (S.profile && S.profile.activity) || 1.45;       // the one thing only this app knows
+  const F = FOOD_TARGETS;
+  /* The stated target does not need his body to be known — that is the point of stating it. The
+     body still supplies the extras (goal weight, waist) where it is available. */
+  if(!b) return { kcal:F.kcal, protein:F.protein, salt:F.salt, freeSugars:F.freeSugars,
+                  fibre:30, goalW:null, tdee:null, waist:null, weight:null, height:null, age:null,
+                  stated:true };
   const bmr  = 10*b.weight + 6.25*b.height - 5*b.age + 5;      // Mifflin-St Jeor, male
-  const tdee = bmr * act;
-  const kcal = Math.max(1500, Math.round((tdee - 550)/25)*25); // about 0.5 kg a week
+  /* Kept and shown as information — what his body burns at rest is worth knowing — but it no
+     longer decides anything. No activity factor is applied to it anywhere. */
+  const tdee = null;
+  const kcal = F.kcal;
   /* His target, not the textbook one — but fall back to BMI 25 if he has not set one. */
   const goalW = b.targetWeight > 0 ? b.targetWeight : 25 * Math.pow(b.height/100, 2);
-  const protein = Math.round((goalW * 1.6)/5)*5;               // 1.6 g per kg of goal weight
+  const protein = F.protein;
   /* Salt 4g, not the 5g a generic plan uses and not the UK's 6g limit. Four of his last seven
      readings were at or above 144 systolic, and the trials that move blood pressure meaningfully
      are the ones that get intake near 4g. He is starting from shop sandwiches and forecourt
      food, where 6g is easy to pass before dinner. */
-  return { kcal, protein, salt:4, fibre:30, goalW:r1(goalW), tdee:Math.round(tdee),
+  return { kcal, protein, salt:F.salt, freeSugars:F.freeSugars, fibre:30, goalW:r1(goalW),
+           tdee:tdee, rmr:Math.round(bmr), stated:true,
            waist:b.waist, weight:b.weight, height:b.height, age:b.age };
 }
 function bmi(w){ const b=body(); return b ? w / Math.pow(b.height/100,2) : 0; }
@@ -2439,7 +2487,16 @@ function mealStat(label,val){
    script does NOT become a property of window — only `var` and function declarations do. A test
    reaching for window.S gets undefined and reports the state as missing when it is right there.
    Handed over through a function because load() and the gist merge can reassign it. */
-window.__buttery = { S:function(){ return S; } };
+window.__buttery = { S:function(){ return S; },
+  /* Pin the clock. Tests only; nothing in the app calls it. */
+  setHour:function(h){ _hourOverride = (h==null?null:+h); },
+  /* 7 Sep 2026 — exposed for the chatLog tests. dayTotals and the chat readers are closure
+     scoped, and poking at a page's internals from outside proves nothing about the page: the
+     test has to call the same function the render calls. */
+  dayTotals:function(k){ return dayTotals(k); },
+  todayKey:function(){ return todayKey(); },
+  chatTotals:function(k){ return chatTotals(k); },
+  chatExercise:function(k){ return chatExercise(k); } };
 /* v2 surfaces, exposed so the test can click every button and prove none is dead. */
 window.renderEat=renderEat; window.renderAte=renderAte; window.renderFridge=renderFridge;
 window.dinnersICanCook=dinnersICanCook; window.remaining=remaining; window.eatThis=eatThis;
@@ -2753,6 +2810,90 @@ function day(k){
 function dayKey(){ return S.viewDay || todayKey(); }
 function isToday(){ return dayKey()===todayKey(); }
 
+/* ══════════════ WHAT THE LOGGING CHAT WROTE (7 Sep 2026) ══════════════
+   Read-only. S.chat[day] is the document that chat produced, schemaVersion 2: meals, exercise,
+   totals (kcal / protein / carbs / salt / freeSugars) and exerciseTotals.
+
+   EXERCISE CALORIES ARE NOT NETTED OFF INTAKE, anywhere, and that is a decision not an omission.
+   Session-burn estimates run 20-50% high, so adding them back to what he may eat converts a
+   guess into permission. The burn is shown beside the food, never inside it. */
+function chatDay(k){
+  var key=k||dayKey(); var d=(S.chat||{})[key];
+  return (d && typeof d==='object') ? d : null;
+}
+/* ── READING WHAT THE CHAT ACTUALLY WRITES (fixed 7 Sep 2026, evening) ──────────────────────
+   THIS IS THE BUG MARK FOUND. Its note described a day as
+
+       a list called MEALS, each row naming its meal in a field called SLOT
+
+   and both readers were built from that note. What the chat actually writes is
+
+       a list called ENTRIES, each row naming its meal in a field called MEAL
+
+   Different key for the list, different key for the meal. Every test passed, because every test
+   used a fixture I had written from the same note — which tested only that I agreed with myself.
+   Mark logged a full day, five entries and 1,775 kcal, opened the Buttery and the Hub, and saw
+   nothing.
+
+   A SCHEMA IN PROSE IS A DESCRIPTION OF AN INTENTION. THE FILE IS THE SCHEMA. The tests now run
+   against a verbatim real day kept in _automation/tests/fixtures.
+
+   Both shapes are accepted, and that is not fence-sitting: the note may yet describe what the
+   chat means to write, this reader must not break either way round, and being liberal about the
+   name of a key costs nothing. */
+function chatEntries(d){
+  if(!d) return [];
+  var raw = Array.isArray(d.entries) ? d.entries
+          : Array.isArray(d.meals)   ? d.meals : [];
+  return raw.map(function(m){
+    var slot = String(m.slot || m.meal || '').toLowerCase();
+    /* The app's own day has four slots. A "drink" is logged against snack so it appears rather
+       than being dropped for having a name the slots do not know. */
+    if(slot==='drink' || slot==='drinks') slot='snack';
+    if(['breakfast','lunch','dinner','snack'].indexOf(slot)<0) slot='snack';
+    return { id:m.id, slot:slot, said:(m.meal||m.slot||''),
+             text:m.asHeSaidIt || m.detail || (Array.isArray(m.items)?m.items.join(', '):''),
+             kcal:+m.kcal||0, protein:+m.protein||0, carbs:+m.carbs||0,
+             salt:(m.saltG!=null?+m.saltG:(+m.salt||0)),
+             rag:m.rag||'', confidence:m.confidence||'' };
+  });
+}
+function chatTotals(k){
+  var d=chatDay(k), t={k:0,p:0,c:0,s:0,fs:0,n:0};
+  if(!d) return t;
+  var T=d.totals||{}, es=chatEntries(d);
+  /* Prefer the chat's own totals — it did the arithmetic against a real food table and showed
+     Mark its assumptions. Fall back to summing the entries only if the totals block is missing,
+     because a day with entries and no totals is still a day he ate. */
+  if(T.kcal!=null || T.protein!=null){
+    t.k=+T.kcal||0; t.p=+T.protein||0; t.c=+T.carbs||0;
+    t.s=(T.saltG!=null?+T.saltG:(+T.salt||0));      // the real files say saltG
+    t.fs=+T.freeSugars||0;
+  }else{
+    es.forEach(function(m){ t.k+=m.kcal; t.p+=m.protein; t.c+=m.carbs; t.s+=m.salt; });
+  }
+  t.n=es.length;
+  return t;
+}
+function chatExercise(k){
+  var d=chatDay(k); if(!d) return null;
+  var xs=Array.isArray(d.exercise)?d.exercise:[];
+  var T=d.exerciseTotals||{};
+  if(!xs.length && !T.sessions) return null;
+  return { sessions:+T.sessions||xs.length,
+           minutes:+T.minutes||xs.reduce(function(n,x){ return n+(+x.minutes||0); },0),
+           kcal:+T.kcalEstimate||xs.reduce(function(n,x){ return n+(+x.kcalEstimate||0); },0),
+           cardio:+T.cardioSessions||xs.filter(function(x){ return x.type==='cardio'; }).length,
+           weights:+T.weightsSessions||xs.filter(function(x){ return x.type==='weights'; }).length,
+           items:xs };
+}
+/* Both surfaces holding food for one day is not an error, but it IS double counting, and a
+   number that is quietly twice what it should be is worse than no number. Say so on screen. */
+function dayHasBoth(k){
+  var key=k||dayKey(), own=dayNorm(S.log[key]||{});
+  return chatTotals(key).n>0 && ((own.items||[]).length>0);
+}
+
 function dayTotals(k){
   const d = k ? dayNorm(S.log[k]||{}) : day(), t = {k:0,p:0,c:0,s:0,ml:0};
   (d.items||[]).forEach(function(m){
@@ -2763,6 +2904,13 @@ function dayTotals(k){
   (d.drinks||[]).forEach(function(m){
     t.k += m.k||0; t.p += m.p||0; t.c += m.c||0; t.s += m.s||0; t.ml += m.ml||0;
   });
+  /* The chat's meals count towards the same day. The meters have to include them or the app
+     would show him near-zero calories on a day he had logged three meals by talking — which is
+     exactly the sort of silently-wrong number this estate keeps having to hunt down. */
+  var ct = chatTotals(k||dayKey());
+  t.k += ct.k; t.p += ct.p; t.c += ct.c; t.s += ct.s;
+  t.fs = ct.fs;                       // free sugars come only from the chat; the app's own
+                                      // 204-food table does not carry them yet.
   return t;
 }
 function itemsIn(slot, k){
@@ -2776,7 +2924,13 @@ function mealsLogged(k){
    with no lunch is the thing worth saying out loud. */
 function missingMeals(k){
   const d = k ? dayNorm(S.log[k]||{}) : day();
+  /* 7 Sep 2026 — the chat's entries fill their slots too. Without this the app told Mark
+     "nothing logged for breakfast or lunch or dinner" on a day he had described all three in
+     detail, which is the same class of wrongness as the empty card: the data was there and the
+     question was being asked of the wrong half of it. */
+  const fromChat = chatEntries(chatDay(k || dayKey())).map(function(m){ return m.slot; });
   return ['breakfast','lunch','dinner'].filter(function(s){
+    if(fromChat.indexOf(s)>-1) return false;
     return !(d.items||[]).some(function(x){ return x.slot===s; });
   });
 }
@@ -3177,7 +3331,15 @@ function render(){
 /* ═══════════════════ THE THREE SCREENS ═══════════════════ */
 
 var WHERE_CHIPS=[{id:'home',n:'At home'},{id:'out',n:'Out'},{id:'car',n:'In the car'}];
-function nowHour(){ return new Date().getHours(); }
+/* 7 Sep 2026 — the hour is overridable FOR TESTS ONLY, and the reason is a flaky test rather
+   than a feature. buttery-v2 asserts that an empty fridge prompts you to fill it in; that is
+   drawn on the Eat screen, which after 8pm becomes the before-bed check instead. So the test
+   passed every morning and failed every evening, and tonight it failed for a change I had not
+   made. Its own boot(hour) helper took an hour argument and never used it — the intent was
+   there in August and never wired up.
+   A test whose answer depends on when it is run is not a test. */
+var _hourOverride = null;
+function nowHour(){ return (_hourOverride==null) ? new Date().getHours() : _hourOverride; }
 /* The app knows what time it is, so it should not ask. Late is its own state rather than a
    fourth meal — after eight the question stops being "what shall I eat" and becomes "am I
    short", which is a different screen entirely. */
@@ -3425,6 +3587,87 @@ function optRow(key,n,p,k,s,why,plain,conf){
    Rebuilt 24 August 2026 around the three things Mark asked for on the same day: log by meal so
    the gaps show, track what he drinks, and close the day deliberately. All three needed the same
    screen, because all three are answers to "what did today actually look like". */
+/* ══════════════ LOGGED BY TALKING ══════════════
+   What the logging chat wrote for the day being looked at: the meals in his own words, the
+   exercise, and the two figures the app cannot work out for itself — free sugars and session
+   burn. Nothing here can be edited from this app. The chat owns these words; changing them
+   here would put two writers on one day, which is the whole thing the design avoids. */
+function esc_(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+function chatCard(){
+  var k=dayKey(), d=chatDay(k), ct=chatTotals(k), x=chatExercise(k);
+  if(!d && !x) return '';
+  var T=targets()||{};
+  var h='<div class="card card-pad" style="margin-top:14px">'
+      + '<div class="eyebrow">Logged by talking</div>';
+
+  if(dayHasBoth(k)){
+    h+='<div class="v2-note" style="background:var(--warn-soft);color:var(--warn);margin-top:8px">'
+     + '<b>This day has food from both places.</b> The meters add them together, so if you '
+     + 'logged the same meal twice the total is twice what you ate. Worth a look.</div>';
+  }
+
+  if(ct.n){
+    h+='<ul style="list-style:none;padding:0;margin:10px 0 0">'
+     + chatEntries(d).map(function(m){
+         var bits=[];
+         if(m.kcal)    bits.push(Math.round(m.kcal)+' kcal');
+         if(m.protein) bits.push(Math.round(m.protein)+'g protein');
+         /* The red/amber/green mark is the chat's own judgement against Mark's food lists and it
+            is the most useful thing on the row — a dot rather than a word, so it reads at a
+            glance and never argues with the text beside it. */
+         var dot = m.rag==='red' ? '<span style="color:var(--stop)">\u25cf</span> '
+                 : m.rag==='amber' ? '<span style="color:var(--warn)">\u25cf</span> '
+                 : m.rag==='green' ? '<span style="color:var(--go,#2e7d32)">\u25cf</span> ' : '';
+         return '<li style="padding:7px 0;border-top:1px solid var(--line)">'
+              + '<div style="font-size:15px">'+dot+esc_(m.text||'\u2014')+'</div>'
+              + '<div class="hint" style="margin-top:2px">'
+              +   (m.said?esc_(m.said)+' \u00b7 ':'') + bits.join(' \u00b7 ')
+              +   (m.confidence==='low' ? ' \u00b7 <b>rough guess</b>' : '')
+              + '</div></li>';
+       }).join('')
+     + '</ul>'
+     /* The chat's own summary of the day, in its words. It is the part Mark would otherwise have
+        to go back to the chat to read. */
+     + (d.note ? '<div class="v2-note" style="margin-top:10px">'+esc_(d.note)+'</div>' : '');
+    /* Free sugars: the number that actually moves visceral fat, and the one the app has never
+       had. 30g is the UK guideline; the chat's brief sets his own aim lower. */
+    if(ct.fs){
+      var over = ct.fs > 30;
+      h+='<div class="v2-note" style="margin-top:10px'
+       + (over?';background:var(--warn-soft);color:var(--warn)':'')+'">'
+       + '<b>Free sugars '+Math.round(ct.fs)+'g</b> &mdash; added sugar and juice, not whole fruit '
+       + 'or plain dairy. Guideline is 30g a day.'+(over?' Over it.':'')+'</div>';
+    }
+  }
+
+  if(x){
+    h+='<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line)">'
+     + '<div class="eyebrow">Movement</div>'
+     + '<p style="margin:6px 0 0;font-size:16px"><b>'+x.sessions+' session'+(x.sessions===1?'':'s')
+     +   '</b> &middot; '+x.minutes+' min'
+     +   (x.cardio?' &middot; '+x.cardio+' cardio':'')
+     +   (x.weights?' &middot; '+x.weights+' weights':'')+'</p>'
+     + (x.items||[]).map(function(it){
+         return '<div class="hint" style="margin-top:4px">'+esc_(it.asHeSaidIt||it.detail||it.type||'')
+              + (it.minutes?' &middot; '+it.minutes+' min':'')
+              + (it.intensity?' &middot; '+esc_(it.intensity):'')+'</div>';
+       }).join('')
+     + (x.kcal ? '<div class="hint" style="margin-top:7px"><b>About '+Math.round(x.kcal)+' kcal burned</b> '
+         + '&mdash; and deliberately NOT added to what you may eat. Session estimates run 20&ndash;50% '
+         + 'high, and eating them back is how a good session becomes a bad day.</div>' : '')
+     + '</div>';
+  }else if(d){
+    h+='<div class="hint" style="margin-top:10px">No exercise logged for this day.</div>';
+  }
+
+  h+='<div class="hint" style="margin-top:10px;opacity:.75">From the logging chat &mdash; read only here.'
+   + (S.chatAt ? ' Last carried across '+esc_(String(S.chatAt).slice(0,16).replace('T',' '))+'.' : '')
+   + '</div></div>';
+  return h;
+}
+
 function renderAte(){
   var el=$('#s-ate'); if(!el) return;
   var d=day(), r=remaining(), meal=mealNow(), t=dayTotals();
@@ -3476,6 +3719,7 @@ function renderAte(){
     h+='<div class="v2-note" style="background:var(--warn-soft);color:var(--warn)">Nothing logged for '
      + miss.map(function(m){ return m; }).join(' or ')+'.</div>';
 
+  h+=chatCard();
   h+=SLOT_ORDER.map(function(sl){ return slotBlock(sl, d); }).join('');
 
   /* ── TYPE IT IN PLAIN ENGLISH ──
@@ -3835,9 +4079,10 @@ document.addEventListener('click', function(e){
    Room does not already know. Height, weight, age and waist are read, not typed. Asking a man
    his height when the house has held it since June is how you end up with two answers. */
 $('#setupGo').addEventListener('click', function(){
-  var act = parseFloat($('#f-act').value);
-  if(!(act>0.9 && act<2.5)) act = 1.45;
-  S.profile = { activity: act };
+  /* S.profile exists only to mark setup as done now that the activity factor has gone. Its
+     `activity` field is deliberately NOT written any more: a stored 1.45 sitting in his phone
+     from August would otherwise look like a live setting to the next person reading this code. */
+  S.profile = { setupDoneAt: new Date().toISOString() };
   S.tab='today'; save(); render();
 });
 
