@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<!-- Desk Clock — estate-apps/desk-clock, staged 20 Sep 2026 from _Source/Desk Clock.html.
-     MASTER IS _Source/Desk Clock.html. Edit there, restage; do not edit this copy in place,
-     which is how the Hub and its builds diverged in June.
-     The Google Fonts link stays: the sandbox cannot reach fonts.gstatic.com to download the
-     woff2, so the service worker caches the font cross-origin on first load instead. One
-     online launch and the clock keeps Cormorant through every reboot after it. -->
+<!-- Desk Clock — estate-apps/desk-clock, staged from _Source/Desk Clock.html by
+     _automation/stage_desk_clock.py. DO NOT EDIT THIS COPY. Edit the master and
+     restage; editing the built copy is how the Hub and its sites diverged in June.
+     The Google Fonts link stays: the build machine cannot reach fonts.gstatic.com to
+     download the woff2, so sw.js caches the font cross-origin on first load instead.
+     One online launch and the clock keeps Cormorant through every restart after. -->
 <title>Connolly Desk Clock</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -40,6 +40,29 @@
            display: -webkit-box; display: flex; -webkit-box-align: center; align-items: center;
            -webkit-box-pack: center; justify-content: center; }
   #shift { -webkit-transform-origin: 50% 50%; transform-origin: 50% 50%; }
+
+  /* ---------- The charging face ----------------------------------------
+     Opened deliberately, from a Shortcuts automation on the charger, not by tapping through.
+     THE FILL IS THE HOUR, NOT THE BATTERY, and the caption says so. Safari has never exposed
+     battery level to a web page — Apple declined the API in 2020 on fingerprinting grounds and
+     has not moved — so a fill that claimed to be charge would be a guess wearing a number's
+     clothes. The hour is something this page genuinely knows. If the automation passes a real
+     reading as ?b=NN it is shown beside the fill as a snapshot with the time it was taken,
+     never merged into it. */
+  #chargeMode { display: none; text-align: center; }
+  #chargeMode.on { display: block; }
+  .fillWrap { position: relative; width: 52vmin; margin: 0 auto; }
+  .fillArt { display: none; }
+  .fillArt.on { display: block; }
+  .fillArt svg { width: 100%; height: auto; display: block; }
+  .fillCap { margin-top: 3.4vmin; font-size: 3.1vmin; letter-spacing: .26em;
+             text-transform: uppercase; color: var(--ivory-dim); }
+  .fillTime { margin-top: 1.2vmin; font-size: 9.5vmin; font-weight: 500; line-height: 1;
+              color: var(--ivory); }
+  .fillPct { margin-top: 1.6vmin; font-size: 3.4vmin; letter-spacing: .2em;
+             text-transform: uppercase; color: var(--brass); }
+  .fillName { margin-top: 2.6vmin; font-size: 2.6vmin; letter-spacing: .3em;
+              text-transform: uppercase; color: var(--ivory-faint); }
 
   /* ---------- Dial + calendar (landscape default) ---------- */
   #dialMode { display: -webkit-box; display: flex; -webkit-box-align: center; align-items: center; padding-left: 10.5vmin; }
@@ -98,6 +121,112 @@
 <body>
 <div id="stage" aria-label="Clock. Tap to change face.">
   <div id="shift">
+
+    <!-- THE CHARGING FACE. Four artworks, one shown at a time; a tap cycles them and the
+         choice is remembered. All four are the same mechanism — a rising clip over a dim
+         drawing — so there is one fill engine and four pictures rather than four animations. -->
+    <div id="chargeMode">
+      <div class="fillWrap">
+
+        <div class="fillArt" data-fill="crest">
+          <svg viewBox="0 0 100 140" aria-hidden="true">
+            <defs><clipPath id="clipCrest"><rect id="lvlCrest" x="-5" y="140" width="110" height="0"/></clipPath></defs>
+            <image href="crest-dim.png" xlink:href="crest-dim.png" x="17" y="4" width="66" height="132" preserveAspectRatio="xMidYMid meet"/>
+            <g clip-path="url(#clipCrest)">
+              <image href="crest-gilt.png" xlink:href="crest-gilt.png" x="17" y="4" width="66" height="132" preserveAspectRatio="xMidYMid meet"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="fillArt" data-fill="arms">
+          <!-- The blank achievement, gilding from the base of the shield up. It sits alongside
+               the real family crest rather than replacing it: this one is a handsome generic,
+               that one is his. The mask is the enclosed black of the shield face, found the same
+               way as the hourglass bulbs — blank field, fenced in by its own edge moulding. -->
+          <svg viewBox="0 0 100 140" aria-hidden="true">
+            <defs>
+              <clipPath id="clipArms"><rect id="lvlArms" x="-5" y="140" width="110" height="0"/></clipPath>
+              <mask id="mArms"><image href="arms-mask-0.png" xlink:href="arms-mask-0.png"
+                    x="3.3" y="0" width="93.4" height="140" preserveAspectRatio="xMidYMid meet"/></mask>
+            </defs>
+            <g clip-path="url(#clipArms)">
+              <rect x="-5" y="0" width="110" height="140" fill="#B8955A" mask="url(#mArms)"/>
+            </g>
+            <image href="arms-line.png" xlink:href="arms-line.png"
+                   x="3.3" y="0" width="93.4" height="140" preserveAspectRatio="xMidYMid meet"/>
+          </svg>
+        </div>
+
+        <div class="fillArt" data-fill="tide">
+          <!-- 20 Sep 2026 — the hand-drawn castle replaced by an engraving. NO INTERIOR MASK for
+               this one, and that is the point of it: the sea is not something the keep contains,
+               it is something that rises in FRONT of it. So the water is a translucent rect drawn
+               AFTER the image, and the stonework reads through it the way a wall does under
+               water. The tide stops at the wall rather than the battlements — a tide rises
+               against a castle, it does not drown it. -->
+          <svg viewBox="0 0 100 140" aria-hidden="true">
+            <defs><clipPath id="clipTide"><rect id="lvlTide" x="-5" y="140" width="110" height="0"/></clipPath></defs>
+            <image href="castle-line.png" xlink:href="castle-line.png"
+                   x="3.3" y="0" width="93.4" height="140" preserveAspectRatio="xMidYMid meet"/>
+            <g clip-path="url(#clipTide)">
+              <rect x="-5" y="0" width="110" height="140" fill="#24404e" opacity="0.82"/>
+              <rect id="waveTide" x="-5" y="-0.6" width="110" height="0.6" fill="#7C6238" opacity="0.7"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="fillArt" data-fill="decanter">
+          <!-- 20 Sep 2026 — the hand-drawn SVG decanter replaced by a real engraving. The line
+               art is the artwork with the black keyed out (luminance became alpha), and the mask
+               is its interior, both made by _automation/make_deskclock_vessels.py.
+               THE CLARET GOES BEHIND THE GLASS, not inside an outline: the fill is painted
+               through the mask and the engraving is drawn OVER it, so the cut-crystal hatching
+               reads across the wine exactly as it would in the room. That is why the generated
+               image ignoring "leave the interior empty" turned out to be an improvement. -->
+          <svg viewBox="0 0 100 140" aria-hidden="true">
+            <defs>
+              <clipPath id="clipDec"><rect id="lvlDec" x="-5" y="140" width="110" height="0"/></clipPath>
+              <mask id="maskDec">
+                <image href="decanter-mask.png" xlink:href="decanter-mask.png"
+                       x="3.3" y="0" width="93.4" height="140" preserveAspectRatio="xMidYMid meet"/>
+              </mask>
+            </defs>
+            <g clip-path="url(#clipDec)">
+              <rect x="-5" y="0" width="110" height="140" fill="#6b1a2d" mask="url(#maskDec)"/>
+            </g>
+            <image href="decanter-line.png" xlink:href="decanter-line.png"
+                   x="3.3" y="0" width="93.4" height="140" preserveAspectRatio="xMidYMid meet"/>
+          </svg>
+        </div>
+
+        <div class="fillArt" data-fill="glass">
+          <!-- Two masks, driven in opposite directions by one level: the upper bulb empties as
+               the lower fills. The masks came from the enclosed black regions of the engraving,
+               not from tracing — and the central pillar divides each bulb in two, which is why
+               the first attempt at finding them kept the left and right halves of the SAME bulb
+               and thought it had found both. -->
+          <svg viewBox="0 0 100 140" aria-hidden="true">
+            <defs>
+              <clipPath id="clipTop"><rect id="lvlTop" x="-5" y="0" width="110" height="70"/></clipPath>
+              <clipPath id="clipBot"><rect id="lvlBot" x="-5" y="140" width="110" height="0"/></clipPath>
+              <mask id="mHgTop"><image href="hourglass-mask-top.png" xlink:href="hourglass-mask-top.png"
+                    x="3.3" y="0" width="93.4" height="140" preserveAspectRatio="xMidYMid meet"/></mask>
+              <mask id="mHgBot"><image href="hourglass-mask-bot.png" xlink:href="hourglass-mask-bot.png"
+                    x="3.3" y="0" width="93.4" height="140" preserveAspectRatio="xMidYMid meet"/></mask>
+            </defs>
+            <g clip-path="url(#clipTop)"><rect x="-5" y="0" width="110" height="140" fill="#E8DFCB" mask="url(#mHgTop)"/></g>
+            <g clip-path="url(#clipBot)"><rect x="-5" y="0" width="110" height="140" fill="#E8DFCB" mask="url(#mHgBot)"/></g>
+            <image href="hourglass-line.png" xlink:href="hourglass-line.png"
+                   x="3.3" y="0" width="93.4" height="140" preserveAspectRatio="xMidYMid meet"/>
+          </svg>
+        </div>
+
+      </div>
+      <div class="fillCap" data-fill-cap>through the hour</div>
+      <div class="fillTime" data-fill-time>--:--</div>
+      <div class="fillPct" data-fill-pct hidden></div>
+      <div class="fillName" data-fill-name>the crest</div>
+    </div>
 
     <div id="dialMode">
       <div class="face">
@@ -216,6 +345,11 @@
     document.getElementById("rt").textContent = tt.h + ":" + tt.m;
     document.getElementById("rd").textContent = DAYS[now.getDay()];
     document.getElementById("big").innerHTML = tt.h + '<span class="colon">:</span>' + tt.m;
+    if (charging) {
+      var ct = timeText(now);
+      timeEl.innerHTML = ct.h + ":" + ct.m;
+      paintFill();
+    }
     document.getElementById("bigDate").textContent =
       DAYS[now.getDay()] + " " + now.getDate() + " " + MONTHS[now.getMonth()];
 
@@ -236,7 +370,12 @@
     shift.style.webkitTransform = t; shift.style.transform = t;
   }
   function fit() {
-    var box = dialMode.hidden ? digiMode : dialMode;
+    /* 20 Sep 2026 — this was `dialMode.hidden ? digiMode : dialMode`, a two-way choice, and a
+       third face turned it into a silent bug: with the charging face showing it measured the
+       DIGITAL one, which is hidden and therefore has no size, so fit() returned early and the
+       charge face rendered unscaled and clipped. Ask which face is actually visible. */
+    var box = chargeMode.className.indexOf("on") > -1 ? chargeMode
+            : (dialMode.hidden ? digiMode : dialMode);
     var cs = window.getComputedStyle(stage);
     var W = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     var H = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
@@ -257,14 +396,114 @@
 
   // ---- Tap to switch face; remembered on this phone ----
   function setMode(m) {
-    dialMode.hidden = (m === "digital"); digiMode.hidden = (m !== "digital");
-    try { localStorage.setItem("clockMode", m); } catch (e) {}
+    charging = (m === "charge");
+    chargeMode.className = charging ? "on" : "";
+    dialMode.hidden = charging || (m === "digital");
+    digiMode.hidden = charging || (m !== "digital");
+    /* The charging face is NOT remembered. It is a place the phone is put, not a preference:
+       remembering it would mean the study clock came back as a charging screen after a reboot,
+       having never been asked to be one. */
+    if (!charging) { try { localStorage.setItem("clockMode", m); } catch (e) {} }
     fit();
   }
+
+  /* ── THE CHARGING FACE ──────────────────────────────────────────────────
+     Four pictures, one mechanism: a clip rectangle rising over a dim drawing. */
+  var FILLS = [
+    { key: "crest",    name: "the crest",     lvl: "lvlCrest" },
+    { key: "tide",     name: "the tide",      lvl: "lvlTide", wave: "waveTide" },
+    { key: "decanter", name: "the decanter",  lvl: "lvlDec" },
+    { key: "glass",    name: "the hourglass", lvl: "lvlTop", lvl2: "lvlBot" },
+    { key: "arms",     name: "the arms",      lvl: "lvlArms" }
+  ];
+  var fillIdx = 0, charging = false;
+  var capEl  = document.querySelector("[data-fill-cap]"),
+      timeEl = document.querySelector("[data-fill-time]"),
+      pctEl  = document.querySelector("[data-fill-pct]"),
+      nameEl = document.querySelector("[data-fill-name]");
+
+  function showFill(i) {
+    fillIdx = (i + FILLS.length) % FILLS.length;
+    var arts = document.querySelectorAll(".fillArt"), k;
+    for (k = 0; k < arts.length; k++) {
+      arts[k].className = "fillArt" + (arts[k].getAttribute("data-fill") === FILLS[fillIdx].key ? " on" : "");
+    }
+    nameEl.innerHTML = FILLS[fillIdx].name;
+    try { localStorage.setItem("chargeFill", FILLS[fillIdx].key); } catch (e) {}
+    paintFill();
+    fit();
+  }
+
+  /* level 0..1 — the position of the hour, which is a thing we actually know. */
+  function hourLevel(d) {
+    return (d.getMinutes() * 60 + d.getSeconds()) / 3600;
+  }
+
+  function paintFill() {
+    var f = FILLS[fillIdx], lv = hourLevel(new Date());
+    var H = 140, top = H * (1 - lv);
+    /* The tide is mapped into the lower half of the frame. Full range looked like a flood: at
+       high water the sea reached the moon. A tide rises against a castle, it does not cover the
+       sky. Low water 132, high water 62. */
+    /* The tide rises up the keep's wall and stops short of the battlements. Low water is below
+       the rock, high water is the base of the parapet. */
+    if (f.key === "tide") top = 140 - 78 * lv;
+    var r = document.getElementById(f.lvl);
+    if (!r) return;
+    if (f.lvl2) {
+      /* The hourglass runs the other way round: the upper bulb EMPTIES as the lower fills, so
+         one level drives two rectangles in opposite directions. The rects sweep whole halves of
+         the frame and the MASKS cut them to the bulbs, so these numbers no longer need to know
+         anything about the shape of the glass — which is why swapping the artwork did not mean
+         rewriting this. */
+      var bot = document.getElementById(f.lvl2);
+      r.setAttribute("y", String(70 * lv));
+      r.setAttribute("height", String(Math.max(0, 70 * (1 - lv))));
+      if (bot) { bot.setAttribute("y", String(140 - 70 * lv)); bot.setAttribute("height", String(70 * lv)); }
+    } else {
+      r.setAttribute("y", String(top));
+      r.setAttribute("height", String(H - top));
+    }
+    if (f.wave) {
+      var w = document.getElementById(f.wave);
+      if (w) w.setAttribute("transform", "translate(0," + top.toFixed(2) + ")");
+    }
+  }
+
+  /* A real battery reading, if the Shortcuts automation passed one. Shown as a SNAPSHOT beside
+     the fill, with the time it was taken, and never mixed into the animation — the page cannot
+     watch the battery climb, so it must not draw one climbing. */
+  function readBattery() {
+    var m = /[?&]b=(\d{1,3})/.exec(window.location.search);
+    if (!m) return;
+    var pct = Math.max(0, Math.min(100, parseInt(m[1], 10)));
+    if (pct !== pct) return;
+    /* two() was invented out of thin air on the first pass and does not exist; timeText() does,
+       and it already honours the ?h=12 switch, so the snapshot reads in the same clock as the
+       rest of the face rather than in a second one. */
+    var t = timeText(new Date());
+    pctEl.innerHTML = pct + "% at " + t.h + ":" + t.m;
+    pctEl.hidden = false;
+  }
+
+  var savedFill = null;
+  try { savedFill = localStorage.getItem("chargeFill"); } catch (e) {}
+  var wantFill = (/[?&]fill=([a-z]+)/.exec(window.location.search) || [])[1] || savedFill;
+  var startIdx = 0, fi;
+  for (fi = 0; fi < FILLS.length; fi++) { if (FILLS[fi].key === wantFill) startIdx = fi; }
+  showFill(startIdx);
+
   var saved = null;
   try { saved = localStorage.getItem("clockMode"); } catch (e) {}
-  setMode(saved === "digital" ? "digital" : "dial");
+  var wantCharge = /[?&](charge|b=)/.test(window.location.search);
+  setMode(wantCharge ? "charge" : (saved === "digital" ? "digital" : "dial"));
+  if (wantCharge) readBattery();
+
   stage.addEventListener("click", function () {
+    /* On the charging face a tap cycles the four pictures rather than leaving the face. Leaving
+       is what closing the app is for; while it is standing on the charger the only thing worth
+       changing is which one you are looking at. */
+    if (charging) { showFill(fillIdx + 1); return; }
     setMode(dialMode.hidden ? "dial" : "digital");
   });
 

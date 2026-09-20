@@ -22,7 +22,7 @@
  *
  * Bump CACHE on every change to the shell or the page, or phones keep the old one.
  */
-var CACHE = 'desk-clock-v1';        /* v1, 20 Sep 2026 — first estate build. */
+var CACHE = 'desk-clock-v5';        /* v5, 20 Sep 2026 — five pictures, four of them engravings. */
 var FONT_CACHE = 'desk-clock-fonts-v1';
 
 var SHELL = [
@@ -31,7 +31,23 @@ var SHELL = [
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',
-  './icon-maskable-512.png'
+  './icon-maskable-512.png',
+  /* The charging face's two crest silhouettes. They are files rather than base64 so the study
+     clock does not carry 60KB it never draws — which means they must be in the shell, or the
+     charging face arrives with no crest the first time it is opened without a network. */
+  './crest-dim.png',
+  './crest-gilt.png',
+  /* The engraving and its interior mask. The line art is 175KB, which is worth it for the one
+     picture that actually looks like an object rather than clipart — and it is cached once. */
+  './decanter-line.png',
+  './decanter-mask.png',
+  './hourglass-line.png',
+  './hourglass-mask-top.png',
+  './hourglass-mask-bot.png',
+  /* The keep has no mask: the sea rises in front of it rather than inside it. */
+  './castle-line.png',
+  './arms-line.png',
+  './arms-mask-0.png'
 ];
 
 var FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
