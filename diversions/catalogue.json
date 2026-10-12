@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-05T06:13:26.592Z",
+  "generatedAt": "2026-10-12T06:20:02.383Z",
   "source": "weekly curator",
-  "count": 298,
+  "count": 274,
   "catalogue": [
     {
       "id": "d-itv-70-up",
@@ -612,246 +612,6 @@
       "blurb": "Sharon Horgan's HBO comedy about a 50-year-old divorcee starting again."
     },
     {
-      "id": "d-prime-the-fitbit-killer",
-      "title": "The Fitbit Killer",
-      "platform": "prime",
-      "type": "tv",
-      "date": "2026-09-15",
-      "blurb": "True-crime special."
-    },
-    {
-      "id": "d-disney-city-of-blood",
-      "title": "City of Blood",
-      "platform": "disney",
-      "type": "tv",
-      "date": "2026-09-16",
-      "blurb": "German drama: two estranged sisters discover vampires control organised crime in a collapsing Berlin."
-    },
-    {
-      "id": "d-disney-city-of-blood-season-1",
-      "title": "City of Blood — Season 1",
-      "platform": "disney",
-      "type": "tv",
-      "date": "2026-09-16",
-      "blurb": "German eight-parter: two sisters find vampires running organised crime in a dystopian Berlin."
-    },
-    {
-      "id": "d-prime-neagley",
-      "title": "Neagley",
-      "platform": "prime",
-      "type": "tv",
-      "date": "2026-09-16",
-      "blurb": "Reacher spin-off with Maria Sten as Chicago PI Frances Neagley digging into a friend's suspicious death."
-    },
-    {
-      "id": "d-prime-neagley-season-1",
-      "title": "Neagley — Season 1",
-      "platform": "prime",
-      "type": "tv",
-      "date": "2026-09-16",
-      "blurb": "Reacher spin-off starring Maria Sten as Chicago private investigator Frances Neagley, hunting the truth behind an old friend's suspicious death."
-    },
-    {
-      "id": "d-prime-slow-horses-season-6",
-      "title": "Slow Horses - Season 6",
-      "platform": "prime",
-      "type": "tv",
-      "date": "2026-09-16",
-      "blurb": "Jackson Lamb and Slough House on the run; via the Apple TV add-on channel on Prime Video."
-    },
-    {
-      "id": "d-prime-slow-horses-series-6",
-      "title": "Slow Horses — Series 6",
-      "platform": "prime",
-      "type": "tv",
-      "date": "2026-09-16",
-      "blurb": "Gary Oldman's Slough House returns — via the Apple TV add-on on Prime Video."
-    },
-    {
-      "id": "d-u-the-chelsea-detective-season-4",
-      "title": "The Chelsea Detective — Season 4",
-      "platform": "u",
-      "type": "tv",
-      "date": "2026-09-16",
-      "blurb": "Adrian Scarborough's DI Max Arnold returns on U&Drama."
-    },
-    {
-      "id": "d-u-the-chelsea-detective-series-4",
-      "title": "The Chelsea Detective — Series 4",
-      "platform": "u",
-      "type": "tv",
-      "date": "2026-09-16",
-      "blurb": "Adrian Scarborough and Vanessa Emme return as DI Max Arnold and DS Layla Walsh for four feature-length Chelsea murder cases."
-    },
-    {
-      "id": "d-netflix-the-doll",
-      "title": "The Doll",
-      "platform": "netflix",
-      "type": "tv",
-      "date": "2026-09-16",
-      "blurb": "Polish period drama about a man's obsessive pursuit of an aristocrat and of high society."
-    },
-    {
-      "id": "d-netflix-the-doll-season-1",
-      "title": "The Doll — Season 1",
-      "platform": "netflix",
-      "type": "tv",
-      "date": "2026-09-16",
-      "blurb": "Polish period drama about social ambition curdling into obsession, from the Boleslaw Prus classic."
-    },
-    {
-      "id": "d-netflix-monster-the-lizzie-borden-story",
-      "title": "Monster: The Lizzie Borden Story",
-      "platform": "netflix",
-      "type": "tv",
-      "date": "2026-09-17",
-      "blurb": "Ryan Murphy's anthology turns to the Fall River axe murders and their prime suspect."
-    },
-    {
-      "id": "d-netflix-stranger-things-tales-from-85-season-2",
-      "title": "Stranger Things: Tales from '85 — Season 2",
-      "platform": "netflix",
-      "type": "tv",
-      "date": "2026-09-17",
-      "blurb": "The animated Hawkins spin-off returns for a second run."
-    },
-    {
-      "id": "d-netflix-best-of-the-best",
-      "title": "Best of the Best",
-      "platform": "netflix",
-      "type": "film",
-      "date": "2026-09-18",
-      "blurb": "Maitreyi Ramakrishnan heads to UCLA for a cutthroat Bollywood-fusion dance competition."
-    },
-    {
-      "id": "d-channel4-coastal-unit",
-      "title": "Coastal Unit",
-      "platform": "channel4",
-      "type": "tv",
-      "date": "2026-09-18",
-      "blurb": "More4: personalities clash in a colourful police precinct in the South of France."
-    },
-    {
-      "id": "d-cinema-little-monsters-2",
-      "title": "Little Monsters 2",
-      "platform": "cinema",
-      "type": "film",
-      "date": "2026-09-18",
-      "blurb": "Sequel to the zombie comedy, released in the UK by Miracle/Dazzler."
-    },
-    {
-      "id": "d-prime-mobland-season-2",
-      "title": "MobLand - Season 2",
-      "platform": "prime",
-      "type": "tv",
-      "date": "2026-09-18",
-      "blurb": "The Harrigans' empire fractures as fixer Harry Da Souza walks a tightrope; via the Paramount+ add-on."
-    },
-    {
-      "id": "d-prime-mobland-series-2",
-      "title": "Mobland — Series 2",
-      "platform": "prime",
-      "type": "tv",
-      "date": "2026-09-18",
-      "blurb": "Two crime families at war and the fixer caught between them — via the Paramount+ add-on."
-    },
-    {
-      "id": "d-cinema-resident-evil",
-      "title": "Resident Evil",
-      "platform": "cinema",
-      "type": "film",
-      "date": "2026-09-18",
-      "blurb": "Zach Cregger's reboot of the video-game franchise, starring Austin Abrams, Zach Cherry, Kali Reis and Paul Walter Hauser."
-    },
-    {
-      "id": "d-cinema-shaun-the-sheep-the-beast-of-mossy-botto",
-      "title": "Shaun The Sheep: The Beast Of Mossy Bottom",
-      "platform": "cinema",
-      "type": "film",
-      "date": "2026-09-18",
-      "blurb": "Aardman's third Shaun spin-off sees the flock investigating a vanished farmer and a wild beast roaming the woods of Mossingham."
-    },
-    {
-      "id": "d-netflix-the-scandal",
-      "title": "The Scandal",
-      "platform": "netflix",
-      "type": "tv",
-      "date": "2026-09-18",
-      "blurb": "New Netflix limited series."
-    },
-    {
-      "id": "d-skyone-the-walking-dead-dead-city-season-3",
-      "title": "The Walking Dead: Dead City — Season 3",
-      "platform": "skyone",
-      "type": "tv",
-      "date": "2026-09-18",
-      "blurb": "Lauren Cohan and Jeffrey Dean Morgan's Maggie and Negan set aside their differences to build Manhattan's first post-apocalypse community."
-    },
-    {
-      "id": "d-prime-you-me-against-the-world",
-      "title": "You + Me — Against the World",
-      "platform": "prime",
-      "type": "film",
-      "date": "2026-09-18",
-      "blurb": "Romantic drama in which a sheltered film student falls for a brooding rebel while someone watches from the shadows."
-    },
-    {
-      "id": "d-prime-outlander-blood-of-my-blood-season-2",
-      "title": "Outlander: Blood of My Blood - Season 2",
-      "platform": "prime",
-      "type": "tv",
-      "date": "2026-09-19",
-      "blurb": "The Outlander prequel returns; via the MGM+ add-on channel on Prime Video."
-    },
-    {
-      "id": "d-prime-outlander-blood-of-my-blood-series-2",
-      "title": "Outlander: Blood of My Blood — Series 2",
-      "platform": "prime",
-      "type": "tv",
-      "date": "2026-09-19",
-      "blurb": "The Outlander prequel returns — via the MGM+ add-on."
-    },
-    {
-      "id": "d-prime-american-hostage",
-      "title": "American Hostage",
-      "platform": "prime",
-      "type": "tv",
-      "date": "2026-09-20",
-      "blurb": "Jon Hamm as a 1970s Indianapolis radio reporter pulled into a hostage crisis; via MGM+."
-    },
-    {
-      "id": "d-iplayer-the-split-up",
-      "title": "The Split Up",
-      "platform": "iplayer",
-      "type": "tv",
-      "date": "2026-09-20",
-      "blurb": "Manchester family-law firm Kishan Law is thrown into turmoil by a buried family secret; spin-off of Abi Morgan's The Split."
-    },
-    {
-      "id": "d-iplayer-the-split-up-series-1",
-      "title": "The Split Up — Series 1",
-      "platform": "iplayer",
-      "type": "tv",
-      "date": "2026-09-20",
-      "blurb": "Six-part spin-off from The Split starring Ritu Arya and Sanjeev Bhaskar as a British-Asian family law dynasty in Manchester rocked by an old secret."
-    },
-    {
-      "id": "d-netflix-wasteman",
-      "title": "Wasteman",
-      "platform": "netflix",
-      "type": "film",
-      "date": "2026-09-20",
-      "blurb": "British prison drama; a man weeks from release is dragged into a drug war by his new cellmate."
-    },
-    {
-      "id": "d-skyone-the-wargame",
-      "title": "The Wargame",
-      "platform": "skyone",
-      "type": "tv",
-      "date": "2026-09-21",
-      "blurb": "Four-part constructed documentary in which real former politicians and military chiefs war-game a Russian attack on UK soil."
-    },
-    {
       "id": "d-prime-hair-fetish-killer",
       "title": "Hair Fetish Killer",
       "platform": "prime",
@@ -906,14 +666,6 @@
       "type": "tv",
       "date": "2026-09-23",
       "blurb": "Jo Joyner and Mark Benton return as the Stratford PIs for ten new mysteries, building to a wedding where the groom vanishes."
-    },
-    {
-      "id": "d-iplayer-the-celebrity-traitors-series-2",
-      "title": "The Celebrity Traitors - Series 2",
-      "platform": "iplayer",
-      "type": "tv",
-      "date": "2026-09-23",
-      "blurb": "Claudia Winkleman returns with a new castle full of famous faithful and traitors."
     },
     {
       "id": "d-netflix-the-golden-ticket",
@@ -1252,6 +1004,14 @@
       "blurb": "Revival with the original cast continues."
     },
     {
+      "id": "d-iplayer-the-celebrity-traitors-series-2",
+      "title": "The Celebrity Traitors — Series 2",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026-10-01",
+      "blurb": "21 celebrities try to unmask the Traitors; Thursday and Friday evenings on BBC One."
+    },
+    {
       "id": "d-iplayer-the-traitors-celebrity-series-2",
       "title": "The Traitors: Celebrity — Series 2",
       "platform": "iplayer",
@@ -1393,7 +1153,7 @@
       "platform": "iplayer",
       "type": "tv",
       "date": "2026-10-04",
-      "blurb": "Supernatural comedy starring Lenny Rush."
+      "blurb": "Family supernatural comedy with Lenny Rush, Tom Davis and Sian Clifford."
     },
     {
       "id": "d-netflix-lorne",
@@ -1425,7 +1185,7 @@
       "platform": "prime",
       "type": "tv",
       "date": "2026-10-07",
-      "blurb": "Stephen King adaptation: a bullied teen discovers telekinetic powers."
+      "blurb": "Mike Flanagan's horror series adapting Stephen King's novel."
     },
     {
       "id": "d-prime-carrie-season-1",
@@ -1449,7 +1209,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-10-08",
-      "blurb": "Limited series: Josh Hartnett protects his town from a deep-sea creature."
+      "blurb": "Limited series: Josh Hartnett as a fisherman fighting a deep-sea creature."
     },
     {
       "id": "d-netflix-below-limited-series",
@@ -1465,7 +1225,7 @@
       "platform": "netflix",
       "type": "film",
       "date": "2026-10-09",
-      "blurb": "Ben Affleck political thriller about parents ransoming their kidnapped son."
+      "blurb": "Ben Affleck as a mayoral candidate who, with his wife, pays a kidnapping ransom."
     },
     {
       "id": "d-netflix-haunted-hotel-season-2",
@@ -1492,14 +1252,6 @@
       "blurb": "Rob Savage's supernatural horror from the Josh Malerman novel, with Jessica Chastain as a mother whose double emerges from her daughter's closet."
     },
     {
-      "id": "d-netflix-sacrifice",
-      "title": "Sacrifice",
-      "platform": "netflix",
-      "type": "film",
-      "date": "2026-10-09",
-      "blurb": "Action-comedy with Anya Taylor-Joy and Chris Evans at a charity gala."
-    },
-    {
       "id": "d-cinema-the-social-reckoning",
       "title": "The Social Reckoning",
       "platform": "cinema",
@@ -1514,6 +1266,14 @@
       "type": "tv",
       "date": "2026-10-09",
       "blurb": "Walter Presents: an Italian heart surgeon's desperate choice for his son pulls him into blackmail."
+    },
+    {
+      "id": "d-netflix-malory-towers",
+      "title": "Malory Towers",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-10-10",
+      "blurb": "BBC series: Darrell Rivers at boarding school in post-war Cornwall."
     },
     {
       "id": "d-netflix-wicked",
@@ -1596,6 +1356,14 @@
       "blurb": "The comedians try new skills and sports around the world."
     },
     {
+      "id": "d-iplayer-the-book-that-changed-my-life",
+      "title": "The Book That Changed My Life",
+      "platform": "iplayer",
+      "type": "film",
+      "date": "2026-10-14",
+      "blurb": "Documentary featuring Queen Camilla on how reading changes lives (date unconfirmed)."
+    },
+    {
       "id": "d-disney-the-lowdown-season-2",
       "title": "The Lowdown — Season 2",
       "platform": "disney",
@@ -1625,7 +1393,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-10-15",
-      "blurb": "Keri Russell's ambassador navigates international conspiracy."
+      "blurb": "Keri Russell as Kate Wyler amid a Russian weapon conspiracy."
     },
     {
       "id": "d-netflix-the-storm",
@@ -1649,7 +1417,7 @@
       "platform": "prime",
       "type": "film",
       "date": "2026-10-16",
-      "blurb": "Heist movie starring Stanley Tucci."
+      "blurb": "Heist film starring Stanley Tucci."
     },
     {
       "id": "d-netflix-norm-the-tale-of-norm-macdonald",
@@ -1658,6 +1426,14 @@
       "type": "film",
       "date": "2026-10-16",
       "blurb": "Judd Apatow documentary on the comedian's legacy."
+    },
+    {
+      "id": "d-netflix-sacrifice",
+      "title": "Sacrifice",
+      "platform": "netflix",
+      "type": "film",
+      "date": "2026-10-16",
+      "blurb": "Anya Taylor-Joy and Chris Evans; a gala is hijacked by a doomsday cult."
     },
     {
       "id": "d-channel4-soviet-jeans",
@@ -1708,12 +1484,20 @@
       "blurb": "Friday the 13th prequel about Pamela Voorhees."
     },
     {
+      "id": "d-netflix-judge-john-deed",
+      "title": "Judge John Deed",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-10-19",
+      "blurb": "Martin Shaw as a maverick High Court judge (6 seasons)."
+    },
+    {
       "id": "d-netflix-cyberpunk-edgerunners-2",
       "title": "Cyberpunk: Edgerunners 2",
       "platform": "netflix",
       "type": "tv",
       "date": "2026-10-20",
-      "blurb": "Return to Night City in the follow-up to the hit sci-fi anime."
+      "blurb": "Standalone anime sequel set in Night City."
     },
     {
       "id": "d-netflix-cyberpunk-edgerunners-season-2",
@@ -1732,12 +1516,20 @@
       "blurb": "Teen discovers his mother has been replaced by an impostor after a car accident."
     },
     {
+      "id": "d-netflix-the-new-stanford-prison-experiment",
+      "title": "The New Stanford Prison Experiment",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-10-21",
+      "blurb": "Limited series: 30 people live in a mock prison for two weeks."
+    },
+    {
       "id": "d-prime-the-terminal-list-season-2",
       "title": "The Terminal List — Season 2",
       "platform": "prime",
       "type": "tv",
       "date": "2026-10-21",
-      "blurb": "Chris Pratt's Navy SEAL pursues conspirators in a global thriller."
+      "blurb": "Chris Pratt action thriller returns."
     },
     {
       "id": "d-netflix-nobody-wants-this-season-3",
@@ -1745,7 +1537,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-10-22",
-      "blurb": "Joanne and Noah move in together."
+      "blurb": "Joanne and Noah move in together; Sasha and Esther date."
     },
     {
       "id": "d-cinema-ali-g-who-iz-i",
@@ -1817,7 +1609,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-10-23",
-      "blurb": "Assane escapes prison to unmask a museum heist copycat."
+      "blurb": "Assane Diop escapes to unmask a copycat Lupin."
     },
     {
       "id": "d-cinema-tad-and-the-magic-lamp",
@@ -1873,7 +1665,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-10-27",
-      "blurb": "Three-part documentary on the Friends star."
+      "blurb": "Three-part documentary series on Matthew Perry's life and legacy."
     },
     {
       "id": "d-netflix-a-couple-of-lies",
@@ -1881,7 +1673,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-10-30",
-      "blurb": "Swedish Nordic noir: two couples swap homes and end up trapped in a web of surveillance and manipulation."
+      "blurb": "Swedish limited series: two couples swap homes in a psychological thriller."
     },
     {
       "id": "d-cinema-animol",
@@ -1980,6 +1772,14 @@
       "blurb": "Karin Slaughter adaptation starring Rose Byrne, Meghann Fahy and Brendan Gleeson, as a lawyer's violent new case dredges up buried small-town secrets."
     },
     {
+      "id": "d-cinema-the-hunger-games-sunrise-on-the-reaping",
+      "title": "The Hunger Games: Sunrise on the Reaping",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11",
+      "blurb": "Hunger Games prequel from Lionsgate."
+    },
+    {
       "id": "d-cinema-zootopia-2",
       "title": "Zootopia 2",
       "platform": "cinema",
@@ -2017,7 +1817,7 @@
       "platform": "prime",
       "type": "tv",
       "date": "2026-11-04",
-      "blurb": "Sports biopic drama series about Muhammad Ali."
+      "blurb": "Sports drama series about Muhammad Ali."
     },
     {
       "id": "d-netflix-black-doves-season-2",
@@ -2065,7 +1865,7 @@
       "platform": "prime",
       "type": "tv",
       "date": "2026-11-11",
-      "blurb": "Second Age saga continues."
+      "blurb": "Fantasy prequel returns, starring Morfydd Clark."
     },
     {
       "id": "d-cinema-ebenezer-a-christmas-carol",
@@ -2105,7 +1905,7 @@
       "platform": "prime",
       "type": "film",
       "date": "2026-11-18",
-      "blurb": "Sports biopic with Nicolas Cage as American football coach and broadcaster John Madden."
+      "blurb": "Sports biopic about John Madden, starring Nicolas Cage."
     },
     {
       "id": "d-netflix-the-law-of-beasts",
@@ -2140,20 +1940,12 @@
       "blurb": "Animated retelling of Cinderella."
     },
     {
-      "id": "d-cinema-the-hunger-games-sunrise-on-the-reaping",
-      "title": "The Hunger Games: Sunrise On The Reaping",
-      "platform": "cinema",
-      "type": "film",
-      "date": "2026-11-20",
-      "blurb": "Joseph Zada plays 16-year-old Haymitch Abernathy in the 50th Hunger Games, with Ralph Fiennes, Glenn Close, Elle Fanning and Kieran Culkin."
-    },
-    {
       "id": "d-prime-blade-runner-2099",
       "title": "Blade Runner 2099",
       "platform": "prime",
       "type": "tv",
       "date": "2026-11-25",
-      "blurb": "Ridley Scott-produced live-action Blade Runner series."
+      "blurb": "Sci-fi sequel series with Michelle Yeoh and Hunter Schafer."
     },
     {
       "id": "d-cinema-focker-in-law",
@@ -2252,12 +2044,28 @@
       "blurb": "Greg Davies returns as crime-scene cleaner Wicky in a one-off."
     },
     {
+      "id": "d-cinema-the-magician-s-nephew",
+      "title": "The Magician's Nephew",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-12",
+      "blurb": "Greta Gerwig's Narnia film, wide UK theatrical release ahead of Netflix."
+    },
+    {
       "id": "d-iplayer-the-other-bennet-sister-christmas-specia",
       "title": "The Other Bennet Sister — Christmas Special",
       "platform": "iplayer",
       "type": "tv",
       "date": "2026-12",
       "blurb": "Three-part festive continuation with Ella Bruccoleri as Mary Bennet and Donal Finn as Tom Hayward."
+    },
+    {
+      "id": "d-cinema-werwulf",
+      "title": "Werwulf",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-12",
+      "blurb": "Stylish horror-thriller from the team behind The Witch."
     },
     {
       "id": "d-netflix-in-a-holidaze",
@@ -2273,7 +2081,7 @@
       "platform": "prime",
       "type": "film",
       "date": "2026-12-02",
-      "blurb": "Christmas caper with Arnold Schwarzenegger as Santa recruiting thief Alan Ritchson to recover his stolen magic bag, co-starring Awkwafina."
+      "blurb": "Christmas film starring Alan Ritchson and Arnold Schwarzenegger."
     },
     {
       "id": "d-netflix-pride-and-prejudice",
@@ -2345,7 +2153,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-12-18",
-      "blurb": "Marvel's fifth Avengers film, arriving head-to-head with 'Dune: Part Three'."
+      "blurb": "Marvel's culminating saga film."
     },
     {
       "id": "d-cinema-dune-part-three",
