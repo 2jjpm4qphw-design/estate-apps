@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Larder">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0D1B3E">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<title>The Larder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap">
+</head>
+<body>
+<style>
+/* ══════════════════════ ESTATE CHROME ══════════════════════
+   Copied from the Garage, which copied it from the Buttery and the Still Room. 9px on the
+   department label — the strip is shared furniture and matches the house, not this room. */
+.estate-strip{display:flex;align-items:center;gap:9px;padding:9px 16px 8px;background:#0D1B3E;
+  padding-top:calc(9px + env(safe-area-inset-top,0px))}
+.estate-strip .em-house{height:13px;width:auto;flex:none;opacity:1}
+.estate-strip .em-dept{font-family:Montserrat,-apple-system,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C4F000;line-height:1}
+
+/* ══════════════════════ TOKENS ══════════════════════
+   The estate palette. Navy ground, lime as accent and fill ONLY — never body text. */
+:root{
+  --bg:#0D1B3E; --surface:#12224A; --surface-2:#172954; --mid:#1A3A6B;
+  --ink:#FFFFFF; --ink-2:#D6DEEE; --muted:#9FB0CE;
+  --line:#24467e; --line-strong:#3159A0;
+  --go:#C4F000; --go-soft:#1B3418; --go-ink:#DCF95E;
+  --warn:#F2B23C; --warn-soft:#3A2C10;
+  --stop:#FF7A6E; --stop-soft:#3D1B18;
+  --data:#7FB6F0;
+  --shadow:0 1px 2px rgba(0,0,0,.45), 0 6px 20px -12px rgba(0,0,0,.8);
+  --radius:14px;
+  --f:"Montserrat","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none !important}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:16px;
+     line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
+     padding-bottom:calc(76px + env(safe-area-inset-bottom,0px));overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none;text-align:left;padding:0}
+input,select,textarea{font:inherit;color:inherit;font-size:16px}
+:focus-visible{outline:2px solid var(--data);outline-offset:2px;border-radius:6px}
+.wrap{max-width:540px;margin:0 auto;padding:0 16px}
+h1{font-size:20px;font-weight:800;margin:0;letter-spacing:-.015em}
+h2{font-size:13px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:22px 0 8px}
+p{margin:0 0 .8em}
+.hint{font-size:14.5px;line-height:1.5;color:var(--muted)}
+
+/* ══════════════════════ CHROME ══════════════════════ */
+.sbar{position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:25}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);
+  backdrop-filter:saturate(160%) blur(12px);-webkit-backdrop-filter:saturate(160%) blur(12px);
+  border-bottom:1px solid var(--line)}
+.topbar-in{max-width:540px;margin:0 auto;padding:6px 16px 10px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.topbar .sub{font-size:13.5px;color:var(--muted);font-weight:600;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sub.bad{color:var(--stop)}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;
+  background:color-mix(in srgb,var(--surface) 96%,transparent);
+  backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabbar-in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 8px;min-height:54px;
+  color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.03em;text-align:center}
+.tab svg{width:22px;height:22px}
+.tab[aria-current="page"]{color:var(--go)}
+
+/* ══════════════════════ CARDS / CONTROLS ══════════════════════ */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.pad{padding:14px 16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 18px;
+  border-radius:12px;background:var(--go);color:var(--bg);font-weight:800;font-size:16px}
+.btn.ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line-strong);font-weight:700}
+.btn.danger{background:var(--stop-soft);color:var(--stop);border:1px solid #6b2a24}
+.btn.wide{width:100%}
+.btn[disabled]{opacity:.5}
+.fl{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:0 0 6px}
+.in{width:100%;min-height:48px;padding:10px 14px;border-radius:12px;border:1px solid var(--line-strong);
+  background:var(--bg);color:var(--ink);font-size:17px;outline:none}
+.in:focus{border-color:var(--go)}
+select.in{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 20px) 21px,calc(100% - 14px) 21px;background-size:6px 6px;background-repeat:no-repeat;padding-right:36px}
+
+/* ══════════════════════ ADD BOX ══════════════════════ */
+.addrow{display:flex;gap:8px;margin-top:14px}
+.addrow .in{flex:1;min-width:0}
+.addrow .btn{flex:none;width:56px;padding:0;font-size:26px;line-height:1}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{min-height:40px;padding:8px 13px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line-strong);
+  color:var(--ink-2);font-size:15px;font-weight:600;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip b{color:var(--go-ink);font-weight:800;margin-right:4px}
+.chip.all{background:transparent;border-style:dashed;color:var(--go-ink)}
+
+/* ══════════════════════ THE LIST ══════════════════════ */
+.aisle{margin-top:18px}
+.aisle-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 2px 8px}
+.aisle-h .t{font-size:13px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.aisle-h .n{font-size:13px;font-weight:700;color:var(--muted)}
+.rows{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:10px 14px;border-top:1px solid var(--line)}
+.row:first-child{border-top:none}
+.row .nm{flex:1;min-width:0;font-size:17px;font-weight:600;line-height:1.3;word-wrap:break-word}
+.row .nt{display:block;font-size:13.5px;font-weight:500;color:var(--muted);margin-top:2px}
+.row .q{flex:none;font-size:15px;font-weight:800;color:var(--go-ink);min-width:28px;text-align:right}
+.row .star{flex:none;color:var(--muted);font-size:13px}
+.box{flex:none;width:28px;height:28px;border-radius:8px;border:2px solid var(--line-strong);display:flex;align-items:center;justify-content:center}
+.box svg{width:18px;height:18px;opacity:0}
+.row.done .box{background:var(--go);border-color:var(--go)}
+.row.done .box svg{opacity:1}
+.row.done .nm{color:var(--muted);text-decoration:line-through;text-decoration-thickness:2px}
+.row.done .q{color:var(--muted)}
+.empty{margin-top:28px;text-align:center;color:var(--muted);font-size:15.5px;padding:0 20px}
+.empty b{display:block;color:var(--ink);font-size:18px;margin-bottom:6px}
+
+/* ══════════════════════ SHOP MODE ══════════════════════
+   Bigger everything. You are holding a basket in the other hand. */
+.progress{margin-top:14px}
+.progress .lbl{display:flex;justify-content:space-between;align-items:baseline;font-weight:700}
+.progress .big{font-size:30px;font-weight:800;letter-spacing:-.03em;color:var(--go-ink)}
+.bar{height:8px;border-radius:99px;background:var(--surface-2);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--go);border-radius:99px;transition:width .25s}
+#v-shop .row{min-height:64px;padding:12px 16px}
+#v-shop .row .nm{font-size:19px}
+#v-shop .box{width:32px;height:32px}
+.toolrow{display:flex;gap:8px;margin-top:12px}
+.toolrow .btn{flex:1;min-height:44px;font-size:14.5px;padding:0 10px}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px}
+.sw{flex:none;width:52px;height:32px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line-strong);position:relative;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--ink-2);transition:transform .2s}
+.sw[aria-checked="true"]{background:var(--go);border-color:var(--go)}
+.sw[aria-checked="true"]::after{transform:translateX(20px);background:var(--bg)}
+.basket-h{margin-top:22px}
+
+/* ══════════════════════ SHEET (edit an item) ══════════════════════ */
+.scrim{position:fixed;inset:0;background:rgba(4,10,26,.66);z-index:50}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;background:var(--surface);border-top:1px solid var(--line-strong);
+  border-radius:20px 20px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow-y:auto;
+  max-width:540px;margin:0 auto}
+.grab{width:40px;height:5px;border-radius:9px;background:var(--line-strong);margin:0 auto 12px}
+.sheet .fld{margin-top:12px}
+.qty{display:flex;align-items:center;gap:10px}
+.qty .btn{width:52px;padding:0;font-size:24px}
+.qty .v{min-width:44px;text-align:center;font-size:22px;font-weight:800}
+.sheet-actions{display:flex;gap:10px;margin-top:18px}
+.sheet-actions .btn{flex:1}
+
+/* ══════════════════════ SETUP ══════════════════════ */
+.order-row{display:flex;align-items:center;gap:8px;min-height:52px;padding:6px 8px 6px 14px;border-top:1px solid var(--line)}
+.order-row:first-child{border-top:none}
+.order-row .t{flex:1;font-weight:600}
+.order-row button{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--ink-2);background:var(--surface-2)}
+.order-row button[disabled]{opacity:.25}
+.statline{display:flex;gap:10px;align-items:flex-start}
+.dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:6px;background:var(--muted)}
+.dot.go{background:var(--go)} .dot.stop{background:var(--stop)} .dot.warn{background:var(--warn)}
+.err{color:var(--stop);font-size:14.5px;margin-top:8px}
+.ok{color:var(--go-ink);font-size:14.5px;margin-top:8px}
+.diag{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted);white-space:pre-wrap;word-break:break-all}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:60;max-width:508px;margin:0 auto;
+  background:var(--mid);border:1px solid var(--line-strong);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;
+  box-shadow:var(--shadow);font-weight:600}
+.toast .msg{flex:1}
+.toast button{color:var(--go-ink);font-weight:800;min-height:36px}
+</style>
+
+<div class="sbar" aria-hidden="true"></div>
+<div class="estate-strip" aria-hidden="true"><img class="em-house" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAABGCAMAAAAdMRrrAAADAFBMVEUAAAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABnduxjAAAAAXRSTlMAQObYZgAAAmlJREFUeNrtmtt2hCAMRU/+/6fbNZ2qQLgkBARNXuoqKrDnkAsIzDAikPgZ1VPLGn1MA4FeD4EcgkN4FASyMUewNwYyNUewGQYaA+CLYRMYNN4cwpNSh0cbkUvh4xivTowuYD7FZIgqxHZxrVmegPuETZTgEBzCCQGJR0D6j8N3INeSe9smEMAMuzbV9pbdlECIE19kLriW8O9VNG9RAh6nBKBHCdhRCR4d9ofAdSHqdikI/M3VVzwLQmbocyEc5RSCQBeGPYpuOc6e4rdgTwivVsIyeQJ/b+UVJuzt8gT05gkaMRk55GWUoFlTFgsx+9vNV4LGs9i4o3WUoPGvRk45O4/ZEBRhRh+a6NwcpXkhMupVG6pV0T2YOhEyB2WjIRShiLIVVYYTbqvTPRCqU5I/Ixx4LfLMF0LYkBkeci0D8tx7lTCvNh/Q/f27DfQwgwabso9vdfL/iu/lvHkGfV99QQeEwgXFJyh0hMggOKWJTz1ZCvZ6BMnS2eG17z8a3KFPevoTtKHOLz07qEGg1pMVtOSS1AABAQTZKhmrhLbjJU1CXYHQqwTGSyTLbXkI7HcNBfcGVRSyWg40bTmYRgdbx6ht2QCCMLVRV5EO4WkQsAgE0xDZmtgqc/f2EFmaFRcimaBZhaDOepHRoYwhQyYuqJMfksoQZEpgqnXBl44o4Omp/sZBSLTFVKxCIaCmEU3VHFdX8uXQVbOLV4MRBHYg86IDy6B1OZQhyNYBc/o4ZT8BXQxqELopTIHQyUB1MiShcAcE8dae2R5hbURjdyXHfOOFV5pDYFTrEByCQ3gzhMVClUNwCL/2A4cGHxiWr8/FAAAAAElFTkSuQmCC"><span class="em-dept">Of the Estate</span></div>
+
+<header class="topbar"><div class="topbar-in">
+  <h1 id="hTitle">The Larder</h1>
+  <span class="sub" id="hSub">&mdash;</span>
+</div></header>
+
+<main class="wrap">
+
+<!-- ────────────────────────── LIST (plan it) ────────────────────────── -->
+<section class="view" id="v-list">
+  <form class="addrow" id="addForm" autocomplete="off">
+    <input class="in" id="addIn" type="text" placeholder="Add an item — e.g. 2 lemons" enterkeyhint="done" autocapitalize="sentences" aria-label="Add an item">
+    <button class="btn" type="submit" aria-label="Add">+</button>
+  </form>
+  <div class="chips" id="suggest" hidden></div>
+  <div id="usualsWrap" hidden>
+    <h2>Usuals not on the list</h2>
+    <div class="chips" id="usuals"></div>
+  </div>
+  <div id="listBody"></div>
+</section>
+
+<!-- ────────────────────────── SHOP (in the store) ────────────────────────── -->
+<section class="view" id="v-shop" hidden>
+  <div class="progress" id="prog"></div>
+  <div class="card" style="margin-top:12px"><div class="pad" style="padding-top:6px;padding-bottom:6px">
+    <div class="toggle">
+      <div><div style="font-weight:700">Keep screen on</div><div class="hint" id="wakeNote" style="font-size:13.5px">So it doesn't lock between aisles.</div></div>
+      <button class="sw" id="wakeSw" role="switch" aria-checked="false" aria-label="Keep screen on"></button>
+    </div>
+  </div></div>
+  <div id="shopBody"></div>
+  <div id="basketWrap" hidden>
+    <h2 class="basket-h" id="basketH">In the basket</h2>
+    <div class="rows" id="basket"></div>
+    <button class="btn ghost wide" id="finishBtn" style="margin-top:14px">Finish shop</button>
+    <p class="hint" style="margin-top:8px">Clears what's in the basket. Anything not found stays on the list for next time.</p>
+  </div>
+</section>
+
+<!-- ────────────────────────── SETUP ────────────────────────── -->
+<section class="view" id="v-setup" hidden>
+  <h2>Share the list</h2>
+  <div class="card"><div class="pad">
+    <p class="hint">Sends the list as plain text — to Kathy by Messages, or into Notes.</p>
+    <button class="btn wide" id="shareBtn">Share list</button>
+    <p class="ok" id="shareMsg" hidden></p>
+  </div></div>
+
+  <h2>Aisle order</h2>
+  <div class="card"><div class="pad" style="padding-bottom:4px"><p class="hint">Set it to the way you walk round the shop. Both the list and Shop follow it.</p></div>
+    <div id="orderList"></div>
+  </div>
+
+  <h2>Sync with the estate</h2>
+  <div class="card"><div class="pad">
+    <div class="statline"><span class="dot" id="syncDot"></span><div><div id="syncHead" style="font-weight:700">&mdash;</div><div class="hint" id="syncDetail" style="font-size:14px"></div></div></div>
+    <div class="toolrow"><button class="btn ghost" id="syncNow">Sync now</button></div>
+    <details id="connect" style="margin-top:14px">
+      <summary style="font-weight:700;min-height:44px;display:flex;align-items:center;cursor:pointer">Connect / change credentials</summary>
+      <p class="hint" style="margin-top:6px">The Larder keeps the list in its own file, <b>larder.json</b>, in the same personal gist as every other room. It never touches the Hub's file. On an iPhone each home-screen app has its own storage, so the gist ID and token have to be entered here once even if other rooms already have them.</p>
+      <div class="fld"><label class="fl" for="cfgId">Gist ID</label><input class="in" id="cfgId" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="fld" style="margin-top:10px"><label class="fl" for="cfgTok">Token</label><input class="in" id="cfgTok" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="toolrow"><button class="btn" id="cfgSave">Check and connect</button><button class="btn ghost" id="cfgForget">Disconnect</button></div>
+      <p class="err" id="cfgErr" hidden></p><p class="ok" id="cfgOk" hidden></p>
+    </details>
+  </div></div>
+
+  <h2>Diagnostics</h2>
+  <div class="card"><div class="pad"><div class="diag" id="diag"></div></div></div>
+</section>
+</main>
+
+<nav class="tabbar"><div class="tabbar-in">
+  <button class="tab" data-go="list" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.3" fill="currentColor" stroke="none"/></svg>List</button>
+  <button class="tab" data-go="shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18l-2 11H5z"/><path d="M8 9l3-5M16 9l-3-5"/></svg>Shop</button>
+  <button class="tab" data-go="setup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>Setup</button>
+</div></nav>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="grab"></div>
+  <div class="fld" style="margin-top:0"><label class="fl" for="eName" id="sheetTitle">Item</label><input class="in" id="eName" type="text" autocomplete="off"></div>
+  <div class="fld"><label class="fl">How many</label>
+    <div class="qty"><button class="btn ghost" id="eMinus" aria-label="One fewer">&minus;</button><span class="v" id="eQty">1</span><button class="btn ghost" id="ePlus" aria-label="One more">+</button></div></div>
+  <div class="fld"><label class="fl" for="eNote">Note</label><input class="in" id="eNote" type="text" placeholder="e.g. the big bag, or M&amp;S only" autocomplete="off"></div>
+  <div class="fld"><label class="fl" for="eCat">Aisle</label><select class="in" id="eCat"></select></div>
+  <div class="fld"><div class="toggle"><div><div style="font-weight:700">A usual</div><div class="hint" style="font-size:13.5px">Offered for one-tap adding every week.</div></div>
+    <button class="sw" id="eUsual" role="switch" aria-checked="false" aria-label="A usual"></button></div></div>
+  <div class="sheet-actions"><button class="btn danger" id="eDel">Remove</button><button class="btn" id="eDone">Done</button></div>
+</div>
+
+<div class="toast" id="toast" hidden><span class="msg" id="toastMsg"></span><button id="toastAct">Undo</button></div>
+
+<script>
+'use strict';
+var BUILD='larder 2026-10-03 v1';
+
+/* ═══════════════════════ AISLES ═══════════════════════
+   Ids are permanent. Labels can change; ids never do, or every remembered item loses its aisle. */
+var CATS=[
+  {id:'fv',   l:'Fruit & veg'},
+  {id:'bak',  l:'Bakery'},
+  {id:'meat', l:'Meat & fish'},
+  {id:'chill',l:'Deli & chilled'},
+  {id:'dairy',l:'Dairy & eggs'},
+  {id:'cup',  l:'Cupboard'},
+  {id:'drink',l:'Drinks'},
+  {id:'alc',  l:'Beer, wine & spirits'},
+  {id:'frz',  l:'Frozen'},
+  {id:'home', l:'Household'},
+  {id:'toil', l:'Toiletries & health'},
+  {id:'pet',  l:'Pets'},
+  {id:'oth',  l:'Other'}
+];
+var CAT_BY={}; CATS.forEach(function(c){ CAT_BY[c.id]=c; });
+
+/* A first guess at the aisle from the words in the name. It only has to be right most of the
+   time: correct an item once in its sheet and that ruling is remembered for good — the same
+   rule-it-once idea as the finance review. Longest matching word wins; a leading '!' gives a
+   word priority (so "orange juice" is a drink, not fruit, and "frozen peas" is frozen). */
+var DICT={
+  frz:'!frozen,!ice cream,ice lolly,lollies,fish fingers,oven chips,!ice cubes,sorbet,frozen peas',
+  alc:'wine,prosecco,champagne,beer,lager,ale,cider,gin,vodka,whisky,whiskey,rum,brandy,port,sherry,!tonic water',
+  drink:'!juice,squash,cordial,water,sparkling,coke,cola,lemonade,tonic,coffee,tea bags,teabags,tea,hot chocolate,smoothie,kombucha,!oat milk,!almond milk',
+  toil:'shampoo,conditioner,toothpaste,toothbrush,deodorant,razor,razors,shaving,soap,shower gel,body wash,plasters,paracetamol,ibuprofen,vitamins,tampons,sanitary,cotton wool,cotton buds,moisturiser,sun cream,suncream,mouthwash,floss,lip balm,hand cream',
+  home:'toilet roll,loo roll,kitchen roll,bin bags,bin liners,washing up,dishwasher,fairy,washing powder,detergent,laundry,fabric conditioner,bleach,cleaner,sponges,cling film,foil,tin foil,baking paper,batteries,light bulb,kitchen towel,tissues,zip bags,freezer bags,candles,matches,polish,!dishwasher tablets,!washing up liquid',
+  pet:'dog food,cat food,dog treats,cat litter,kitty litter,pet food,dog biscuits,chews',
+  bak:'bread,loaf,baguette,rolls,bagels,bagel,croissant,croissants,crumpets,muffins,wraps,tortillas,pitta,naan,brioche,sourdough,scones,teacakes,hot cross buns,cake,doughnuts',
+  dairy:'milk,butter,cheese,cheddar,mozzarella,parmesan,feta,halloumi,yoghurt,yogurt,cream,creme fraiche,crème fraîche,eggs,egg,fromage frais,custard,margarine,spread,lurpak',
+  chill:'hummus,houmous,dips,coleslaw,pate,pâté,olives,quiche,pasta fresh,fresh pasta,ready meal,pizza,pesto,sushi,salad pot,sandwich,tofu',
+  meat:'chicken,beef,pork,lamb,mince,steak,sausages,sausage,bacon,ham,turkey,duck,gammon,salmon,cod,haddock,tuna steak,prawns,fish,chorizo,salami,burgers,meatballs,chops,fillet,fillets,kippers,mackerel,sea bass,venison',
+  fv:'apple,apples,banana,bananas,orange,oranges,lemon,lemons,lime,limes,grapes,berries,strawberries,raspberries,blueberries,melon,pear,pears,peach,plums,kiwi,mango,pineapple,avocado,avocados,tomato,tomatoes,potato,potatoes,onion,onions,garlic,carrot,carrots,broccoli,cauliflower,cabbage,lettuce,salad,spinach,rocket,cucumber,pepper,peppers,courgette,courgettes,aubergine,mushrooms,leeks,leek,celery,parsnips,sweet potato,peas,beans green,green beans,herbs,coriander,parsley,basil,mint,ginger,chilli,chillies,spring onions,beetroot,asparagus,kale,sprouts,squash butternut,butternut squash,fruit,veg,vegetables',
+  cup:'pasta,rice,noodles,flour,sugar,salt,oil,olive oil,vinegar,stock,stock cubes,gravy,tinned,tins,tin,beans,baked beans,chickpeas,lentils,tomatoes chopped,chopped tomatoes,passata,soup,cereal,porridge,oats,granola,muesli,weetabix,jam,marmalade,honey,peanut butter,nutella,biscuits,crisps,chocolate,sweets,nuts,crackers,ketchup,mayonnaise,mayo,mustard,sauce,soy sauce,spices,curry paste,herbs dried,tuna,sweetcorn,coconut milk,baking powder,yeast,raisins,popcorn,cous cous,couscous,quinoa,tea lights'
+};
+var KW=[]; Object.keys(DICT).forEach(function(cat){ DICT[cat].split(',').forEach(function(w){
+  w=w.trim(); if(!w) return; var pri=w.charAt(0)==='!'; if(pri) w=w.slice(1);
+  KW.push({w:w, cat:cat, score:w.length+(pri?20:0)});
+}); });
+function norm(s){ return String(s||'').toLowerCase().replace(/[’']/g,'').replace(/\s+/g,' ').trim(); }
+function guessCat(name){
+  var n=' '+norm(name).replace(/[^a-z0-9àâçéèêëîïôûùüÿñæœ& ]/g,' ').replace(/\s+/g,' ')+' ';
+  var best=null;
+  KW.forEach(function(k){
+    if(n.indexOf(' '+k.w+' ')>=0 && (!best || k.score>best.score)) best=k;
+  });
+  return best?best.cat:'oth';
+}
+
+/* ═══════════════════════ STATE ═══════════════════════
+   items  — what is on the list, by id. Each carries u (last changed) so two devices merge by
+            "newest change wins" per item, never by replacing the whole list.
+   del    — deletion tombstones {id: when}. Without them the merge would bring a deleted item
+            straight back (the Hub learnt that the hard way in June).
+   known  — everything ever added, by lower-case name: its aisle, whether it is a usual, how
+            often bought. This is what makes the second week faster than the first.
+   order  — aisle walk order. */
+var LS_KEY='larder:state', LS_SYNC='larder:sync';
+var S=fresh();
+function fresh(){ return {v:1, items:{}, del:{}, known:{}, order:CATS.map(function(c){return c.id;}), orderU:0}; }
+function now(){ return Date.now(); }
+function uid(){ return now().toString(36)+Math.random().toString(36).slice(2,8); }
+function loadLocal(){
+  try{ var raw=localStorage.getItem(LS_KEY); if(raw){ var o=JSON.parse(raw); if(o&&o.items) S=sanitise(o); } }catch(e){ diagNote('load failed: '+e.message); }
+}
+function sanitise(o){
+  var s=fresh();
+  s.items=o.items||{}; s.del=o.del||{}; s.known=o.known||{};
+  if(Array.isArray(o.order)){
+    var seen={}; s.order=o.order.filter(function(id){ if(CAT_BY[id]&&!seen[id]){ seen[id]=1; return true; } return false; });
+    CATS.forEach(function(c){ if(!seen[c.id]) s.order.push(c.id); });   // a new aisle in a later build is never lost
+  }
+  s.orderU=o.orderU||0;
+  return s;
+}
+var _storeOk=true;
+function saveLocal(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); _storeOk=true; }
+  catch(e){ _storeOk=false; diagNote('SAVE FAILED: '+e.message); }
+}
+function save(){ saveLocal(); gSchedule(); }
+
+/* ═══════════════════════ MERGE ═══════════════════════
+   Pure function — the test harness drives it directly. Never loses a change made on either side
+   unless the other side made a newer one to the same item. */
+var TOMB_DAYS=60;
+function merge(a,b){
+  a=a||fresh(); b=b||fresh();
+  var out=fresh(), cut=now()-TOMB_DAYS*864e5;
+  [a.del,b.del].forEach(function(d){ Object.keys(d||{}).forEach(function(id){
+    if(d[id]>cut && (!out.del[id] || d[id]>out.del[id])) out.del[id]=d[id];
+  }); });
+  var ids={}; Object.keys(a.items||{}).concat(Object.keys(b.items||{})).forEach(function(id){ ids[id]=1; });
+  Object.keys(ids).forEach(function(id){
+    var x=(a.items||{})[id], y=(b.items||{})[id], w=!x?y:!y?x:((y.u||0)>(x.u||0)?y:x);
+    if(!w) return;
+    if(out.del[id] && out.del[id]>=(w.u||0)) return;
+    out.items[id]=w;
+  });
+  var ks={}; Object.keys(a.known||{}).concat(Object.keys(b.known||{})).forEach(function(k){ ks[k]=1; });
+  Object.keys(ks).forEach(function(k){
+    var x=(a.known||{})[k], y=(b.known||{})[k];
+    var w=!x?y:!y?x:((y.u||0)>(x.u||0)?y:x);
+    if(x&&y){ w=Object.assign({},w); w.n=Math.max(x.n||0,y.n||0); w.last=Math.max(x.last||0,y.last||0); }
+    out.known[k]=w;
+  });
+  var o=(b.orderU||0)>(a.orderU||0)?b:a;
+  var s=sanitise({items:out.items, del:out.del, known:out.known, order:o.order, orderU:o.orderU||0});
+  return s;
+}
+
+/* ═══════════════════════ ACTIONS ═══════════════════════ */
+function parseEntry(txt){
+  var t=String(txt||'').trim().replace(/\s+/g,' '), q=1, m;
+  if((m=t.match(/^(\d{1,2})\s*[x×]?\s+(.+)$/i)) && !/^\d+\s*(g|kg|ml|l|cl|pk|pack)\b/i.test(t)){ q=+m[1]; t=m[2]; }
+  else if((m=t.match(/^(.+?)\s*[x×]\s*(\d{1,2})$/i))){ t=m[1]; q=+m[2]; }
+  t=t.charAt(0).toUpperCase()+t.slice(1);
+  return {name:t, qty:Math.max(1,Math.min(99,q||1))};
+}
+function onListByKey(k){
+  var hit=null; Object.keys(S.items).forEach(function(id){ var it=S.items[id]; if(norm(it.name)===k && !it.done) hit=it; });
+  return hit;
+}
+function addItem(txt, opts){
+  var p=parseEntry(txt); if(!p.name) return null;
+  var k=norm(p.name), kn=S.known[k], t=now();
+  var existing=onListByKey(k);
+  if(existing){                                   // already on the list: bump it, never duplicate
+    existing.qty=(existing.qty||1)+(opts&&opts.fromUsual?0:p.qty); existing.u=t;
+    save(); return existing;
+  }
+  var it={id:uid(), name:kn?kn.name:p.name, qty:p.qty, note:'', cat:kn?kn.cat:guessCat(p.name), done:false, at:t, u:t};
+  S.items[it.id]=it;
+  S.known[k]=Object.assign({name:it.name, cat:it.cat, usual:false, n:0, last:0}, kn||{}, {u:t});
+  save(); return it;
+}
+function setDone(id, d){ var it=S.items[id]; if(!it) return; it.done=!!d; it.u=now(); save(); }
+function removeItem(id){ if(!S.items[id]) return; delete S.items[id]; S.del[id]=now(); save(); }
+function updateItem(id, f){
+  var it=S.items[id]; if(!it) return; var t=now(), oldK=norm(it.name);
+  if(f.name!=null){ var nm=String(f.name).trim(); if(nm) it.name=nm.charAt(0).toUpperCase()+nm.slice(1); }
+  if(f.qty!=null) it.qty=Math.max(1,Math.min(99,f.qty|0));
+  if(f.note!=null) it.note=String(f.note).trim();
+  if(f.cat!=null && CAT_BY[f.cat]) it.cat=f.cat;
+  it.u=t;
+  var k=norm(it.name), kn=S.known[k]||S.known[oldK]||{n:0,last:0,usual:false};
+  /* Correcting the aisle here IS the ruling: remembered against the name for every future week. */
+  S.known[k]=Object.assign({},kn,{name:it.name, cat:it.cat, u:t, usual:f.usual!=null?!!f.usual:!!kn.usual});
+  save();
+}
+function finishShop(){
+  var t=now(), n=0, gone=[];
+  Object.keys(S.items).forEach(function(id){
+    var it=S.items[id]; if(!it.done) return;
+    var k=norm(it.name), kn=S.known[k]||{name:it.name,cat:it.cat,usual:false,n:0};
+    S.known[k]=Object.assign({},kn,{n:(kn.n||0)+1,last:t,u:t});
+    gone.push(it); delete S.items[id]; S.del[id]=t; n++;
+  });
+  save(); return {n:n, gone:gone};
+}
+function undoFinish(gone){
+  var t=now();
+  gone.forEach(function(it){ var c=Object.assign({},it,{u:t+1}); S.items[c.id]=c; delete S.del[c.id]; });
+  save();
+}
+function usualsMissing(){
+  var on={}; Object.keys(S.items).forEach(function(id){ on[norm(S.items[id].name)]=1; });   // ticked counts: it is in the basket
+  return Object.keys(S.known).filter(function(k){ return S.known[k].usual && !on[k]; })
+    .map(function(k){ return S.known[k]; })
+    .sort(function(a,b){ return S.order.indexOf(a.cat)-S.order.indexOf(b.cat) || a.name.localeCompare(b.name); });
+}
+function suggestions(q){
+  q=norm(q); if(q.length<2) return [];
+  var on={}; Object.keys(S.items).forEach(function(id){ if(!S.items[id].done) on[norm(S.items[id].name)]=1; });
+  return Object.keys(S.known).filter(function(k){ return !on[k] && k.indexOf(q)>=0 && k!==q; })
+    .map(function(k){ return S.known[k]; })
+    .sort(function(a,b){ var ap=norm(a.name).indexOf(q)===0?0:1, bp=norm(b.name).indexOf(q)===0?0:1;
+      return ap-bp || (b.n||0)-(a.n||0) || a.name.localeCompare(b.name); })
+    .slice(0,6);
+}
+function grouped(filter){
+  var g={}; Object.keys(S.items).forEach(function(id){ var it=S.items[id]; if(filter && !filter(it)) return; (g[it.cat]=g[it.cat]||[]).push(it); });
+  return S.order.filter(function(c){ return g[c]; }).map(function(c){
+    return {cat:c, items:g[c].sort(function(a,b){ return (a.done-b.done) || (a.at||0)-(b.at||0); })};
+  });
+}
+function listText(){
+  var lines=['Shopping list'];
+  grouped(function(it){ return !it.done; }).forEach(function(gr){
+    lines.push('', CAT_BY[gr.cat].l.toUpperCase());
+    gr.items.forEach(function(it){ lines.push('• '+it.name+(it.qty>1?' ×'+it.qty:'')+(it.note?' ('+it.note+')':'')); });
+  });
+  return lines.join('\n');
+}
+
+/* ═══════════════════════ RENDER ═══════════════════════ */
+function $(s){ return document.querySelector(s); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+var TICK='<svg viewBox="0 0 24 24" fill="none" stroke="#0D1B3E" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+var VIEW='list';
+function rowHtml(it, mode){
+  var kn=S.known[norm(it.name)];
+  return '<button class="row'+(it.done?' done':'')+'" data-id="'+esc(it.id)+'" data-mode="'+mode+'">'
+    +'<span class="box">'+TICK+'</span>'
+    +'<span class="nm">'+esc(it.name)+(it.note?'<span class="nt">'+esc(it.note)+'</span>':'')+'</span>'
+    +(mode==='list'&&kn&&kn.usual?'<span class="star" aria-label="usual">★</span>':'')
+    +(it.qty>1?'<span class="q">×'+it.qty+'</span>':'')
+    +'</button>';
+}
+function counts(){ var t=0,d=0; Object.keys(S.items).forEach(function(id){ t++; if(S.items[id].done) d++; }); return {t:t,d:d,left:t-d}; }
+function render(){
+  var c=counts();
+  /* LIST */
+  var gs=grouped();
+  $('#listBody').innerHTML = gs.length ? gs.map(function(gr){
+      var left=gr.items.filter(function(i){return !i.done;}).length;
+      return '<div class="aisle"><div class="aisle-h"><span class="t">'+esc(CAT_BY[gr.cat].l)+'</span><span class="n">'+(left||'✓')+'</span></div>'
+        +'<div class="rows">'+gr.items.map(function(it){ return rowHtml(it,'list'); }).join('')+'</div></div>';
+    }).join('')
+    : '<div class="empty"><b>The list is empty.</b>Type above to add things. Tap an item to change its aisle, quantity or note, or to make it a usual. Tap its box to tick it off.</div>';
+  var um=usualsMissing();
+  $('#usualsWrap').hidden=!um.length;
+  $('#usuals').innerHTML = um.length ? (um.length>1?'<button class="chip all" data-usual-all="1">+ All '+um.length+'</button>':'')
+    + um.map(function(k){ return '<button class="chip" data-add="'+esc(k.name)+'"><b>+</b>'+esc(k.name)+'</button>'; }).join('') : '';
+  /* SHOP */
+  var todo=grouped(function(it){ return !it.done; });
+  var pct=c.t?Math.round(c.d/c.t*100):0;
+  $('#prog').innerHTML = c.t
+    ? '<div class="lbl"><span><span class="big">'+c.left+'</span> left</span><span class="hint">'+c.d+' of '+c.t+' in the basket</span></div><div class="bar"><i style="width:'+pct+'%"></i></div>'
+    : '';
+  $('#shopBody').innerHTML = todo.length ? todo.map(function(gr){
+      return '<div class="aisle"><div class="aisle-h"><span class="t">'+esc(CAT_BY[gr.cat].l)+'</span><span class="n">'+gr.items.length+'</span></div>'
+        +'<div class="rows">'+gr.items.map(function(it){ return rowHtml(it,'shop'); }).join('')+'</div></div>';
+    }).join('')
+    : (c.t ? '<div class="empty"><b>Everything is in the basket.</b>Tap Finish shop when you are done.</div>'
+           : '<div class="empty"><b>Nothing to shop for.</b>Add items on the List tab first.</div>');
+  var inB=[]; Object.keys(S.items).forEach(function(id){ if(S.items[id].done) inB.push(S.items[id]); });
+  inB.sort(function(a,b){ return (b.u||0)-(a.u||0); });
+  $('#basketWrap').hidden=!inB.length;
+  $('#basketH').textContent='In the basket · '+inB.length;
+  $('#basket').innerHTML=inB.map(function(it){ return rowHtml(it,'shop'); }).join('');
+  if(!_finishArmed) $('#finishBtn').textContent='Finish shop · clear '+inB.length;
+  /* SETUP */
+  $('#orderList').innerHTML=S.order.map(function(id,i){
+    return '<div class="order-row"><span class="t">'+esc(CAT_BY[id].l)+'</span>'
+      +'<button data-mv="'+id+'" data-dir="-1" aria-label="Move '+esc(CAT_BY[id].l)+' up"'+(i===0?' disabled':'')+'>▲</button>'
+      +'<button data-mv="'+id+'" data-dir="1" aria-label="Move '+esc(CAT_BY[id].l)+' down"'+(i===S.order.length-1?' disabled':'')+'>▼</button></div>';
+  }).join('');
+  renderSync(); renderDiag();
+  /* header */
+  var sub=$('#hSub');
+  if(VIEW==='shop'){ sub.textContent=c.t?(c.left+' to find'):'Empty'; sub.className='sub'; }
+  else { var ss=syncSummary(); sub.textContent=(c.left?c.left+' on the list · ':'')+ss.short; sub.className='sub'+(ss.bad?' bad':''); }
+}
+function renderSuggest(){
+  var q=$('#addIn').value, sg=suggestions(q), el=$('#suggest');
+  el.hidden=!sg.length;
+  el.innerHTML=sg.map(function(k){ return '<button class="chip" data-add="'+esc(k.name)+'"><b>+</b>'+esc(k.name)+'</button>'; }).join('');
+}
+function go(v){
+  VIEW=v;
+  ['list','shop','setup'].forEach(function(x){ $('#v-'+x).hidden=(x!==v); });
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(t){ if(t.dataset.go===v) t.setAttribute('aria-current','page'); else t.removeAttribute('aria-current'); });
+  $('#hTitle').textContent = v==='shop'?'In the shop':v==='setup'?'Setup':'The Larder';
+  window.scrollTo(0,0);
+  render();
+}
+
+/* ═══════════════════════ TOAST (undo, never a browser dialog) ═══════════════════════ */
+var _toastT=null, _toastFn=null;
+function toast(msg, actLabel, fn){
+  $('#toastMsg').textContent=msg; _toastFn=fn||null;
+  $('#toastAct').hidden=!fn; $('#toastAct').textContent=actLabel||'Undo';
+  $('#toast').hidden=false;
+  clearTimeout(_toastT); _toastT=setTimeout(function(){ $('#toast').hidden=true; _toastFn=null; }, fn?6000:2600);
+}
+
+/* ═══════════════════════ EDIT SHEET ═══════════════════════ */
+var _editId=null, _eQty=1, _delArmed=false;
+function openSheet(id){
+  var it=S.items[id]; if(!it) return; _editId=id; _eQty=it.qty||1; _delArmed=false;
+  var kn=S.known[norm(it.name)]||{};
+  $('#eName').value=it.name; $('#eNote').value=it.note||''; $('#eQty').textContent=_eQty;
+  $('#eCat').innerHTML=S.order.map(function(c){ return '<option value="'+c+'"'+(c===it.cat?' selected':'')+'>'+esc(CAT_BY[c].l)+'</option>'; }).join('');
+  $('#eUsual').setAttribute('aria-checked', kn.usual?'true':'false');
+  $('#eDel').textContent='Remove';
+  $('#scrim').hidden=false; $('#sheet').hidden=false;
+}
+function closeSheet(saveIt){
+  if(saveIt && _editId && S.items[_editId]){
+    updateItem(_editId,{name:$('#eName').value, qty:_eQty, note:$('#eNote').value, cat:$('#eCat').value,
+                        usual:$('#eUsual').getAttribute('aria-checked')==='true'});
+  }
+  _editId=null; $('#scrim').hidden=true; $('#sheet').hidden=true; render();
+}
+
+/* ═══════════════════════ WAKE LOCK ═══════════════════════
+   Requested synchronously inside the tap — the Roadcraft lesson: iOS only honours permission-ish
+   requests made in the gesture, and an await in front spends it. The switch reports what
+   actually happened, never what we hoped. */
+var _wake=null, _wantWake=false;
+function wakeOn(){
+  if(!('wakeLock' in navigator)){ wakeNote('This phone does not offer it — set Auto-Lock longer in Settings › Display instead.', true); setWakeSw(false); _wantWake=false; return; }
+  try{
+    navigator.wakeLock.request('screen').then(function(l){
+      _wake=l; setWakeSw(true); wakeNote('On — the screen will stay lit while this is open.');
+      l.addEventListener('release',function(){ _wake=null; if(!_wantWake){ setWakeSw(false); wakeNote("So it doesn't lock between aisles."); } });
+    }).catch(function(e){ _wantWake=false; setWakeSw(false); wakeNote('Refused by the phone: '+(e&&e.name||'unknown')+'. Low Power Mode blocks it.', true); });
+  }catch(e){ _wantWake=false; setWakeSw(false); wakeNote('Failed: '+e.message, true); }
+}
+function wakeOff(){ _wantWake=false; if(_wake){ try{ _wake.release(); }catch(_){} } _wake=null; setWakeSw(false); wakeNote("So it doesn't lock between aisles."); }
+function setWakeSw(on){ $('#wakeSw').setAttribute('aria-checked',on?'true':'false'); }
+function wakeNote(t,bad){ var el=$('#wakeNote'); el.textContent=t; el.style.color=bad?'var(--stop)':''; }
+
+/* ═══════════════════════ THE GIST ═══════════════════════
+   Own file, larder.json, in the personal gist — the own-file pattern the other standalone rooms
+   use. A PATCH that names only this file leaves every other file in the gist untouched, so this
+   app can never overwrite the Hub. Pull, merge by id, push; one request in flight at a time. */
+var G_ID='connolly-sync:gist-id', G_TOK='connolly-sync:token', G_FILE='larder.json';
+var _gInFlight=false, _gDirty=false, _gTimer=null;
+var SY={lastOk:0, lastErr:'', lastErrAt:0, lastTry:0};
+try{ var _sy=JSON.parse(localStorage.getItem(LS_SYNC)||'null'); if(_sy) SY=Object.assign(SY,_sy); }catch(_){}
+function sySave(){ try{ localStorage.setItem(LS_SYNC, JSON.stringify(SY)); }catch(_){} }
+function gCreds(){ try{ var i=localStorage.getItem(G_ID), t=localStorage.getItem(G_TOK); return (i&&t)?{id:i,token:t}:null; }catch(_){ return null; } }
+function gHeaders(tk){ return {'Authorization':'Bearer '+tk,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}; }
+function explain(status, e){
+  if(status===401||status===403) return 'GitHub refused the token. It needs gist access, or it has expired.';
+  if(status===404) return 'Gist not found — check the gist ID, and that the token can see it.';
+  if(status===409) return 'GitHub was busy with another write (409). Will retry.';
+  if(status===422) return 'GitHub rejected the file (422).';
+  if(status) return 'GitHub said '+status+'.';
+  if(typeof navigator!=='undefined' && navigator.onLine===false) return 'No signal. Changes are saved on this phone and will sync when you are back online.';
+  return 'Could not reach GitHub'+(e&&e.message?' ('+e.message+')':'')+'.';
+}
+function gFetchRemote(c){
+  return fetch('https://api.github.com/gists/'+c.id,{headers:gHeaders(c.token),cache:'no-store'})
+    .then(function(r){ if(!r.ok){ var e=new Error('http'); e.status=r.status; throw e; } return r.json(); })
+    .then(function(j){
+      var f=j.files&&j.files[G_FILE]; if(!f) return null;               // first run: no file yet, not an error
+      return (f.truncated&&f.raw_url) ? fetch(f.raw_url,{cache:'no-store'}).then(function(x){ return x.text(); }) : f.content;
+    })
+    .then(function(raw){ if(raw==null) return null; var o=JSON.parse(raw||'{}'); return sanitise(o); });
+}
+function syncFail(e){
+  SY.lastErr=explain(e&&e.status, e); SY.lastErrAt=now(); sySave(); render();
+}
+function gPull(cb){
+  var c=gCreds(); if(!c){ if(cb) cb(false); return; }
+  SY.lastTry=now();
+  gFetchRemote(c).then(function(remote){
+    if(remote){ S=merge(S, remote); saveLocal(); }
+    SY.lastOk=now(); SY.lastErr=''; sySave();
+    if(cb) cb(true); else render();
+  }).catch(function(e){ syncFail(e); if(cb) cb(false); });
+}
+function gPush(){
+  var c=gCreds(); if(!c) return;
+  if(_gInFlight){ _gDirty=true; return; }
+  _gInFlight=true; SY.lastTry=now();
+  gFetchRemote(c).then(function(remote){
+    if(remote) S=merge(S, remote);
+    saveLocal();
+    var body={files:{}}; body.files[G_FILE]={content:JSON.stringify({v:1, items:S.items, del:S.del, known:S.known, order:S.order, orderU:S.orderU,
+      savedAt:new Date().toISOString(), by:BUILD})};
+    return fetch('https://api.github.com/gists/'+c.id,{method:'PATCH',headers:gHeaders(c.token),body:JSON.stringify(body)});
+  }).then(function(r){
+    if(r && !r.ok){ var e=new Error('http'); e.status=r.status; throw e; }
+    SY.lastOk=now(); SY.lastErr=''; sySave();
+  }).catch(function(e){
+    syncFail(e);
+    if(e && e.status===409){ _gDirty=true; }
+  }).then(function(){
+    _gInFlight=false; render();
+    if(_gDirty){ _gDirty=false; setTimeout(gPush,1500); }
+  });
+}
+function gSchedule(){ if(!gCreds()) return; clearTimeout(_gTimer); _gTimer=setTimeout(gPush,1500); }
+function ago(t){
+  if(!t) return 'never'; var s=Math.round((now()-t)/1000);
+  if(s<60) return 'just now'; if(s<3600) return Math.round(s/60)+' min ago';
+  var d=new Date(t), td=new Date(); var hm=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+  return d.toDateString()===td.toDateString()?'at '+hm:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+hm;
+}
+function syncSummary(){
+  if(!_storeOk) return {short:'Not saving!', bad:true};
+  if(!gCreds()) return {short:'This phone only', bad:false};
+  if(SY.lastErr && SY.lastErrAt>=SY.lastOk) return {short:'Sync failed', bad:true};
+  return {short:SY.lastOk?'Synced '+ago(SY.lastOk):'Not synced yet', bad:false};
+}
+function renderSync(){
+  var c=gCreds(), dot=$('#syncDot'), h=$('#syncHead'), d=$('#syncDetail');
+  if(!_storeOk){ dot.className='dot stop'; h.textContent='This phone is not saving the list'; d.textContent='Its storage refused the write. Check Settings › Safari › Advanced, or free some space.'; return; }
+  if(!c){ dot.className='dot warn'; h.textContent='Not connected — this phone only';
+    d.textContent='The list is saved on this phone. Connect below so it is backed up and shows on your other devices.'; $('#syncNow').hidden=true; $('#cfgForget').hidden=true; return; }
+  $('#syncNow').hidden=false; $('#cfgForget').hidden=false;
+  if(SY.lastErr && SY.lastErrAt>=SY.lastOk){ dot.className='dot stop'; h.textContent='Sync failed '+ago(SY.lastErrAt); d.textContent=SY.lastErr+(SY.lastOk?' Last good sync '+ago(SY.lastOk)+'.':''); return; }
+  dot.className='dot go'; h.textContent=SY.lastOk?'Synced '+ago(SY.lastOk):'Connected, not synced yet';
+  d.textContent='Gist '+c.id.slice(0,8)+'… · file larder.json';
+}
+var _diag=[];
+function diagNote(t){ _diag.push(new Date().toISOString().slice(11,19)+' '+t); if(_diag.length>8) _diag.shift(); }
+function renderDiag(){
+  var c=counts(), standalone=(window.navigator.standalone===true)||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+  $('#diag').textContent=[
+    'build      '+BUILD,
+    'installed  '+(standalone?'yes (home screen)':'no — running in the browser'),
+    'items      '+c.t+' ('+c.d+' ticked) · known '+Object.keys(S.known).length+' · tombstones '+Object.keys(S.del).length,
+    'storage    '+(_storeOk?'ok':'FAILING'),
+    'sync       '+(gCreds()?'connected':'not connected')+' · last ok '+ago(SY.lastOk)+(SY.lastErr?' · last error: '+SY.lastErr:''),
+    'wake lock  '+(('wakeLock' in navigator)?'supported':'not supported')+(_wake?' · held':''),
+    'worker     '+(('serviceWorker' in navigator)?(navigator.serviceWorker.controller?'active (works offline)':'registering'):'unsupported')
+  ].concat(_diag).join('\n');
+}
+
+/* ═══════════════════════ WIRING ═══════════════════════ */
+var _finishArmed=false, _finishT=null;
+function wire(){
+  $('#addForm').addEventListener('submit',function(e){
+    e.preventDefault(); var v=$('#addIn').value; if(!v.trim()) return;
+    var it=addItem(v); $('#addIn').value=''; renderSuggest(); render();
+    if(it) toast('Added '+it.name+' to '+CAT_BY[it.cat].l, 'Change', function(){ openSheet(it.id); });
+  });
+  $('#addIn').addEventListener('input', renderSuggest);
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('[data-add],[data-usual-all],.row,[data-mv],.tab'); if(!t) return;
+    if(t.dataset.add!=null){ var it=addItem(t.dataset.add,{fromUsual:true}); $('#addIn').value=''; renderSuggest(); render(); if(it) toast('Added '+it.name); return; }
+    if(t.dataset.usualAll){ var um=usualsMissing(); um.forEach(function(k){ addItem(k.name,{fromUsual:true}); }); render(); toast('Added '+um.length+' usuals'); return; }
+    if(t.dataset.go){ go(t.dataset.go); return; }
+    if(t.dataset.mv){
+      var i=S.order.indexOf(t.dataset.mv), j=i+(+t.dataset.dir);
+      if(j<0||j>=S.order.length) return;
+      var tmp=S.order[i]; S.order[i]=S.order[j]; S.order[j]=tmp; S.orderU=now(); save(); render(); return;
+    }
+    if(t.classList.contains('row')){
+      var id=t.dataset.id;
+      if(t.dataset.mode==='shop'){
+        var was=S.items[id]&&S.items[id].done; setDone(id,!was); render();
+        if(!was){ var nm=S.items[id]&&S.items[id].name; toast(nm+' in the basket','Undo',function(){ setDone(id,false); render(); }); }
+      } else if(e.target.closest('.box')){ setDone(id, !(S.items[id]&&S.items[id].done)); render(); }
+      else openSheet(id);
+    }
+  });
+  $('#scrim').addEventListener('click',function(){ closeSheet(true); });
+  $('#eDone').addEventListener('click',function(){ closeSheet(true); });
+  $('#eMinus').addEventListener('click',function(){ _eQty=Math.max(1,_eQty-1); $('#eQty').textContent=_eQty; });
+  $('#ePlus').addEventListener('click',function(){ _eQty=Math.min(99,_eQty+1); $('#eQty').textContent=_eQty; });
+  $('#eUsual').addEventListener('click',function(){ var b=$('#eUsual'); b.setAttribute('aria-checked', b.getAttribute('aria-checked')==='true'?'false':'true'); });
+  $('#eDel').addEventListener('click',function(){
+    if(!_delArmed){ _delArmed=true; $('#eDel').textContent='Tap again'; return; }
+    var it=S.items[_editId]; var copy=it?Object.assign({},it):null;
+    removeItem(_editId); _editId=null; closeSheet(false);
+    if(copy) toast('Removed '+copy.name,'Undo',function(){ copy.u=now(); S.items[copy.id]=copy; delete S.del[copy.id]; save(); render(); });
+  });
+  $('#finishBtn').addEventListener('click',function(){
+    /* Two taps, never a confirm() dialog — a native dialog blocks the page on iOS. */
+    if(!_finishArmed){ _finishArmed=true; $('#finishBtn').textContent='Tap again to clear the basket';
+      clearTimeout(_finishT); _finishT=setTimeout(function(){ _finishArmed=false; render(); },4000); return; }
+    _finishArmed=false; clearTimeout(_finishT);
+    var r=finishShop(); wakeOff(); render();
+    toast('Shop finished — '+r.n+' cleared','Undo',function(){ undoFinish(r.gone); render(); });
+  });
+  $('#wakeSw').addEventListener('click',function(){
+    if($('#wakeSw').getAttribute('aria-checked')==='true') wakeOff(); else { _wantWake=true; wakeOn(); }
+  });
+  $('#toastAct').addEventListener('click',function(){ var f=_toastFn; $('#toast').hidden=true; _toastFn=null; if(f) f(); });
+  $('#shareBtn').addEventListener('click',function(){
+    var txt=listText(), m=$('#shareMsg');
+    if(navigator.share){ navigator.share({text:txt}).catch(function(){}); return; }
+    if(navigator.clipboard){ navigator.clipboard.writeText(txt).then(function(){ m.hidden=false; m.textContent='Copied — paste it wherever you like.'; },
+      function(){ m.hidden=false; m.textContent='Could not copy on this device.'; }); }
+  });
+  $('#syncNow').addEventListener('click',function(){ $('#syncHead').textContent='Syncing…'; gPush(); });
+  $('#cfgSave').addEventListener('click',function(){
+    var id=$('#cfgId').value.trim().replace(/^.*gist\.github\.com\/[^/]+\//,'').replace(/[^a-f0-9]/gi,''), tk=$('#cfgTok').value.trim(), btn=$('#cfgSave');
+    var er=$('#cfgErr'), ok=$('#cfgOk'); er.hidden=true; ok.hidden=true;
+    if(!id||!tk){ er.hidden=false; er.textContent='Both the gist ID and the token are needed.'; return; }
+    btn.disabled=true; btn.textContent='Checking…';
+    /* Verify BEFORE storing. "Connected" on an untested token is how the Wireless never synced. */
+    fetch('https://api.github.com/gists/'+id,{headers:gHeaders(tk),cache:'no-store'}).then(function(r){
+      if(!r.ok){ var e=new Error('http'); e.status=r.status; throw e; }
+      try{ localStorage.setItem(G_ID,id); localStorage.setItem(G_TOK,tk); }catch(_){}
+      $('#cfgTok').value=''; ok.hidden=false; ok.textContent='Connected. Syncing now.';
+      gPush();
+    }).catch(function(e){ er.hidden=false; er.textContent=explain(e&&e.status,e); })
+      .then(function(){ btn.disabled=false; btn.textContent='Check and connect'; render(); });
+  });
+  $('#cfgForget').addEventListener('click',function(){
+    try{ localStorage.removeItem(G_ID); localStorage.removeItem(G_TOK); }catch(_){}
+    SY={lastOk:0,lastErr:'',lastErrAt:0,lastTry:0}; sySave(); $('#cfgOk').hidden=false; $('#cfgOk').textContent='Disconnected. The list stays on this phone.'; render();
+  });
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden) return;
+    gPull(function(){ render(); });
+    if(_wantWake && !_wake) wakeNote('Paused when the app was in the background — tap the switch to turn it back on.', true), setWakeSw(false), _wantWake=false;
+  });
+  window.addEventListener('online',function(){ gPush(); });
+  setInterval(function(){ if(!document.hidden) renderSync(); },30000);
+}
+
+function boot(){
+  loadLocal();
+  var c=gCreds(); if(c) $('#cfgId').value=c.id;
+  wire(); go('list');
+  if(Object.keys(S.items).length) { /* open on Shop if the list already has things and you are probably in the shop */ }
+  gPull(function(){ render(); });
+  if('serviceWorker' in navigator && location.protocol.indexOf('http')===0) navigator.serviceWorker.register('./sw.js').then(function(){ setTimeout(renderDiag,1500); }).catch(function(e){ diagNote('worker failed: '+e.message); });
+}
+boot();
+
+/* For the test harness. */
+window.__larder={ get S(){ return S; }, set S(v){ S=v; }, merge:merge, guessCat:guessCat, parseEntry:parseEntry, addItem:addItem,
+  setDone:setDone, removeItem:removeItem, updateItem:updateItem, finishShop:finishShop, undoFinish:undoFinish,
+  usualsMissing:usualsMissing, suggestions:suggestions, grouped:grouped, listText:listText, explain:explain,
+  render:render, go:go, fresh:fresh, BUILD:BUILD, CATS:CATS };
+</script>
+</body>
+</html>
