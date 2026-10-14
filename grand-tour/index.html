@@ -1,0 +1,1076 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Grand Tour">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0D1B3E">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<title>The Grand Tour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+</head>
+<body>
+<style>
+/* ══════════════════════ ESTATE CHROME (as the Garage and the Larder) ══════════════════════ */
+.estate-strip{display:flex;align-items:center;gap:9px;padding:9px 16px 8px;background:#0D1B3E;padding-top:calc(9px + env(safe-area-inset-top,0px))}
+.estate-strip .em-house{height:13px;width:auto;flex:none;opacity:1}
+.estate-strip .em-dept{font-family:Montserrat,-apple-system,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C4F000;line-height:1}
+
+/* ══════════════════════ TOKENS ══════════════════════ */
+:root{
+  --bg:#0D1B3E; --surface:#12224A; --surface-2:#172954; --mid:#1A3A6B;
+  --ink:#FFFFFF; --ink-2:#D6DEEE; --muted:#9FB0CE;
+  --line:#24467e; --line-strong:#3159A0;
+  --go:#C4F000; --go-soft:#1B3418; --go-ink:#DCF95E;
+  --warn:#F2B23C; --warn-soft:#3A2C10;
+  --stop:#FF7A6E; --stop-soft:#3D1B18;
+  --data:#7FB6F0;
+  --shadow:0 1px 2px rgba(0,0,0,.45), 0 6px 20px -12px rgba(0,0,0,.8);
+  --radius:14px;
+  --f:"Montserrat","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none !important}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:16px;line-height:1.45;
+     -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;text-size-adjust:100%;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px));overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none;text-align:left;padding:0}
+input,select{font:inherit;color:inherit;font-size:16px}
+:focus-visible{outline:2px solid var(--data);outline-offset:2px;border-radius:6px}
+.wrap{max-width:540px;margin:0 auto;padding:0 16px}
+h1{font-size:20px;font-weight:800;margin:0;letter-spacing:-.015em}
+h2{font-size:13px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:22px 0 8px}
+p{margin:0 0 .8em}
+.hint{font-size:14.5px;line-height:1.5;color:var(--muted)}
+.sbar{position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:25}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);
+  backdrop-filter:saturate(160%) blur(12px);-webkit-backdrop-filter:saturate(160%) blur(12px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:540px;margin:0 auto;padding:6px 16px 10px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.topbar .sub{font-size:13.5px;color:var(--muted);font-weight:600;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sub.bad{color:var(--stop)}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--surface) 96%,transparent);
+  backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabbar-in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 8px;min-height:54px;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.03em;text-align:center}
+.tab svg{width:22px;height:22px}
+.tab[aria-current="page"]{color:var(--go)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.pad{padding:14px 16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 18px;border-radius:12px;background:var(--go);color:var(--bg);font-weight:800;font-size:16px;text-align:center}
+.btn.ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line-strong);font-weight:700}
+.btn.danger{background:var(--stop-soft);color:var(--stop);border:1px solid #6b2a24}
+.btn.wide{width:100%}
+.btn[disabled]{opacity:.5}
+.btnrow{display:flex;gap:8px;margin-top:10px}
+.btnrow .btn{flex:1;min-width:0;padding:0 8px;font-size:15px}
+.fl{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:0 0 6px}
+.in{width:100%;min-height:48px;padding:10px 14px;border-radius:12px;border:1px solid var(--line-strong);background:var(--bg);color:var(--ink);font-size:17px;outline:none}
+.in:focus{border-color:var(--go)}
+
+/* segmented choices */
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;border-radius:12px;background:var(--bg);border:1px solid var(--line-strong)}
+.seg button{min-height:40px;border-radius:9px;text-align:center;font-weight:700;font-size:14px;color:var(--muted);padding:0 4px}
+.seg button[aria-pressed="true"]{background:var(--go);color:var(--bg)}
+.choice{margin-top:12px}
+.choice .fl{display:flex;justify-content:space-between}
+.choice .fl span{font-weight:600;color:var(--muted);opacity:.85}
+
+/* places */
+.place{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px 10px 8px 14px;border-top:1px solid var(--line)}
+.place:first-child{border-top:none}
+.pin{flex:none;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;background:var(--surface-2);border:2px solid var(--line-strong);color:var(--ink-2)}
+.pin.s{background:var(--go);border-color:var(--go);color:var(--bg)}
+.pin.f{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.place .nm{flex:1;min-width:0}
+.place .nm b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.place .nm span{display:block;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.place .x{flex:none;width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:20px}
+.place.unset .nm b{color:var(--muted);font-weight:600}
+.results{border-top:1px solid var(--line)}
+.res{display:block;width:100%;padding:11px 14px;border-top:1px solid var(--line);min-height:48px}
+.res:first-child{border-top:none}
+.res b{display:block;font-weight:700}
+.res span{font-size:13px;color:var(--muted)}
+.searchbox{padding:10px 12px;border-top:1px solid var(--line);background:var(--surface-2)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:40px;padding:8px 13px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line-strong);color:var(--ink-2);font-size:14.5px;font-weight:700}
+.chip[aria-pressed="true"]{background:var(--go);border-color:var(--go);color:var(--bg)}
+
+/* map + result */
+.map{position:relative;z-index:0;isolation:isolate;height:340px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);background:#dfe5ec;margin-top:14px}
+.leaflet-container{font-family:var(--f)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--go-ink);line-height:1.1}
+.stat span{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.mix{display:flex;height:14px;border-radius:99px;overflow:hidden;margin:12px 0 8px;background:var(--surface-2)}
+.mix i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.verdict{font-size:16px;line-height:1.5;color:var(--ink-2);margin-top:12px}
+.verdict b{color:var(--ink)}
+.bad-route{color:var(--warn)}
+.err{color:var(--stop);font-size:14.5px;margin-top:8px}
+.ok{color:var(--go-ink);font-size:14.5px;margin-top:8px}
+.spinner{display:inline-block;width:18px;height:18px;border:3px solid rgba(13,27,62,.3);border-top-color:var(--bg);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* saved drives */
+.drive{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:12px 14px;border-top:1px solid var(--line)}
+.drive:first-child{border-top:none}
+.drive .nm{flex:1;min-width:0}
+.drive .nm b{display:block;font-weight:700}
+.drive .nm span{display:block;font-size:13.5px;color:var(--muted)}
+.drive .go{flex:none;color:var(--go-ink);font-weight:800}
+.empty{margin-top:28px;text-align:center;color:var(--muted);font-size:15.5px;padding:0 20px}
+.empty b{display:block;color:var(--ink);font-size:18px;margin-bottom:6px}
+
+/* ══════════════════════ DRIVE MODE ══════════════════════ */
+#drive{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;flex-direction:column}
+#dmap{flex:1;min-height:0;background:#dfe5ec;position:relative;z-index:0;isolation:isolate}
+.dtop{padding:calc(10px + env(safe-area-inset-top,0px)) 16px 12px;background:var(--bg);display:flex;gap:14px;align-items:center;border-bottom:1px solid var(--line)}
+.arrow{flex:none;width:64px;height:64px;border-radius:16px;background:var(--go);display:flex;align-items:center;justify-content:center}
+.arrow svg{width:46px;height:46px}
+.dnext{flex:1;min-width:0}
+.dnext .d{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.dnext .t{font-size:17px;font-weight:700;color:var(--ink-2);margin-top:4px}
+.offroute{background:var(--warn-soft);color:var(--warn);padding:10px 16px;display:flex;align-items:center;gap:12px;font-weight:700;border-bottom:1px solid #6b5420}
+.offroute .btn{min-height:40px;font-size:14.5px;background:var(--warn);color:var(--bg)}
+.dbot{padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--line)}
+.dstats{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px}
+.dstats div{text-align:center;flex:1}
+.dstats b{display:block;font-size:22px;font-weight:800}
+.dstats span{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+.dbtns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.dbtns .btn{min-height:50px;font-size:15px;padding:0 6px}
+.dnote{font-size:13px;color:var(--muted);text-align:center;margin-top:8px}
+.me{width:20px;height:20px;border-radius:50%;background:#2A7BFF;border:3px solid #fff;box-shadow:0 0 0 2px rgba(0,0,0,.25)}
+
+.diag{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:12.5px;color:var(--muted);white-space:pre-wrap;word-break:break-all}
+.statline{display:flex;gap:10px;align-items:flex-start}
+.dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:6px;background:var(--muted)}
+.dot.go{background:var(--go)} .dot.stop{background:var(--stop)} .dot.warn{background:var(--warn)}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:90;max-width:508px;margin:0 auto;background:var(--mid);border:1px solid var(--line-strong);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);font-weight:600}
+.toast .msg{flex:1}
+.toast button{color:var(--go-ink);font-weight:800;min-height:36px}
+details summary{list-style:none}
+details summary::-webkit-details-marker{display:none}
+</style>
+
+<div class="sbar" aria-hidden="true"></div>
+<div class="estate-strip" aria-hidden="true"><img class="em-house" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAABGCAMAAAAdMRrrAAADAFBMVEUAAAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABnduxjAAAAAXRSTlMAQObYZgAAAmlJREFUeNrtmtt2hCAMRU/+/6fbNZ2qQLgkBARNXuoqKrDnkAsIzDAikPgZ1VPLGn1MA4FeD4EcgkN4FASyMUewNwYyNUewGQYaA+CLYRMYNN4cwpNSh0cbkUvh4xivTowuYD7FZIgqxHZxrVmegPuETZTgEBzCCQGJR0D6j8N3INeSe9smEMAMuzbV9pbdlECIE19kLriW8O9VNG9RAh6nBKBHCdhRCR4d9ofAdSHqdikI/M3VVzwLQmbocyEc5RSCQBeGPYpuOc6e4rdgTwivVsIyeQJ/b+UVJuzt8gT05gkaMRk55GWUoFlTFgsx+9vNV4LGs9i4o3WUoPGvRk45O4/ZEBRhRh+a6NwcpXkhMupVG6pV0T2YOhEyB2WjIRShiLIVVYYTbqvTPRCqU5I/Ixx4LfLMF0LYkBkeci0D8tx7lTCvNh/Q/f27DfQwgwabso9vdfL/iu/lvHkGfV99QQeEwgXFJyh0hMggOKWJTz1ZCvZ6BMnS2eG17z8a3KFPevoTtKHOLz07qEGg1pMVtOSS1AABAQTZKhmrhLbjJU1CXYHQqwTGSyTLbXkI7HcNBfcGVRSyWg40bTmYRgdbx6ht2QCCMLVRV5EO4WkQsAgE0xDZmtgqc/f2EFmaFRcimaBZhaDOepHRoYwhQyYuqJMfksoQZEpgqnXBl44o4Omp/sZBSLTFVKxCIaCmEU3VHFdX8uXQVbOLV4MRBHYg86IDy6B1OZQhyNYBc/o4ZT8BXQxqELopTIHQyUB1MiShcAcE8dae2R5hbURjdyXHfOOFV5pDYFTrEByCQ3gzhMVClUNwCL/2A4cGHxiWr8/FAAAAAElFTkSuQmCC"><span class="em-dept">Of the Estate</span></div>
+
+<header class="topbar"><div class="topbar-in">
+  <h1 id="hTitle">The Grand Tour</h1>
+  <span class="sub" id="hSub">&mdash;</span>
+</div></header>
+
+<main class="wrap">
+
+<!-- ────────────────────────── PLAN ────────────────────────── -->
+<section class="view" id="v-plan">
+  <div class="seg" style="margin-top:14px" id="modeSeg">
+    <button data-mode="route" aria-pressed="true">Start, vias, finish</button>
+    <button data-mode="loop" aria-pressed="false">A loop from here</button>
+  </div>
+
+  <h2>Where</h2>
+  <div class="card"><div id="places"></div></div>
+
+  <div id="loopOpts" hidden>
+    <h2>How long a drive</h2>
+    <div class="chips" id="durChips">
+      <button class="chip" data-dur="60">1 hour</button><button class="chip" data-dur="90">1½ hours</button>
+      <button class="chip" data-dur="120">2 hours</button><button class="chip" data-dur="180">3 hours</button>
+    </div>
+    <h2>Heading</h2>
+    <div class="chips" id="dirChips">
+      <button class="chip" data-dir="any">Surprise me</button><button class="chip" data-dir="0">North</button><button class="chip" data-dir="45">NE</button>
+      <button class="chip" data-dir="90">East</button><button class="chip" data-dir="135">SE</button><button class="chip" data-dir="180">South</button>
+      <button class="chip" data-dir="225">SW</button><button class="chip" data-dir="270">West</button><button class="chip" data-dir="315">NW</button>
+    </div>
+  </div>
+
+  <h2>The kind of drive</h2>
+  <div class="card"><div class="pad" style="padding-top:4px">
+    <div class="choice"><div class="fl">Country lanes <span id="laneNote"></span></div>
+      <div class="seg" data-knob="lanes"><button data-v="few">Fewer</button><button data-v="some">Some</button><button data-v="lots">Plenty</button></div></div>
+    <div class="choice"><div class="fl">A roads &amp; dual carriageways</div>
+      <div class="seg" data-knob="fast"><button data-v="avoid">Avoid</button><button data-v="some">Occasional</button><button data-v="fine">Fine</button></div></div>
+    <div class="choice"><div class="fl">Big towns</div>
+      <div class="seg" data-knob="towns"><button data-v="avoid">Go round</button><button data-v="fine">Don't mind</button></div></div>
+    <div class="choice"><div class="fl">Pace <span>for the timings only</span></div>
+      <div class="seg" data-knob="pace"><button data-v="gentle">Gentle</button><button data-v="brisk">Brisk</button><button data-v="spirited">Spirited</button></div></div>
+    <p class="hint" style="margin:12px 0 0">Motorways, dirt tracks and private roads are never used unless there is truly no other way.</p>
+  </div></div>
+
+  <button class="btn wide" id="planBtn" style="margin-top:16px">Plan the drive</button>
+  <p class="err" id="planErr" hidden></p>
+
+  <div id="result" hidden>
+    <div class="map" id="map"></div>
+    <div class="stats">
+      <div class="stat"><b id="rMiles">–</b><span>Miles</span></div>
+      <div class="stat"><b id="rTime">–</b><span>About</span></div>
+      <div class="stat"><b id="rTwist">–</b><span id="rTwistL">Bends</span></div>
+    </div>
+    <div class="card" style="margin-top:8px"><div class="pad">
+      <div class="mix" id="rMix"></div>
+      <div class="legend" id="rLegend"></div>
+      <div class="verdict" id="rVerdict"></div>
+    </div></div>
+    <div class="btnrow"><button class="btn" id="driveBtn">Drive it</button><button class="btn ghost" id="altBtn">Another way</button></div>
+    <div class="btnrow"><button class="btn ghost" id="saveBtn">Save</button><button class="btn ghost" id="gpxBtn">GPX file</button><button class="btn ghost" id="gmapBtn">Google Maps</button></div>
+    <p class="hint" style="margin-top:8px" id="gmapNote" hidden>Google Maps gets 8 points along this route, but it re-plans its own roads between them, so it may cut corners onto faster roads. The GPX file is exact — open it in an app such as OsmAnd or Kurviger if you want someone else's sat-nav to follow it.</p>
+  </div>
+</section>
+
+<!-- ────────────────────────── DRIVES (saved) ────────────────────────── -->
+<section class="view" id="v-drives" hidden>
+  <div id="drivesBody"></div>
+</section>
+
+<!-- ────────────────────────── SETUP ────────────────────────── -->
+<section class="view" id="v-setup" hidden>
+  <h2>Home</h2>
+  <div class="card"><div class="pad">
+    <p class="hint">Where drives start and finish unless you say otherwise.</p>
+    <div id="homeShow" style="font-weight:700;margin-bottom:10px">Not set</div>
+    <div style="display:flex;gap:8px"><input class="in" id="homeIn" type="text" placeholder="Postcode or place" autocomplete="off"><button class="btn" id="homeFind" style="flex:none">Find</button></div>
+    <div id="homeRes" class="card" style="margin-top:8px" hidden></div>
+  </div></div>
+
+  <h2>How it chooses roads</h2>
+  <div class="card"><div class="pad hint" style="color:var(--ink-2)">
+    <p>Each kind of road has a price per mile. A B road is the cheapest; a minor road costs 5% more; lanes, A roads and dual carriageways cost more again; motorways cost twenty times as much, and dirt tracks are never used. Roads through woodland or beside water get cheaper, and roads next to busy traffic dearer. The route is the cheapest total — so it will happily go a good deal further to stay on a B road.</p>
+    <p style="margin:0">Routing is done by BRouter (brouter.de) on OpenStreetMap data. It knows the road type, surface, speed limit and lane count, but not road names, so turn instructions give directions without naming roads. Timings are this app's own estimate for a Fiat 124 at the pace you choose, not BRouter's.</p>
+  </div></div>
+
+  <h2>Sync with the estate</h2>
+  <div class="card"><div class="pad">
+    <div class="statline"><span class="dot" id="syncDot"></span><div><div id="syncHead" style="font-weight:700">&mdash;</div><div class="hint" id="syncDetail" style="font-size:14px"></div></div></div>
+    <details id="connect" style="margin-top:12px">
+      <summary style="font-weight:700;min-height:44px;display:flex;align-items:center;cursor:pointer">Connect / change credentials</summary>
+      <p class="hint" style="margin-top:6px">Saved drives go to their own file, <b>grand-tour.json</b>, in the personal gist. It never touches the Hub's file. Enter the gist ID and token once on each device.</p>
+      <label class="fl" for="cfgId">Gist ID</label><input class="in" id="cfgId" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <label class="fl" for="cfgTok" style="margin-top:10px">Token</label><input class="in" id="cfgTok" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <div class="btnrow"><button class="btn" id="cfgSave">Check and connect</button><button class="btn ghost" id="cfgForget">Disconnect</button></div>
+      <p class="err" id="cfgErr" hidden></p><p class="ok" id="cfgOk" hidden></p>
+    </details>
+  </div></div>
+
+  <h2>Diagnostics</h2>
+  <div class="card"><div class="pad"><div class="diag" id="diag"></div></div></div>
+</section>
+</main>
+
+<nav class="tabbar"><div class="tabbar-in">
+  <button class="tab" data-go="plan" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19c3-1 4-5 7-6s6 2 9-1"/><circle cx="4" cy="19" r="1.6" fill="currentColor"/><circle cx="20" cy="12" r="1.6" fill="currentColor"/></svg>Plan</button>
+  <button class="tab" data-go="drives"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Drives</button>
+  <button class="tab" data-go="setup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>Setup</button>
+</div></nav>
+
+<!-- ────────────────────────── DRIVE MODE ────────────────────────── -->
+<div id="drive" hidden>
+  <div class="dtop"><div class="arrow" id="dArrow"></div><div class="dnext"><div class="d" id="dDist">–</div><div class="t" id="dText">Waiting for GPS…</div></div></div>
+  <div class="offroute" id="dOff" hidden><span style="flex:1">Off the planned route</span><button class="btn" id="dRejoin">Rejoin</button></div>
+  <div id="dmap"></div>
+  <div class="dbot">
+    <div class="dstats"><div><b id="dLeft">–</b><span>Miles left</span></div><div><b id="dEta">–</b><span>Arrive</span></div><div><b id="dSpeed">–</b><span>mph</span></div></div>
+    <div class="dbtns"><button class="btn ghost" id="dVoice">Voice on</button><button class="btn ghost" id="dCentre">Re-centre</button><button class="btn danger" id="dEnd">End</button></div>
+    <div class="dnote" id="dNote">Mount the phone before you set off. Don't touch it while driving.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden><span class="msg" id="toastMsg"></span><button id="toastAct">Undo</button></div>
+
+<script>
+'use strict';
+var BUILD='grand-tour 2026-10-04 v1';
+var BROUTER='https://brouter.de/brouter';
+var PROFILE_TEMPLATE="# The Grand Tour \u2014 scenic car profile for The Estate (Mark's Fiat 124 Spider)\n#\n# Lower cost = preferred. A B road costs 1 per metre; everything else is priced relative to it.\n# So with primary_cost 1.45 the router will drive up to ~45% further to stay on a B road\n# rather than take an A road. That is the whole point: not the fastest, not the shortest.\n#\n# The app rewrites the five knob values below before uploading, from the Plan screen's choices.\n\n---context:global\n\nassign downhillcost 0\nassign downhillcutoff 0\nassign uphillcost 0\nassign uphillcutoff 0\n\nassign validForCars 1\nassign validForBikes 0\nassign considerTurnRestrictions true\nassign turnInstructionMode 1\nassign turnInstructionCatchingRange 40\n\n# \u2500\u2500 knobs (rewritten by the app) \u2500\u2500\nassign lane_cost        1.25   # unclassified roads \u2014 the lanes\nassign singletrack_cost 1.7    # lanes tagged one lane wide\nassign dual_cost        1.9    # trunk dual carriageway\nassign primary_cost     1.45   # A roads\nassign town_add         0.8    # extra cost per metre in big towns\nassign scenic_weight    1      # 0 = ignore woods/water/quiet, 1 = full effect\n\n---context:way   # following code refers to way-tags\n\nassign turncost switch junction=roundabout 0 60\n\nassign initialclassifier switch route=ferry 1 0\nassign initialcost switch route=ferry 20000 0\n\nassign isresidentialorliving or highway=residential|living_street living_street=yes\n\nassign motorvehicleaccess\n       switch motor_vehicle=\n              switch vehicle=\n                     switch access=\n                            switch highway=motorway|motorway_link|trunk|trunk_link|primary|primary_link 1\n                            switch highway=secondary|secondary_link|tertiary|tertiary_link|unclassified 1\n                            switch isresidentialorliving 1\n                            switch highway=service 1\n                            switch highway=track 1\n                            0\n                            access=yes|permissive|designated|destination\n                     vehicle=yes|permissive|designated|destination\n              motor_vehicle=yes|permissive|designated|destination\n\nassign caraccess\n       switch motorcar=\n              motorvehicleaccess\n              motorcar=yes|permissive|designated|destination\n\nassign accesspenalty switch caraccess 0 10000\n\nassign onewaypenalty\n       switch switch reversedirection=yes\n                     switch oneway=\n                            junction=roundabout\n                            oneway=yes|true|1\n                     oneway=-1\n              10000\n              0\n\n# Paved means paved. No dirt tracks, ever.\nassign isunpaved surface=unpaved|gravel|ground|dirt|grass|compacted|sand|fine_gravel|earth|mud|pebblestone|grass_paver|clay|rock|stone|wood\nassign ispaved   or surface= surface=asphalt|paved|concrete|paving_stones|sett|cobblestone\nassign surfacepenalty switch isunpaved 10000 0\n\nassign isdual and highway=trunk|trunk_link oneway=yes|true|1\n\nassign base\n       switch highway=motorway|motorway_link                20\n       switch highway=trunk|trunk_link                      switch isdual dual_cost 1.6\n       switch highway=primary|primary_link                  primary_cost\n       switch highway=secondary|secondary_link              1\n       switch highway=tertiary|tertiary_link                1.05\n       switch highway=unclassified                          switch lanes=1 singletrack_cost lane_cost\n       switch highway=residential                           2.5\n       switch highway=living_street                         6\n       switch highway=service                               6\n       switch highway=track                                 switch and tracktype=grade1 ispaved 8 10000\n       10000\n\n# Scenery, from BRouter's pseudo-tags: woods and parkland, water nearby, quiet away from big roads.\nassign forestmult\n       switch estimated_forest_class=6 0.84\n       switch estimated_forest_class=5 0.86\n       switch estimated_forest_class=4 0.88\n       switch estimated_forest_class=3 0.91\n       switch estimated_forest_class=2 0.94\n       switch estimated_forest_class=1 0.97\n       1\nassign rivermult   switch estimated_river_class=3|4|5|6 0.92 1\nassign noisemult   switch estimated_noise_class=4|5|6 1.15 switch estimated_noise_class=3 1.07 1\nassign trafficmult switch estimated_traffic_class=6|7 1.15 switch estimated_traffic_class=5 1.07 1\nassign scenery     multiply forestmult multiply rivermult multiply noisemult trafficmult\nassign scenicmult  add 1 multiply scenic_weight sub scenery 1\n\n# Big towns cost extra; villages and small market towns barely at all.\nassign townpenalty\n       switch estimated_town_class=2|3|4|5|6 town_add\n       switch estimated_town_class=1 multiply 0.25 town_add\n       0\n\nassign costfactor\n       add max onewaypenalty accesspenalty\n       add surfacepenalty\n       add townpenalty\n       multiply base scenicmult\n\n# expose these in the route's WayTags so the app can score the drive\nassign dummyUsage1 = maxspeed=\nassign dummyUsage2 = lanes=\nassign dummyUsage3 = estimated_town_class=\n\n# way priorities used for voice hint generation\nassign priorityclassifier =\n  if      ( highway=motorway                  ) then  30\n  else if ( highway=motorway_link             ) then  29\n  else if ( highway=trunk                     ) then  28\n  else if ( highway=trunk_link                ) then  27\n  else if ( highway=primary                   ) then  26\n  else if ( highway=primary_link              ) then  25\n  else if ( highway=secondary                 ) then  24\n  else if ( highway=secondary_link            ) then  23\n  else if ( highway=tertiary                  ) then  22\n  else if ( highway=tertiary_link             ) then  21\n  else if ( highway=unclassified              ) then  20\n  else if ( isresidentialorliving             ) then  6\n  else if ( highway=service                   ) then  6\n  else if ( highway=track                     ) then if tracktype=grade1 then 4 else 2\n  else 0\n\nassign isbadoneway = not equal onewaypenalty 0\nassign isgoodoneway = if reversedirection=yes then oneway=-1\n                      else if oneway= then junction=roundabout else oneway=yes|true|1\nassign isroundabout = junction=roundabout\nassign islinktype = highway=motorway_link|trunk_link|primary_link|secondary_link|tertiary_link\nassign isgoodforcars = if greater priorityclassifier 6 then true\n                  else if ( or isresidentialorliving highway=service ) then true\n                  else false\n\nassign classifiermask add          isbadoneway\n                      add multiply isgoodoneway   2\n                      add multiply isroundabout   4\n                      add multiply islinktype     8\n                      add multiply isgoodforcars 16\n                          multiply isresidentialorliving 32\n\n---context:node  # following code refers to node tags\n\nassign motorvehicleaccess\n       switch motor_vehicle=\n              switch vehicle=\n                     switch access=\n                            not barrier=gate|bollard|lift_gate|cycle_barrier|block|kissing_gate|stile\n                            access=yes|permissive|designated|destination\n                     vehicle=yes|permissive|designated|destination\n              motor_vehicle=yes|permissive|designated|destination\n\nassign caraccess\n       switch motorcar=\n              motorvehicleaccess\n              motorcar=yes|permissive|designated|destination\n\nassign initialcost\n       switch caraccess\n              switch highway=traffic_signals 120 switch crossing=traffic_signals 60 0\n              1000000\n";
+
+/* ═══════════════════════ SMALL HELPERS ═══════════════════════ */
+function $(s){ return document.querySelector(s); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function now(){ return Date.now(); }
+function uid(){ return now().toString(36)+Math.random().toString(36).slice(2,7); }
+var MI=1609.344, RAD=Math.PI/180;
+function hav(a,b){ // [lat,lon] metres
+  var dl=(b[0]-a[0])*RAD, dn=(b[1]-a[1])*RAD, la=a[0]*RAD, lb=b[0]*RAD;
+  var h=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(la)*Math.cos(lb)*Math.sin(dn/2)*Math.sin(dn/2);
+  return 2*6371008.8*Math.asin(Math.min(1,Math.sqrt(h)));
+}
+function bearing(a,b){
+  var la=a[0]*RAD, lb=b[0]*RAD, dn=(b[1]-a[1])*RAD;
+  var y=Math.sin(dn)*Math.cos(lb), x=Math.cos(la)*Math.sin(lb)-Math.sin(la)*Math.cos(lb)*Math.cos(dn);
+  return (Math.atan2(y,x)/RAD+360)%360;
+}
+function dest(p, brg, m){ // move from [lat,lon]
+  var d=m/6371008.8, b=brg*RAD, la=p[0]*RAD, lo=p[1]*RAD;
+  var la2=Math.asin(Math.sin(la)*Math.cos(d)+Math.cos(la)*Math.sin(d)*Math.cos(b));
+  var lo2=lo+Math.atan2(Math.sin(b)*Math.sin(d)*Math.cos(la),Math.cos(d)-Math.sin(la)*Math.sin(la2));
+  return [la2/RAD, ((lo2/RAD+540)%360)-180];
+}
+function fmtMiles(m){ var mi=m/MI; return mi<10?mi.toFixed(1):String(Math.round(mi)); }
+function fmtDur(s){ var m=Math.round(s/60); if(m<60) return m+' min'; var h=Math.floor(m/60), r=m%60; return h+'h'+(r?' '+('0'+r).slice(-2):''); }
+function sayDur(s){ var m=Math.round(s/60), h=Math.floor(m/60), r=m%60;
+  return (h?h+(h===1?' hour':' hours'):'')+(h&&r?' ':'')+(r||!h?r+' minutes':''); }
+function fmtClock(t){ var d=new Date(t); return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
+function fmtAhead(m){ // British: yards close in, miles further out
+  var yd=m/0.9144;
+  if(yd<20) return 'now';
+  if(yd<440) return (Math.round(yd/50)*50||20)+' yd';
+  return (m/MI<10?(m/MI).toFixed(1):Math.round(m/MI))+' mi';
+}
+function sayAhead(m){
+  var yd=m/0.9144; if(yd<440) return 'In '+(Math.round(yd/50)*50||50)+' yards, ';
+  var mi=m/MI; return 'In '+(mi<1.2?'about a mile':(Math.round(mi*2)/2)+' miles')+', ';
+}
+
+/* ═══════════════════════ STATE ═══════════════════════ */
+var LS_KEY='grandtour:state', LS_SYNC='grandtour:sync', LS_PROF='grandtour:profiles';
+var DEF_KNOBS={lanes:'some', fast:'some', towns:'avoid', pace:'brisk'};
+var S=fresh();
+function fresh(){ return {v:1, home:null, homeU:0, knobs:Object.assign({},DEF_KNOBS), drives:{}, del:{}}; }
+var plan={mode:'route', start:null, vias:[], finish:null, back:true, dur:120, dir:'any', loopSeed:0};
+var current=null;            // the planned route on screen
+var altIdx=0;
+var _storeOk=true;
+function loadLocal(){ try{ var o=JSON.parse(localStorage.getItem(LS_KEY)||'null'); if(o) S=sanitise(o); }catch(e){ diagNote('load: '+e.message); } }
+function sanitise(o){ var s=fresh(); s.home=o.home||null; s.homeU=o.homeU||0; s.knobs=Object.assign({},DEF_KNOBS,o.knobs||{}); s.drives=o.drives||{}; s.del=o.del||{}; return s; }
+function saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); _storeOk=true; }catch(e){ _storeOk=false; diagNote('SAVE FAILED: '+e.message); } }
+function save(){ saveLocal(); gSchedule(); }
+
+/* ═══════════════════════ THE PROFILE ═══════════════════════
+   The plan screen's choices become five numbers in the profile. Each distinct profile is uploaded
+   once and its BRouter id remembered; if the server has forgotten it, upload again. */
+var KNOBS={
+  lanes:{ few:{lane_cost:1.7, singletrack_cost:3.0}, some:{lane_cost:1.25, singletrack_cost:1.7}, lots:{lane_cost:1.03, singletrack_cost:1.25} },
+  fast: { avoid:{primary_cost:1.8, dual_cost:3.0}, some:{primary_cost:1.45, dual_cost:1.9}, fine:{primary_cost:1.15, dual_cost:1.25} },
+  towns:{ avoid:{town_add:1.0}, fine:{town_add:0.15} }
+};
+function profileText(k){
+  var vals=Object.assign({scenic_weight:1}, KNOBS.lanes[k.lanes]||KNOBS.lanes.some, KNOBS.fast[k.fast]||KNOBS.fast.some, KNOBS.towns[k.towns]||KNOBS.towns.avoid);
+  var t=PROFILE_TEMPLATE;
+  Object.keys(vals).forEach(function(n){
+    var re=new RegExp('(assign\\s+'+n+'\\s+)[0-9.]+');
+    if(!re.test(t)) throw new Error('profile knob missing: '+n);
+    t=t.replace(re,'$1'+vals[n]);
+  });
+  return t;
+}
+function hashStr(s){ var h=5381; for(var i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))|0; return (h>>>0).toString(36); }
+function profCache(){ try{ return JSON.parse(localStorage.getItem(LS_PROF)||'{}'); }catch(_){ return {}; } }
+function uploadProfile(text, force){
+  var h=hashStr(text), c=profCache();
+  if(!force && c[h]) return Promise.resolve(c[h]);
+  return fetch(BROUTER+'/profile',{method:'POST',body:text,headers:{'Content-Type':'text/plain'}})
+    .then(function(r){ if(!r.ok) throw rErr('The route server refused the profile ('+r.status+').'); return r.json(); })
+    .then(function(j){
+      if(j.error) throw rErr('Profile rejected by the route server: '+j.error);
+      if(!j.profileid) throw rErr('The route server did not return a profile id.');
+      c[h]=j.profileid; try{ localStorage.setItem(LS_PROF, JSON.stringify(c)); }catch(_){}
+      LAST.profile=j.profileid; return j.profileid;
+    });
+}
+function rErr(m){ var e=new Error(m); e.user=true; return e; }
+var LAST={profile:'', status:'', when:0};
+
+/* ═══════════════════════ ROUTING ═══════════════════════ */
+function routeUrl(pts, profile, alt){
+  return BROUTER+'?lonlats='+pts.map(function(p){ return p.lon.toFixed(6)+','+p.lat.toFixed(6); }).join('|')
+    +'&profile='+encodeURIComponent(profile)+'&alternativeidx='+(alt||0)+'&format=geojson';
+}
+function explainRouteError(status, text){
+  var t=String(text||'').toLowerCase();
+  if(/not mapped|no.*segment|datafile/.test(t)) return 'One of the places is too far from any road the route server knows. Try a nearby village instead.';
+  if(/island/.test(t)) return 'One of the places is on a road cut off from the rest (a private estate, an island). Move it to a public road.';
+  if(/timeout|too long|operation killed|maxRunningTime/i.test(text)) return 'The route server gave up — the drive is very long. Try fewer miles or an extra via point.';
+  if(/profile/.test(t) && /not found|unknown|does not exist/.test(t)) return 'PROFILE_GONE';
+  if(status===429||/rate/.test(t)) return 'The route server is busy (too many requests). Wait a minute and try again.';
+  if(!status) return (navigator.onLine===false)?'No signal — routes need the internet to plan. Saved drives work offline.':'Could not reach the route server (brouter.de).';
+  return 'The route server said: '+String(text||status).slice(0,160);
+}
+function fetchRoute(pts, knobs, alt, retried){
+  var text=profileText(knobs);
+  return uploadProfile(text, !!retried).then(function(pid){
+    return fetch(routeUrl(pts,pid,alt)).then(function(r){
+      return r.text().then(function(body){
+        LAST.status=r.status; LAST.when=now();
+        if(!r.ok){
+          var m=explainRouteError(r.status, body);
+          if(m==='PROFILE_GONE' && !retried) return fetchRoute(pts, knobs, alt, true);
+          throw rErr(m==='PROFILE_GONE'?'The route server lost the profile twice. Try again in a minute.':m);
+        }
+        var gj; try{ gj=JSON.parse(body); }catch(_){ throw rErr(explainRouteError(r.status, body)); }
+        return parseRoute(gj, knobs.pace);
+      });
+    }, function(e){ LAST.status='network'; throw rErr(explainRouteError(0, e&&e.message)); });
+  });
+}
+
+/* ═══════════════════════ READING A BROUTER ROUTE ═══════════════════════
+   Coordinates come with BRouter's "messages": one row per stretch of identical road, ending at a
+   given point, with the road's tags. We walk the coordinates and label each one with its stretch,
+   so every metre knows its road type — that drives the colours, the mix and the timings. */
+var CLS={ b:{l:'B roads & minor', c:'#C4F000'}, lane:{l:'Lanes', c:'#8FD14F'}, a:{l:'A roads', c:'#7FB6F0'},
+          dual:{l:'Dual carriageway', c:'#F2B23C'}, mway:{l:'Motorway', c:'#FF7A6E'}, town:{l:'Town streets', c:'#B9C3D6'} };
+var CLS_ORDER=['b','lane','a','dual','mway','town'];
+function tagsOf(s){ var o={}; String(s||'').split(' ').forEach(function(kv){ var i=kv.indexOf('='); if(i>0) o[kv.slice(0,i)]=kv.slice(i+1); }); return o; }
+function classify(t){
+  var h=t.highway||'';
+  if(/^motorway/.test(h)) return 'mway';
+  if(/^trunk/.test(h)) return (t.oneway==='yes'||t.oneway==='1'||t.oneway==='true')?'dual':'a';
+  if(/^primary/.test(h)) return (t.oneway==='yes'&&!t.junction)?'dual':'a';
+  if(/^(secondary|tertiary)/.test(h)) return 'b';
+  if(h==='unclassified') return 'lane';
+  return 'town';
+}
+function limitKmh(t){ var m=t.maxspeed; if(!m) return 0; if(m==='urban') return 50; if(m==='rural') return 100; var n=parseFloat(m); return isFinite(n)?n:0; }
+/* Average mph a Fiat 124 actually holds, by road, at "brisk". Never above the limit. */
+var SPEED={ mway:65, dual:58, a:42, b:38, lane:26, town:20 };
+var PACE={ gentle:0.86, brisk:1, spirited:1.1 };
+function segSpeedMph(t, cls, pace){
+  var v=SPEED[cls]||20;
+  if(cls==='b' && /^tertiary/.test(t.highway||'')) v=33;
+  if(cls==='lane' && t.lanes==='1') v=20;
+  if(t.highway==='service') v=12;
+  v*= (PACE[pace]||1);
+  var lim=limitKmh(t);
+  if(lim){ var limMph=lim*0.621371; if(lim<=50) v=Math.min(v, limMph*0.78); else v=Math.min(v, limMph*0.95); }
+  return Math.max(8,v);
+}
+function parseRoute(gj, pace){
+  var f=gj&&gj.features&&gj.features[0]; if(!f) throw rErr('The route server returned no route.');
+  var coords=f.geometry.coordinates.map(function(c){ return [c[1],c[0]]; });
+  var msgs=(f.properties.messages||[]).slice(1).map(function(r){
+    return { lat:(+r[1])/1e6, lon:(+r[0])/1e6, dist:+r[3], tags:tagsOf(r[9]), node:r[10]||'' };
+  });
+  var n=coords.length, cls=new Array(n), seg=new Array(n), cum=new Array(n);
+  cum[0]=0; for(var i=1;i<n;i++) cum[i]=cum[i-1]+hav(coords[i-1],coords[i]);
+  // label points: point i belongs to the stretch ending at the first message at or after it
+  var mi=0;
+  for(i=0;i<n;i++){
+    while(mi<msgs.length-1 && i>0 && Math.abs(coords[i-1][0]-msgs[mi].lat)<2e-6 && Math.abs(coords[i-1][1]-msgs[mi].lon)<2e-6) mi++;
+    seg[i]=mi; cls[i]=msgs.length?classify(msgs[mi].tags):'b';
+  }
+  var hints=(f.properties.voicehints||[]).map(function(h){ return {idx:h[0], cmd:h[1], exit:h[2], dist:h[3], angle:h[4]}; });
+  var r={coords:coords, cls:cls, seg:seg, cum:cum, msgs:msgs, hints:hints, total:cum[n-1]||0,
+         brouterSec:+f.properties['total-time']||0, pace:pace||'brisk'};
+  r.stats=analyse(r);
+  return r;
+}
+function analyse(r){
+  var mix={}, sec=0, signals=0, n=r.coords.length;
+  CLS_ORDER.forEach(function(k){ mix[k]=0; });
+  // per stretch, using the summed geometry length of its points (messages' own distance is close)
+  var segLen={};
+  for(var i=1;i<n;i++){ var d=r.cum[i]-r.cum[i-1]; segLen[r.seg[i]]=(segLen[r.seg[i]]||0)+d; mix[r.cls[i]]+=d; }
+  var green=0, open=0, openRuns=0, run=0, villages=0, prevRural=false;
+  r.msgs.forEach(function(m,k){
+    var L=segLen[k]||0, c=classify(m.tags), sp=segSpeedMph(m.tags,c,r.pace);
+    sec+=L/(sp*0.44704);
+    if(/traffic_signals/.test(m.node)) signals++;
+    var fc=+(m.tags.estimated_forest_class||0), rc=+(m.tags.estimated_river_class||0);
+    if(fc>=2||rc>=3) green+=L;
+    var lim=limitKmh(m.tags), town=+(m.tags.estimated_town_class||0);
+    var isOpen=(c==='b'||c==='a'||c==='lane') && (lim>=90 || (!lim && !town && c!=='lane'));
+    if(isOpen){ run+=L; open+=L; } else { if(run>=1500) openRuns++; run=0; }
+    var rural=(lim>=80||(!lim&&!town));
+    if(prevRural && lim && lim<=50 && c!=='mway' && c!=='dual') villages++;
+    prevRural = rural ? true : (lim && lim<=50 ? false : prevRural);
+  });
+  if(run>=1500) openRuns++;
+  sec += signals*20 + r.hints.length*6;          // lights and junctions cost time
+  // bendiness: heading change per mile, sampled every ~40 m so GPS-style jitter doesn't count
+  var turn=0, last=null, lastB=null, acc=0;
+  for(i=0;i<n;i++){
+    if(!last){ last=r.coords[i]; continue; }
+    acc=hav(last,r.coords[i]); if(acc<40) continue;
+    var b=bearing(last,r.coords[i]);
+    if(lastB!=null){ var d2=Math.abs(((b-lastB+540)%360)-180); if(d2<100) turn+=d2; }  // junction turns (>100°) aren't bends
+    lastB=b; last=r.coords[i];
+  }
+  var miles=r.total/MI, perMile=miles?turn/miles:0;
+  return { mix:mix, seconds:sec, green:green, open:open, openRuns:openRuns, villages:villages, signals:signals,
+           bendsPerMile:perMile, miles:miles };
+}
+function bendWord(p){ return p<35?'Straight':p<70?'Flowing':p<120?'Twisty':'Very twisty'; }
+function verdict(st, total){
+  var pct=function(k){ return total?Math.round(st.mix[k]/total*100):0; };
+  var nice=pct('b')+pct('lane'), parts=[];
+  parts.push('<b>'+nice+'%</b> B roads, minor roads and lanes');
+  if(st.mix.a>0) parts.push(Math.round(st.mix.a/MI)+' mi of A road');
+  if(st.mix.dual>0) parts.push(Math.round(st.mix.dual/MI*10)/10+' mi of dual carriageway');
+  if(st.mix.mway>0) parts.push('<span class="bad-route">'+Math.round(st.mix.mway/MI*10)/10+' mi of motorway — no way round it found</span>');
+  var s=parts.join(', ')+'. ';
+  if(st.openRuns) s+='<b>'+st.openRuns+'</b> open stretch'+(st.openRuns>1?'es':'')+' at the national limit ('+Math.round(st.open/MI)+' mi in all). ';
+  if(st.villages) s+='Through about <b>'+st.villages+'</b> village'+(st.villages>1?'s':'')+'. ';
+  if(total && st.green/total>0.15) s+=Math.round(st.green/total*100)+'% wooded, parkland or by water.';
+  return s;
+}
+
+/* ═══════════════════════ GEOCODING ═══════════════════════
+   UK postcodes go to postcodes.io (exact); everything else to Photon (OpenStreetMap search),
+   biased to Great Britain. */
+var PC_RE=/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
+function geocode(q, near){
+  q=String(q||'').trim(); if(!q) return Promise.resolve([]);
+  if(PC_RE.test(q)){
+    return fetch('https://api.postcodes.io/postcodes/'+encodeURIComponent(q.replace(/\s+/g,'')))
+      .then(function(r){ return r.json(); })
+      .then(function(j){ if(!j.result) return []; var x=j.result;
+        return [{name:x.postcode, sub:[x.admin_ward,x.admin_district].filter(Boolean).join(', '), lat:x.latitude, lon:x.longitude}]; });
+  }
+  var u='https://photon.komoot.io/api/?limit=6&lang=en&bbox=-8.7,49.8,1.9,60.9&q='+encodeURIComponent(q);
+  if(near) u+='&lat='+near.lat.toFixed(4)+'&lon='+near.lon.toFixed(4);
+  return fetch(u).then(function(r){ return r.json(); }).then(function(j){
+    return (j.features||[]).map(function(f){ var p=f.properties||{};
+      var nm=p.name||p.street||p.city||'Place';
+      var sub=[p.city&&p.city!==nm?p.city:'', p.county, p.postcode].filter(Boolean).join(', ');
+      return {name:nm, sub:sub, lat:f.geometry.coordinates[1], lon:f.geometry.coordinates[0]}; });
+  });
+}
+
+/* ═══════════════════════ PLACES UI ═══════════════════════ */
+var _editing=null;   // {role:'start'|'via'|'finish', i}
+function placeRows(){
+  var rows=[];
+  rows.push({role:'start', p:plan.start, pin:'<span class="pin s">S</span>', ph:S.home?'Home — '+S.home.name:'Set a start'});
+  if(plan.mode==='route'){
+    plan.vias.forEach(function(v,i){ rows.push({role:'via', i:i, p:v, pin:'<span class="pin">'+(i+1)+'</span>', ph:'Via'}); });
+    if(plan.vias.length<5) rows.push({role:'addvia', pin:'<span class="pin">+</span>', ph:'Add a via point'});
+    rows.push({role:'finish', p:plan.back?null:plan.finish, pin:'<span class="pin f">F</span>', ph:plan.back?'Back to the start':'Finish'});
+  }
+  return rows;
+}
+function renderPlaces(){
+  var h=placeRows().map(function(r){
+    /* Which row opens the search box. "No index" is stored as null on the editing side and
+       undefined on the row side — compare them as equal, or Start and Add-a-via never open. */
+    var ri=(r.i==null?null:r.i), ei=_editing?(_editing.i==null?null:_editing.i):null;
+    var editing=!!_editing && ( (_editing.role===r.role && ei===ri)
+                             || (r.role==='addvia' && _editing.role==='via' && ei!=null && ei>=plan.vias.length) );
+    var main = r.p ? '<b>'+esc(r.p.name)+'</b>'+(r.p.sub?'<span>'+esc(r.p.sub)+'</span>':'') : '<b>'+esc(r.role==='start'&&S.home&&!r.p?r.ph:r.ph)+'</b>'+(r.role==='finish'&&plan.back?'<span>Tap to finish somewhere else</span>':'');
+    var x='';
+    if(r.role==='via') x='<button class="x" data-del-via="'+r.i+'" aria-label="Remove via">✕</button>';
+    if(r.role==='finish' && !plan.back) x='<button class="x" data-back="1" aria-label="Back to start instead">↺</button>';
+    var row='<div class="place'+(r.p?'':' unset')+'">'+r.pin+'<button class="nm" data-edit="'+r.role+'" data-i="'+(r.i==null?'':r.i)+'">'+main+'</button>'+x+'</div>';
+    if(editing){
+      row+='<div class="searchbox"><div style="display:flex;gap:8px"><input class="in" id="placeIn" type="search" placeholder="Village, town, postcode or pub" autocomplete="off" enterkeyhint="search">'
+        +'<button class="btn" id="placeGo" style="flex:none;width:72px;padding:0">Find</button></div>'
+        +'<div class="chips" style="margin-top:8px"><button class="chip" id="useHere">My location</button>'+(S.home?'<button class="chip" id="useHome">Home</button>':'')+'<button class="chip" id="placeCancel">Cancel</button></div>'
+        +'<div id="placeRes" class="results" style="margin-top:8px"></div><p class="err" id="placeErr" hidden></p></div>';
+    }
+    return row;
+  }).join('');
+  $('#places').innerHTML=h;
+  var pi=$('#placeIn'); if(pi) setTimeout(function(){ try{ pi.focus(); }catch(_){} },30);
+}
+function setPlace(role, i, p){
+  if(role==='start') plan.start=p;
+  else if(role==='via'){ if(i==null||i>=plan.vias.length) plan.vias.push(p); else plan.vias[i]=p; }
+  else if(role==='finish'){ plan.finish=p; plan.back=false; }
+  _editing=null; renderPlaces();
+}
+function doSearch(){
+  var q=$('#placeIn').value, box=$('#placeRes'), er=$('#placeErr'); er.hidden=true;
+  box.innerHTML='<div class="res"><span>Searching…</span></div>';
+  var near=plan.start||S.home;
+  geocode(q, near).then(function(list){
+    if(!list.length){ box.innerHTML='<div class="res"><span>Nothing found. Try a postcode, or the nearest village.</span></div>'; return; }
+    box.innerHTML=list.map(function(p,k){ return '<button class="res" data-pick="'+k+'"><b>'+esc(p.name)+'</b><span>'+esc(p.sub)+'</span></button>'; }).join('');
+    box._list=list;
+  }).catch(function(){ box.innerHTML=''; er.hidden=false; er.textContent=navigator.onLine===false?'No signal for the place search.':'The place search did not answer. Try again, or use a postcode.'; });
+}
+function hereNow(){
+  return new Promise(function(res,rej){
+    if(!navigator.geolocation) return rej(new Error('This device has no location.'));
+    navigator.geolocation.getCurrentPosition(function(p){ res({name:'My location', sub:'Where I was when I planned it', lat:p.coords.latitude, lon:p.coords.longitude}); },
+      function(e){ rej(new Error(e.code===1?'Location is switched off for this app (Settings › Privacy › Location Services › Safari Websites).':'Could not get a position.')); },
+      {enableHighAccuracy:true, timeout:15000, maximumAge:60000});
+  });
+}
+
+/* ═══════════════════════ LOOP GENERATOR ═══════════════════════
+   Two via points either side of the chosen heading, sized so the triangle — once it follows real
+   B roads, which wander — comes out near the time asked for. "Another way" moves them. */
+function loopVias(start, minutes, dir, seed){
+  var mph=30*(PACE[S.knobs.pace]||1), roadM=minutes/60*mph*MI;
+  var straight=roadM/1.38;                     // B-road routes run ~38% longer than the crow flies
+  var r=straight/3.15;                         // triangle: r + r + chord(70°) ≈ 3.15r
+  var rnd=function(k){ var x=Math.sin((seed+1)*9301+k*49297)*233280; return x-Math.floor(x); };
+  var b = dir==='any' ? Math.floor(rnd(1)*360) : (+dir + (rnd(2)-0.5)*30);
+  var spread=35+rnd(3)*12;
+  var A=dest([start.lat,start.lon], b-spread, r*(0.9+rnd(4)*0.2));
+  var B=dest([start.lat,start.lon], b+spread, r*(0.9+rnd(5)*0.2));
+  return [{name:'Loop point 1', lat:A[0], lon:A[1]}, {name:'Loop point 2', lat:B[0], lon:B[1]}];
+}
+
+/* ═══════════════════════ MAP ═══════════════════════ */
+var map=null, routeLayer=null;
+function haveLeaflet(){ return typeof L!=='undefined' && L.map; }
+function tiles(){ return L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18, attribution:'© OpenStreetMap'}); }
+function drawRoute(m, r, layer, pts){
+  if(layer) m.removeLayer(layer);
+  var g=L.layerGroup().addTo(m);
+  // navy casing underneath, so the colours read on a pale map
+  L.polyline(r.coords,{color:'#0D1B3E',weight:9,opacity:.85}).addTo(g);
+  var start=0;
+  for(var i=1;i<=r.coords.length;i++){
+    if(i===r.coords.length || r.cls[i]!==r.cls[start]){
+      L.polyline(r.coords.slice(Math.max(0,start-1), i),{color:CLS[r.cls[start]].c,weight:5,opacity:1}).addTo(g);
+      start=i;
+    }
+  }
+  var isLoop=pts&&pts.length>1&&Math.abs(pts[0].lat-pts[pts.length-1].lat)<1e-6&&Math.abs(pts[0].lon-pts[pts.length-1].lon)<1e-6;
+  (pts||[]).forEach(function(p,k){
+    if(isLoop && k===pts.length-1) return;                 // a loop's finish is its start: one pin, not two stacked
+    var lbl=k===0?(isLoop?'S/F':'S'):(k===pts.length-1?'F':String(k));
+    L.marker([p.lat,p.lon],{icon:L.divIcon({className:'',html:'<span class="pin '+(k===0?'s':k===pts.length-1?'f':'')+'" style="box-shadow:0 1px 4px rgba(0,0,0,.4);'+(lbl.length>1?'width:36px;border-radius:13px;font-size:11px':'')+'">'+lbl+'</span>',iconSize:[lbl.length>1?36:26,26],iconAnchor:[lbl.length>1?18:13,13]})}).addTo(g);
+  });
+  return g;
+}
+function showResult(r, pts){
+  $('#result').hidden=false;
+  var st=r.stats, tot=r.total;
+  $('#rMiles').textContent=fmtMiles(tot);
+  $('#rTime').textContent=fmtDur(st.seconds);
+  $('#rTwist').textContent=bendWord(st.bendsPerMile);
+  $('#rTwistL').textContent=Math.round(st.bendsPerMile)+'° per mile';
+  $('#rMix').innerHTML=CLS_ORDER.filter(function(k){ return st.mix[k]>0; }).map(function(k){ return '<i style="width:'+(st.mix[k]/tot*100).toFixed(2)+'%;background:'+CLS[k].c+'"></i>'; }).join('');
+  $('#rLegend').innerHTML=CLS_ORDER.filter(function(k){ return st.mix[k]>0; }).map(function(k){ return '<span><i style="background:'+CLS[k].c+'"></i>'+CLS[k].l+' '+Math.round(st.mix[k]/tot*100)+'%</span>'; }).join('');
+  $('#rVerdict').innerHTML=verdict(st, tot);
+  $('#altBtn').textContent= altIdx>=3 ? 'Back to first' : 'Another way';
+  if(haveLeaflet()){
+    if(!map){ map=L.map('map',{zoomControl:false, attributionControl:true, center:r.coords[0], zoom:11}); tiles().addTo(map); }
+    routeLayer=drawRoute(map, r, routeLayer, pts);
+    setTimeout(function(){ map.invalidateSize(); map.fitBounds(L.latLngBounds(r.coords),{padding:[24,24]}); },60);
+  } else {
+    $('#map').innerHTML='<div class="empty" style="margin-top:120px">The map library did not load (no signal?). The route itself is fine.</div>';
+  }
+  setTimeout(function(){ $('#result').scrollIntoView({behavior:'smooth',block:'start'}); },120);
+}
+
+function routePoints(){
+  var s=plan.start||S.home; if(!s) return null;
+  var pts=[s];
+  if(plan.mode==='loop') pts=pts.concat(loopVias(s, plan.dur, plan.dir, plan.loopSeed));
+  else pts=pts.concat(plan.vias);
+  pts.push(plan.mode==='loop'||plan.back ? s : (plan.finish||s));
+  return pts;
+}
+var _busy=false;
+function doPlan(alt){
+  if(_busy) return;
+  var pts=routePoints(), er=$('#planErr'); er.hidden=true;
+  if(!pts){ er.hidden=false; er.textContent='Set a start first — or a Home in Setup.'; return; }
+  if(plan.mode==='route' && pts.length===2 && hav([pts[0].lat,pts[0].lon],[pts[1].lat,pts[1].lon])<500){
+    er.hidden=false; er.textContent='Add a via point or a different finish — start and finish are the same place.'; return; }
+  _busy=true; var btn=$('#planBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Planning…';
+  $('#altBtn').disabled=true;
+  fetchRoute(pts, S.knobs, alt||0).then(function(r){
+    current={r:r, pts:pts, knobs:Object.assign({},S.knobs), mode:plan.mode, alt:alt||0};
+    showResult(r, pts);
+  }).catch(function(e){
+    er.hidden=false; er.textContent=e.user?e.message:('Something went wrong: '+e.message); diagNote('plan: '+e.message);
+  }).then(function(){ _busy=false; btn.disabled=false; btn.textContent='Plan the drive'; $('#altBtn').disabled=false; render(); });
+}
+
+/* ═══════════════════════ SAVE / EXPORT ═══════════════════════ */
+function autoName(c){
+  var s=c.pts[0], via=c.pts.slice(1,-1).filter(function(p){ return !/^Loop point/.test(p.name); });
+  var f=c.pts[c.pts.length-1], loop=(f.lat===s.lat&&f.lon===s.lon);
+  var base=(s.name==='My location'?'From here':s.name.split(',')[0]);
+  if(via.length) return base+' via '+via.map(function(p){ return p.name.split(',')[0]; }).slice(0,2).join(' & ')+(loop?' (loop)':' to '+f.name.split(',')[0]);
+  return base+(loop?' — '+fmtMiles(c.r.total)+' mile loop':' to '+f.name.split(',')[0]);
+}
+function simplify(coords, tol){ // Douglas–Peucker in metres-ish, keeps lines small for the gist
+  if(coords.length<3) return coords.slice();
+  var keep=new Uint8Array(coords.length); keep[0]=keep[coords.length-1]=1;
+  var stack=[[0,coords.length-1]], k=111320*Math.cos(coords[0][0]*RAD);
+  while(stack.length){
+    var s=stack.pop(), a=coords[s[0]], b=coords[s[1]], md=0, mi=-1;
+    for(var i=s[0]+1;i<s[1];i++){
+      var p=coords[i], x1=(a[1])*k,y1=a[0]*110540,x2=b[1]*k,y2=b[0]*110540,x=p[1]*k,y=p[0]*110540;
+      var dx=x2-x1, dy=y2-y1, L2=dx*dx+dy*dy, t=L2?((x-x1)*dx+(y-y1)*dy)/L2:0; t=Math.max(0,Math.min(1,t));
+      var d=Math.hypot(x-(x1+t*dx), y-(y1+t*dy)); if(d>md){ md=d; mi=i; }
+    }
+    if(md>tol && mi>0){ keep[mi]=1; stack.push([s[0],mi],[mi,s[1]]); }
+  }
+  var out=[]; for(i=0;i<coords.length;i++) if(keep[i]) out.push([+coords[i][0].toFixed(5),+coords[i][1].toFixed(5)]); return out;
+}
+function saveCurrent(){
+  if(!current) return null;
+  var c=current, t=now(), d={ id:uid(), name:autoName(c), created:t, u:t, mode:c.mode, alt:c.alt,
+    pts:c.pts.map(function(p){ return {name:p.name, sub:p.sub||'', lat:+p.lat.toFixed(6), lon:+p.lon.toFixed(6)}; }),
+    knobs:c.knobs, miles:+(c.r.total/MI).toFixed(1), seconds:Math.round(c.r.stats.seconds),
+    bends:Math.round(c.r.stats.bendsPerMile), nice:Math.round((c.r.stats.mix.b+c.r.stats.mix.lane)/c.r.total*100),
+    line:simplify(c.r.coords, 25) };
+  S.drives[d.id]=d; save(); return d;
+}
+function gpxText(c, name){
+  var e=function(s){ return String(s).replace(/[<>&"]/g,function(x){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[x]; }); };
+  var w=c.pts.map(function(p,k){ return '  <wpt lat="'+p.lat.toFixed(6)+'" lon="'+p.lon.toFixed(6)+'"><name>'+e(k===0?'Start':k===c.pts.length-1?'Finish':'Via '+k+' '+p.name)+'</name></wpt>'; }).join('\n');
+  var t=c.r.coords.map(function(p){ return '      <trkpt lat="'+p[0].toFixed(6)+'" lon="'+p[1].toFixed(6)+'"/>'; }).join('\n');
+  return '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="The Grand Tour" xmlns="http://www.topografix.com/GPX/1/1">\n'
+    +'  <metadata><name>'+e(name)+'</name></metadata>\n'+w+'\n  <trk><name>'+e(name)+'</name><trkseg>\n'+t+'\n    </trkseg></trk>\n</gpx>\n';
+}
+function googleUrl(c){
+  var r=c.r, wanted=8, pts=[], j=0;
+  for(var i=1;i<=wanted;i++){
+    var target=r.total*i/(wanted+1); while(j<r.cum.length-1 && r.cum[j]<target) j++;
+    pts.push(r.coords[j][0].toFixed(5)+','+r.coords[j][1].toFixed(5));
+  }
+  var s=r.coords[0], f=r.coords[r.coords.length-1];
+  return 'https://www.google.com/maps/dir/?api=1&travelmode=driving&origin='+s[0].toFixed(5)+','+s[1].toFixed(5)
+    +'&destination='+f[0].toFixed(5)+','+f[1].toFixed(5)+'&waypoints='+encodeURIComponent(pts.join('|'));
+}
+
+/* ═══════════════════════ DRIVE MODE ═══════════════════════
+   Follows your position along the planned line, says the next turn, notices when you leave it.
+   GPS, wake lock and speech are all requested synchronously inside the "Drive it" tap — the
+   Roadcraft lesson: on iOS an await before a permission request spends the gesture. */
+var DRV=null, dmap=null;
+var ARROWS={ straight:'M23 40V8M12 19L23 8l11 11', left:'M30 40V22a6 6 0 00-6-6H10M18 8l-8 8 8 8', right:'M16 40V22a6 6 0 016-6h14M28 8l8 8-8 8',
+  sleft:'M28 40V24L14 10M14 21V10h11', sright:'M18 40V24L32 10M32 21V10H21', uturn:'M30 40V18a8 8 0 00-16 0v10M8 22l6 7 6-7',
+  rbt:'M23 42V29M17.3 25.7a8 8 0 1 1 11.4 0M28.7 25.7L37 16M37 16h-7M37 16v7', finish:'M12 40V8h20l-4 7 4 7H12' };
+var CMD={1:['straight','Continue straight on'],2:['left','Turn left'],3:['sleft','Bear left'],4:['left','Turn sharp left'],
+  5:['right','Turn right'],6:['sright','Bear right'],7:['right','Turn sharp right'],8:['sleft','Keep left'],9:['sright','Keep right'],
+  10:['uturn','Make a U-turn'],11:['uturn','Make a U-turn'],12:['straight','Off route'],13:['rbt','At the roundabout'],14:['rbt','At the roundabout'],
+  15:['uturn','Make a U-turn'],16:['straight','Head on'],17:['sleft','Take the exit on the left'],18:['sright','Take the exit on the right']};
+function ordinal(n){ return ['','first','second','third','fourth','fifth','sixth','seventh','eighth'][n]||n+'th'; }
+function hintText(h){
+  if(!h) return 'Arrive at the finish';
+  var c=CMD[h.cmd]||['straight','Continue']; var t=c[1];
+  if((h.cmd===13||h.cmd===14) && h.exit) t+=', take the '+ordinal(Math.abs(h.exit))+' exit';
+  return t;
+}
+function arrowSvg(kind){ return '<svg viewBox="0 0 46 46" fill="none" stroke="#0D1B3E" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="'+(ARROWS[kind]||ARROWS.straight)+'"/></svg>'; }
+
+/* Where are we on the line? Search a window ahead of the last known index, so a loop that crosses
+   itself can't make the app jump to the far side of the drive. */
+function locate(r, pos, fromIdx){
+  var best=-1, bd=1e9, lo=Math.max(0,fromIdx-30), hi=Math.min(r.coords.length-1, fromIdx+600);
+  for(var i=lo;i<=hi;i++){ var d=hav(pos,r.coords[i]); if(d<bd){ bd=d; best=i; } }
+  return {idx:best, off:bd};
+}
+function nextHint(r, idx){ for(var k=0;k<r.hints.length;k++) if(r.hints[k].idx>idx) return r.hints[k]; return null; }
+function remainingSec(r, idx){
+  if(!r.total) return 0; var frac=(r.total-r.cum[idx])/r.total; return r.stats.seconds*frac;
+}
+
+function startDrive(c){
+  if(!c) return;
+  DRV={ r:c.r, pts:c.pts, idx:0, offCount:0, voice:true, spoken:{}, watch:null, wake:null, lastFix:0, speed:0, follow:true, me:null, rejoining:false };
+  $('#drive').hidden=false;
+  /* — permissions, synchronously in the tap — */
+  if(navigator.geolocation){
+    DRV.watch=navigator.geolocation.watchPosition(onFix, function(e){
+      $('#dText').textContent = e.code===1 ? 'Location refused. Settings › Privacy › Location Services › Safari Websites › While Using.' : 'No GPS fix yet…';
+      $('#dDist').textContent='–';
+    }, {enableHighAccuracy:true, maximumAge:1000, timeout:20000});
+  } else $('#dText').textContent='This device has no GPS.';
+  if('wakeLock' in navigator){ try{ navigator.wakeLock.request('screen').then(function(l){ DRV&&(DRV.wake=l); }).catch(function(){ $('#dNote').textContent='The screen may lock — set Auto-Lock longer in Settings › Display.'; }); }catch(_){} }
+  else $('#dNote').textContent='This phone can\'t be kept awake by an app — set Auto-Lock to Never while driving.';
+  speak('Starting the drive. '+fmtMiles(c.r.total)+' miles, about '+sayDur(c.r.stats.seconds)+'.', true);
+  /* — map — */
+  if(haveLeaflet()){
+    if(!dmap){ dmap=L.map('dmap',{zoomControl:false, center:c.r.coords[0], zoom:15}); tiles().addTo(dmap);
+      dmap.on('dragstart',function(){ if(DRV) DRV.follow=false; $('#dCentre').textContent='Re-centre'; }); }
+    DRV.layer=drawRoute(dmap, c.r, DRV.layer, c.pts);
+    setTimeout(function(){ dmap.invalidateSize(); dmap.setView(c.r.coords[0], 15); },60);
+  }
+  renderDrive();
+}
+function onFix(p){
+  if(!DRV) return;
+  var pos=[p.coords.latitude,p.coords.longitude], r=DRV.r;
+  DRV.lastFix=now(); DRV.speed=(p.coords.speed!=null&&p.coords.speed>=0)?p.coords.speed*2.23694:DRV.speed;
+  var loc=locate(r,pos,DRV.idx);
+  var tol=Math.max(45, (p.coords.accuracy||20)*1.5);
+  if(loc.off>tol*1.6) DRV.offCount++; else { DRV.offCount=0; if(loc.idx>=DRV.idx-5) DRV.idx=Math.max(DRV.idx,loc.idx); }
+  DRV.off=DRV.offCount>=3;
+  DRV.pos=pos;
+  if(DRV.me) DRV.me.setLatLng(pos); else if(dmap) DRV.me=L.marker(pos,{icon:L.divIcon({className:'',html:'<div class="me"></div>',iconSize:[20,20],iconAnchor:[10,10]})}).addTo(dmap);
+  if(dmap && DRV.follow) dmap.panTo(pos,{animate:true});
+  var h=nextHint(r,DRV.idx), ahead=h? r.cum[h.idx]-r.cum[DRV.idx] : r.total-r.cum[DRV.idx];
+  /* spoken prompts: once far out (on faster roads), once close, once at the turn */
+  if(h && DRV.voice && !DRV.off){
+    var far=DRV.speed>40?800:450, key=h.idx+':';
+    if(ahead<far && ahead>250 && !DRV.spoken[key+'f']){ DRV.spoken[key+'f']=1; speak(sayAhead(ahead)+hintText(h).toLowerCase()); }
+    else if(ahead<=250 && ahead>45 && !DRV.spoken[key+'n']){ DRV.spoken[key+'n']=1; speak(sayAhead(ahead)+hintText(h).toLowerCase()); }
+    else if(ahead<=45 && !DRV.spoken[key+'x']){ DRV.spoken[key+'x']=1; speak(hintText(h)); }
+  }
+  if(!h && ahead<60 && !DRV.spoken.end){ DRV.spoken.end=1; speak('You have arrived. Lovely drive.'); }
+  if(DRV.off && !DRV.spoken['off'+DRV.idx]){ DRV.spoken['off'+DRV.idx]=1; speak('You are off the planned route.'); }
+  renderDrive();
+}
+function renderDrive(){
+  if(!DRV) return;
+  var r=DRV.r, h=nextHint(r,DRV.idx), ahead=h? r.cum[h.idx]-r.cum[DRV.idx] : r.total-r.cum[DRV.idx];
+  var kind=h?(CMD[h.cmd]||['straight'])[0]:'finish';
+  $('#dArrow').innerHTML=arrowSvg(kind);
+  if(DRV.lastFix){ $('#dDist').textContent=fmtAhead(ahead); $('#dText').textContent=hintText(h); }
+  $('#dLeft').textContent=fmtMiles(r.total-r.cum[DRV.idx]);
+  $('#dEta').textContent=fmtClock(now()+remainingSec(r,DRV.idx)*1000);
+  $('#dSpeed').textContent=DRV.lastFix?Math.round(DRV.speed):'–';
+  $('#dOff').hidden=!DRV.off;
+  $('#dVoice').textContent=DRV.voice?'Voice on':'Voice off';
+}
+function endDrive(){
+  if(!DRV) return;
+  if(DRV.watch!=null && navigator.geolocation) navigator.geolocation.clearWatch(DRV.watch);
+  if(DRV.wake){ try{ DRV.wake.release(); }catch(_){} }
+  try{ speechSynthesis.cancel(); }catch(_){}
+  DRV=null; $('#drive').hidden=true;
+}
+/* Rejoin: plan from where you are to a point ~1 km further along the line, then splice. */
+function rejoin(){
+  if(!DRV||!DRV.pos||DRV.rejoining) return;
+  var r=DRV.r, target=DRV.idx; while(target<r.coords.length-1 && r.cum[target]-r.cum[DRV.idx]<1000) target++;
+  DRV.rejoining=true; $('#dRejoin').textContent='Planning…';
+  var a={lat:DRV.pos[0],lon:DRV.pos[1]}, b={lat:r.coords[target][0],lon:r.coords[target][1]};
+  fetchRoute([a,b], current?current.knobs:S.knobs, 0).then(function(j){
+    var nr=splice(j, r, target);
+    DRV.r=nr; DRV.idx=0; DRV.offCount=0; DRV.off=false; DRV.spoken={};
+    if(dmap) DRV.layer=drawRoute(dmap, nr, DRV.layer, DRV.pts);
+    speak('New way back to the route.');
+  }).catch(function(e){ speak('Could not plan a way back.'); $('#dText').textContent=e.message; })
+    .then(function(){ if(DRV){ DRV.rejoining=false; $('#dRejoin').textContent='Rejoin'; renderDrive(); } });
+}
+function splice(j, r, target){
+  var coords=j.coords.concat(r.coords.slice(target+1)), cls=j.cls.concat(r.cls.slice(target+1));
+  var cum=[0]; for(var i=1;i<coords.length;i++) cum[i]=cum[i-1]+hav(coords[i-1],coords[i]);
+  var shift=j.coords.length-(target+1);
+  var hints=j.hints.concat(r.hints.filter(function(h){ return h.idx>target; }).map(function(h){ return Object.assign({},h,{idx:h.idx+shift}); }));
+  var secLeft=j.stats.seconds + r.stats.seconds*((r.total-r.cum[target])/(r.total||1));
+  var nr={coords:coords, cls:cls, cum:cum, hints:hints, total:cum[cum.length-1], seg:[], msgs:[], pace:r.pace};
+  nr.stats=Object.assign({}, r.stats, {seconds:secLeft});
+  return nr;
+}
+var _voiceGB=null;
+function speak(t, force){
+  if(!('speechSynthesis' in window)) return;
+  if(!force && DRV && !DRV.voice) return;
+  try{
+    if(!_voiceGB){ var vs=speechSynthesis.getVoices(); _voiceGB=vs.filter(function(v){ return /en-GB/i.test(v.lang); })[0]||null; }
+    var u=new SpeechSynthesisUtterance(t); u.lang='en-GB'; if(_voiceGB) u.voice=_voiceGB; u.rate=1.0;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }catch(_){}
+}
+
+/* ═══════════════════════ SAVED DRIVES ═══════════════════════ */
+function renderDrives(){
+  var list=Object.keys(S.drives).map(function(k){ return S.drives[k]; }).sort(function(a,b){ return b.created-a.created; });
+  $('#drivesBody').innerHTML = list.length
+    ? '<h2>Saved drives</h2><div class="card">'+list.map(function(d){
+        return '<button class="drive" data-open="'+esc(d.id)+'"><span class="nm"><b>'+esc(d.name)+'</b><span>'+d.miles+' mi · about '+fmtDur(d.seconds)+' · '+d.nice+'% B roads &amp; lanes · '+bendWord(d.bends).toLowerCase()+'</span></span><span class="go">›</span></button>';
+      }).join('')+'</div><p class="hint" style="margin-top:10px">Opening a saved drive re-plans it with the same points and choices, so it picks up any road changes. Swipe isn\'t needed — open one and use Delete.</p>'
+    : '<div class="empty"><b>No saved drives yet.</b>Plan one, then tap Save. Saved drives are kept on this phone and, once connected in Setup, in the estate gist.</div>';
+}
+function openDrive(id){
+  var d=S.drives[id]; if(!d) return;
+  plan.mode='route'; plan.start=d.pts[0]; plan.vias=d.pts.slice(1,-1);
+  var f=d.pts[d.pts.length-1]; plan.back=(f.lat===d.pts[0].lat&&f.lon===d.pts[0].lon); plan.finish=plan.back?null:f;
+  S.knobs=Object.assign({},DEF_KNOBS,d.knobs); altIdx=d.alt||0;
+  go('plan'); renderKnobs(); renderPlaces(); setMode('route');
+  _openedId=id; doPlan(altIdx);
+  toast('Re-planning “'+d.name+'”','Delete',function(){ var copy=S.drives[id]; delete S.drives[id]; S.del[id]=now(); save(); renderDrives();
+    toast('Deleted','Undo',function(){ copy.u=now(); S.drives[id]=copy; delete S.del[id]; save(); renderDrives(); }); });
+}
+var _openedId=null;
+
+/* ═══════════════════════ GIST (own file, as the Larder) ═══════════════════════ */
+var G_ID='connolly-sync:gist-id', G_TOK='connolly-sync:token', G_FILE='grand-tour.json';
+var _gInFlight=false, _gDirty=false, _gTimer=null;
+var SY={lastOk:0,lastErr:'',lastErrAt:0};
+try{ var _sy=JSON.parse(localStorage.getItem(LS_SYNC)||'null'); if(_sy) SY=Object.assign(SY,_sy); }catch(_){}
+function sySave(){ try{ localStorage.setItem(LS_SYNC, JSON.stringify(SY)); }catch(_){} }
+function gCreds(){ try{ var i=localStorage.getItem(G_ID), t=localStorage.getItem(G_TOK); return (i&&t)?{id:i,token:t}:null; }catch(_){ return null; } }
+function gHeaders(tk){ return {'Authorization':'Bearer '+tk,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}; }
+function gExplain(status){
+  if(status===401||status===403) return 'GitHub refused the token. It needs gist access, or it has expired.';
+  if(status===404) return 'Gist not found — check the gist ID, and that the token can see it.';
+  if(status===409) return 'GitHub was busy with another write (409). Will retry.';
+  if(status) return 'GitHub said '+status+'.';
+  return navigator.onLine===false?'No signal. Saved here; will sync later.':'Could not reach GitHub.';
+}
+function merge(a,b){
+  a=a||fresh(); b=b||fresh(); var out=fresh(), cut=now()-90*864e5;
+  [a.del,b.del].forEach(function(d){ Object.keys(d||{}).forEach(function(id){ if(d[id]>cut && (!out.del[id]||d[id]>out.del[id])) out.del[id]=d[id]; }); });
+  var ids={}; Object.keys(a.drives||{}).concat(Object.keys(b.drives||{})).forEach(function(k){ ids[k]=1; });
+  Object.keys(ids).forEach(function(id){ var x=(a.drives||{})[id], y=(b.drives||{})[id], w=!x?y:!y?x:((y.u||0)>(x.u||0)?y:x);
+    if(w && !(out.del[id] && out.del[id]>=(w.u||0))) out.drives[id]=w; });
+  var hb=(b.homeU||0)>(a.homeU||0); out.home=hb?b.home:a.home; out.homeU=Math.max(a.homeU||0,b.homeU||0);
+  out.knobs=Object.assign({},DEF_KNOBS,a.knobs||{});      // the kind of drive is per device: a phone and an iPad may differ
+  return out;
+}
+function gFetch(c){
+  return fetch('https://api.github.com/gists/'+c.id,{headers:gHeaders(c.token),cache:'no-store'})
+    .then(function(r){ if(!r.ok){ var e=new Error('http'); e.status=r.status; throw e; } return r.json(); })
+    .then(function(j){ var f=j.files&&j.files[G_FILE]; if(!f) return null;
+      return (f.truncated&&f.raw_url)?fetch(f.raw_url,{cache:'no-store'}).then(function(x){ return x.text(); }):f.content; })
+    .then(function(raw){ return raw==null?null:sanitise(JSON.parse(raw||'{}')); });
+}
+function gPull(cb){ var c=gCreds(); if(!c){ cb&&cb(); return; }
+  gFetch(c).then(function(rem){ if(rem){ S=merge(S,rem); saveLocal(); } SY.lastOk=now(); SY.lastErr=''; sySave(); })
+    .catch(function(e){ SY.lastErr=gExplain(e&&e.status); SY.lastErrAt=now(); sySave(); }).then(function(){ cb&&cb(); render(); }); }
+function gPush(){
+  var c=gCreds(); if(!c) return; if(_gInFlight){ _gDirty=true; return; } _gInFlight=true;
+  gFetch(c).then(function(rem){ if(rem) S=merge(S,rem); saveLocal();
+    var body={files:{}}; body.files[G_FILE]={content:JSON.stringify({v:1,home:S.home,homeU:S.homeU,drives:S.drives,del:S.del,savedAt:new Date().toISOString(),by:BUILD})};
+    return fetch('https://api.github.com/gists/'+c.id,{method:'PATCH',headers:gHeaders(c.token),body:JSON.stringify(body)}); })
+  .then(function(r){ if(r&&!r.ok){ var e=new Error('http'); e.status=r.status; throw e; } SY.lastOk=now(); SY.lastErr=''; sySave(); })
+  .catch(function(e){ SY.lastErr=gExplain(e&&e.status); SY.lastErrAt=now(); sySave(); if(e&&e.status===409) _gDirty=true; })
+  .then(function(){ _gInFlight=false; render(); if(_gDirty){ _gDirty=false; setTimeout(gPush,1500); } });
+}
+function gSchedule(){ if(!gCreds()) return; clearTimeout(_gTimer); _gTimer=setTimeout(gPush,1500); }
+function ago(t){ if(!t) return 'never'; var s=Math.round((now()-t)/1000); if(s<60) return 'just now'; if(s<3600) return Math.round(s/60)+' min ago'; return fmtClock(t)+(new Date(t).toDateString()===new Date().toDateString()?'':' '+new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'})); }
+function syncSummary(){
+  if(!_storeOk) return {t:'Not saving!',bad:true};
+  if(!gCreds()) return {t:'This phone only',bad:false};
+  if(SY.lastErr && SY.lastErrAt>=SY.lastOk) return {t:'Sync failed',bad:true};
+  return {t:SY.lastOk?'Synced '+ago(SY.lastOk):'Not synced yet',bad:false};
+}
+function renderSync(){
+  var c=gCreds(), dot=$('#syncDot'), h=$('#syncHead'), d=$('#syncDetail');
+  $('#cfgForget').hidden=!c;
+  if(!c){ dot.className='dot warn'; h.textContent='Not connected — this phone only'; d.textContent='Saved drives are kept on this phone. Connect to back them up and see them on the iPad.'; return; }
+  if(SY.lastErr && SY.lastErrAt>=SY.lastOk){ dot.className='dot stop'; h.textContent='Sync failed '+ago(SY.lastErrAt); d.textContent=SY.lastErr; return; }
+  dot.className='dot go'; h.textContent=SY.lastOk?'Synced '+ago(SY.lastOk):'Connected, not synced yet'; d.textContent='Gist '+c.id.slice(0,8)+'… · file grand-tour.json';
+}
+var _diag=[];
+function diagNote(t){ _diag.push(new Date().toISOString().slice(11,19)+' '+t); if(_diag.length>8) _diag.shift(); }
+function renderDiag(){
+  var sa=(navigator.standalone===true)||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+  $('#diag').textContent=['build      '+BUILD,'installed  '+(sa?'yes':'no — in the browser'),'map        '+(haveLeaflet()?'Leaflet loaded':'NOT LOADED'),
+    'router     brouter.de · last status '+(LAST.status||'–')+(LAST.when?' '+ago(LAST.when):''),'profile    '+(LAST.profile||'not uploaded this session'),
+    'drives     '+Object.keys(S.drives).length+' saved','storage    '+(_storeOk?'ok':'FAILING'),
+    'gps        '+(navigator.geolocation?'available':'none')+' · wake lock '+(('wakeLock' in navigator)?'yes':'no')+' · speech '+(('speechSynthesis' in window)?'yes':'no'),
+    'worker     '+(('serviceWorker' in navigator)?(navigator.serviceWorker.controller?'active':'registering'):'unsupported')].concat(_diag).join('\n');
+}
+
+/* ═══════════════════════ RENDER / NAV ═══════════════════════ */
+var VIEW='plan';
+function renderKnobs(){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-knob]'),function(seg){
+    var k=seg.dataset.knob; Array.prototype.forEach.call(seg.querySelectorAll('button'),function(b){ b.setAttribute('aria-pressed', S.knobs[k]===b.dataset.v?'true':'false'); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#durChips .chip'),function(b){ b.setAttribute('aria-pressed', +b.dataset.dur===plan.dur?'true':'false'); });
+  Array.prototype.forEach.call(document.querySelectorAll('#dirChips .chip'),function(b){ b.setAttribute('aria-pressed', b.dataset.dir===String(plan.dir)?'true':'false'); });
+}
+function setMode(m){
+  plan.mode=m; Array.prototype.forEach.call(document.querySelectorAll('#modeSeg button'),function(b){ b.setAttribute('aria-pressed', b.dataset.mode===m?'true':'false'); });
+  $('#loopOpts').hidden=(m!=='loop'); _editing=null; renderPlaces();
+}
+function render(){
+  renderDrives(); renderSync(); renderDiag();
+  $('#homeShow').textContent=S.home?S.home.name+(S.home.sub?' — '+S.home.sub:''):'Not set';
+  var ss=syncSummary(), sub=$('#hSub');
+  sub.textContent = VIEW==='plan' && current ? fmtMiles(current.r.total)+' mi · '+fmtDur(current.r.stats.seconds) : ss.t;
+  sub.className='sub'+(ss.bad&&!(VIEW==='plan'&&current)?' bad':'');
+}
+function go(v){
+  VIEW=v; ['plan','drives','setup'].forEach(function(x){ $('#v-'+x).hidden=(x!==v); });
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(t){ if(t.dataset.go===v) t.setAttribute('aria-current','page'); else t.removeAttribute('aria-current'); });
+  $('#hTitle').textContent=v==='drives'?'Drives':v==='setup'?'Setup':'The Grand Tour';
+  window.scrollTo(0,0); render();
+  if(v==='plan' && map) setTimeout(function(){ map.invalidateSize(); },50);
+}
+var _toastT=null,_toastFn=null;
+function toast(msg,label,fn){ $('#toastMsg').textContent=msg; _toastFn=fn||null; $('#toastAct').hidden=!fn; $('#toastAct').textContent=label||'Undo'; $('#toast').hidden=false;
+  clearTimeout(_toastT); _toastT=setTimeout(function(){ $('#toast').hidden=true; _toastFn=null; }, fn?7000:2800); }
+function download(name, text, type){
+  var blob=new Blob([text],{type:type});
+  if(navigator.canShare && window.File){ try{ var f=new File([blob],name,{type:type}); if(navigator.canShare({files:[f]})){ navigator.share({files:[f], title:name}).catch(function(){}); return; } }catch(_){} }
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },1000);
+}
+
+/* ═══════════════════════ WIRING ═══════════════════════ */
+function wire(){
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('button'); if(!t) return;
+    if(t.dataset.go){ go(t.dataset.go); return; }
+    if(t.dataset.mode){ setMode(t.dataset.mode); return; }
+    if(t.parentNode && t.parentNode.dataset && t.parentNode.dataset.knob){ S.knobs[t.parentNode.dataset.knob]=t.dataset.v; save(); renderKnobs(); return; }
+    if(t.dataset.dur){ plan.dur=+t.dataset.dur; renderKnobs(); return; }
+    if(t.dataset.dir){ plan.dir=t.dataset.dir; plan.loopSeed=0; renderKnobs(); return; }
+    if(t.dataset.edit){ var role=t.dataset.edit==='addvia'?'via':t.dataset.edit; var i=t.dataset.i===''?(role==='via'?plan.vias.length:null):+t.dataset.i;
+      _editing={role:role, i:i}; renderPlaces(); return; }
+    if(t.dataset.delVia!=null){ plan.vias.splice(+t.dataset.delVia,1); renderPlaces(); return; }
+    if(t.dataset.back){ plan.back=true; plan.finish=null; renderPlaces(); return; }
+    if(t.id==='placeGo'){ doSearch(); return; }
+    if(t.id==='placeCancel'){ _editing=null; renderPlaces(); return; }
+    if(t.id==='useHome'){ setPlace(_editing.role,_editing.i,S.home); return; }
+    if(t.id==='useHere'){ var ed=_editing; t.textContent='Locating…';
+      hereNow().then(function(p){ setPlace(ed.role,ed.i,p); }).catch(function(er){ var el=$('#placeErr'); if(el){ el.hidden=false; el.textContent=er.message; } t.textContent='My location'; }); return; }
+    if(t.dataset.pick!=null){ var box=$('#placeRes'); var p=box&&box._list&&box._list[+t.dataset.pick]; if(p) setPlace(_editing.role,_editing.i,p); return; }
+    if(t.dataset.open){ openDrive(t.dataset.open); return; }
+    if(t.dataset.homepick!=null){ var hb=$('#homeRes'); var hp=hb._list[+t.dataset.homepick]; S.home=hp; S.homeU=now(); save(); hb.hidden=true; $('#homeIn').value=''; render(); renderPlaces(); return; }
+  });
+  document.addEventListener('keydown',function(e){ if(e.key==='Enter' && e.target.id==='placeIn'){ e.preventDefault(); doSearch(); } if(e.key==='Enter'&&e.target.id==='homeIn'){ e.preventDefault(); $('#homeFind').click(); } });
+  $('#planBtn').addEventListener('click',function(){ altIdx=0; _openedId=null; doPlan(0); });
+  $('#altBtn').addEventListener('click',function(){
+    if(plan.mode==='loop'){ plan.loopSeed++; altIdx=0; doPlan(0); return; }      // a loop varies best by moving its points
+    altIdx=altIdx>=3?0:altIdx+1; doPlan(altIdx);
+  });
+  $('#saveBtn').addEventListener('click',function(){ var d=saveCurrent(); if(d){ render(); toast('Saved as “'+d.name+'”'); } });
+  $('#gpxBtn').addEventListener('click',function(){ if(current) download((autoName(current).replace(/[^\w\s-]/g,'').trim()||'drive')+'.gpx', gpxText(current, autoName(current)), 'application/gpx+xml'); });
+  $('#gmapBtn').addEventListener('click',function(){ if(!current) return; $('#gmapNote').hidden=false; window.open(googleUrl(current),'_blank'); });
+  $('#driveBtn').addEventListener('click',function(){ startDrive(current); });
+  $('#dEnd').addEventListener('click',endDrive);
+  $('#dVoice').addEventListener('click',function(){ if(!DRV) return; DRV.voice=!DRV.voice; if(!DRV.voice) try{ speechSynthesis.cancel(); }catch(_){} renderDrive(); });
+  $('#dCentre').addEventListener('click',function(){ if(!DRV) return; DRV.follow=true; if(DRV.pos&&dmap) dmap.setView(DRV.pos,15); });
+  $('#dRejoin').addEventListener('click',rejoin);
+  $('#toastAct').addEventListener('click',function(){ var f=_toastFn; $('#toast').hidden=true; _toastFn=null; if(f) f(); });
+  $('#homeFind').addEventListener('click',function(){
+    var q=$('#homeIn').value, hb=$('#homeRes'); hb.hidden=false; hb.innerHTML='<div class="res"><span>Searching…</span></div>';
+    geocode(q).then(function(list){ hb._list=list; hb.innerHTML=list.length?list.map(function(p,k){ return '<button class="res" data-homepick="'+k+'"><b>'+esc(p.name)+'</b><span>'+esc(p.sub)+'</span></button>'; }).join(''):'<div class="res"><span>Nothing found.</span></div>'; })
+      .catch(function(){ hb.innerHTML='<div class="res"><span>The search did not answer.</span></div>'; });
+  });
+  $('#cfgSave').addEventListener('click',function(){
+    var id=$('#cfgId').value.trim().replace(/^.*gist\.github\.com\/[^/]+\//,'').replace(/[^a-f0-9]/gi,''), tk=$('#cfgTok').value.trim(), btn=$('#cfgSave'), er=$('#cfgErr'), ok=$('#cfgOk');
+    er.hidden=true; ok.hidden=true; if(!id||!tk){ er.hidden=false; er.textContent='Both the gist ID and the token are needed.'; return; }
+    btn.disabled=true; btn.textContent='Checking…';
+    fetch('https://api.github.com/gists/'+id,{headers:gHeaders(tk),cache:'no-store'}).then(function(r){
+      if(!r.ok){ var e=new Error('http'); e.status=r.status; throw e; }
+      try{ localStorage.setItem(G_ID,id); localStorage.setItem(G_TOK,tk); }catch(_){}
+      $('#cfgTok').value=''; ok.hidden=false; ok.textContent='Connected. Syncing now.'; gPush();
+    }).catch(function(e){ er.hidden=false; er.textContent=gExplain(e&&e.status); }).then(function(){ btn.disabled=false; btn.textContent='Check and connect'; render(); });
+  });
+  $('#cfgForget').addEventListener('click',function(){ try{ localStorage.removeItem(G_ID); localStorage.removeItem(G_TOK); }catch(_){} SY={lastOk:0,lastErr:'',lastErrAt:0}; sySave(); render(); });
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden && !DRV) gPull(); });
+  window.addEventListener('online',function(){ gPush(); });
+}
+
+function boot(){
+  loadLocal();
+  var c=gCreds(); if(c) $('#cfgId').value=c.id;
+  wire(); renderKnobs(); renderPlaces(); go('plan');
+  gPull();
+  if('serviceWorker' in navigator && location.protocol.indexOf('http')===0) navigator.serviceWorker.register('./sw.js').catch(function(e){ diagNote('worker: '+e.message); });
+}
+boot();
+
+window.__tour={ get S(){ return S; }, set S(v){ S=v; }, plan:plan, get current(){ return current; }, set current(v){ current=v; },
+  profileText:profileText, parseRoute:parseRoute, analyse:analyse, classify:classify, tagsOf:tagsOf, segSpeedMph:segSpeedMph,
+  verdict:verdict, bendWord:bendWord, loopVias:loopVias, hav:hav, locate:locate, nextHint:nextHint, hintText:hintText, splice:splice,
+  simplify:simplify, gpxText:gpxText, googleUrl:googleUrl, autoName:autoName, saveCurrent:saveCurrent, merge:merge, fresh:fresh,
+  routeUrl:routeUrl, explainRouteError:explainRouteError, fetchRoute:fetchRoute, doPlan:doPlan, showResult:showResult, go:go,
+  setMode:setMode, setPlace:setPlace, startDrive:startDrive, onFix:onFix, endDrive:endDrive, get DRV(){ return DRV; },
+  fmtAhead:fmtAhead, sayAhead:sayAhead, BUILD:BUILD };
+</script>
+</body>
+</html>
