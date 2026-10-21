@@ -22,7 +22,7 @@
  *
  * Bump CACHE on every change to the shell or the page, or phones keep the old one.
  */
-var CACHE = 'desk-clock-v5';        /* v5, 20 Sep 2026 — five pictures, four of them engravings. */
+var CACHE = 'desk-clock-v6';        /* v6, 21 Oct 2026 — diary face (swipe left), night from 23:00 to 07:00. */
 var FONT_CACHE = 'desk-clock-fonts-v1';
 
 var SHELL = [

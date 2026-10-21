@@ -114,12 +114,58 @@
     .big { font-size: 30vmin; }
   }
 
+
+  /* ---------- Diary face (swipe left) — 21 Oct 2026 ----------
+     Clock on the left, today in half-hour blocks on the right, and a countdown to the next
+     meeting, so a glance from the desk answers "when am I next on". Work is brass, family ivory. */
+  #diaryMode { width: 94vw; height: 88vh; display: -webkit-box; display: flex; }
+  .dLeft { width: 36%; padding-right: 3vmin; display: -webkit-box; display: flex; -webkit-box-orient: vertical; flex-direction: column; justify-content: center; }
+  .dTime { font-size: 22vmin; line-height: 1; font-weight: 500; font-variant-numeric: lining-nums tabular-nums; }
+  .dTime .colon { color: var(--brass); }
+  .dDate { margin-top: 2vmin; font-size: 3.6vmin; letter-spacing: .28em; text-transform: uppercase; color: var(--brass); font-weight: 600; }
+  .dNext { margin-top: 5vmin; padding-top: 3vmin; border-top: 1px solid var(--ivory-faint); }
+  .dNext .k { font-size: 2.8vmin; letter-spacing: .3em; text-transform: uppercase; color: var(--ivory-dim); font-weight: 600; }
+  .dNext .c { font-size: 11vmin; line-height: 1.05; font-weight: 500; font-variant-numeric: lining-nums tabular-nums; margin-top: 1vmin; }
+  .dNext .c.soon { color: var(--brass); }
+  .dNext .w { font-size: 3.6vmin; color: var(--ivory); margin-top: 1vmin; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dNext .w2 { font-size: 3vmin; color: var(--ivory-dim); margin-top: .6vmin; }
+  .dRight { -webkit-box-flex: 1; flex: 1; min-width: 0; border-left: 1px solid var(--ivory-faint); padding-left: 3vmin; position: relative; overflow: hidden; }
+  .dAll { font-size: 2.8vmin; color: var(--ivory-dim); margin-bottom: 1.2vmin; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dGrid { display: grid; grid-template-columns: 10vmin 1fr 1fr; grid-auto-rows: 5.2vmin; position: relative; }
+  .dHr { grid-column: 1; font-size: 2.7vmin; color: var(--ivory-faint); font-variant-numeric: tabular-nums; border-top: 1px solid #141210; padding-top: .3vmin; }
+  .dHr.full { color: var(--ivory-dim); }
+  .dHr.now { color: var(--brass); }
+  .dLine { grid-column: 2 / 4; border-top: 1px solid #141210; }
+  .dEv { margin: .25vmin .5vmin; padding: .5vmin 1.2vmin; border-radius: .8vmin; font-size: 2.9vmin; line-height: 1.25;
+         overflow: hidden; z-index: 1; border-left: .6vmin solid var(--brass); background: rgba(184,149,90,.16); color: var(--ivory); }
+  .dEv.personal { border-left-color: var(--ivory); background: rgba(232,223,203,.08); }
+  .dEv.past { opacity: .38; }
+  .dEv.nowEv { background: rgba(184,149,90,.32); }
+  .dEv b { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ivory-dim); margin-right: .8vmin; }
+  .dNow { grid-column: 1 / 4; height: 0; border-top: 2px solid var(--brass); z-index: 2; position: relative; }
+  .dMsg { font-size: 3.2vmin; color: var(--ivory-dim); line-height: 1.5; }
+  .dStale { position: absolute; right: 0; bottom: 0; font-size: 2.2vmin; color: var(--ivory-faint); }
+  .dSetup { font-size: 3vmin; color: var(--ivory); line-height: 1.5; max-width: 80vmin; }
+  .dSetup input { display: block; width: 100%; box-sizing: border-box; margin: 1vmin 0 2vmin; padding: 1.4vmin; font: inherit; font-size: 3vmin;
+                  background: #0b0a09; color: var(--ivory); border: 1px solid var(--ivory-faint); border-radius: 1vmin; }
+  .dSetup button { font: inherit; font-size: 3vmin; padding: 1.2vmin 3vmin; border-radius: 1vmin; border: 0; background: var(--brass); color: #000; font-weight: 600; }
+  .dSetup .err { color: #d98b7a; margin-top: 1.5vmin; }
+
+  /* ---------- Night: 23:00 to 07:00 the page goes to pure black ----------
+     On this phone (iPhone 11 Pro Max, OLED) a black pixel is a pixel that is off, so this is the
+     screen resting, not a dimmed clock. The page also lets go of its keep-awake request, so if
+     Auto-Lock is set the phone sleeps on its own. The real switch-off is a Shortcuts automation;
+     this is the belt to its braces. A tap shows the time for fifteen seconds. */
+  #night { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: #000; z-index: 50; }
+  #night .peek { position: absolute; top: 50%; left: 0; right: 0; margin-top: -9vmin; text-align: center;
+                 font-size: 18vmin; line-height: 1; color: var(--ivory-faint); font-variant-numeric: lining-nums tabular-nums; }
   [hidden] { display: none !important; }
   @media (prefers-reduced-motion: reduce) { #shift { transition: none; -webkit-transition: none; } }
 </style>
 </head>
 <body>
-<div id="stage" aria-label="Clock. Tap to change face.">
+<div id="night" hidden><div class="peek" id="nightPeek" hidden></div></div>
+<div id="stage" aria-label="Clock. Tap to change face. Swipe left for the diary.">
   <div id="shift">
 
     <!-- THE CHARGING FACE. Four artworks, one shown at a time; a tap cycles them and the
@@ -253,6 +299,25 @@
       </div>
     </div>
 
+    <div id="diaryMode" hidden>
+      <div class="dLeft">
+        <div class="dTime" id="dTime">00:00</div>
+        <div class="dDate" id="dDate"></div>
+        <div class="dNext" id="dNext"></div>
+      </div>
+      <div class="dRight" id="dRight">
+        <div id="dList"></div>
+        <div class="dSetup" id="dSetup" hidden>
+          <div>Connect the diary once on this phone. Use the same gist ID and token as the other estate apps.</div>
+          <input id="dSid" placeholder="Gist ID" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <input id="dStok" type="password" placeholder="Token" autocomplete="off">
+          <button type="button" id="dSave">Connect</button>
+          <div class="err" id="dSerr"></div>
+        </div>
+        <div class="dStale" id="dStale"></div>
+      </div>
+    </div>
+
     <div id="digiMode" hidden>
       <img alt="" src="data:image/png;base64,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">
       <div class="big" id="big">00<span class="colon">:</span>00</div>
@@ -343,6 +408,12 @@
 
     var tt = timeText(now);
     document.getElementById("rt").textContent = tt.h + ":" + tt.m;
+    var dT = document.getElementById("dTime");
+    if (dT) {
+      dT.innerHTML = tt.h + '<span class="colon">:</span>' + tt.m;
+      document.getElementById("dDate").textContent = DAYS[now.getDay()] + " " + now.getDate() + " " + MONTHS[now.getMonth()];
+      if (s === 0 && diaryMode && !diaryMode.hidden) renderDiary();
+    }
     document.getElementById("rd").textContent = DAYS[now.getDay()];
     document.getElementById("big").innerHTML = tt.h + '<span class="colon">:</span>' + tt.m;
     if (charging) {
@@ -363,7 +434,7 @@
   // Safari and the Claude viewer both add bars, so the face is scaled down
   // to fit the visible area instead of being cut off at the bottom.
   var shift = document.getElementById("shift"), stage = document.getElementById("stage");
-  var dialMode = document.getElementById("dialMode"), digiMode = document.getElementById("digiMode");
+  var dialMode = document.getElementById("dialMode"), digiMode = document.getElementById("digiMode"), diaryMode = document.getElementById("diaryMode");
   var nx = 0, ny = 0, sc = 1;
   function apply() {
     var t = "translate(" + nx + "px," + ny + "px) scale(" + sc + ")";
@@ -375,7 +446,7 @@
        DIGITAL one, which is hidden and therefore has no size, so fit() returned early and the
        charge face rendered unscaled and clipped. Ask which face is actually visible. */
     var box = chargeMode.className.indexOf("on") > -1 ? chargeMode
-            : (dialMode.hidden ? digiMode : dialMode);
+            : (!diaryMode.hidden ? diaryMode : (dialMode.hidden ? digiMode : dialMode));
     var cs = window.getComputedStyle(stage);
     var W = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     var H = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
@@ -398,8 +469,11 @@
   function setMode(m) {
     charging = (m === "charge");
     chargeMode.className = charging ? "on" : "";
-    dialMode.hidden = charging || (m === "digital");
+    dialMode.hidden = charging || (m === "digital") || (m === "diary");
     digiMode.hidden = charging || (m !== "digital");
+    diaryMode.hidden = charging || (m !== "diary");
+    if (m !== "diary" && !charging) lastFace = m;
+    if (m === "diary") { renderDiary(); loadDiary(); }
     /* The charging face is NOT remembered. It is a place the phone is put, not a preference:
        remembering it would mean the study clock came back as a charging screen after a reboot,
        having never been asked to be one. */
@@ -416,7 +490,7 @@
     { key: "glass",    name: "the hourglass", lvl: "lvlTop", lvl2: "lvlBot" },
     { key: "arms",     name: "the arms",      lvl: "lvlArms" }
   ];
-  var fillIdx = 0, charging = false;
+  var fillIdx = 0, charging = false, lastFace = "dial";
   var capEl  = document.querySelector("[data-fill-cap]"),
       timeEl = document.querySelector("[data-fill-time]"),
       pctEl  = document.querySelector("[data-fill-pct]"),
@@ -496,10 +570,12 @@
   var saved = null;
   try { saved = localStorage.getItem("clockMode"); } catch (e) {}
   var wantCharge = /[?&](charge|b=)/.test(window.location.search);
-  setMode(wantCharge ? "charge" : (saved === "digital" ? "digital" : "dial"));
+  setMode(wantCharge ? "charge" : (saved === "digital" ? "digital" : (saved === "diary" ? "diary" : "dial")));
   if (wantCharge) readBattery();
 
-  stage.addEventListener("click", function () {
+  stage.addEventListener("click", function (ev) {
+    if (swiped) { swiped = false; return; }
+    if (!diaryMode.hidden) return;   /* the diary face is read, not tapped; swipe right to leave */
     /* On the charging face a tap cycles the four pictures rather than leaving the face. Leaving
        is what closing the app is for; while it is standing on the charger the only thing worth
        changing is which one you are looking at. */
@@ -507,11 +583,198 @@
     setMode(dialMode.hidden ? "dial" : "digital");
   });
 
+
+  /* ── SWIPE: left for the diary, right to go back to whichever face you came from ──────── */
+  var sx = 0, sy = 0, swiped = false;
+  stage.addEventListener("touchstart", function (e) {
+    if (!e.touches || !e.touches.length) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  }, false);
+  stage.addEventListener("touchend", function (e) {
+    if (charging || !e.changedTouches || !e.changedTouches.length) return;
+    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    swiped = true; setTimeout(function () { swiped = false; }, 600);
+    if (dx < 0 && diaryMode.hidden) setMode("diary");
+    else if (dx > 0 && !diaryMode.hidden) setMode(lastFace || "dial");
+  }, false);
+
+  /* ── THE DIARY ───────────────────────────────────────────────────────────────────────────
+     Today's work and family diary, from desk-diary.json in the private estate store, written by
+     the calendar tasks on the Mac four times a day. The page holds no data of its own and no
+     credentials in its code: the ID and token are typed into this phone once and live only in
+     its storage, like every other estate app. The last good copy is kept, so a dead network
+     shows the morning's diary marked with its age rather than an empty column. */
+  var K_ID = "connolly-sync:gist-id", K_TOK = "connolly-sync:token", D_FILE = "desk-diary.json", K_CACHE = "deskDiary:last";
+  var diary = null, lastLoad = 0;
+  try { diary = JSON.parse(localStorage.getItem(K_CACHE) || "null"); } catch (e) { diary = null; }
+  function lsg(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function creds() { var i = lsg(K_ID), t = lsg(K_TOK); return (i && t) ? { id: i, t: t } : null; }
+  function ymd(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function mins(hm) { var p = String(hm).split(":"); return parseInt(p[0], 10) * 60 + parseInt(p[1] || "0", 10); }
+  function hmOf(m) { return pad(Math.floor(m / 60)) + ":" + pad(m % 60); }
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function getJSON(url, tok, ok, bad) {
+    var x = new XMLHttpRequest();
+    x.open("GET", url, true);
+    x.setRequestHeader("Authorization", "Bearer " + tok);
+    x.setRequestHeader("Accept", "application/vnd.github+json");
+    x.onreadystatechange = function () {
+      if (x.readyState !== 4) return;
+      if (x.status >= 200 && x.status < 300) { try { ok(JSON.parse(x.responseText)); } catch (e) { bad(0); } }
+      else bad(x.status);
+    };
+    x.send();
+  }
+  function loadDiary() {
+    var c = creds();
+    if (!c) { renderDiary(); return; }
+    if (Date.now() - lastLoad < 20000) return;
+    lastLoad = Date.now();
+    getJSON("https://api.github.com/gists/" + c.id, c.t, function (j) {
+      var f = j && j.files && j.files[D_FILE];
+      if (!f) { diary = diary || null; renderDiary("Waiting for the first diary from the Mac."); return; }
+      var take = function (txt) {
+        try { diary = JSON.parse(txt); localStorage.setItem(K_CACHE, JSON.stringify(diary)); } catch (e) {}
+        renderDiary();
+      };
+      if (f.truncated && f.raw_url) {
+        getJSON(f.raw_url, c.t, function (o) { take(JSON.stringify(o)); }, function () { renderDiary(); });
+      } else take(f.content);
+    }, function (st) {
+      renderDiary(st === 401 || st === 403 ? "The token was refused — reconnect below." : null, st === 401 || st === 403);
+    });
+  }
+  setInterval(function () { if (!diaryMode.hidden && document.visibilityState === "visible") { lastLoad = 0; loadDiary(); } }, 600000);
+  document.addEventListener("visibilitychange", function () { if (!diaryMode.hidden && document.visibilityState === "visible") { lastLoad = 0; loadDiary(); } });
+
+  document.getElementById("dSave").addEventListener("click", function (e) {
+    e.stopPropagation();
+    var id = (document.getElementById("dSid").value || "").replace(/^.*\//, "").replace(/[^a-f0-9]/gi, "");
+    var tk = (document.getElementById("dStok").value || "").replace(/\s+/g, "");
+    var er = document.getElementById("dSerr");
+    if (!id || !tk) { er.innerHTML = "Both are needed."; return; }
+    er.innerHTML = "Checking…";
+    getJSON("https://api.github.com/gists/" + id, tk, function () {
+      try { localStorage.setItem(K_ID, id); localStorage.setItem(K_TOK, tk); } catch (x) {}
+      document.getElementById("dStok").value = ""; er.innerHTML = ""; lastLoad = 0; loadDiary();
+    }, function (st) { er.innerHTML = st === 404 ? "Gist not found — check the ID." : (st ? "GitHub said " + st + "." : "Could not reach GitHub."); });
+  });
+  var setupEls = ["dSid", "dStok", "dSave", "dSetup"];
+  for (var se = 0; se < setupEls.length; se++) {
+    document.getElementById(setupEls[se]).addEventListener("click", function (e) { e.stopPropagation(); });
+    document.getElementById(setupEls[se]).addEventListener("touchend", function (e) { e.stopPropagation(); });
+  }
+
+  function dayEvents(key) {
+    if (!diary || !diary.days) return null;
+    for (var i = 0; i < diary.days.length; i++) if (diary.days[i].date === key) return diary.days[i].events || [];
+    return [];
+  }
+  function renderDiary(msg, forceSetup) {
+    if (diaryMode.hidden) return;
+    var now = new Date(), nowM = now.getHours() * 60 + now.getMinutes();
+    var setup = document.getElementById("dSetup"), list = document.getElementById("dList");
+    var c = creds();
+    setup.hidden = !!c && !forceSetup;
+    var evs = dayEvents(ymd(now));
+    var stale = document.getElementById("dStale");
+    if (diary && diary.generatedAt) {
+      var age = (Date.now() - new Date(diary.generatedAt).getTime()) / 3600000;
+      var g = new Date(diary.generatedAt);
+      stale.innerHTML = (age > 14 ? "⚠ " : "") + "diary as at " + pad(g.getHours()) + ":" + pad(g.getMinutes()) + (ymd(g) !== ymd(now) ? " " + g.getDate() + "/" + (g.getMonth() + 1) : "");
+    } else stale.innerHTML = "";
+    if (evs === null) { list.innerHTML = '<div class="dMsg">' + esc(msg || (c ? "Loading the diary…" : "")) + "</div>"; renderNext(null, nowM); return; }
+    var timed = [], allday = [], i;
+    for (i = 0; i < evs.length; i++) { if (evs[i].a) allday.push(evs[i]); else timed.push(evs[i]); }
+    timed.sort(function (a, b) { return mins(a.s) - mins(b.s); });
+    /* Window: half-hour rows, sixteen of them, starting an hour before now (but not before 07:00
+       in the morning unless something is booked earlier) so the next thing is always in view. */
+    var ROWS = 16, first = Math.floor((nowM - 60) / 30) * 30;
+    if (first < 420) first = 420;
+    if (timed.length && mins(timed[0].s) < first && mins(timed[0].s) >= nowM - 60) first = Math.floor(mins(timed[0].s) / 30) * 30;
+    if (first > 1440 - ROWS * 30) first = 1440 - ROWS * 30;
+    var last = first + ROWS * 30, h = "";
+    if (allday.length) { var at = []; for (i = 0; i < allday.length; i++) at.push(esc(allday[i].t)); h += '<div class="dAll">All day · ' + at.join(" · ") + "</div>"; }
+    h += '<div class="dGrid">';
+    for (var r = 0; r < ROWS; r++) {
+      var bm = first + r * 30, isNow = nowM >= bm && nowM < bm + 30;
+      h += '<div class="dHr' + (bm % 60 === 0 ? " full" : "") + (isNow ? " now" : "") + '" style="grid-row:' + (r + 1) + '">' + hmOf(bm) + "</div>";
+      h += '<div class="dLine" style="grid-row:' + (r + 1) + '"></div>';
+    }
+    /* Two lanes: an event that overlaps one already placed goes beside it, not on top of it. */
+    var laneEnd = [0, 0];
+    for (i = 0; i < timed.length; i++) {
+      var e = timed[i], s = mins(e.s), en = e.e ? mins(e.e) : s + 30;
+      if (en <= s) en = s + 30;
+      if (en <= first || s >= last) continue;
+      var r1 = Math.max(0, Math.floor((s - first) / 30)), r2 = Math.min(ROWS, Math.ceil((en - first) / 30));
+      if (r2 <= r1) r2 = r1 + 1;
+      var lane = laneEnd[0] <= s ? 0 : (laneEnd[1] <= s ? 1 : 1);
+      laneEnd[lane] = en;
+      var cls = "dEv" + (e.r === "personal" ? " personal" : "") + (en <= nowM ? " past" : "") + (s <= nowM && nowM < en ? " nowEv" : "");
+      var col = (lane === 0 && (i + 1 >= timed.length || mins(timed[i + 1].s) >= en) && laneEnd[1] <= s) ? "2 / 4" : (lane + 2) + " / " + (lane + 3);
+      h += '<div class="' + cls + '" style="grid-row:' + (r1 + 1) + " / " + (r2 + 1) + ";grid-column:" + col + '"><b>' + esc(e.s) + "</b>" + esc(e.t) + "</div>";
+    }
+    if (nowM >= first && nowM < last) {
+      var frac = (nowM - first) / 30, rr = Math.floor(frac);
+      h += '<div class="dNow" style="grid-row:' + (rr + 1) + ";top:" + ((frac - rr) * 5.2).toFixed(2) + 'vmin"></div>';
+    }
+    h += "</div>";
+    if (!timed.length && !allday.length) h += '<div class="dMsg" style="margin-top:2vmin">Nothing in the diary today.</div>';
+    list.innerHTML = h;
+    renderNext(timed, nowM);
+    fit();
+  }
+  function renderNext(timed, nowM) {
+    var box = document.getElementById("dNext");
+    if (!timed) { box.innerHTML = ""; return; }
+    var cur = null, nxt = null, i;
+    for (i = 0; i < timed.length; i++) {
+      var s = mins(timed[i].s), en = timed[i].e ? mins(timed[i].e) : s + 30;
+      if (s <= nowM && nowM < en && !cur) cur = timed[i];
+      if (s > nowM && !nxt) nxt = timed[i];
+    }
+    var h = "";
+    if (nxt) {
+      var left = mins(nxt.s) - nowM, soon = left <= 10;
+      h += '<div class="k">Next meeting</div><div class="c' + (soon ? " soon" : "") + '">' + (left >= 60 ? Math.floor(left / 60) + "h " + pad(left % 60) + "m" : left + " min") + "</div>" +
+           '<div class="w">' + esc(nxt.s) + " · " + esc(nxt.t) + "</div>";
+    } else {
+      var tm = new Date(); tm.setDate(tm.getDate() + 1);
+      var te = dayEvents(ymd(tm)) || [], f = null;
+      for (i = 0; i < te.length; i++) if (!te[i].a && (!f || mins(te[i].s) < mins(f.s))) f = te[i];
+      h += '<div class="k">Next meeting</div><div class="c" style="font-size:6vmin">None today</div>' +
+           (f ? '<div class="w">Tomorrow ' + esc(f.s) + " · " + esc(f.t) + "</div>" : "");
+    }
+    if (cur) h += '<div class="w2">Now: ' + esc(cur.t) + (cur.e ? " · until " + esc(cur.e) : "") + "</div>";
+    box.innerHTML = h;
+  }
+
+  /* ── NIGHT ─────────────────────────────────────────────────────────────────────────────── */
+  var NIGHT_FROM = 23 * 60, NIGHT_TO = 7 * 60, NO_NIGHT = /[?&]night=off\b/.test(location.search);
+  var nightEl = document.getElementById("night"), peekEl = document.getElementById("nightPeek"), peekT = null;
+  function isNight(d) { var m = d.getHours() * 60 + d.getMinutes(); return !NO_NIGHT && (m >= NIGHT_FROM || m < NIGHT_TO); }
+  function nightCheck() {
+    var n = isNight(new Date());
+    if (n && nightEl.hidden) { nightEl.hidden = false; try { if (lock) { lock.release(); lock = null; } } catch (e) {} }
+    if (!n && !nightEl.hidden) { nightEl.hidden = true; peekEl.hidden = true; wake(); }
+    if (!diaryMode.hidden && !n) renderDiary();
+  }
+  nightEl.addEventListener("click", function (e) {
+    e.stopPropagation();
+    var t = timeText(new Date()); peekEl.innerHTML = t.h + ":" + t.m; peekEl.hidden = false;
+    clearTimeout(peekT); peekT = setTimeout(function () { peekEl.hidden = true; }, 15000);
+  });
+  setInterval(nightCheck, 30000);
+  setTimeout(nightCheck, 50);
+  if (!diaryMode.hidden) { lastLoad = 0; renderDiary(); loadDiary(); }
+
   // ---- Keep the screen awake where the browser allows it (Auto-Lock: Never is the real fix) ----
   var lock = null;
   function wake() {
     try {
-      if (navigator.wakeLock && document.visibilityState === "visible") {
+      if (navigator.wakeLock && document.visibilityState === "visible" && !isNight(new Date())) {
         navigator.wakeLock.request("screen").then(function (l) { lock = l; }, function () {});
       }
     } catch (e) {}
