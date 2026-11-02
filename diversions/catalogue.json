@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-26T07:07:56.339Z",
+  "generatedAt": "2026-11-02T10:00:12.006Z",
   "source": "weekly curator",
-  "count": 208,
+  "count": 227,
   "catalogue": [
     {
       "id": "d-itv-70-up",
@@ -100,14 +100,6 @@
       "blurb": "Friday the 13th prequel series; date to be confirmed."
     },
     {
-      "id": "d-iplayer-cunk-on-cinema",
-      "title": "Cunk on Cinema",
-      "platform": "iplayer",
-      "type": "tv",
-      "date": "2026",
-      "blurb": "Diane Morgan's Philomena Cunk takes on the history of film in a three-part mockumentary."
-    },
-    {
       "id": "d-itv-emerald-city",
       "title": "Emerald City",
       "platform": "itv",
@@ -169,7 +161,7 @@
       "platform": "channel4",
       "type": "tv",
       "date": "2026",
-      "blurb": "Return of the BAFTA-winning I Am anthology, with Nicola Coughlan and Joe Cole in a two-part drama tackling the manosphere."
+      "blurb": "Nicola Coughlan and Joe Cole in a one-off drama from the I Am anthology (date unconfirmed)."
     },
     {
       "id": "d-iplayer-ludwig-season-2",
@@ -372,6 +364,14 @@
       "blurb": "Dan Stevens leads the next Terror anthology season, acquired by Sky; date TBC."
     },
     {
+      "id": "d-skyone-the-trip-to-the-northern-lights",
+      "title": "The Trip… To The Northern Lights",
+      "platform": "skyone",
+      "type": "tv",
+      "date": "2026",
+      "blurb": "Steve Coogan and Rob Brydon's fifth Trip, on Sky Max this winter (month unconfirmed)."
+    },
+    {
       "id": "d-itv-the-voice-uk",
       "title": "The Voice UK",
       "platform": "itv",
@@ -506,134 +506,6 @@
       "type": "tv",
       "date": "2026-10",
       "blurb": "New true-crime drama in Disney+ UK's October line-up."
-    },
-    {
-      "id": "d-u-anna-pigeon",
-      "title": "Anna Pigeon",
-      "platform": "u",
-      "type": "tv",
-      "date": "2026-10-06",
-      "blurb": "Park ranger investigates crimes in US national parks (U&Drama)."
-    },
-    {
-      "id": "d-prime-carrie",
-      "title": "Carrie",
-      "platform": "prime",
-      "type": "tv",
-      "date": "2026-10-07",
-      "blurb": "Mike Flanagan's horror series adapting Stephen King's novel."
-    },
-    {
-      "id": "d-prime-carrie-season-1",
-      "title": "Carrie — Season 1",
-      "platform": "prime",
-      "type": "tv",
-      "date": "2026-10-07",
-      "blurb": "Mike Flanagan's serialised take on Stephen King's Carrie, reworking the bullied-telekinetic-teen story as a horror drama."
-    },
-    {
-      "id": "d-disney-phineas-and-ferb-halloween-special",
-      "title": "Phineas and Ferb — Halloween Special",
-      "platform": "disney",
-      "type": "tv",
-      "date": "2026-10-07",
-      "blurb": "Halloween special premiere, part of a spooky-season animation drop."
-    },
-    {
-      "id": "d-netflix-below",
-      "title": "Below",
-      "platform": "netflix",
-      "type": "tv",
-      "date": "2026-10-08",
-      "blurb": "Limited series: Josh Hartnett as a fisherman fighting a deep-sea creature."
-    },
-    {
-      "id": "d-netflix-below-limited-series",
-      "title": "Below — Limited Series",
-      "platform": "netflix",
-      "type": "tv",
-      "date": "2026-10-08",
-      "blurb": "Josh Hartnett's fisherman protects his town from a deep-sea creature."
-    },
-    {
-      "id": "d-netflix-animals",
-      "title": "Animals",
-      "platform": "netflix",
-      "type": "film",
-      "date": "2026-10-09",
-      "blurb": "Ben Affleck as a mayoral candidate who, with his wife, pays a kidnapping ransom."
-    },
-    {
-      "id": "d-netflix-haunted-hotel-season-2",
-      "title": "Haunted Hotel — Season 2",
-      "platform": "netflix",
-      "type": "tv",
-      "date": "2026-10-09",
-      "blurb": "Adult animated comedy returns for more paranormal disasters at the world's most haunted hotel."
-    },
-    {
-      "id": "d-disney-oasis-don-t-look-back-in-anger",
-      "title": "Oasis: Don't Look Back in Anger",
-      "platform": "disney",
-      "type": "film",
-      "date": "2026-10-09",
-      "blurb": "Behind the scenes of the Oasis Live '25 reunion tour."
-    },
-    {
-      "id": "d-cinema-other-mommy",
-      "title": "Other Mommy",
-      "platform": "cinema",
-      "type": "film",
-      "date": "2026-10-09",
-      "blurb": "Rob Savage's supernatural horror from the Josh Malerman novel, with Jessica Chastain as a mother whose double emerges from her daughter's closet."
-    },
-    {
-      "id": "d-cinema-the-social-reckoning",
-      "title": "The Social Reckoning",
-      "platform": "cinema",
-      "type": "film",
-      "date": "2026-10-09",
-      "blurb": "Jeremy Strong plays Mark Zuckerberg in Aaron Sorkin's take on Facebook's founding and fallout."
-    },
-    {
-      "id": "d-channel4-until-the-last-heartbeat",
-      "title": "Until The Last Heartbeat",
-      "platform": "channel4",
-      "type": "tv",
-      "date": "2026-10-09",
-      "blurb": "Walter Presents: an Italian heart surgeon's desperate choice for his son pulls him into blackmail."
-    },
-    {
-      "id": "d-netflix-malory-towers",
-      "title": "Malory Towers",
-      "platform": "netflix",
-      "type": "tv",
-      "date": "2026-10-10",
-      "blurb": "BBC series: Darrell Rivers at boarding school in post-war Cornwall."
-    },
-    {
-      "id": "d-netflix-wicked",
-      "title": "Wicked",
-      "platform": "netflix",
-      "type": "film",
-      "date": "2026-10-10",
-      "blurb": "Elphaba and Glinda's Shiz University friendship fractures into legendary rivalry."
-    },
-    {
-      "id": "d-itv-the-party",
-      "title": "The Party",
-      "platform": "itv",
-      "type": "tv",
-      "date": "2026-10-11",
-      "blurb": "Five-part drama from Elizabeth Day's novel: a journalist and his wealthy school friend."
-    },
-    {
-      "id": "d-iplayer-time-series-3",
-      "title": "Time — Series 3",
-      "platform": "iplayer",
-      "type": "tv",
-      "date": "2026-10-11",
-      "blurb": "Jimmy McGovern's prison drama with David Tennant and Siobhan Finneran in a young offenders institution."
     },
     {
       "id": "d-netflix-lupin-season-4",
@@ -897,7 +769,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-10-23",
-      "blurb": "DC horror-tinged Clayface origin story from Warner Bros."
+      "blurb": "DC body-horror film from Warner Bros."
     },
     {
       "id": "d-cinema-fatherland",
@@ -1020,6 +892,14 @@
       "blurb": "Animated fantasy: two children enter an enchanted forest to rescue their sibling (Peyton Elizabeth Lee, Jacob Tremblay voices)."
     },
     {
+      "id": "d-itv-adultery-season-1",
+      "title": "Adultery — Season 1",
+      "platform": "itv",
+      "type": "tv",
+      "date": "2026-10-25",
+      "blurb": "Teenagers' first love leads their parents (Dominic Cooper, Romola Garai) into an affair."
+    },
+    {
       "id": "d-iplayer-this-city-is-ours-series-2",
       "title": "This City Is Ours — Series 2",
       "platform": "iplayer",
@@ -1100,6 +980,22 @@
       "blurb": "Mystery thriller reimagining Baba Yaga in a coastal town."
     },
     {
+      "id": "d-skyatlantic-yaga-season-1",
+      "title": "YAGA — Season 1",
+      "platform": "skyatlantic",
+      "type": "tv",
+      "date": "2026-10-31",
+      "blurb": "Mystery thriller reimagining the Baba Yaga myth in a coastal town."
+    },
+    {
+      "id": "d-iplayer-bill-s-included-season-1",
+      "title": "Bill's Included — Season 1",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026-11",
+      "blurb": "Rob Brydon sitcom as a divorced man renting rooms to students."
+    },
+    {
       "id": "d-iplayer-blue-planet-iii",
       "title": "Blue Planet III",
       "platform": "iplayer",
@@ -1108,20 +1004,20 @@
       "blurb": "BBC natural history series returns to the oceans (month only)."
     },
     {
+      "id": "d-iplayer-cunk-on-cinema",
+      "title": "Cunk on Cinema",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026-11",
+      "blurb": "Diane Morgan's Philomena Cunk on the history of film."
+    },
+    {
       "id": "d-itv-i-m-a-celebrity-get-me-out-of-here",
       "title": "I'm A Celebrity... Get Me Out Of Here!",
       "platform": "itv",
       "type": "tv",
       "date": "2026-11",
       "blurb": "Ant and Dec return live from Australia's Springbrook National Park for a new jungle series."
-    },
-    {
-      "id": "d-disney-percy-jackson-and-the-olympians-season-3",
-      "title": "Percy Jackson and the Olympians — Season 3",
-      "platform": "disney",
-      "type": "tv",
-      "date": "2026-11",
-      "blurb": "Third season of the Rick Riordan adaptation (US date 20 Nov; UK date unconfirmed)."
     },
     {
       "id": "d-cinema-predator-badlands",
@@ -1153,7 +1049,7 @@
       "platform": "skyatlantic",
       "type": "tv",
       "date": "2026-11",
-      "blurb": "Ella Purnell's Rhiannon juggles a promotion and a new romance while a copycat killer threatens to expose her lethal side hustle."
+      "blurb": "Ella Purnell in the adaptation of C.J. Skuse's novel."
     },
     {
       "id": "d-skyatlantic-the-good-daughter",
@@ -1172,12 +1068,20 @@
       "blurb": "Disney animation sequel (cinema first)."
     },
     {
+      "id": "d-iplayer-tall-tales-murder-season-1",
+      "title": "Tall Tales & Murder — Season 1",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026-11-02",
+      "blurb": "Darkly comic Irish crime drama with Ella Lily Hyland and Aidan Gillen, based on Caimh McDonnell's Dublin Trilogy."
+    },
+    {
       "id": "d-skyatlantic-the-gilded-age-season-4",
       "title": "The Gilded Age — Season 4",
       "platform": "skyatlantic",
       "type": "tv",
       "date": "2026-11-02",
-      "blurb": "Julian Fellowes' 1880s New York period drama."
+      "blurb": "Julian Fellowes's 1880s New York period drama."
     },
     {
       "id": "d-netflix-bass-x-machina",
@@ -1188,6 +1092,14 @@
       "blurb": "Adult animated steampunk Western voiced by Brian Tyree Henry."
     },
     {
+      "id": "d-netflix-bass-x-machina-season-1",
+      "title": "Bass X Machina — Season 1",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-11-03",
+      "blurb": "Adult animated steampunk Western with Brian Tyree Henry as a father protecting his family."
+    },
+    {
       "id": "d-netflix-a-dog-s-perfect-christmas",
       "title": "A Dog's Perfect Christmas",
       "platform": "netflix",
@@ -1196,12 +1108,36 @@
       "blurb": "Festive family film told partly from the dog's point of view."
     },
     {
+      "id": "d-disney-all-s-fair-season-2",
+      "title": "All's Fair — Season 2",
+      "platform": "disney",
+      "type": "tv",
+      "date": "2026-11-04",
+      "blurb": "The lawyers of Grant, Ronson & Greene return for more scandal."
+    },
+    {
       "id": "d-prime-the-greatest",
       "title": "The Greatest",
       "platform": "prime",
       "type": "tv",
       "date": "2026-11-04",
-      "blurb": "Sports drama series biopic about Muhammad Ali."
+      "blurb": "First authorised scripted series about Muhammad Ali's life."
+    },
+    {
+      "id": "d-cinema-the-last-temptation-of-becky",
+      "title": "The Last Temptation of Becky",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11-04",
+      "blurb": "Lulu Wilson returns as Becky, now an undercover CIA field agent in Poland; with Neil Patrick Harris and Kate Siegel."
+    },
+    {
+      "id": "d-u-a-remarkable-place-to-die-season-2",
+      "title": "A Remarkable Place to Die — Season 2",
+      "platform": "u",
+      "type": "tv",
+      "date": "2026-11-05",
+      "blurb": "DS Anais Mallory investigates her sister's death in her hometown of Queenstown (U&Drama)."
     },
     {
       "id": "d-netflix-black-doves-season-2",
@@ -1209,7 +1145,39 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-11-05",
-      "blurb": "Keira Knightley and Ben Whishaw return in the spy thriller."
+      "blurb": "British spy thriller with Keira Knightley and Ben Whishaw hunting answers after an attack."
+    },
+    {
+      "id": "d-disney-super-troopers-3",
+      "title": "Super Troopers 3",
+      "platform": "disney",
+      "type": "film",
+      "date": "2026-11-05",
+      "blurb": "The Super Troopers must stop Farva's chaotic engagement while working a drug ring case."
+    },
+    {
+      "id": "d-cinema-godzilla-minus-zero",
+      "title": "Godzilla Minus Zero",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11-06",
+      "blurb": "Takashi Yamazaki's sequel to Godzilla Minus One, set two years after the attack as Japan rebuilds."
+    },
+    {
+      "id": "d-cinema-i-play-rocky",
+      "title": "I Play Rocky",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11-06",
+      "blurb": "Anthony Ippolito plays a young Sylvester Stallone during the making of Rocky; Peter Farrelly directs."
+    },
+    {
+      "id": "d-cinema-merry-christmas-aubrey-flint",
+      "title": "Merry Christmas Aubrey Flint",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11-06",
+      "blurb": "John Bradley as a Christmas-hating recluse who directs A Christmas Carol at a retirement home; with Celia Imrie and Richard E. Grant."
     },
     {
       "id": "d-netflix-possible-love",
@@ -1217,15 +1185,39 @@
       "platform": "netflix",
       "type": "film",
       "date": "2026-11-06",
-      "blurb": "Romantic drama directed by Lee Chang-dong."
+      "blurb": "Lee Chang-dong's Korean drama about two married couples confronting hidden desires."
+    },
+    {
+      "id": "d-iplayer-return-to-paradise-season-3",
+      "title": "Return to Paradise — Season 3",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026-11-06",
+      "blurb": "Death in Paradise spin-off set in Australia."
+    },
+    {
+      "id": "d-prime-the-assassin-series-2",
+      "title": "The Assassin — Series 2",
+      "platform": "prime",
+      "type": "tv",
+      "date": "2026-11-06",
+      "blurb": "Hitwoman Julie and Edward reluctantly team up against Spain's corrupt underworld."
     },
     {
       "id": "d-cinema-the-cat-in-the-hat",
-      "title": "The Cat In The Hat",
+      "title": "The Cat in the Hat",
       "platform": "cinema",
       "type": "film",
       "date": "2026-11-06",
-      "blurb": "Warner Bros animated adaptation of the Dr. Seuss classic."
+      "blurb": "Animated Dr. Seuss adaptation with Bill Hader, Matt Berry and Quinta Brunson."
+    },
+    {
+      "id": "d-alibi-hudson-rex-season-8b",
+      "title": "Hudson & Rex — Season 8b",
+      "platform": "alibi",
+      "type": "tv",
+      "date": "2026-11-08",
+      "blurb": "Detective Hudson and former police K9 Rex return (U&Alibi)."
     },
     {
       "id": "d-netflix-avedon",
@@ -1233,7 +1225,7 @@
       "platform": "netflix",
       "type": "film",
       "date": "2026-11-11",
-      "blurb": "Ron Howard's documentary on photographer Richard Avedon."
+      "blurb": "Ron Howard documentary on photographer Richard Avedon."
     },
     {
       "id": "d-netflix-chiaroscuro",
@@ -1244,12 +1236,20 @@
       "blurb": "An art advisor helps a police inspector hunt a killer who recreates famous artworks in Rome."
     },
     {
+      "id": "d-channel4-hunting-alice-bell-season-1",
+      "title": "Hunting Alice Bell — Season 1",
+      "platform": "channel4",
+      "type": "tv",
+      "date": "2026-11-11",
+      "blurb": "A woman falsely accused of being a nurse linked to a serial killer joins others trying to clear their names."
+    },
+    {
       "id": "d-disney-rivals-season-2-part-2",
-      "title": "Rivals — Season 2 Part 2",
+      "title": "Rivals — Season 2, Part 2",
       "platform": "disney",
       "type": "tv",
       "date": "2026-11-11",
-      "blurb": "Jilly Cooper adaptation continues with David Tennant."
+      "blurb": "Second half of season two: the Cotswolds franchise battle between Baddingham and O'Hara."
     },
     {
       "id": "d-netflix-the-body-season-1",
@@ -1261,11 +1261,11 @@
     },
     {
       "id": "d-prime-the-lord-of-the-rings-the-rings-of-power",
-      "title": "The Lord of the Rings: The Rings of Power — Season 3",
+      "title": "The Lord of the Rings: The Rings of Power — Series 3",
       "platform": "prime",
       "type": "tv",
       "date": "2026-11-11",
-      "blurb": "New season of the Tolkien-based fantasy series."
+      "blurb": "Five years after the fall of Eregion, Sauron's armies threaten Middle-earth."
     },
     {
       "id": "d-netflix-the-empress-season-3",
@@ -1273,7 +1273,23 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-11-12",
-      "blurb": "Final season of the German historical drama about Empress Elisabeth."
+      "blurb": "Final season of the German historical drama on Empress Elisabeth."
+    },
+    {
+      "id": "d-skyatlantic-the-good-daughter-season-1",
+      "title": "The Good Daughter — Season 1",
+      "platform": "skyatlantic",
+      "type": "tv",
+      "date": "2026-11-12",
+      "blurb": "Sisters confront buried trauma when a new crime reopens an attack from twenty years earlier."
+    },
+    {
+      "id": "d-cinema-ebenezer",
+      "title": "Ebenezer",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11-13",
+      "blurb": "Ti West's gothic Christmas Carol reimagining with Johnny Depp as Scrooge, plus Rupert Grint and Daisy Ridley."
     },
     {
       "id": "d-cinema-ebenezer-a-christmas-carol",
@@ -1284,12 +1300,28 @@
       "blurb": "Paramount's new take on the Dickens Christmas story."
     },
     {
+      "id": "d-cinema-fjord",
+      "title": "Fjord",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11-13",
+      "blurb": "Cristian Mungiu's drama with Sebastian Stan and Renate Reinsve as a couple whose beliefs draw child protection authorities in Norway."
+    },
+    {
       "id": "d-netflix-heartland",
       "title": "Heartland",
       "platform": "netflix",
       "type": "film",
       "date": "2026-11-13",
       "blurb": "Jessica Chastain plays a reclusive country star searching for her niece in Nashville."
+    },
+    {
+      "id": "d-cinema-prima-facie",
+      "title": "Prima Facie",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11-13",
+      "blurb": "Cynthia Erivo as a criminal defence barrister whose faith in the justice system is tested; adapted from Suzie Miller's play."
     },
     {
       "id": "d-cinema-the-great-beyond",
@@ -1300,12 +1332,28 @@
       "blurb": "Warner Bros release; UK date per Screen Daily schedule."
     },
     {
+      "id": "d-iplayer-honey-season-1",
+      "title": "Honey — Season 1",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026-11-14",
+      "blurb": "Darkly comic Cold War thriller about an MI6 agent undercover in 1982 East Berlin."
+    },
+    {
       "id": "d-prime-the-chosen-season-6",
       "title": "The Chosen — Season 6",
       "platform": "prime",
       "type": "tv",
       "date": "2026-11-15",
       "blurb": "Sixth season of the crowd-funded biblical drama about the life of Jesus."
+    },
+    {
+      "id": "d-prime-the-chosen-series-6",
+      "title": "The Chosen — Series 6",
+      "platform": "prime",
+      "type": "tv",
+      "date": "2026-11-15",
+      "blurb": "Season six covers the final day of Jesus of Nazareth."
     },
     {
       "id": "d-netflix-gentle-monster",
@@ -1321,7 +1369,7 @@
       "platform": "prime",
       "type": "film",
       "date": "2026-11-18",
-      "blurb": "Nicolas Cage as football coach and commentator John Madden."
+      "blurb": "Chronicles John Madden's life and his partnership with Al Davis."
     },
     {
       "id": "d-netflix-the-law-of-beasts",
@@ -1332,12 +1380,36 @@
       "blurb": "Polish drama across 1988 and 2014, splitting a detective and a psychiatrist over a child killer's sanity."
     },
     {
+      "id": "d-disney-vienna-game",
+      "title": "Vienna Game",
+      "platform": "disney",
+      "type": "tv",
+      "date": "2026-11-18",
+      "blurb": "Historical drama of scheming in 1814 Vienna as Europe's rulers meet."
+    },
+    {
       "id": "d-netflix-the-altruists",
       "title": "The Altruists",
       "platform": "netflix",
       "type": "tv",
       "date": "2026-11-19",
-      "blurb": "Julia Garner and Anthony Boyle in a crime drama on the Bankman-Fried/Ellison fraud."
+      "blurb": "Limited series with Julia Garner and Anthony Boyle as Caroline Ellison and Sam Bankman-Fried."
+    },
+    {
+      "id": "d-cinema-a-talent-for-murder",
+      "title": "A Talent For Murder",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11-20",
+      "blurb": "Anton Corbijn's thriller with Helen Mirren as Patricia Highsmith, pressed to write another Ripley novel."
+    },
+    {
+      "id": "d-disney-percy-jackson-and-the-olympians-season-3",
+      "title": "Percy Jackson and the Olympians — Season 3",
+      "platform": "disney",
+      "type": "tv",
+      "date": "2026-11-20",
+      "blurb": "The Titan's Curse: Percy sets out to rescue Annabeth from Kronos's forces."
     },
     {
       "id": "d-netflix-steps",
@@ -1345,7 +1417,7 @@
       "platform": "netflix",
       "type": "film",
       "date": "2026-11-20",
-      "blurb": "Animated comedy with Ali Wong as Cinderella's stepsister Lilith."
+      "blurb": "Animated film in which Cinderella's stepsister Lilith teams up with Cinderella and a troll to save the kingdom."
     },
     {
       "id": "d-cinema-the-hunger-games-sunrise-on-the-reaping",
@@ -1353,7 +1425,23 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-11-20",
-      "blurb": "Lionsgate prequel returning to Panem for the Reaping that precedes the Games."
+      "blurb": "Prequel following a young Haymitch Abernathy in the 50th Hunger Games; with Elle Fanning and Ralph Fiennes."
+    },
+    {
+      "id": "d-cinema-you-can-see-everything",
+      "title": "You Can See Everything",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11-20",
+      "blurb": "Documentary on Elizabeth Holmes directed by Nathan Fielder and Lance Oppenheim."
+    },
+    {
+      "id": "d-cinema-your-mother-your-mother-your-mother",
+      "title": "Your Mother Your Mother Your Mother",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11-20",
+      "blurb": "Mahershala Ali as a religious hitman balancing fatherhood and grief; with John Cho."
     },
     {
       "id": "d-prime-blade-runner-2099",
@@ -1361,15 +1449,23 @@
       "platform": "prime",
       "type": "tv",
       "date": "2026-11-25",
-      "blurb": "Miniseries set 50 years after Blade Runner 2049."
+      "blurb": "Set 50 years after Blade Runner 2049, a fugitive Blade Runner hunts a runaway who holds a city-collapsing truth."
     },
     {
       "id": "d-cinema-focker-in-law",
-      "title": "Focker-In-Law",
+      "title": "Focker in Law",
       "platform": "cinema",
       "type": "film",
       "date": "2026-11-25",
-      "blurb": "Universal's third Fockers sequel (Meet the Parents franchise)."
+      "blurb": "Meet the Parents sequel with Ben Stiller and Robert De Niro; Ariana Grande joins."
+    },
+    {
+      "id": "d-cinema-the-further-mis-adventures-of-cliff-boot",
+      "title": "The Further Mis-Adventures of Cliff Booth",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11-25",
+      "blurb": "David Fincher's follow-up to Once Upon a Time in Hollywood, Brad Pitt returning as Cliff Booth in 1977 LA."
     },
     {
       "id": "d-netflix-the-mosquito-bowl",
@@ -1377,7 +1473,15 @@
       "platform": "netflix",
       "type": "film",
       "date": "2026-11-25",
-      "blurb": "Bill Skarsgård and Ray Nicholson in a WWII drama about a Marines football game before Okinawa."
+      "blurb": "WWII drama about college footballers turned Marines before Okinawa, with Bill Skarsgard."
+    },
+    {
+      "id": "d-disney-tracker-season-4",
+      "title": "Tracker — Season 4",
+      "platform": "disney",
+      "type": "tv",
+      "date": "2026-11-25",
+      "blurb": "Justin Hartley returns as survivalist Colter Shaw."
     },
     {
       "id": "d-netflix-the-hunting-wives-season-2",
@@ -1385,7 +1489,15 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-11-26",
-      "blurb": "Brittany Snow returns in the East Texas crime thriller."
+      "blurb": "Returning thriller series."
+    },
+    {
+      "id": "d-prime-alan-carr-s-great-big-bucket-list",
+      "title": "Alan Carr's Great Big Bucket List",
+      "platform": "prime",
+      "type": "tv",
+      "date": "2026-11-27",
+      "blurb": "Alan Carr and comics road-test popular bucket list activities."
     },
     {
       "id": "d-cinema-disney-s-hexed",
@@ -1402,6 +1514,22 @@
       "type": "film",
       "date": "2026-11-27",
       "blurb": "Walt Disney Animation's fantasy comedy with Hailee Steinfeld as a teenager who discovers magical powers, with Rashida Jones and Stephen Fry."
+    },
+    {
+      "id": "d-disney-mickey-s-home-alone",
+      "title": "Mickey's Home Alone",
+      "platform": "disney",
+      "type": "film",
+      "date": "2026-11-27",
+      "blurb": "Mickey and Pluto defend the house from a raccoon and a weasel after Christmas dinner."
+    },
+    {
+      "id": "d-cinema-minotaur",
+      "title": "Minotaur",
+      "platform": "cinema",
+      "type": "film",
+      "date": "2026-11-27",
+      "blurb": "Andrey Zvyagintsev's psychological drama about a company director whose work and marriage collapse."
     },
     {
       "id": "d-netflix-the-hunchback-soul-of-paris",
@@ -1433,7 +1561,15 @@
       "platform": "alibi",
       "type": "tv",
       "date": "2026-12",
-      "blurb": "Two-part Christmas special with Mark Gatiss and Polly Walker."
+      "blurb": "Two-part Christmas special (U&Alibi)."
+    },
+    {
+      "id": "d-iplayer-call-the-midwife-sisters-in-arms",
+      "title": "Call The Midwife: Sisters In Arms",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2026-12",
+      "blurb": "Three-part wartime Poplar prequel with younger Sister Monica Joan, Julienne and Evangelina."
     },
     {
       "id": "d-iplayer-ludwig-christmas-special",
@@ -1481,7 +1617,7 @@
       "platform": "iplayer",
       "type": "tv",
       "date": "2026-12",
-      "blurb": "One-off episode with guests Robert Webb and Peter Serafinowicz."
+      "blurb": "Greg Davies returns as a crime scene cleaner for a festive special."
     },
     {
       "id": "d-cinema-the-magician-s-nephew",
@@ -1545,7 +1681,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-12-04",
-      "blurb": "Sequel to the Santa-as-action-hero Christmas actioner."
+      "blurb": "Sequel to the Christmas action comedy (Universal)."
     },
     {
       "id": "d-disney-only-murders-in-the-building-season-6",
@@ -1585,7 +1721,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-12-11",
-      "blurb": "Sony's third modern Jumanji adventure."
+      "blurb": "Third film in the modern Jumanji series (Sony)."
     },
     {
       "id": "d-cinema-avengers-doomsday",
@@ -1593,7 +1729,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-12-18",
-      "blurb": "Marvel's Avengers film, culmination of the current saga."
+      "blurb": "Marvel's Avengers instalment (Disney)."
     },
     {
       "id": "d-cinema-dune-part-three",
@@ -1601,7 +1737,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-12-18",
-      "blurb": "Denis Villeneuve's concluding Dune chapter."
+      "blurb": "Concluding part of Denis Villeneuve's Dune trilogy (Warner Bros)."
     },
     {
       "id": "d-cinema-ice-age-boiling-point",
@@ -1609,7 +1745,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-12-18",
-      "blurb": "New Ice Age animated adventure from Disney."
+      "blurb": "New Ice Age animated adventure (Disney)."
     },
     {
       "id": "d-netflix-ray-gunn",
@@ -1625,7 +1761,7 @@
       "platform": "cinema",
       "type": "film",
       "date": "2026-12-23",
-      "blurb": "Third Angry Birds animated movie from Paramount."
+      "blurb": "Third animated Angry Birds film (Paramount)."
     },
     {
       "id": "d-netflix-emily-in-paris-season-6",
@@ -1636,12 +1772,20 @@
       "blurb": "Lily Collins dramedy reaches its final season."
     },
     {
-      "id": "d-iplayer-call-the-midwife-sisters-in-arms",
-      "title": "Call the Midwife: Sisters in Arms",
+      "id": "d-iplayer-death-in-paradise-season-16",
+      "title": "Death in Paradise — Season 16",
       "platform": "iplayer",
       "type": "tv",
-      "date": "2026-12-25",
-      "blurb": "Three-part WWII prequel to Call the Midwife."
+      "date": "2027-01",
+      "blurb": "More light-hearted Caribbean murder investigations."
+    },
+    {
+      "id": "d-itv-grantchester-season-11-final",
+      "title": "Grantchester — Season 11 (final)",
+      "platform": "itv",
+      "type": "tv",
+      "date": "2027-01",
+      "blurb": "Robson Green's final season as DI Geordie Keating (date TBC)."
     },
     {
       "id": "d-channel4-patience-series-3",
@@ -1650,6 +1794,14 @@
       "type": "tv",
       "date": "2027-01",
       "blurb": "Returns in January (expected)."
+    },
+    {
+      "id": "d-iplayer-waterloo-road-season-18",
+      "title": "Waterloo Road — Season 18",
+      "platform": "iplayer",
+      "type": "tv",
+      "date": "2027-01",
+      "blurb": "The school drama returns."
     },
     {
       "id": "d-netflix-agatha-christie-s-seven-dials",
