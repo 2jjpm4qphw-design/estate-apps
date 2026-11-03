@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-02T10:00:12.006Z",
+  "generatedAt": "2026-11-03T10:10:24.061Z",
   "source": "weekly curator",
-  "count": 227,
+  "count": 230,
   "catalogue": [
     {
       "id": "d-itv-70-up",
@@ -506,22 +506,6 @@
       "type": "tv",
       "date": "2026-10",
       "blurb": "New true-crime drama in Disney+ UK's October line-up."
-    },
-    {
-      "id": "d-netflix-lupin-season-4",
-      "title": "Lupin - Season 4",
-      "platform": "netflix",
-      "type": "tv",
-      "date": "2026-10-13",
-      "blurb": "Omar Sy's Assane Diop plots new high-stakes cons in Paris."
-    },
-    {
-      "id": "d-netflix-the-trap",
-      "title": "The Trap",
-      "platform": "netflix",
-      "type": "tv",
-      "date": "2026-10-13",
-      "blurb": "German psychological thriller: a reclusive author leaves her house after ten years to bait her sister's killer."
     },
     {
       "id": "d-prime-helluva-boss-season-3",
@@ -1105,7 +1089,7 @@
       "platform": "netflix",
       "type": "film",
       "date": "2026-11-04",
-      "blurb": "Festive family film told partly from the dog's point of view."
+      "blurb": "Dennis Quaid, Mary Steenburgen and Milo Ventimiglia in a holiday family drama about a grandfather, granddaughter and dogs after a medical emergency."
     },
     {
       "id": "d-disney-all-s-fair-season-2",
@@ -1113,7 +1097,7 @@
       "platform": "disney",
       "type": "tv",
       "date": "2026-11-04",
-      "blurb": "The lawyers of Grant, Ronson & Greene return for more scandal."
+      "blurb": "The lawyers of Grant, Ronson & Greene return for more scandals and secrets."
     },
     {
       "id": "d-prime-the-greatest",
@@ -1145,7 +1129,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-11-05",
-      "blurb": "British spy thriller with Keira Knightley and Ben Whishaw hunting answers after an attack."
+      "blurb": "Keira Knightley and Ben Whishaw return as undercover spy Helen reunites with Sam while her husband nears Prime Minister."
     },
     {
       "id": "d-disney-super-troopers-3",
@@ -1153,7 +1137,7 @@
       "platform": "disney",
       "type": "film",
       "date": "2026-11-05",
-      "blurb": "The Super Troopers must stop Farva's chaotic engagement while working a drug ring case."
+      "blurb": "Farva's engagement to Thorny's sister spirals into chaos as the Troopers try to crack a drug ring."
     },
     {
       "id": "d-cinema-godzilla-minus-zero",
@@ -1225,7 +1209,7 @@
       "platform": "netflix",
       "type": "film",
       "date": "2026-11-11",
-      "blurb": "Ron Howard documentary on photographer Richard Avedon."
+      "blurb": "Ron Howard directs a documentary on photographer Richard Avedon."
     },
     {
       "id": "d-netflix-chiaroscuro",
@@ -1234,6 +1218,14 @@
       "type": "tv",
       "date": "2026-11-11",
       "blurb": "An art advisor helps a police inspector hunt a killer who recreates famous artworks in Rome."
+    },
+    {
+      "id": "d-netflix-chiaroscuro-season-1",
+      "title": "ChiaroScuro — Season 1",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-11-11",
+      "blurb": "Italian crime series; a serial killer stages murders inspired by artworks in Rome."
     },
     {
       "id": "d-channel4-hunting-alice-bell-season-1",
@@ -1249,7 +1241,7 @@
       "platform": "disney",
       "type": "tv",
       "date": "2026-11-11",
-      "blurb": "Second half of season two: the Cotswolds franchise battle between Baddingham and O'Hara."
+      "blurb": "David Tennant and Aidan Turner in the 1980s Cotswolds TV-and-politics saga: Tony Baddingham vs Declan O'Hara."
     },
     {
       "id": "d-netflix-the-body-season-1",
@@ -1257,7 +1249,15 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-11-11",
-      "blurb": "Raunchy teen psychological drama series from Quinn Shephard."
+      "blurb": "Teen psychological drama; a Catholic high school dance team's ritual leads to prophetic visions."
+    },
+    {
+      "id": "d-netflix-the-gospel-of-christmas",
+      "title": "The Gospel of Christmas",
+      "platform": "netflix",
+      "type": "film",
+      "date": "2026-11-11",
+      "blurb": "Tyler Perry's holiday musical drama; a pastor must rediscover his faith before Christmas."
     },
     {
       "id": "d-prime-the-lord-of-the-rings-the-rings-of-power",
@@ -1273,7 +1273,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-11-12",
-      "blurb": "Final season of the German historical drama on Empress Elisabeth."
+      "blurb": "Final season of the German historical drama about Empress Elisabeth, with Devrim Lingnau and Philip Froissant."
     },
     {
       "id": "d-skyatlantic-the-good-daughter-season-1",
@@ -1313,7 +1313,15 @@
       "platform": "netflix",
       "type": "film",
       "date": "2026-11-13",
-      "blurb": "Jessica Chastain plays a reclusive country star searching for her niece in Nashville."
+      "blurb": "Crime thriller written and directed by Shana Feste, with Jessica Chastain as a country star searching for her missing niece."
+    },
+    {
+      "id": "d-netflix-murder-in-galicia",
+      "title": "Murder in Galicia",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-11-13",
+      "blurb": "Spanish true-crime drama about a Civil Guard sergeant's investigation."
     },
     {
       "id": "d-cinema-prima-facie",
@@ -1409,7 +1417,7 @@
       "platform": "disney",
       "type": "tv",
       "date": "2026-11-20",
-      "blurb": "The Titan's Curse: Percy sets out to rescue Annabeth from Kronos's forces."
+      "blurb": "Based on The Titan's Curse; Percy must rescue Annabeth after she is captured by Kronos's forces."
     },
     {
       "id": "d-netflix-steps",
@@ -1417,7 +1425,15 @@
       "platform": "netflix",
       "type": "film",
       "date": "2026-11-20",
-      "blurb": "Animated film in which Cinderella's stepsister Lilith teams up with Cinderella and a troll to save the kingdom."
+      "blurb": "Animated children's film with Ali Wong voicing a stepsister who must help save the kingdom."
+    },
+    {
+      "id": "d-netflix-the-blue-road",
+      "title": "The Blue Road",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-11-20",
+      "blurb": "South Korean-Japanese crime drama; detectives from Seoul and Tokyo hunt a killer."
     },
     {
       "id": "d-cinema-the-hunger-games-sunrise-on-the-reaping",
@@ -1473,7 +1489,7 @@
       "platform": "netflix",
       "type": "film",
       "date": "2026-11-25",
-      "blurb": "WWII drama about college footballers turned Marines before Okinawa, with Bill Skarsgard."
+      "blurb": "Biographical war drama with Bill Skarsgård and Ray Nicholson about a football game before the invasion of Okinawa."
     },
     {
       "id": "d-disney-tracker-season-4",
@@ -1481,7 +1497,7 @@
       "platform": "disney",
       "type": "tv",
       "date": "2026-11-25",
-      "blurb": "Justin Hartley returns as survivalist Colter Shaw."
+      "blurb": "Lone-wolf survivalist Colter tracks missing people for rewards."
     },
     {
       "id": "d-netflix-the-hunting-wives-season-2",
@@ -1489,7 +1505,7 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-11-26",
-      "blurb": "Returning thriller series."
+      "blurb": "Crime thriller returns, with Brittany Snow."
     },
     {
       "id": "d-prime-alan-carr-s-great-big-bucket-list",
@@ -1521,7 +1537,7 @@
       "platform": "disney",
       "type": "film",
       "date": "2026-11-27",
-      "blurb": "Mickey and Pluto defend the house from a raccoon and a weasel after Christmas dinner."
+      "blurb": "Mickey and Pluto defend their Christmas dinner from a raccoon and a weasel."
     },
     {
       "id": "d-cinema-minotaur",
@@ -1537,7 +1553,15 @@
       "platform": "netflix",
       "type": "tv",
       "date": "2026-11-27",
-      "blurb": "French drama with Vincent Cassel, set in 1830s Paris during a cholera outbreak."
+      "blurb": "French historical drama with Vincent Cassel and Daphné Patakia, set in 1830s Paris."
+    },
+    {
+      "id": "d-netflix-tyson-fury",
+      "title": "Tyson Fury",
+      "platform": "netflix",
+      "type": "tv",
+      "date": "2026-11-27",
+      "blurb": "Sports documentary on boxer Tyson Fury."
     },
     {
       "id": "d-u-art-detectives-christmas-special",
